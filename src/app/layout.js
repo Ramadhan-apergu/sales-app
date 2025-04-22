@@ -5,6 +5,7 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 // import 'antd/dist/reset.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import { ConfigProvider } from 'antd';
 
 import "./globals.css";
 
@@ -20,6 +21,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
+    <ConfigProvider theme={{token:{fontSize: 16}}}>
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <AntdRegistry>
@@ -28,5 +30,6 @@ export default function RootLayout({ children }) {
         <ToastContainer />
       </body>
     </html>
+    </ConfigProvider>
   );
 }

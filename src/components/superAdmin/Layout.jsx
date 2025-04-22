@@ -4,16 +4,22 @@ import React, { useEffect, useState, useRo } from 'react';
 import { PiSidebar, PiSpeedometer, PiSwap  } from "react-icons/pi";
 import { HiOutlineTruck, HiOutlineFolder, HiOutlineUser, HiArrowUturnLeft, HiOutlineInboxStack, HiOutlineWrenchScrewdriver } from "react-icons/hi2";
 import { HiOutlinePrinter } from "react-icons/hi";
-import { Breadcrumb, Button, Layout, Menu, theme } from 'antd';
+import { Breadcrumb, Button, Drawer, Layout, Menu, theme } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+    MenuOutlined
+  } from '@ant-design/icons'
+import Image from 'next/image';
 const { Header, Sider, Content } = Layout;
 
-const App = ({children}) => {
+const App = ({children, pageTitle}) => {
 
   const basePath = '/super-admin'
   const [collapsed, setCollapsed] = useState(false);
   const [itemSelected, setItemSelected] = useState({})
   const [breadcrumbTitle, setBreadcrumbTitle] = useState([])
+  const [openDrawer, setOpenDrawer] = useState(false);
+
   const pathname = usePathname();
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -113,7 +119,7 @@ const App = ({children}) => {
     bottom: 0,
     scrollbarWidth: 'thin',
     scrollbarGutter: 'stable',
-    background:'white'
+    background:'white',
   };
 
   useEffect(() => {
@@ -132,7 +138,7 @@ const App = ({children}) => {
     const breadcrumbTitle = splitPathname
       .slice(2)
       .map(title => ({
-        title: title.replace(/-/g, ' ')
+        title: /^[a-f0-9\-]{36}$/.test(title) ? title : title.replace(/-/g, ' ')
       }));
     
     setBreadcrumbTitle(breadcrumbTitle);
@@ -145,48 +151,78 @@ const App = ({children}) => {
     }
   };
 
+  const showDrawer = () => {
+    setOpenDrawer(true);
+  };
+  const onClose = () => {
+    setOpenDrawer(false);
+  };
+
   return (
-    <Layout style={{minHeight: '100dvh'}}>
-      <Sider trigger={null} collapsible collapsed={collapsed} style={siderStyle}>
-        <div className="h-16 mx-1 py-3 flex justify-center items-center sticky top-0 z-50 bg-white">
-            <img src="/images/karya-group-logo.webp" className={`h-full ${collapsed && 'hidden'}`} alt="karya group" />
-            <img src="/images/karya-group-icon.webp" className={`h-full ${!collapsed && 'hidden'}`} alt="karya group" />
+<Layout style={{ minHeight: '100dvh' }}>
+      <Header style={{ height: '8dvh', width: '100%', background: '#fff', padding: 0, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <img src={'/images/karya-group-logo.webp'} alt='karya group logo' className='h-full py-2 px-4'/>
+        <div className='lg:hidden'>
+            <Button icon={<MenuOutlined />} variant='outlined' color='blue' style={{marginRight:'16px'}} onClick={showDrawer}/>
         </div>
-        <Menu
-        onClick={menuHandle}
-          theme="light"
-          mode="inline"
-          selectedKeys={[itemSelected.key]}
-          style={{border:'none'}}
-          items={menuItems}
-        />
-      </Sider>
+      </Header>
+
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer, height:'64px', display:'flex', justifyContent:'between', alignItems:'center',  }}>
-          <button 
-        onClick={() => setCollapsed(!collapsed)}
-          className='h-full aspect-square hover:bg-gray-3 cursor-pointer duration-300 flex justify-center items-center text-lg'>
-            <PiSidebar />
-          </button>
-        </Header>
-        <Content style={{ margin: '0 16px', display:'flex', flexDirection:'column'}}>
-            <Breadcrumb
-            style={{ margin: '16px 0', textTransform: 'capitalize' }}
-            items={breadcrumbTitle}
-            />
-            <div
-            style={{
-                margin: '24px 16px',
-                padding: 24,
-                flex: 1,
-                background: colorBgContainer,
-                borderRadius: borderRadiusLG,
+        <div className='hidden lg:block w-[20vw] xl:w-[15vw] h-[92dvh] bg-white'>
+            <Sider
+            width="100%"
+            style={{ height: '100%', background: '#fff', overflow:'auto', scrollbarWidth: 'thin', scrollbarGutter: 'stable'}}
+            >
+                <Menu
+                    onClick={menuHandle}
+                    theme="light"
+                    mode="inline"
+                    selectedKeys={[itemSelected.key]}
+                    style={{border:'none'}}
+                    items={menuItems}
+                />
+            </Sider>
+        </div>
+
+        <div className='w-[100vw] lg:w-[80vw] xl:w-[85vw] h-[92dvh] bg-gray-3'>
+            <Content            style={{
+                height: '100%',
+                width: '100%',
+                background: '#f5f5f5 ',
+                padding: '16px',
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection:'column',
+                gap: '8px'
             }}
             >
-            {children}
-            </div>
-        </Content>
+                <div className='w-full hidden h-[5%] lg:flex justify-start item-center'>
+                    <Breadcrumb
+                        style={{textTransform: 'capitalize'}}
+                        items={breadcrumbTitle}
+                    />
+                </div>
+
+                <div className='w-full lg:hidden h-[5%] flex justify-start item-center'>
+                    <p className='text-xl capitalize'>{pageTitle || '-'}</p>
+                </div>
+
+                <div className='w-full h-[95%] overflow-auto px-2 rounded-xl' style={{scrollbarWidth:'thin'}}>
+                    {children}
+                </div>
+            </Content>
+        </div>
       </Layout>
+      <Drawer title="Menu" onClose={onClose} open={openDrawer}>
+        <Menu
+            onClick={menuHandle}
+            theme="light"
+            mode="inline"
+            selectedKeys={[itemSelected.key]}
+            style={{border:'none'}}
+            items={menuItems}
+        />
+      </Drawer>
     </Layout>
   );
 };

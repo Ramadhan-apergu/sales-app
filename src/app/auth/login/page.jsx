@@ -17,13 +17,6 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
   
-    // useEffect(() => {
-    //   const token = Cookies.get('x_atkn');
-    //   if (token) {
-    //     router.replace('/');
-    //   }
-    // }, [router]);
-  
     const handleSubmit = async () => {
       if (!username || !password) {
         toast.error("Email and Password are required!");
@@ -74,7 +67,7 @@ export default function Login() {
         toast.success("Login successful!");
   
         // Redirect setelah login sukses
-        router.push(`/${dataValidate.role}/dashboard`);
+        window.location.href = `/${dataValidate.role}/dashboard`;
       } catch (error) {
         const message =
           error?.response?.data?.message ||
