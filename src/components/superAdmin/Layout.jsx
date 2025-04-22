@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useRo, Suspense } from 'react';
+import React, { useEffect, useState, useRo } from 'react';
 import { PiSidebar, PiSpeedometer, PiSwap  } from "react-icons/pi";
 import { HiOutlineTruck, HiOutlineFolder, HiOutlineUser, HiArrowUturnLeft, HiOutlineInboxStack, HiOutlineWrenchScrewdriver } from "react-icons/hi2";
 import { HiOutlinePrinter } from "react-icons/hi";
@@ -159,62 +159,20 @@ const App = ({children, pageTitle}) => {
   };
 
   return (
-    <Layout style={{ minHeight: '100dvh' }}>
-        <Suspense fallback={<div className="p-4">Loading...</div>}>
-            <Header style={{ height: '8dvh', width: '100%', background: '#fff', padding: 0, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <img src={'/images/karya-group-logo.webp'} alt='karya group logo' className='h-full py-2 px-4'/>
-                <div className='lg:hidden'>
-                    <Button icon={<MenuOutlined />} variant='outlined' color='blue' style={{marginRight:'16px'}} onClick={showDrawer}/>
-                </div>
-            </Header>
+<Layout style={{ minHeight: '100dvh' }}>
+      <Header style={{ height: '8dvh', width: '100%', background: '#fff', padding: 0, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <img src={'/images/karya-group-logo.webp'} alt='karya group logo' className='h-full py-2 px-4'/>
+        <div className='lg:hidden'>
+            <Button icon={<MenuOutlined />} variant='outlined' color='blue' style={{marginRight:'16px'}} onClick={showDrawer}/>
+        </div>
+      </Header>
 
-            <Layout>
-                <div className='hidden lg:block w-[20vw] xl:w-[15vw] h-[92dvh] bg-white'>
-                    <Sider
-                    width="100%"
-                    style={{ height: '100%', background: '#fff', overflow:'auto', scrollbarWidth: 'thin', scrollbarGutter: 'stable'}}
-                    >
-                        <Menu
-                            onClick={menuHandle}
-                            theme="light"
-                            mode="inline"
-                            selectedKeys={[itemSelected.key]}
-                            style={{border:'none'}}
-                            items={menuItems}
-                        />
-                    </Sider>
-                </div>
-
-                <div className='w-[100vw] lg:w-[80vw] xl:w-[85vw] h-[92dvh] bg-gray-3'>
-                    <Content            style={{
-                        height: '100%',
-                        width: '100%',
-                        background: '#f5f5f5 ',
-                        padding: '16px',
-                        overflow: 'auto',
-                        display: 'flex',
-                        flexDirection:'column',
-                        gap: '8px'
-                    }}
-                    >
-                        <div className='w-full hidden h-[5%] lg:flex justify-start item-center'>
-                            <Breadcrumb
-                                style={{textTransform: 'capitalize'}}
-                                items={breadcrumbTitle}
-                            />
-                        </div>
-
-                        <div className='w-full lg:hidden h-[5%] flex justify-start item-center'>
-                            <p className='text-xl capitalize'>{pageTitle || '-'}</p>
-                        </div>
-
-                        <div className='w-full h-[95%] overflow-auto px-2 rounded-xl' style={{scrollbarWidth:'thin'}}>
-                            {children}
-                        </div>
-                    </Content>
-                </div>
-            </Layout>
-            <Drawer title="Menu" onClose={onClose} open={openDrawer}>
+      <Layout>
+        <div className='hidden lg:block w-[20vw] xl:w-[15vw] h-[92dvh] bg-white'>
+            <Sider
+            width="100%"
+            style={{ height: '100%', background: '#fff', overflow:'auto', scrollbarWidth: 'thin', scrollbarGutter: 'stable'}}
+            >
                 <Menu
                     onClick={menuHandle}
                     theme="light"
@@ -223,8 +181,48 @@ const App = ({children, pageTitle}) => {
                     style={{border:'none'}}
                     items={menuItems}
                 />
-            </Drawer>
-        </Suspense>
+            </Sider>
+        </div>
+
+        <div className='w-[100vw] lg:w-[80vw] xl:w-[85vw] h-[92dvh] bg-gray-3'>
+            <Content            style={{
+                height: '100%',
+                width: '100%',
+                background: '#f5f5f5 ',
+                padding: '16px',
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection:'column',
+                gap: '8px'
+            }}
+            >
+                <div className='w-full hidden h-[5%] lg:flex justify-start item-center'>
+                    <Breadcrumb
+                        style={{textTransform: 'capitalize'}}
+                        items={breadcrumbTitle}
+                    />
+                </div>
+
+                <div className='w-full lg:hidden h-[5%] flex justify-start item-center'>
+                    <p className='text-xl capitalize'>{pageTitle || '-'}</p>
+                </div>
+
+                <div className='w-full h-[95%] overflow-auto px-2 rounded-xl' style={{scrollbarWidth:'thin'}}>
+                    {children}
+                </div>
+            </Content>
+        </div>
+      </Layout>
+      <Drawer title="Menu" onClose={onClose} open={openDrawer}>
+        <Menu
+            onClick={menuHandle}
+            theme="light"
+            mode="inline"
+            selectedKeys={[itemSelected.key]}
+            style={{border:'none'}}
+            items={menuItems}
+        />
+      </Drawer>
     </Layout>
   );
 };

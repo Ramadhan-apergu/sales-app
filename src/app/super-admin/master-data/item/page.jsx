@@ -6,7 +6,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
 import ItemFetch from "@/modules/salesApi/item";
 import { Button, Modal, Table, Tag } from "antd";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import HeaderControls from "@/components/superAdmin/masterData/list/HeaderControls";
@@ -17,7 +17,7 @@ import Link from "next/link";
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 
-export default function Customer() {
+function Item() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -220,3 +220,17 @@ export default function Customer() {
     </Layout>
   );
 }
+
+export default function ItemPage() {
+    return (
+      <Suspense
+        fallback={
+          <div className="w-full h-full flex justify-center items-center">
+            <LoadingOutlined style={{ fontSize: "44px" }} />
+          </div>
+        }
+      >
+        <Item />
+      </Suspense>
+    );
+  }
