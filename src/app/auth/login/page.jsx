@@ -3,11 +3,11 @@
 import FixedHeaderBar from "@/components/salesOutdoor/FixedHeaderBar";
 import { Input, Button } from 'antd';
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import AuthFetch from "@/modules/salesApi/auth";
 import Cookies from "js-cookie";
 import { redirect, useRouter } from 'next/navigation'
 import ApiAuth from "@/modules/api/auth";
+import useNotification from "@/hooks/useNotification";
 
 export default function Login() {
 
@@ -16,10 +16,11 @@ export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const { notify, contextHolder } = useNotification();
   
     const handleSubmit = async () => {
       if (!username || !password) {
-        toast.error("Email and Password are required!");
+        notify('error', 'Error', 'Email and Password are required!');
         return;
       }
   
@@ -30,7 +31,7 @@ export default function Login() {
         const data = response?.data?.data || {};
   
         if (!data?.access_token) {
-          toast.error("Login failed! Invalid response from server.");
+          notify('error', 'Error', 'Login failed! Invalid response from server.');
           return;
         }
 
@@ -39,7 +40,7 @@ export default function Login() {
         const dataValidate = resValidateRole?.data || {}
 
         if (!dataValidate?.valid || dataValidate?.role == '') {
-            toast.error("Login failed! Invalid response from server.");
+            notify('error', 'Error', 'Login failed! Invalid response from server.');
             return;
         }
   
@@ -64,7 +65,7 @@ export default function Login() {
             sameSite: 'None',
           });
   
-        toast.success("Login successful!");
+        notify('success', 'Success', 'Login successful!');
   
         // Redirect setelah login sukses
         window.location.href = `/${dataValidate.role}/dashboard`;
@@ -72,7 +73,7 @@ export default function Login() {
         const message =
           error?.response?.data?.message ||
           "Login failed! Server error, please try again later.";
-        toast.error(message);
+        notify('error', 'Error', message);
       } finally {
         setLoading(false);
       }
@@ -130,6 +131,7 @@ export default function Login() {
                         >
                             Submit
                         </Button>
+                        {contextHolder}
                     </div>
                 </div>
                 <p className="text-xs text-gray-12/70">&copy; 2025 Karya Group. All rights reserved.</p>

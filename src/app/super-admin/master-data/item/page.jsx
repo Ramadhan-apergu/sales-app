@@ -1,18 +1,21 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { DeleteOutlined, EditOutlined, LoadingOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
 import ItemFetch from "@/modules/salesApi/item";
-import { Button, Modal, Table, Tag } from "antd";
+import { Button, Input, Modal, Pagination, Table } from "antd";
 import { Suspense, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 
-import HeaderControls from "@/components/superAdmin/masterData/list/HeaderControls";
-import MobileList from "@/components/superAdmin/masterData/list/MobileList";
-import PaginationControls from "@/components/superAdmin/masterData/list/PaginationControls";
 import Link from "next/link";
+import Search from "antd/es/input/Search";
+import useNotification from "@/hooks/useNotification";
+import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import HeaderContent from "@/components/superAdmin/masterData/HeaderContent";
+import BodyContent from "@/components/superAdmin/masterData/BodyContent";
+import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+import { getResponseHandler } from "@/utils/responseHandlers";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -27,109 +30,113 @@ function Item() {
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
   const offset = (page - 1) * limit;
+  const [searchName, setSearchName] = useState("");
+  const [searchCode, setSearchCode] = useState();
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const title = 'item'
+  const { notify, contextHolder: notificationContextHolder } = useNotification();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-        const response = await ItemFetch.get(offset, limit, statusFilter);
-        const data = response?.data?.data || {};
-
-        if (!data?.list) {
-          toast.error("Fetching data failed! Invalid response from server.");
-          return;
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          setIsloading(true);
+  
+          const response = await ItemFetch.get(offset, limit);
+  
+          const resData = getResponseHandler(response, notify)
+  
+          if (resData) {
+              setDatas(resData.list)
+              setTotalItems(resData.total_items)
+          }
+  
+        } catch (error) {
+          notify('error', 'Error', error?.message || "Internal Server error");
+        } finally {
+          setIsloading(false);
         }
+      };
+  
+    if (!searchCode && searchName == "") {
+        fetchData();
+    }
+    }, [page, limit, pathname, searchCode, searchName]);
 
-        setDatas(data.list);
-        setTotalItems(data.total_items || 0);
-      } catch (error) {
-        const message =
-          error?.response?.data?.message ||
-          "Login failed! Server error, please try again later.";
-        toast.error(message);
-      } finally {
-        setIsloading(false);
+  const fetchData = async () => {
+    try {
+      setIsloading(true);
+      const response = await ItemFetch.get(offset, limit, searchName == '' ? null : searchName, !searchCode || searchCode == '' ? null : searchCode );
+      const resData = getResponseHandler(response, notify)
+  
+      if (resData) {
+          setDatas(resData.list)
+          setTotalItems(resData.total_items)
       }
-    };
-
-    fetchData();
-  }, [page, limit, pathname, statusFilter]);
-
-  const deleteModal = (record) => {
-    modal.confirm({
-      title: `Delete ${title} "${record.displayname}"?`,
-      content: "This action cannot be undone.",
-      okText: "Yes, delete",
-      cancelText: "Cancel",
-      onOk: () => {
-        console.log(`Deleting ${title}: ${record.displayname} (ID: ${record.id})`);
-        // call delete function here
-      },
-    });
+    } catch (error) {
+        notify('error', 'Error', error?.message || "Internal Server error");
+    } finally {
+      setIsloading(false);
+    }
   };
 
   const handleEdit = (record) => {
     router.push(`/super-admin/master-data/${title}/${record.id}/edit`);
   };
 
-  const handleStatusChange = ({key}) => {
-    dropdownItems.forEach(item => {
-        if (item.key == key) {
-            const label = item.label.toLocaleLowerCase()
-            if (label != statusFilter.toLocaleLowerCase) {
-                setStatusFilter(label == 'all status' ? 'all' : label)
-            }
-        }
-    })
-  }
-
-  const dropdownItems = [
-    {
-      key: '1',
-      label: 'All Status'
-    },
-    {
-      key: '2',
-      label: 'Active'
-    },
-    {
-      key: '3',
-      label: 'Inactive'
-    },
-  ];
 
   const columns = [
     {
       title: 'Internal ID',
       dataIndex: 'id',
       key: 'id',
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
     },
     {
       title: 'Item Name/Number',
       dataIndex: 'displayname',
       key: 'displayname',
-      fixed: 'left',
+      fixed: isLargeScreen ? 'left' : '',
       render: (text, record) => (
         <Link href={`/super-admin/master-data/${title}/${record.id}`}>
           {text}
-        </Link>)
+        </Link>),
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
     },
     {
       title: 'Display Name/Code',
       dataIndex: 'itemid',
       key: 'itemid',
+      onHeaderCell: () => ({
+        style: { minWidth: 180 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 180 },
+      }),
     },
     {
       title: 'Item Process Family',
       dataIndex: 'itemprocessfamily',
       key: 'itemprocessfamily',
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
     },
     {
       title: 'Actions',
@@ -140,83 +147,86 @@ function Item() {
       render: (_, record) => (
         <div className="flex justify-center items-center gap-2">
               <Button 
-                  type="primary"
+                  type="link"
                   size="small"  
                   icon={<EditOutlined />} 
                   onClick={() => handleEdit(record)}
               >
+                {isLargeScreen? 'Edit' : ''}
               </Button>
-              <>                  
-                <Button 
-                    type="primary"
-                    danger
-                    size="small"  
-                    icon={<DeleteOutlined />} 
-                    onClick={() => deleteModal(record)}
-                >
-                </Button>
                 {contextHolder}
-              </>
         </div>
       ),
+      onHeaderCell: () => ({
+        style: { minWidth: 80 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 80 },
+      }),
     }
   ];
 
+  const handleEnter = (e, type) => {
+    if (e.key === "Enter") {
+        fetchData()
+    }
+  };
+
   return (
     <Layout pageTitle={title}>
-      {!isLoading ? (
-        <>
-            <div className="w-full h-1/12 flex justify-between items-start gap-2">
-                <HeaderControls
-                    isLargeScreen={isLargeScreen}
-                    statusFilter={statusFilter}
-                    onStatusChange={handleStatusChange}
-                    onAdd={() => router.push(`/super-admin/master-data/${title}/new`)}
-                    dropdownItems={dropdownItems}
-                />
+        <HeaderContent justify="between">
+            <div className="flex justify-start items-center gap-2 lg:gap-4">
+                <Input placeholder="Code" width={'100%'}
+                    value={searchCode}
+                    onChange={(e) => setSearchCode(e.target.value)}
+                    onKeyDown={(e) => handleEnter(e)}
+                    allowClear/>
+                <Search width={'100%'} placeholder="Search Display Name" allowClear value={searchName} onChange={(e) => {setSearchName(e.target.value); handleEnter(e, 'name')}} onSearch={fetchData}/>
             </div>
-          <div
-            ref={containerRef}
-            className="lg:p-4 justify-between lg:bg-white w-full h-11/12 lg:rounded-xl flex flex-col gap-2 overflow-auto"
-          >
-            {isLargeScreen ? (
-                <Table
-                rowKey={(record) => record.id}
-                size="small" pagination={false}
-                columns={columns}
-                dataSource={datas}
-                scroll={{y: (containerHeight - 80) - 35}}
-                bordered/>
+            <div className="flex justify-end items-center gap-2 lg:gap-4">
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
+                >
+                    {isLargeScreen ? `Add` : ""}
+                </Button>
+            </div>
+        </HeaderContent>
+        <BodyContent>
+            {!isLoading ? (
+                <>
+                    <div ref={containerRef} className="w-full h-[92%]">
+                        <Table
+                                rowKey={(record) => record.id}
+                                size="small" pagination={false}
+                                columns={columns}
+                                dataSource={datas}
+                                scroll={{y: containerHeight - 50, x: 'max-content'}}
+                                bordered
+                                tableLayout="auto"
+                            />
+                        </div>
+                        <div className="w-full h-[8%] flex justify-end items-end overflow-hidden">
+                        <Pagination
+                            total={totalItems}
+                            defaultPageSize={limit}
+                            defaultCurrent={page}
+                            onChange={(newPage, newLimit) => {
+                                router.push(
+                                `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
+                                )
+                            }}
+                            size='small'
+                            align={'end'}
+                        />
+                    </div>
+                </>
             ) : (
-                <div className="w-full pr-2 h-[95%] lg:h-11/12 overflow-x-auto flex flex-col" style={{ scrollbarWidth: 'thin' }}>
-                    <MobileList
-                        data={datas}
-                        onEdit={handleEdit}
-                        onDelete={deleteModal}
-                        contextHolder={contextHolder}
-                    />
-                </div>
+            <LoadingSpin/>
             )}
-                <div className="w-full h-[5%] lg:flex-1 flex justify-end items-center">
-                    <PaginationControls
-                    totalItems={totalItems}
-                    page={page}
-                    limit={limit}
-                    isLargeScreen={isLargeScreen}
-                    onChange={(page, pageSize) => {
-                        router.push(
-                        `/super-admin/master-data/${title}?page=${page}&limit=${pageSize}`
-                        );
-                    }}
-                    />
-                </div>
-          </div>
-        </>
-      ) : (
-        <div className="w-full h-full flex justify-center items-center">
-          <LoadingOutlined style={{ fontSize: "44px" }} />
-        </div>
-      )}
+        </BodyContent>
+          {notificationContextHolder}
     </Layout>
   );
 }
@@ -225,12 +235,10 @@ export default function ItemPage() {
     return (
       <Suspense
         fallback={
-          <div className="w-full h-full flex justify-center items-center">
-            <LoadingOutlined style={{ fontSize: "44px" }} />
-          </div>
+          <LoadingSpinProcessing/>
         }
       >
-        <Item />
+        <Item/>
       </Suspense>
     );
   }

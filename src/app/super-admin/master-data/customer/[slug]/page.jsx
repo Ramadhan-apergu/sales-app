@@ -1,112 +1,83 @@
-'use client'
+'use client';
 
-import Layout from "@/components/superAdmin/Layout"
-import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { Button, Input, Tabs, Modal } from "antd";
-import { useParams, useRouter } from "next/navigation";
-import { ContactsOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, UnorderedListOutlined, UserOutlined } from '@ant-design/icons';
-import { useEffect, useState } from "react";
-import CustomerFetch from "@/modules/salesApi/customer";
-import { toast } from "react-toastify";
-import useContainerHeight from "@/hooks/useContainerHeight";
-
-function LabeledValue({data =[], height, isReadOnly = true}) {
-    return (
-        <div className="w-full flex flex-col gap-4 px-2 overflow-auto" style={{height: height}}>
-            {data.length > 0 && data.map((item, i) => (
-                        <div key={i} className="flex w-full justify-start items-start flex-col capitalize gap-0.5">
-                        <p className="text-sm font-semibold">{item.label}</p>
-                        <Input readOnly={isReadOnly} value={item.value} variant="filled"/>
-                    </div>
-            ))}
-        </div>
-    )
-}
+import React, {useEffect, useState } from 'react';
+import { Button, Dropdown, Modal, Tag } from 'antd';
+import Layout from '@/components/superAdmin/Layout';
+import {
+  EditOutlined,
+  MoreOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons';
+import useNotification from '@/hooks/useNotification';
+import { useParams, useRouter } from 'next/navigation';
+import CustomerFetch from '@/modules/salesApi/customer';
+import HeaderContent from '@/components/superAdmin/masterData/HeaderContent';
+import BodyContent from '@/components/superAdmin/masterData/BodyContent';
+import { customerAliases } from '@/utils/aliases';
+import LoadingSpin from '@/components/superAdmin/LoadingSpin';
+import InputForm from '@/components/superAdmin/masterData/InputForm';
+import { deleteResponseHandler, getByIdResponseHandler } from '@/utils/responseHandlers';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { formatDateToShort } from '@/utils/formatDate';
+import EmptyCustom from '@/components/superAdmin/masterData/EmptyCustom';
 
 export default function Detail() {
-    const { slug } = useParams()
-    const router = useRouter();
-    const isLargeScreen = useBreakpoint("lg");
-    const [data, setData] = useState({})
-    const [groupData, setGroupData] = useState({})
-    const [isLoading, setIsloading] = useState(false)
-    const { containerRef, containerHeight } = useContainerHeight();
-    const title = 'customer'
-    const [modal, contextHolder] = Modal.useModal()
+  const { notify, contextHolder: contextNotify } = useNotification();
+  const router = useRouter();
+
+  const isLargeScreen = useBreakpoint('lg')
+  const { slug } = useParams()
+  const [data, setData] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [modal, contextHolder] = Modal.useModal()
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-        const response = await CustomerFetch.getById(slug);
-        const data = response?.data?.data || {};
+    async function fetchData() {
+        try {
+            setIsLoading(true)
+            const response = await CustomerFetch.getById(slug)
+            const resData = getByIdResponseHandler(response, notify)
+            setData(resData)
+            
+            if (resData) {
+                mapingGroup(resData)
+            }
 
-        if (!data) {
-          toast.error("Fetching data failed! Invalid response from server.");
-          return;
+        } catch (error) {
+            const message =
+            error?.message ||
+            "Login failed! Server error, please try again later.";
+          notify('error', 'Error', message);
+        } finally {
+            setIsLoading(false)
         }
-        setData(data);
-        setGroupData(groupDataMaping(data))
-      } catch (error) {
-        const message =
-          error?.response?.data?.message ||
-          "Login failed! Server error, please try again later.";
-        toast.error(message);
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const tabItems = [
-    {
-        key: '1',
-        label: isLargeScreen ? 'General' : '',
-        children: <LabeledValue height={containerHeight - 35} data={groupData['general'] || []}/>,
-        icon: <UserOutlined />
-    },
-    {
-        key: '2',
-        label: isLargeScreen ? 'Contact' : '',
-        children: <LabeledValue height={containerHeight - 35} data={groupData['contact'] || []}/>,
-        icon: <ContactsOutlined />
-    },
-    {
-        key: '3',
-        label: isLargeScreen ? 'Address' : '',
-        children: <LabeledValue height={containerHeight - 35} data={groupData['address'] || []}/>,
-        icon: <EnvironmentOutlined />
-    },
-    {
-        key: '4',
-        label: isLargeScreen ? 'Financial' : '',
-        children: <LabeledValue height={containerHeight - 35} data={groupData['finance'] || []}/>,
-        icon: <DollarOutlined />
     }
-  ]
+    fetchData()
+  }, [])
 
-  const groupFields = {
-    general: ['entityid', 'companyname', 'status', 'category'],
-    contact: ['addressee', 'phone', 'altphone', 'email'],
-    finance: ['creditlimit', 'currency', 'resalenumber', 'terms', 'overduebalance'],
-    address: ['addr1', 'city', 'state', 'zip', 'defaultaddress'],
-  };
-  
-  function groupDataMaping(customer) {
-    const grouped = {};
-  
-    Object.entries(groupFields).forEach(([group, fields]) => {
-      grouped[group] = fields.map(field => ({
-        label: field,
-        value: customer[field] ?? '',
-      }));
-    });
-  
-    return grouped;
+  const title = 'customer'
+
+  const fieldGroups = {
+    general: [
+      "id","internalid","entityid","companyname",
+      "category","status","createdby","createddate"
+    ],
+    contact: [
+      "addressee","phone","altphone","email"
+    ],
+    address: [
+      "addr1","city","state","zip","defaultaddress"
+    ],
+    financial: [
+      "creditlimit","overduebalance","currency",
+      "resalenumber","terms"
+    ]
   }
 
+  const handleEdit = () => {
+    router.push(`/super-admin/master-data/${title}/${data.id}/edit`);
+  };
+  
   const deleteModal = () => {
     modal.confirm({
       title: `Delete ${title} "${data.companyname}"?`,
@@ -114,35 +85,179 @@ export default function Detail() {
       okText: "Yes, delete",
       cancelText: "Cancel",
       onOk: () => {
-        console.log(`Deleting ${title}: ${data.companyname} (ID: ${data.id})`);
-        // call delete function here
+        handleDelete(data.id)
       },
     });
   };
 
-  const handleEdit = () => {
-    router.push(`/super-admin/master-data/${title}/${data.id}/edit`);
+    const handleDelete = async (id) => {
+      try {
+          const response = await CustomerFetch.delete(id)
+
+          const resData = deleteResponseHandler(response, notify)
+  
+          if (resData) {
+            router.push(`/super-admin/master-data/${title}`);
+          }
+  
+      } catch (error) {
+          notify('error', 'Error', error?.message || "Internal Server error");
+      }
+    }
+
+  const [general, setGeneral] = useState(
+    Object.fromEntries(fieldGroups.general.map(key => [key, '']))
+  )
+  const [contact, setContact] = useState(
+    Object.fromEntries(fieldGroups.contact.map(key => [key, '']))
+  )
+  const [address, setAddress] = useState(
+    Object.fromEntries(fieldGroups.address.map(key => [key, '']))
+  )
+  const [financial, setFinancial] = useState(
+    Object.fromEntries(fieldGroups.financial.map(key => [key, '']))
+  )
+
+  function mapingGroup(data) {
+    const pick = (keys) => 
+      keys.reduce((obj, k) => {
+        if (k == 'createddate') {
+            obj[k] = data[k] != null ? formatDateToShort(data[k]) : ''
+        } else {
+            obj[k] = data[k] != null ? data[k] : ''
+        }
+        return obj
+      }, {})
+
+    setGeneral(pick(fieldGroups.general))
+    setContact(pick(fieldGroups.contact))
+    setAddress(pick(fieldGroups.address))
+    setFinancial(pick(fieldGroups.financial))
+  }
+
+  const items = [
+    {
+      key: '1',
+      label: 'Approve'
+    },
+    {
+      key: '2',
+      label: 'Delete',
+      danger: true
+    },
+  ];
+
+  const handleClickAction = ({ key }) => {
+    switch (key) {
+      case '1':
+        notify('success', 'Approve Boongan', ':P');
+        break;
+      case '2':
+        deleteModal();
+        break;
+      default:
+        console.warn('Unhandled action:', key);
+    }
   };
 
-    return (
-        <Layout pageTitle={'Customer Detail'}>
-            <div className="w-full h-1/12 flex justify-between items-start">
-                <div className="flex justify-center items-center gap-2">
-                    <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>{isLargeScreen ? 'List' : ''}</Button>
-                </div>
-                <div className="flex justify-center items-center gap-2">
-                    <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
-                    <Button icon={<DeleteOutlined />} danger variant={'outlined'} onClick={deleteModal}>{isLargeScreen ? 'Delete' : ''}</Button>{contextHolder}
-                </div>
-            </div>
-            <div ref={containerRef} className="w-full bg-white py-4 pr-4 shadow pb-1 h-11/12 flex justify-between rounded-xl overflow-hidden divide-gray-4">
-                <Tabs
-                    defaultActiveKey="1"
-                    items={tabItems}
-                    style={{width: '100%'}}
-                    tabPosition={'left'}
-                />
-            </div>
-        </Layout>
-    )
+  return (
+    <Layout pageTitle="Customer Details">
+                <HeaderContent justify='between'>
+                    <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
+                        {isLargeScreen ? 'List' : ''}
+                    </Button>
+                    {data && (
+                        <div className="flex justify-center items-center gap-2">
+                            {/* <Button icon={<DeleteOutlined />} danger type={'primary'} onClick={deleteModal}>{isLargeScreen ? 'Delete' : ''}</Button> */}
+                            <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
+                            {contextHolder}
+                            <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
+                                <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
+                            </Dropdown>
+                        </div>
+                    )}
+                </HeaderContent>
+                <BodyContent gap='12'>
+                    {!isLoading ? (
+                        <>
+                            {data ? (
+                                <div className='w-full h-full flex flex-col gap-8'>
+                                    <div className='w-full flex flex-col px-4'>
+                                        <p className='text-2xl font-semibold'>Customer</p>
+                                        <div className='w-full flex lg:text-lg'>
+                                            <p className='w-2/3 lg:w-1/2'>
+                                                {data.internalid + ' / ' + data.companyname}
+                                            </p>
+                                            <div className='w-1/3 lg:w-1/2 flex justify-end'>
+                                                <div>
+                                                    <Tag style={{textTransform: 'capitalize'}} color={data.status =='active' ? 'green' : 'red'}>{data.status}</Tag>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <InputForm
+                                        isReadOnly={true}
+                                        type="general"
+                                        payload={general}
+                                        data={[
+                                            { key: 'id', input: 'input', isAlias: true },
+                                            { key: 'internalid', input: 'input', isAlias: true },
+                                            { key: 'entityid', input: 'input', isAlias: true },
+                                            { key: 'companyname', input: 'input', isAlias: true },
+                                            { key: 'category', input: 'input', isAlias: false },
+                                            { key: 'createdby', input: 'input', isAlias: true },
+                                            { key: 'createddate', input: 'input', isAlias: true },
+                                        ]}
+                                        aliases={customerAliases}
+                                    />
+                                    <InputForm
+                                        isReadOnly={true}
+                                        type="contact"
+                                        payload={contact}
+                                        data={[
+                                            { key: 'email', input: 'input', isAlias: false },
+                                            { key: 'phone', input: 'input', isAlias: false },
+                                            { key: 'altphone', input: 'input', isAlias: true },
+                                            { key: 'addressee', input: 'input', isAlias: true },
+                                        ]}
+                                        aliases={customerAliases}
+                                    />
+                                    <InputForm
+                                        isReadOnly={true}
+                                        type="address"
+                                        payload={address}
+                                        data={[
+                                            { key: 'addr1', input: 'input', isAlias: true },
+                                            { key: 'city', input: 'input', isAlias: false },
+                                            { key: 'state', input: 'input', isAlias: false },
+                                            { key: 'zip', input: 'input', isAlias: false },
+                                            { key: 'defaultaddress', input: 'input', isAlias: true },
+                                        ]}
+                                        aliases={customerAliases}
+                                    />
+                                    <InputForm
+                                        isReadOnly={true}
+                                        type="financial"
+                                        payload={financial}
+                                        data={[
+                                            { key: 'creditlimit', input: 'input', isAlias: true },
+                                            { key: 'overduebalance', input: 'input', isAlias: true },
+                                            { key: 'currency', input: 'input', isAlias: false },
+                                            { key: 'resalenumber', input: 'input', isAlias: true },
+                                            { key: 'terms', input: 'input', isAlias: true },
+                                        ]}
+                                        aliases={customerAliases}
+                                    />
+                                </div>
+                            ) : (
+                                <EmptyCustom/>
+                            )}
+                        </>
+                    ) : (
+                        <LoadingSpin/>
+                    )}
+                </BodyContent>
+        {contextNotify}
+    </Layout>
+  );
 }

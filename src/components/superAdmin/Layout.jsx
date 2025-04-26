@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useRo } from 'react';
-import { PiSidebar, PiSpeedometer, PiSwap  } from "react-icons/pi";
+import { PiSpeedometer, PiSwap  } from "react-icons/pi";
 import { HiOutlineTruck, HiOutlineFolder, HiOutlineUser, HiArrowUturnLeft, HiOutlineInboxStack, HiOutlineWrenchScrewdriver } from "react-icons/hi2";
 import { HiOutlinePrinter } from "react-icons/hi";
 import { Breadcrumb, Button, Drawer, Layout, Menu, theme } from 'antd';
@@ -9,16 +9,16 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
     MenuOutlined
   } from '@ant-design/icons'
-import Image from 'next/image';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 const { Header, Sider, Content } = Layout;
 
 const App = ({children, pageTitle}) => {
 
   const basePath = '/super-admin'
-  const [collapsed, setCollapsed] = useState(false);
   const [itemSelected, setItemSelected] = useState({})
   const [breadcrumbTitle, setBreadcrumbTitle] = useState([])
   const [openDrawer, setOpenDrawer] = useState(false);
+  const isLargeScreen = useBreakpoint('lg')
 
   const pathname = usePathname();
   const {
@@ -110,18 +110,6 @@ const App = ({children, pageTitle}) => {
 
   const allItems = flattenItems(menuItems);
 
-  const siderStyle = {
-    overflow: 'auto',
-    height: '100vh',
-    position: 'sticky',
-    insetInlineStart: 0,
-    top: 0,
-    bottom: 0,
-    scrollbarWidth: 'thin',
-    scrollbarGutter: 'stable',
-    background:'white',
-  };
-
   useEffect(() => {
     const flattenItems = (items) => {
       return items.flatMap(item => 
@@ -185,11 +173,12 @@ const App = ({children, pageTitle}) => {
         </div>
 
         <div className='w-[100vw] lg:w-[80vw] xl:w-[85vw] h-[92dvh] bg-gray-3'>
-            <Content            style={{
+            <Content
+            style={{
                 height: '100%',
                 width: '100%',
                 background: '#f5f5f5 ',
-                padding: '16px',
+                padding: isLargeScreen ? '1.25rem' : '1rem',
                 overflow: 'auto',
                 display: 'flex',
                 flexDirection:'column',
@@ -207,7 +196,7 @@ const App = ({children, pageTitle}) => {
                     <p className='text-xl capitalize'>{pageTitle || '-'}</p>
                 </div>
 
-                <div className='w-full h-[95%] overflow-auto px-2 rounded-xl' style={{scrollbarWidth:'thin'}}>
+                <div className='w-full h-[95%] pb-1 overflow-auto' style={{scrollbarWidth:'thin'}}>
                     {children}
                 </div>
             </Content>
