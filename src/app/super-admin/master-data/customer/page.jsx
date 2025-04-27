@@ -71,7 +71,7 @@ function Customer() {
     dropdownItems.forEach(item => {
         if (item.key == key) {
             const label = item.label.toLocaleLowerCase()
-            if (label != statusFilter.toLocaleLowerCase) {
+            if (label != statusFilter.toLocaleLowerCase()) {
                 switch (label) {
                     case 'all status':
                         setStatusFilter('all')

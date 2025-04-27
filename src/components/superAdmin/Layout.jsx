@@ -84,23 +84,23 @@ const App = ({children, pageTitle}) => {
             },
         ]
     },
-    {
-        key: 'sub2',
-        icon: <HiOutlineWrenchScrewdriver />,
-        label: 'Administration',
-        children: [
-            {
-                key: '10',
-                label: 'Users Access',
-                path: `${basePath}/administration/users-access`
-            },
-            {
-                key: '11',
-                label: 'Access All Report',
-                path: `${basePath}/system-management/access-all-report`
-            },
-        ]
-    },
+    // {
+    //     key: 'sub2',
+    //     icon: <HiOutlineWrenchScrewdriver />,
+    //     label: 'Administration',
+    //     children: [
+    //         {
+    //             key: '10',
+    //             label: 'Users Access',
+    //             path: `${basePath}/administration/users-access`
+    //         },
+    //         {
+    //             key: '11',
+    //             label: 'Access All Report',
+    //             path: `${basePath}/system-management/access-all-report`
+    //         },
+    //     ]
+    // },
   ]
 
   const router = useRouter();

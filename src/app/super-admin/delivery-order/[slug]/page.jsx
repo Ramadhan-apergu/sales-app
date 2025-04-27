@@ -22,6 +22,7 @@ import { formatDateToShort } from '@/utils/formatDate';
 import EmptyCustom from '@/components/superAdmin/masterData/EmptyCustom';
 import SalesOrderFetch from '@/modules/salesApi/salesOrder';
 import EditableTable from '@/components/superAdmin/masterData/EditableTable';
+import FullfillmentFetch from '@/modules/salesApi/itemFullfillment';
 
 export default function Detail() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -37,9 +38,8 @@ export default function Detail() {
     async function fetchData() {
         try {
             setIsLoading(true)
-            const response = await SalesOrderFetch.getById(slug)
+            const response = await FullfillmentFetch.getById(slug)
             const resData = getByIdResponseHandler(response, notify)
-            console.log(resData)
             setData(resData)
             
             if (resData) {
@@ -58,33 +58,26 @@ export default function Detail() {
     fetchData()
   }, [])
 
-  const title = 'sales-order'
+  const title = 'delivery-order'
 
   const fieldGroups = {
     general: [
-        "id",
-        "entity",
-        "trandate",
-        "status",
-        "salesrep",
-        "otherrefnum",
-        "subtotalbruto",
-        "subtotal",
-        "discounttotal",
-        "taxtotal",
-        "total",
-        "tranid",
-        "createdby",
-        "createddate",
-        "customer",
-
-    ],
+        'id',
+        'salesorderid',
+        'refno',
+        'entity',
+        'createdfrom',
+        'shipstatus',
+        'trandate',
+        'memo',
+        'createdby',
+        'createddate',
+        'customer',
+        'dateso',
+        'numso',
+      ],
     item: [
-        "sales_order_items"
-    ],
-    billing: [
-        "term",
-        "paymentoption",
+        "fulfillment_items"
     ],
     shipping: [
         "shippingoption",
@@ -129,9 +122,6 @@ export default function Detail() {
   const [item, setItem] = useState(
     Object.fromEntries(fieldGroups.item.map(key => [key, '']))
   )
-  const [billing, setBilling] = useState(
-    Object.fromEntries(fieldGroups.billing.map(key => [key, '']))
-  )
   const [shipping, setShipping] = useState(
     Object.fromEntries(fieldGroups.shipping.map(key => [key, '']))
   )
@@ -149,7 +139,6 @@ export default function Detail() {
 
     setGeneral(pick(fieldGroups.general))
     setItem(pick(fieldGroups.item))
-    setBilling(pick(fieldGroups.billing))
     setShipping(pick(fieldGroups.shipping))
   }
 
@@ -179,7 +168,7 @@ export default function Detail() {
   };
 
   return (
-    <Layout pageTitle="Sales Order Details">
+    <Layout pageTitle="Delivery Order Details">
                 <HeaderContent justify='between'>
                     <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/${title}`);}}>
                         {isLargeScreen ? 'List' : ''}
@@ -204,12 +193,9 @@ export default function Detail() {
                                         <p className='text-2xl font-semibold'>Sales Order</p>
                                         <div className='w-full flex lg:text-lg'>
                                             <p className='w-2/3 lg:w-1/2'>
-                                                {data.otherrefnum + ' / ' + data.customer}
+                                                {data.createdfrom + ' / ' + data.customer}
                                             </p>
                                             <div className='w-1/3 lg:w-1/2 flex justify-end'>
-                                                <div>
-                                                    <Tag style={{textTransform: 'capitalize'}} color={data.status.toLowerCase() =='open' ? 'green' : 'red'}>{data.status}</Tag>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -219,20 +205,18 @@ export default function Detail() {
                                         payload={general}
                                         data={[
                                             { key: "id", input: "input", isAlias: false },
+                                            { key: "salesorderid", input: "input", isAlias: false },
+                                            { key: "refno", input: "input", isAlias: false },
                                             { key: "entity", input: "input", isAlias: false },
+                                            { key: "createdfrom", input: "input", isAlias: false },
+                                            { key: "shipstatus", input: "input", isAlias: false },
                                             { key: "trandate", input: "input", isAlias: false },
-                                            { key: "status", input: "input", isAlias: false },
-                                            { key: "salesrep", input: "input", isAlias: false },
-                                            { key: "otherrefnum", input: "input", isAlias: false },
-                                            { key: "subtotalbruto", input: "input", isAlias: false },
-                                            { key: "subtotal", input: "input", isAlias: false },
-                                            { key: "discounttotal", input: "input", isAlias: false },
-                                            { key: "taxtotal", input: "input", isAlias: false },
-                                            { key: "total", input: "input", isAlias: false },
-                                            { key: "tranid", input: "input", isAlias: false },
+                                            { key: "memo", input: "input", isAlias: false },
                                             { key: "createdby", input: "input", isAlias: false },
                                             { key: "createddate", input: "input", isAlias: false },
-                                            { key: "customer", input: "input", isAlias: false }
+                                            { key: "customer", input: "input", isAlias: false },
+                                            { key: "dateso", input: "input", isAlias: false },
+                                            { key: "numso", input: "input", isAlias: false }
                                           ]}
                                         aliases={customerAliases}
                                     />
@@ -244,21 +228,11 @@ export default function Detail() {
                                             Item
                                         </Divider>
                                         <EditableTable
-                                        data={item.sales_order_items}
+                                        data={item.fulfillment_items}
                                         onChange={(e) => {console.log(e)}}
                                         isReadOnly={true}
                                         />
                                     </div>
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="billing"
-                                        payload={billing}
-                                        data={[
-                                            { key: "term", input: "input", isAlias: false },
-                                            { key: "paymentoption", input: "input", isAlias: false }
-                                        ]}
-                                        aliases={customerAliases}
-                                    />
                                     <InputForm
                                         isReadOnly={true}
                                         type="shipping"
