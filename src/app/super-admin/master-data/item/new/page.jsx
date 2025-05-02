@@ -9,11 +9,8 @@ import {
 } from '@ant-design/icons';
 import useNotification from '@/hooks/useNotification';
 import { useRouter } from 'next/navigation';
-import HeaderContent from '@/components/superAdmin/masterData/HeaderContent';
-import BodyContent from '@/components/superAdmin/masterData/BodyContent';
 import { itemAliases } from '@/utils/aliases';
-import LoadingSpin from '@/components/superAdmin/LoadingSpin';
-import InputForm from '@/components/superAdmin/masterData/InputForm';
+import InputForm from '@/components/superAdmin/InputForm';
 import { createResponseHandler } from '@/utils/responseHandlers';
 import LoadingSpinProcessing from '@/components/superAdmin/LoadingSpinProcessing';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -60,7 +57,7 @@ export default function CustomerNew() {
 
     const handleChangePayload = (type, payload) => {
             switch (type) {
-            case 'general':
+            case 'primary':
               setPayloadGeneral(payload);
               break;
             default:
@@ -119,55 +116,129 @@ export default function CustomerNew() {
       };
 
   return (
+
     <>
-            <Layout pageTitle={`Add ${title}`}>
-                <HeaderContent justify='between'>
-                    <Button icon={<LeftOutlined />} onClick={() => router.back()}>
-                    {isLargeScreen ? 'Back' : ''}
-                    </Button>
-                    <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
-                        {isLargeScreen ? 'Submit' : ''}
-                    </Button>
-                </HeaderContent>
-                <BodyContent>
-                    {!isLoading ? (
-                        <div className='w-full h-full flex flex-col gap-8'>
-                            <div className='w-full flex flex-col px-4'>
-                                <p className='text-2xl font-semibold capitalize'>{title}</p>
+    <Layout pageTitle="">
+        <div className='w-full flex flex-col gap-4'>
+            <div className='w-full flex justify-between items-center'>
+                <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Add New Item</p>
+            </div>
+                <div className='w-full flex flex-col gap-4'>
+                    <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
+                            <div className='w-full lg:w-1/2 flex gap-1'>
+                                <Button icon={<LeftOutlined />} onClick={() => router.back()}>
+                                    {isLargeScreen ? 'Back' : ''}
+                                </Button>
                             </div>
-                            <InputForm
-                            type="general"
-                            payload={payloadGeneral}
-                            data={[
-                                { key: 'itemid', input: 'input', isAlias: true },
-                                { key: 'displayname', input: 'input', isAlias: true },
-                                { key: 'itemprocessfamily', input: 'select', options: itemprocessfamilyOptions, isAlias: true },
-                                { key: 'unitstype', input: 'select', options:unitstypeOptions, isAlias: true },
-                            ]}
-                            onChange={handleChangePayload}
-                            aliases={itemAliases}
-                            />
-                            <InputForm
-                                type="pricing"
-                                payload={payloadPricing}
-                                data={[
-                                    { key: 'price', input: 'number', isAlias: false },
-                                    { key: 'discount', input: 'number', isAlias: false },
-                                ]}
-                                onChange={handleChangePayload}
-                                aliases={itemAliases}
-                            />
+                            <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                                <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
+                                    {isLargeScreen ? 'Submit' : ''}
+                                </Button>
                         </div>
-                    ) : (
-                        <LoadingSpin/>
-                    )}
+                    </div>
+                    <div className='w-full flex flex-col gap-8'>
+                    <InputForm
+                        type="primary"
+                        payload={payloadGeneral}
+                        data={[
+                            {
+                            key: 'itemid',
+                            input: 'input',
+                            isAlias: true,
+                            rules: [
+                                { required: true, message: `${itemAliases['itemid']} is required` },
+                            ],
+                            },
+                            {
+                            key: 'displayname',
+                            input: 'input',
+                            isAlias: true,
+                            rules: [
+                                { required: true, message: `${itemAliases['displayname']} is required` },
+                            ],
+                            },
+                            {
+                            key: 'itemprocessfamily',
+                            input: 'select',
+                            options: itemprocessfamilyOptions,
+                            isAlias: true,
+                            rules: [
+                                { required: true, message: `${itemAliases['itemprocessfamily']} is required` },
+                            ],
+                            },
+                            {
+                            key: 'unitstype',
+                            input: 'select',
+                            options: unitstypeOptions,
+                            isAlias: true,
+                            rules: [
+                                { required: true, message: `${itemAliases['unitstype']} is required` },
+                            ],
+                            },
+                        ]}
+                        aliases={itemAliases}
+                        onChange={handleChangePayload}
+                        />
+
+                        <InputForm
+                        type="pricing"
+                        payload={payloadPricing}
+                        data={[
+                            {
+                            key: 'price',
+                            input: 'number',
+                            isAlias: false,
+                            rules: [
+                                { required: true, message: `Price is required` },
+                            ],
+                            },
+                            {
+                            key: 'discount',
+                            input: 'number',
+                            isAlias: false,
+                            rules: [], // Optional, tidak ada validasi required
+                            },
+                        ]}
+                        aliases={itemAliases}
+                        onChange={handleChangePayload}
+                        />
+                    </div>
+                </div>
+        </div>
+    </Layout>
+    {isLoadingSubmit && (
+        <LoadingSpinProcessing/>
+    )}
+{contextHolder}
+</>
+    // <>
+    //         <Layout pageTitle={`Add ${title}`}>
+    //             <HeaderContent justify='between'>
+    //                 <Button icon={<LeftOutlined />} onClick={() => router.back()}>
+    //                 {isLargeScreen ? 'Back' : ''}
+    //                 </Button>
+    //                 <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
+    //                     {isLargeScreen ? 'Submit' : ''}
+    //                 </Button>
+    //             </HeaderContent>
+    //             <BodyContent>
+    //                 {!isLoading ? (
+    //                     <div className='w-full h-full flex flex-col gap-8'>
+    //                         <div className='w-full flex flex-col px-4'>
+    //                             <p className='text-2xl font-semibold capitalize'>{title}</p>
+    //                         </div>
+
+    //                     </div>
+    //                 ) : (
+    //                     <LoadingSpin/>
+    //                 )}
                     
-                </BodyContent>
-            </Layout>
-            {isLoadingSubmit && (
-                <LoadingSpinProcessing/>
-            )}
-        {contextHolder}
-    </>
+    //             </BodyContent>
+    //         </Layout>
+    //         {isLoadingSubmit && (
+    //             <LoadingSpinProcessing/>
+    //         )}
+    //     {contextHolder}
+    // </>
   );
 }

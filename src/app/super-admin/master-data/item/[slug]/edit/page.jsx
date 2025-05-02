@@ -10,16 +10,15 @@ import {
 import useNotification from '@/hooks/useNotification';
 import { useParams, useRouter } from 'next/navigation';
 import CustomerFetch from '@/modules/salesApi/customer';
-import HeaderContent from '@/components/superAdmin/masterData/HeaderContent';
-import BodyContent from '@/components/superAdmin/masterData/BodyContent';
 import { itemAliases } from '@/utils/aliases';
 import LoadingSpin from '@/components/superAdmin/LoadingSpin';
-import InputForm from '@/components/superAdmin/masterData/InputForm';
+import InputForm from '@/components/superAdmin/InputForm';
 import { deleteResponseHandler, getByIdResponseHandler, updateResponseHandler } from '@/utils/responseHandlers';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { formatDateToShort } from '@/utils/formatDate';
-import EmptyCustom from '@/components/superAdmin/masterData/EmptyCustom';
+import EmptyCustom from '@/components/superAdmin/EmptyCustom';
 import ItemFetch from '@/modules/salesApi/item';
+import LoadingSpinProcessing from '@/components/superAdmin/LoadingSpinProcessing';
 
 export default function Edit() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -148,7 +147,7 @@ const itemprocessfamilyOptions = [
 
 const handleChangePayload = (type, payload) => {
     switch (type) {
-    case 'general':
+    case 'primary':
       setGeneral(payload);
       break;
     default:
@@ -207,62 +206,109 @@ const handleChangePayload = (type, payload) => {
       };
 
   return (
-        <Layout pageTitle={`Edit ${title}`}>
-                <HeaderContent justify='between'>
-                    <div></div>
-                        {data && (
-                            <div className="flex justify-center items-center gap-2">
-                                <Button icon={<CloseOutlined />} variant={'outlined'} onClick={() => {router.back()}}>{isLargeScreen ? 'Cancel' : ''}</Button>{contextHolder}
-                                <Button icon={<SaveOutlined />} type={'primary'} onClick={handleSubmit}>{isLargeScreen ? 'Save' : ''}</Button>
-                            </div>
-                        )}
-                </HeaderContent>
-                <BodyContent gap='12'>
+    <>
+                <Layout pageTitle="Edit Customer">
+        <div className='w-full flex flex-col gap-4'>
+                    <div className='w-full flex justify-between items-center'>
+                        <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Edit Item</p>
+                    </div>
                     {!isLoading ? (
                         <>
                             {data ? (
-                                <div className='w-full h-full flex flex-col gap-8'>
-                                    <div className='w-full flex flex-col px-4'>
-                                        <p className='text-2xl font-semibold capitalize'>Edit {title}</p>
-                                        <div className='w-full flex lg:text-lg'>
-                                            <p className='w-full'>
-                                                {data.displayname + ' / ' + data.itemid}
-                                            </p>
+                                <div className='w-full flex flex-col gap-4'>
+                                    <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
+                                            <div className='w-full lg:w-1/2 flex gap-1'>
+                                            <Button icon={<CloseOutlined />} variant={'outlined'} onClick={() => {router.back()}}>{isLargeScreen ? 'Cancel' : ''}</Button>{contextHolder}
+                                            </div>
+                                            <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                                            <Button icon={<SaveOutlined />} type={'primary'} onClick={handleSubmit}>{isLargeScreen ? 'Save' : ''}</Button>
                                         </div>
                                     </div>
-                                    <InputForm
-                                        type="general"
-                                        payload={general}
-                                        data={[
-                                            { key: 'itemid', input: 'input', isAlias: true },
-                                            { key: 'displayname', input: 'input', isAlias: true },
-                                            { key: 'itemprocessfamily', input: 'select', options: itemprocessfamilyOptions, isAlias: true },
-                                            { key: 'unitstype', input: 'select', options:unitstypeOptions, isAlias: true },
-                                        ]}
-                                        aliases={itemAliases}
-                                        onChange={handleChangePayload}
-                                    />
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="pricing"
-                                        payload={pricing}
-                                        data={[
-                                            { key: 'price', input: 'number', isAlias: false },
-                                            { key: 'discount', input: 'number', isAlias: false },
-                                        ]}
-                                        aliases={itemAliases}
-                                        onChange={handleChangePayload}
-                                    />
+                                    <div className='w-full flex flex-col gap-8'>
+                                        <InputForm
+                                            type="primary"
+                                            payload={general}
+                                            data={[
+                                                {
+                                                    key: 'displayname',
+                                                    input: 'input',
+                                                    isAlias: true,
+                                                    rules: [
+                                                        { required: true, message: `${itemAliases['displayname']} is required` },
+                                                    ],
+                                                },
+                                                {
+                                                key: 'itemid',
+                                                input: 'input',
+                                                isAlias: true,
+                                                rules: [
+                                                    { required: true, message: `${itemAliases['itemid']} is required` },
+                                                ],
+                                                },
+                                                {
+                                                key: 'itemprocessfamily',
+                                                input: 'select',
+                                                options: itemprocessfamilyOptions,
+                                                isAlias: true,
+                                                rules: [
+                                                    { required: true, message: `${itemAliases['itemprocessfamily']} is required` },
+                                                ],
+                                                },
+                                                {
+                                                key: 'unitstype',
+                                                input: 'select',
+                                                options: unitstypeOptions,
+                                                isAlias: true,
+                                                rules: [
+                                                    { required: true, message: `${itemAliases['unitstype']} is required` },
+                                                ],
+                                                },
+                                            ]}
+                                            aliases={itemAliases}
+                                            onChange={handleChangePayload}
+                                            />
+
+                                            <InputForm
+                                            type="pricing"
+                                            payload={pricing}
+                                            data={[
+                                                {
+                                                key: 'price',
+                                                input: 'number',
+                                                isAlias: false,
+                                                rules: [
+                                                    { required: true, message: `Price is required` },
+                                                ],
+                                                },
+                                                {
+                                                key: 'discount',
+                                                input: 'number',
+                                                isAlias: false,
+                                                rules: [],
+                                                },
+                                            ]}
+                                            aliases={itemAliases}
+                                            onChange={handleChangePayload}
+                                            />
+                                    </div>
                                 </div>
                             ) : (
-                                <EmptyCustom/>
+                                <div className='w-full h-96'>
+                                    <EmptyCustom/>
+                                </div>
                             )}
                         </>
                     ) : (
-                        <LoadingSpin/>
+                        <div className='w-full h-96'>
+                            <LoadingSpin/>
+                        </div>
                     )}
-                </BodyContent>
+                    </div>
+        </Layout>
         {contextNotify}
-    </Layout>
+        {isLoadingSubmit && (
+            <LoadingSpinProcessing/>
+        )}
+    </>
   );
 }

@@ -3,7 +3,6 @@ import Layout from "@/components/superAdmin/Layout";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import ItemFetch from "@/modules/salesApi/item";
 import { Button, Input, Modal, Pagination, Table } from "antd";
 import { Suspense, useEffect, useState } from "react";
@@ -12,8 +11,6 @@ import Link from "next/link";
 import Search from "antd/es/input/Search";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
-import HeaderContent from "@/components/superAdmin/masterData/HeaderContent";
-import BodyContent from "@/components/superAdmin/masterData/BodyContent";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 
@@ -25,7 +22,6 @@ function Item() {
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { containerRef, containerHeight } = useContainerHeight();
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
@@ -35,7 +31,7 @@ function Item() {
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsloading] = useState(false);
+  const [isLoading, setIsloading] = useState(true);
   const [modal, contextHolder] = Modal.useModal();
   const title = 'item'
   const { notify, contextHolder: notificationContextHolder } = useNotification();
@@ -174,58 +170,71 @@ function Item() {
 
   return (
     <Layout pageTitle={title}>
-        <HeaderContent justify="between">
-            <div className="flex justify-start items-center gap-2 lg:gap-4">
-                <Input placeholder="Code" width={'100%'}
-                    value={searchCode}
-                    onChange={(e) => setSearchCode(e.target.value)}
-                    onKeyDown={(e) => handleEnter(e)}
-                    allowClear/>
-                <Search width={'100%'} placeholder="Search Display Name" allowClear value={searchName} onChange={(e) => {setSearchName(e.target.value); handleEnter(e, 'name')}} onSearch={fetchData}/>
-            </div>
-            <div className="flex justify-end items-center gap-2 lg:gap-4">
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
-                >
-                    {isLargeScreen ? `Add` : ""}
-                </Button>
-            </div>
-        </HeaderContent>
-        <BodyContent>
-            {!isLoading ? (
-                <>
-                    <div ref={containerRef} className="w-full h-[92%]">
-                        <Table
+            <div className='w-full flex flex-col gap-4'>
+                <div className='w-full flex justify-between items-center'>
+                    <p className='text-xl font-semibold text-blue-6'>Item List</p>
+                        <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
+                    >
+                        {isLargeScreen ? `New` : ""}
+                    </Button>
+                </div>
+                    <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
+                        <div className='flex gap-2'>
+                            <div className='flex flex-col justify-start items-start gap-1'>
+                                <label className='hidden lg:block text-sm font-semibold leading-none'>Code</label>
+                                <Input
+                                    value={searchCode}
+                                    onChange={(e) => setSearchCode(e.target.value)}
+                                    onKeyDown={(e) => handleEnter(e)}
+                                    placeholder={isLargeScreen? '' : 'Code'}
+                                    allowClear/>
+                            </div>
+                            <div className='flex flex-col justify-start items-start gap-1'>
+                                <label className='hidden lg:block text-sm font-semibold leading-none'>Display Name</label>
+                                <Search placeholder={isLargeScreen? '' : 'Name'} width={'100%'} allowClear value={searchName} onChange={(e) => {setSearchName(e.target.value); handleEnter(e, 'name')}} onSearch={fetchData}/>
+                            </div>  
+                        </div>
+                        <div className='flex gap-2'>
+                        </div>
+                    </div>
+                {!isLoading ? (
+                    <>
+                        <div>
+                            <Table
                                 rowKey={(record) => record.id}
-                                size="small" pagination={false}
+                                size="small"
+                                pagination={false}
                                 columns={columns}
                                 dataSource={datas}
-                                scroll={{y: containerHeight - 50, x: 'max-content'}}
+                                scroll={{x: 'max-content'}}
                                 bordered
                                 tableLayout="auto"
                             />
                         </div>
-                        <div className="w-full h-[8%] flex justify-end items-end overflow-hidden">
-                        <Pagination
-                            total={totalItems}
-                            defaultPageSize={limit}
-                            defaultCurrent={page}
-                            onChange={(newPage, newLimit) => {
-                                router.push(
-                                `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
-                                )
-                            }}
-                            size='small'
-                            align={'end'}
-                        />
+                        <div>
+                            <Pagination
+                                total={totalItems}
+                                defaultPageSize={limit}
+                                defaultCurrent={page}
+                                onChange={(newPage, newLimit) => {
+                                    router.push(
+                                    `/super-admin/${title}?page=${newPage}&limit=${newLimit}`
+                                    )
+                                }}
+                                size='small'
+                                align={'end'}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <div className="w-full h-96">                    
+                        <LoadingSpin/>
                     </div>
-                </>
-            ) : (
-            <LoadingSpin/>
-            )}
-        </BodyContent>
+                )}
+            </div>
           {notificationContextHolder}
     </Layout>
   );

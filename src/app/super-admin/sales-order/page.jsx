@@ -1,22 +1,20 @@
 "use client";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from '@/components/superAdmin/Layout'
 import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
-import CustomerFetch from "@/modules/salesApi/customer";
-import { Button, Dropdown, Modal, Pagination, Table, Tag } from "antd";
+import { Button, Modal, Pagination, Table, Tag, Select, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
-import HeaderContent from "@/components/superAdmin/masterData/HeaderContent";
-import BodyContent from "@/components/superAdmin/masterData/BodyContent";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
-import { deleteResponseHandler, getResponseHandler } from "@/utils/responseHandlers";
+import { getResponseHandler } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
+import CustomerFetch from '@/modules/salesApi/customer';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -26,17 +24,19 @@ function SalesOrder() {
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { containerRef, containerHeight } = useContainerHeight();
+  const { RangePicker } = DatePicker
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
   const offset = (page - 1) * limit;
 
   const [datas, setDatas] = useState([]);
+  const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
+  const [searchName, setSearchName] = useState("");
   const title = 'sales-order'
   const { notify, contextHolder: notificationContextHolder } = useNotification();
 
@@ -45,7 +45,7 @@ function SalesOrder() {
       try {
         setIsloading(true);
 
-        const response = await SalesOrderFetch.get(offset, limit, statusFilter);
+        const response = await SalesOrderFetch.get(offset, limit, statusFilter, searchName);
 
         const resData = getResponseHandler(response, notify)
 
@@ -62,7 +62,38 @@ function SalesOrder() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter]);
+  }, [page, limit, pathname, statusFilter, searchName]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsloading(true);
+
+        const response = await CustomerFetch.get(0, 1000, null);
+
+        const resData = getResponseHandler(response, notify)
+
+        if (resData) {
+            const mapingCustomerOption = resData.list.map((data) => {
+                return {
+                    ...data,
+                    value: data.companyname,
+                    label: data.companyname
+                }
+            })
+            setDataCustomer(mapingCustomerOption)
+            
+        }
+
+      } catch (error) {
+        notify('error', 'Error', error?.message || "Internal Server error");
+      } finally {
+        setIsloading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
 
   const handleEdit = (record) => {
@@ -159,7 +190,7 @@ function SalesOrder() {
       key: 'actions',
       fixed: 'right',
       align: 'right',
-      width: 87,
+      width: isLargeScreen ? 87: 30,
       render: (_, record) => (
         <div className="flex justify-center items-center gap-2">
               <Button 
@@ -176,65 +207,128 @@ function SalesOrder() {
     }
   ];
 
-  return (
-    <Layout pageTitle='Sales Order List'>
-        <HeaderContent justify="between">
-            <div className="flex justify-start items-center">
-            </div>
-            <div className="flex justify-end items-center gap-2 lg:gap-4">
-                <Dropdown
-                    menu={{ items: dropdownItems, onClick: handleStatusChange, style: { textAlign: "right" } }}
-                    placement="bottomRight"
-                   >
-                       <Button icon={<FilterOutlined />} style={{ textTransform: "capitalize" }}>
-                        {isLargeScreen ? (statusFilter == "all" ? "all status" : statusFilter) : ""}
-                    </Button>
-                 </Dropdown>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => router.push(`/super-admin/${title}/new`)}
-                >
-                    {isLargeScreen ? `Add` : ""}
-                </Button>
-            </div>
-        </HeaderContent>
-        <BodyContent gap="0">
-            {!isLoading ? (
-                <>
-                    <div ref={containerRef} className="w-full h-[92%]">
-                        <Table
-                                rowKey={(record) => record.id}
-                                size="small" pagination={false}
-                                columns={columns}
-                                dataSource={datas}
-                                scroll={{y: containerHeight - 50, x: 'max-content'}}
-                                bordered
-                                tableLayout="auto"
-                            />
-                        </div>
-                        <div className="w-full h-[8%] flex justify-end items-end overflow-hidden">
-                        <Pagination
-                            total={totalItems}
-                            defaultPageSize={limit}
-                            defaultCurrent={page}
-                            onChange={(newPage, newLimit) => {
-                                router.push(
-                                `/super-admin/${title}?page=${newPage}&limit=${newLimit}`
-                                )
-                            }}
-                            size='small'
-                            align={'end'}
-                        />
-                    </div>
-                </>
-            ) : (
-            <LoadingSpin/>
-            )}
+    // const fetchData = async () => {
+    //   try {
+    //     setIsloading(true);
+    //     const response = await SalesOrderFetch.get(offset, limit, statusFilter, searchName);
+    //     const resData = getResponseHandler(response, notify)
+    
+    //     if (resData) {
+    //         setDatas(resData.list)
+    //         setTotalItems(resData.total_items)
+    //     }
+    //   } catch (error) {
+    //       notify('error', 'Error', error?.message || "Internal Server error");
+    //   } finally {
+    //     setIsloading(false);
+    //   }
+    // };
 
-        </BodyContent>
-        {notificationContextHolder}
-    </Layout>
+  return (
+    <Layout>
+    <div className='w-full flex flex-col gap-4'>
+        <div className='w-full flex justify-between items-center'>
+        <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Sales Order List</p>
+        </div>
+            <div className='w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
+            <div className='flex gap-2'>
+                            <div className='hidden lg:flex flex-col justify-start items-start gap-1'>
+                                <label className='text-sm font-semibold leading-none'>Customer Name</label>
+                                <Select
+                                    showSearch
+                                    placeholder="Select a person"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                    }
+                                    options={dataCustomer}
+                                    dropdownStyle={{ minWidth: '250px', whiteSpace: 'nowrap' }}
+                                    onChange={(e) => {setSearchName(e)}}
+                                    allowClear
+                                />
+                            </div>
+                            <div className='flex flex-col justify-start items-start gap-1'>
+                                <label className='hidden lg:block text-sm font-semibold leading-none'>Date</label>
+                                <div className='flex justify-center items-start gap-2'>
+                                    <RangePicker
+                                        showTime={false}
+                                        format="DD-MM-YYYY"
+                                        onChange={(value, dateString) => {
+                                            console.log('Selected Time: ', value);
+                                            console.log('Formatted Selected Time: ', dateString);
+                                        }}
+                                        onOk={(val) => {console.log(val)}}
+                                    />
+                                </div>
+                            </div>  
+                        </div>
+                        <div className='flex gap-2'>
+                            <div className='flex lg:hidden flex-col justify-start items-start gap-1'>
+                                <Select
+                                        showSearch
+                                        placeholder="Select a person"
+                                        filterOption={(input, option) =>
+                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                        }
+                                        options={dataCustomer}
+                                        dropdownStyle={{ minWidth: '250px', whiteSpace: 'nowrap' }}
+                                        onChange={(e) => {setSearchName(e)}}
+                                        allowClear
+                                        dropdownAlign={{ points: ['tr', 'br'] }}
+                                />
+                            </div>
+                            <div className='flex flex-col justify-start items-start gap-1'>
+                                <label className='hidden lg:block text-sm font-semibold leading-none'>Status</label>
+                                <Select
+                                defaultValue="all"
+                                onChange={(e) => {setStatusFilter(e)}}
+                                options={[
+                                    { value: 'all', label: 'All' },
+                                    { value: 'open', label: 'Open' },
+                                    { value: 'close', label: 'Close' },
+                                ]}
+                                dropdownStyle={{ minWidth: '100px', whiteSpace: 'nowrap' }}
+                                dropdownAlign={{ points: ['tr', 'br'] }}
+                                />
+                            </div> 
+                        </div>
+            </div>
+        {!isLoading ? (
+            <>
+                <div>
+                    <Table
+                        rowKey={(record) => record.id}
+                        size="small"
+                        pagination={false}
+                        columns={columns}
+                        dataSource={datas}
+                        scroll={{x: 'max-content'}}
+                        bordered
+                        tableLayout="auto"
+                    />
+                </div>
+                <div>
+                    <Pagination
+                        total={totalItems}
+                        defaultPageSize={limit}
+                        defaultCurrent={page}
+                        onChange={(newPage, newLimit) => {
+                            router.push(
+                            `/super-admin/${title}?page=${newPage}&limit=${newLimit}`
+                            )
+                        }}
+                        size='small'
+                        align={'end'}
+                    />
+                </div>
+            </>
+        ) : (
+            <div className="w-full h-96">                    
+                <LoadingSpin/>
+            </div>
+        )}
+    </div>
+{notificationContextHolder}
+</Layout>
   );
 }
 

@@ -9,15 +9,13 @@ import {
 } from '@ant-design/icons';
 import useNotification from '@/hooks/useNotification';
 import { useParams, useRouter } from 'next/navigation';
-import HeaderContent from '@/components/superAdmin/masterData/HeaderContent';
-import BodyContent from '@/components/superAdmin/masterData/BodyContent';
 import { itemAliases } from '@/utils/aliases';
 import LoadingSpin from '@/components/superAdmin/LoadingSpin';
-import InputForm from '@/components/superAdmin/masterData/InputForm';
+import InputForm from '@/components/superAdmin/InputForm';
 import { deleteResponseHandler, getByIdResponseHandler } from '@/utils/responseHandlers';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { formatDateToShort } from '@/utils/formatDate';
-import EmptyCustom from '@/components/superAdmin/masterData/EmptyCustom';
+import EmptyCustom from '@/components/superAdmin/EmptyCustom';
 import ItemFetch from '@/modules/salesApi/item';
 
 export default function Detail() {
@@ -146,37 +144,39 @@ export default function Detail() {
   };
 
   return (
-    <Layout pageTitle={`Detail ${title}`}>
-                <HeaderContent justify='between'>
-                    <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
-                        {isLargeScreen ? 'List' : ''}
-                    </Button>
-                    {data && (
-                        <div className="flex justify-center items-center gap-2">
-                            <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
-                            <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
-                                <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
-                            </Dropdown>
-                            {contextHolder}
-                        </div>
-                    )}
-                </HeaderContent>
-                <BodyContent gap='12'>
-                    {!isLoading ? (
-                        <>
-                            {data ? (
-                                <div className='w-full h-full flex flex-col gap-8'>
-                                    <div className='w-full flex flex-col px-4'>
-                                        <p className='text-2xl font-semibold'>Item Details</p>
-                                        <div className='w-full flex lg:text-lg'>
-                                            <p className='w-full'>
-                                                {data.displayname + ' / ' + data.itemid}
-                                            </p>
+        <Layout>
+        <div className='w-full flex flex-col gap-4'>
+            <div className='w-full flex justify-between items-center'>
+                <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Item Details</p>
+                <Button icon={<UnorderedListOutlined />} type='link' onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
+                    {isLargeScreen ? 'List' : ''}
+                </Button>
+            </div>
+                {!isLoading ? (
+                    <>
+                        {data ? (
+                                    <div className='w-full flex flex-col gap-4'>
+                                        <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
+                                                <div className='w-full lg:w-1/2 flex gap-1 flex-col'>
+                                                    <p className='w-full lg:text-lg'>
+                                                        {data.displayname + ' / ' + data.itemid}
+                                                    </p>
+                                                    {/* <div>
+                                                        <Tag style={{textTransform: 'capitalize', fontSize: '16px'}} color={data.status =='active' ? 'green' : 'red'}>{data.status}</Tag>
+                                                    </div> */}
+                                                </div>
+                                                <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                                                    <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
+                                                    {contextHolder}
+                                                    <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
+                                                        <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
+                                                    </Dropdown>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <InputForm
+                                        <div className='w-full flex flex-col gap-8'>
+                                        <InputForm
                                         isReadOnly={true}
-                                        type="general"
+                                        type="primary"
                                         payload={general}
                                         data={[
                                             { key: 'displayname', input: 'input', isAlias: true },
@@ -201,16 +201,61 @@ export default function Detail() {
                                         ]}
                                         aliases={itemAliases}
                                     />
-                                </div>
-                            ) : (
+                                        </div>
+                                    </div>
+                        ) : (
+                            <div className='w-full h-96'>
                                 <EmptyCustom/>
-                            )}
-                        </>
-                    ) : (
-                        <LoadingSpin/>
-                    )}
-                </BodyContent>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                        <div className='w-full h-96'>
+                            <LoadingSpin/>
+                        </div>
+                )}
+        </div>
         {contextNotify}
     </Layout>
+    // <Layout pageTitle={`Detail ${title}`}>
+    //             <HeaderContent justify='between'>
+    //                 <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
+    //                     {isLargeScreen ? 'List' : ''}
+    //                 </Button>
+    //                 {data && (
+    //                     <div className="flex justify-center items-center gap-2">
+    //                         <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
+    //                         <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
+    //                             <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
+    //                         </Dropdown>
+    //                         {contextHolder}
+    //                     </div>
+    //                 )}
+    //             </HeaderContent>
+    //             <BodyContent gap='12'>
+    //                 {!isLoading ? (
+    //                     <>
+    //                         {data ? (
+    //                             <div className='w-full h-full flex flex-col gap-8'>
+    //                                 <div className='w-full flex flex-col px-4'>
+    //                                     <p className='text-2xl font-semibold'>Item Details</p>
+    //                                     <div className='w-full flex lg:text-lg'>
+    //                                         <p className='w-full'>
+    //                                             {data.displayname + ' / ' + data.itemid}
+    //                                         </p>
+    //                                     </div>
+    //                                 </div>
+                                    
+    //                             </div>
+    //                         ) : (
+    //                             <EmptyCustom/>
+    //                         )}
+    //                     </>
+    //                 ) : (
+    //                     <LoadingSpin/>
+    //                 )}
+    //             </BodyContent>
+    //     {contextNotify}
+    // </Layout>
   );
 }

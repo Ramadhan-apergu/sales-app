@@ -10,11 +10,8 @@ import {
 import useNotification from '@/hooks/useNotification';
 import { useRouter } from 'next/navigation';
 import CustomerFetch from '@/modules/salesApi/customer';
-import HeaderContent from '@/components/superAdmin/masterData/HeaderContent';
-import BodyContent from '@/components/superAdmin/masterData/BodyContent';
 import { customerAliases } from '@/utils/aliases';
-import LoadingSpin from '@/components/superAdmin/LoadingSpin';
-import InputForm from '@/components/superAdmin/masterData/InputForm';
+import InputForm from '@/components/superAdmin/InputForm';
 import { createResponseHandler } from '@/utils/responseHandlers';
 import LoadingSpinProcessing from '@/components/superAdmin/LoadingSpinProcessing';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -59,7 +56,7 @@ export default function CustomerNew() {
 
     const handleChangePayload = (type, payload) => {
             switch (type) {
-            case 'general':
+            case 'primary':
               setPayloadGeneral(payload);
               break;
             case 'contact':
@@ -132,71 +129,154 @@ export default function CustomerNew() {
 
   return (
     <>
-            <Layout pageTitle="Add New Customer">
-                <HeaderContent justify='between'>
-                    <Button icon={<LeftOutlined />} onClick={() => router.back()}>
-                    {isLargeScreen ? 'Back' : ''}
-                    </Button>
-                    <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
-                        {isLargeScreen ? 'Submit' : ''}
-                    </Button>
-                </HeaderContent>
-                <BodyContent>
-                    {!isLoading ? (
-                        <div className='w-full h-full flex flex-col gap-8'>
-                            <div className='w-full flex flex-col px-4'>
-                                <p className='text-2xl font-semibold'>Customer</p>
+            <Layout pageTitle="">
+                <div className='w-full flex flex-col gap-4'>
+                    <div className='w-full flex justify-between items-center'>
+                        <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Add New Customer</p>
+                    </div>
+                        <div className='w-full flex flex-col gap-4'>
+                            <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
+                                    <div className='w-full lg:w-1/2 flex gap-1'>
+                                        <Button icon={<LeftOutlined />} onClick={() => router.back()}>
+                                            {isLargeScreen ? 'Back' : ''}
+                                        </Button>
+                                    </div>
+                                    <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                                        <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
+                                            {isLargeScreen ? 'Submit' : ''}
+                                        </Button>
+                                </div>
                             </div>
+                            <div className='w-full flex flex-col gap-8'>
                             <InputForm
-                            type="general"
-                            payload={payloadGeneral}
-                            data={[
-                                { key: 'companyname', input: 'input', isAlias: true },
-                            ]}
-                            onChange={handleChangePayload}
-                            aliases={customerAliases}
-                            />
-                            <InputForm
+                                type="primary"
+                                payload={payloadGeneral}
+                                data={[
+                                    {
+                                    key: 'companyname',
+                                    input: 'input',
+                                    isAlias: true,
+                                    rules: [
+                                        { required: true, message: `${customerAliases['companyname']} is required` },
+                                    ],
+                                    },
+                                ]}
+                                onChange={handleChangePayload}
+                                aliases={customerAliases}
+                                />
+
+                                <InputForm
                                 type="contact"
                                 payload={payloadContact}
                                 data={[
-                                    { key: 'email', input: 'input', isAlias: false },
-                                    { key: 'phone', input: 'input', isAlias: false },
-                                    { key: 'altphone', input: 'input', isAlias: true },
-                                    { key: 'addressee', input: 'input', isAlias: true },
+                                    {
+                                    key: 'email',
+                                    input: 'input',
+                                    isAlias: false,
+                                    rules: [
+                                        { required: true, message: 'Email is required' },
+                                        { pattern: /^\S+@\S+\.\S+$/, message: 'Email format is invalid' },
+                                    ],
+                                    },
+                                    {
+                                    key: 'phone',
+                                    input: 'input',
+                                    isAlias: false,
+                                    rules: [
+                                        { required: true, message: 'Phone is required' },
+                                    ],
+                                    },
+                                    {
+                                    key: 'altphone',
+                                    input: 'input',
+                                    isAlias: true,
+                                    rules: [],
+                                    },
+                                    {
+                                    key: 'addressee',
+                                    input: 'input',
+                                    isAlias: true,
+                                    rules: [],
+                                    },
                                 ]}
                                 onChange={handleChangePayload}
                                 aliases={customerAliases}
-                            />
-                            <InputForm
+                                />
+
+                                <InputForm
                                 type="address"
                                 payload={payloadAddress}
                                 data={[
-                                    { key: 'addr1', input: 'input', isAlias: true },
-                                    { key: 'city', input: 'input', isAlias: false },
-                                    { key: 'state', input: 'input', isAlias: false },
-                                    { key: 'zip', input: 'input', isAlias: false },
+                                    {
+                                    key: 'addr1',
+                                    input: 'input',
+                                    isAlias: true,
+                                    rules: [],
+                                    },
+                                    {
+                                    key: 'city',
+                                    input: 'input',
+                                    isAlias: false,
+                                    rules: [
+                                        { required: true, message: 'City is required' },
+                                    ],
+                                    },
+                                    {
+                                    key: 'state',
+                                    input: 'input',
+                                    isAlias: false,
+                                    rules: [
+                                        { required: true, message: 'State is required' },
+                                    ],
+                                    },
+                                    {
+                                    key: 'zip',
+                                    input: 'input',
+                                    isAlias: false,
+                                    rules: [
+                                        { required: true, message: 'Zip code is required' },
+                                    ],
+                                    },
                                 ]}
                                 onChange={handleChangePayload}
                                 aliases={customerAliases}
-                            />
-                            <InputForm
+                                />
+
+                                <InputForm
                                 type="financial"
                                 payload={payloadFinancial}
                                 data={[
-                                    { key: 'terms', input: 'select', options: termOptions, isAlias: true },
-                                    { key: 'creditlimit', input: 'number', isAlias: true },
-                                    { key: 'resalenumber', input: 'number', isAlias: true },
+                                    {
+                                    key: 'terms',
+                                    input: 'select',
+                                    options: termOptions,
+                                    isAlias: true,
+                                    rules: [
+                                        { required: true, message: `${customerAliases['terms']} is required` },
+                                    ],
+                                    },
+                                    {
+                                    key: 'creditlimit',
+                                    input: 'number',
+                                    isAlias: true,
+                                    rules: [
+                                        { required: true, message: `${customerAliases['creditlimit']} is required` },
+                                        { type: 'number', min: 0, message: `${customerAliases['creditlimit']} must be zero or positive` },
+                                    ],
+                                    },
+                                    {
+                                    key: 'resalenumber',
+                                    input: 'number',
+                                    isAlias: true,
+                                    rules: [],
+                                    },
                                 ]}
                                 onChange={handleChangePayload}
                                 aliases={customerAliases}
-                            />
+                                />
+                            </div>
                         </div>
-                    ) : (
-                        <LoadingSpin/>
-                    )}
-                    
-                </BodyContent>
+                </div>
             </Layout>
             {isLoadingSubmit && (
                 <LoadingSpinProcessing/>

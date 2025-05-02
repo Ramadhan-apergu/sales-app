@@ -8,16 +8,18 @@ import {
   LeftOutlined,
 } from '@ant-design/icons';
 import useNotification from '@/hooks/useNotification';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { agreementAliases } from '@/utils/aliases';
 import LoadingSpin from '@/components/superAdmin/LoadingSpin';
 import InputForm from '@/components/superAdmin/InputForm';
-import { createResponseHandler, getResponseHandler } from '@/utils/responseHandlers';
+import { getByIdResponseHandler, getResponseHandler, updateResponseHandler } from '@/utils/responseHandlers';
 import LoadingSpinProcessing from '@/components/superAdmin/LoadingSpinProcessing';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import ItemFetch from '@/modules/salesApi/item';
 import Search from 'antd/es/input/Search';
 import AgreementFetch from '@/modules/salesApi/agreement';
+import dayjs from 'dayjs';
+import EmptyCustom from '@/components/superAdmin/EmptyCustom';
 
 function SelectItem({ onselect }) {
     const isLargeScreen = useBreakpoint("lg");
@@ -291,12 +293,38 @@ function SelectItem({ onselect }) {
   
 
 
-export default function AgreementNew() {
+export default function AgreementEdit() {
+  const { slug } = useParams()
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint('lg')
   const [modal, contextHolder] = Modal.useModal()
-    const title = 'agreement'
+  const title = 'agreement'
+  const [data, setData] = useState(null)
+
+    useEffect(() => {
+      async function fetchData() {
+          try {
+              setIsLoading(true)
+              const response = await AgreementFetch.getById(slug)
+              const resData = getByIdResponseHandler(response, notify)
+              setData(resData)
+
+              if (resData) {
+                  mapingGroup(resData)
+              }
+  
+          } catch (error) {
+              const message =
+              error?.message ||
+              "Login failed! Server error, please try again later.";
+            notify('error', 'Error', message);
+          } finally {
+              setIsLoading(false)
+          }
+      }
+      fetchData()
+    }, [])
 
   const [payloadCustomForm, setPayloadCustomForm] = useState({
     "customform": '1'
@@ -567,9 +595,9 @@ export default function AgreementNew() {
                 return null;
               }
     
-          const response = await AgreementFetch.add(payload);
+          const response = await AgreementFetch.update(slug, payload);
     
-          const resData = createResponseHandler(response, notify);
+          const resData = updateResponseHandler(response, notify);
 
           if (resData) {
             router.push(`/super-admin/master-data/${title}/${resData}`)
@@ -697,6 +725,23 @@ export default function AgreementNew() {
         setPayloadDetail((prev) => prev.filter((item) => item.itemid !== record.itemid));
       }
 
+      const mapingGroup = (data) => {
+        const customformData = {customform: data.customform}
+        const generalData = {
+            agreementcode: data.agreementcode,
+            agreementname: data.agreementname,
+            effectivedate: dayjs(data.effectivedate),
+            enddate: dayjs(data.enddate),
+            status: data.status,
+            description: data.description,
+          }
+
+          setPayloadCustomForm(customformData)
+          setPayloadGeneral(generalData)
+          setPayloadGroup(data.agreement_groups)
+          setPayloadDetail(data.agreement_lines)
+      }
+
   return (
     <>
             <Layout pageTitle="">
@@ -704,124 +749,138 @@ export default function AgreementNew() {
                     <div className='w-full flex justify-between items-center'>
                         <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Add New Agreement</p>
                     </div>
-                        <div className='w-full flex flex-col gap-4'>
-                            <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
-                                    <div className='w-full lg:w-1/2 flex gap-1'>
-                                        <Button icon={<LeftOutlined />} onClick={() => router.back()}>
-                                            {isLargeScreen ? 'Back' : ''}
-                                        </Button>
+                    {!isLoading ? (
+                        <>
+                            {data ? (
+                                <div className='w-full flex flex-col gap-4'>
+                                    <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
+                                            <div className='w-full lg:w-1/2 flex gap-1'>
+                                                <Button icon={<LeftOutlined />} onClick={() => router.back()}>
+                                                    {isLargeScreen ? 'Back' : ''}
+                                                </Button>
+                                            </div>
+                                            <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                                                <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
+                                                    {isLargeScreen ? 'Submit' : ''}
+                                                </Button>
+                                        </div>
                                     </div>
-                                    <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-                                        <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
-                                            {isLargeScreen ? 'Submit' : ''}
-                                        </Button>
-                                </div>
-                            </div>
-                            <div className='w-full flex flex-col gap-8'>
-                            <InputForm
-                                type="customform"
-                                title='Form Type'
-                                payload={payloadCustomForm}
-                                data={[
-                                    {
-                                    key: 'customform',
-                                    input: 'select',
-                                    options: formOptions,
-                                    isAlias: true,
-                                    rules: [
-                                        { required: true, message: `${agreementAliases['customform']} is required` },
-                                    ],
-                                    },
-                                ]}
-                                onChange={handleChangePayload}
-                                aliases={agreementAliases}
-                                />
-                                        <InputForm
-                                            title={'primary'}
-                                            type="primary"
-                                            payload={payloadGeneral}
-                                            data={[
-                                                { key: 'agreementcode', input: 'input', isAlias: true,
-                                                    rules: [
-                                                    { required: true, message: `${agreementAliases['agreementcode']} is required` },
-                                                ], },
-                                                { key: 'status', input: 'select', isAlias: true, options: statusOptions,
-                                                    rules: [
-                                                        { required: true, message: `Status is required` },]
-                                                 },
-                                                { key: 'agreementname', input: 'input', isAlias: true,
-                                                    rules: [
-                                                        { required: true, message: `${agreementAliases['agreementname']} is required` },]
-                                                },
-                                                { key: 'effectivedate', input: 'date', isAlias: true },
-                                                { key: 'enddate', input: 'date', isAlias: true },
-                                                { key: 'description', input: 'input', isAlias: true },
-                                            ]}
-                                            aliases={agreementAliases}
-                                            onChange={handleChangePayload}
+                                    <div className='w-full flex flex-col gap-8'>
+                                    <InputForm
+                                        type="customform"
+                                        title='Form Type'
+                                        payload={payloadCustomForm}
+                                        data={[
+                                            {
+                                            key: 'customform',
+                                            input: 'select',
+                                            options: formOptions,
+                                            isAlias: true,
+                                            rules: [
+                                                { required: true, message: `${agreementAliases['customform']} is required` },
+                                            ],
+                                            },
+                                        ]}
+                                        onChange={handleChangePayload}
+                                        aliases={agreementAliases}
                                         />
-                                        {payloadCustomForm.customform != 5 ? (
-                                            <div className='w-full flex flex-col gap-4'>
-                                                <Divider
-                                                        style={{
-                                                        margin: '0',
-                                                        textTransform: 'capitalize',
-                                                        borderColor: '#1677ff',
-                                                        }}
-                                                        orientation="left"
-                                                    >
-                                                    {formOptions[(parseInt(payloadCustomForm.customform) - 1)].label} Detail    
-                                                </Divider>
-                                                <div className='flex justify-end'>
-                                                    <Button type='primary' onClick={handleAddModalItem}>Add</Button>
-                                                </div>
-                                                <TableCustom onDelete={handleDeleteDetail} data={payloadDetail} keys={keys[(parseInt(payloadCustomForm.customform) - 1)]} aliases={agreementAliases}/>
-                                            </div>
-                                        ) : (
-                                            <div className='w-full flex flex-col gap-4'>
-                                                <div className='flex justify-end gap-2 items-center'>
-                                                    <Switch
-                                                    size='small'
-                                                        checked={isPayloadGroupItem}
-                                                        onChange={()=> setIsPayloadGroupItem(!isPayloadGroupItem)}
-                                                    />
-                                                    <p className='font-semibold'>Free Item Type</p>
-                                                </div>
-                                                {!isPayloadGroupItem ? (
-                                                    <InputForm
-                                                        title='agreement groups (Price)'
-                                                        type="group"
-                                                        payload={payloadGroup}
-                                                        data={[
-                                                            { key: 'itemcategory', input: 'select', options: itemprocessfamilyOptions, isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                            { key: 'qtymin', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                            { key: 'qtymax', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                            { key: 'discountnominal', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                        ]}
-                                                        aliases={agreementAliases}
-                                                        onChange={handleChangePayload}
-                                                    />
+                                                <InputForm
+                                                    title={'primary'}
+                                                    type="primary"
+                                                    payload={payloadGeneral}
+                                                    data={[
+                                                        { key: 'agreementcode', input: 'input', isAlias: true,
+                                                            rules: [
+                                                            { required: true, message: `${agreementAliases['agreementcode']} is required` },
+                                                        ], },
+                                                        { key: 'status', input: 'select', isAlias: true, options: statusOptions,
+                                                            rules: [
+                                                                { required: true, message: `Status is required` },]
+                                                        },
+                                                        { key: 'agreementname', input: 'input', isAlias: true,
+                                                            rules: [
+                                                                { required: true, message: `${agreementAliases['agreementname']} is required` },]
+                                                        },
+                                                        { key: 'effectivedate', input: 'date', isAlias: true },
+                                                        { key: 'enddate', input: 'date', isAlias: true },
+                                                        { key: 'description', input: 'input', isAlias: true },
+                                                    ]}
+                                                    aliases={agreementAliases}
+                                                    onChange={handleChangePayload}
+                                                />
+                                                {payloadCustomForm.customform != 5 ? (
+                                                    <div className='w-full flex flex-col gap-4'>
+                                                        <Divider
+                                                                style={{
+                                                                margin: '0',
+                                                                textTransform: 'capitalize',
+                                                                borderColor: '#1677ff',
+                                                                }}
+                                                                orientation="left"
+                                                            >
+                                                            {formOptions[(parseInt(payloadCustomForm.customform) - 1)].label} Detail    
+                                                        </Divider>
+                                                        <div className='flex justify-end'>
+                                                            <Button type='primary' onClick={handleAddModalItem}>Add</Button>
+                                                        </div>
+                                                        <TableCustom onDelete={handleDeleteDetail} data={payloadDetail} keys={keys[(parseInt(payloadCustomForm.customform) - 1)]} aliases={agreementAliases}/>
+                                                    </div>
                                                 ) : (
-                                                    <InputForm
-                                                        title='agreement groups (Items)'
-                                                        type="group"
-                                                        payload={payloadGroup}
-                                                        data={[
-                                                            { key: 'itemcategory', input: 'select', options: itemprocessfamilyOptions, isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                            { key: 'qtymin', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                            { key: 'qtymax', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                            { key: 'qtyfree', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                            { key: 'unitfree', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                        ]}
-                                                        aliases={agreementAliases}
-                                                        onChange={handleChangePayload}
-                                                    />
+                                                    <div className='w-full flex flex-col gap-4'>
+                                                        <div className='flex justify-end gap-2 items-center'>
+                                                            <Switch
+                                                            size='small'
+                                                                checked={isPayloadGroupItem}
+                                                                onChange={()=> setIsPayloadGroupItem(!isPayloadGroupItem)}
+                                                            />
+                                                            <p className='font-semibold'>Free Item Type</p>
+                                                        </div>
+                                                        {!isPayloadGroupItem ? (
+                                                            <InputForm
+                                                                title='agreement groups (Price)'
+                                                                type="group"
+                                                                payload={payloadGroup}
+                                                                data={[
+                                                                    { key: 'itemcategory', input: 'select', options: itemprocessfamilyOptions, isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtymin', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtymax', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'discountnominal', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                ]}
+                                                                aliases={agreementAliases}
+                                                                onChange={handleChangePayload}
+                                                            />
+                                                        ) : (
+                                                            <InputForm
+                                                                title='agreement groups (Items)'
+                                                                type="group"
+                                                                payload={payloadGroup}
+                                                                data={[
+                                                                    { key: 'itemcategory', input: 'select', options: itemprocessfamilyOptions, isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtymin', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtymax', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtyfree', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'unitfree', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                ]}
+                                                                aliases={agreementAliases}
+                                                                onChange={handleChangePayload}
+                                                            />
+                                                        )}
+                                                        <GroupItemList category={payloadGroup.itemcategory}/>
+                                                    </div>
                                                 )}
-                                                <GroupItemList category={payloadGroup.itemcategory}/>
-                                            </div>
-                                        )}
-                            </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className='w-full h-96'>
+                                    <EmptyCustom/>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className='w-full h-96'>
+                            <LoadingSpin/>
                         </div>
+                    )}
                 </div>
             </Layout>
             {isLoadingSubmit && (

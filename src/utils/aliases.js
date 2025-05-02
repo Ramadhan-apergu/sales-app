@@ -26,3 +26,30 @@ export const itemAliases = {
     unitstype: 'Units Type',
     itemid: 'Item ID'
 }
+
+export const agreementAliases = {
+    id: 'ID',
+    agreementid: 'Agreement ID',
+    itemid: 'Display Name/Code',
+    baseprice: 'Base Price',
+    basepriceunit: 'Base Price Unit',
+    qtymin: 'Qty Min',
+    qtyminunit: 'Qty Min Unit',
+    qtymax: 'Qty Max',
+    qtymaxunit: 'Qty Max Unit',
+    discountnominal: 'Discount Nominal',
+    discountpercent: 'Discount Percent',
+    paymenttype: 'Payment Type',
+    qtyfree: 'Qty Free',
+    perunit: 'Per Unit',
+    displayname: 'Item Name/Number',
+    price: 'Base Price',
+    unitstype: 'Unit',
+    agreementcode: 'Agreement Code',
+    agreementname: 'Agreement Name',
+    createdby: 'Created By',
+    createddate: 'Created Date',
+    customform: 'Custom Form',
+    effectivedate: 'Effective Date',
+    enddate: 'End Date',
+}

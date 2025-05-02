@@ -1,21 +1,16 @@
 "use client";
 
 import Layout from "@/components/superAdmin/Layout";
-import { DeleteOutlined, EditOutlined, FilterOutlined, LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
 import AgreementFetch from "@/modules/salesApi/agreement";
 import { Button, Dropdown, Modal, Pagination, Table, Tag } from "antd";
 import { Suspense, useEffect, useState } from "react";
-import HeaderControls from "@/components/superAdmin/masterData/list/HeaderControls";
-import PaginationControls from "@/components/superAdmin/masterData/list/PaginationControls";
 import Link from "next/link";
 import { formatDateToShort } from "@/utils/formatDate";
-import MobileListAgreement from "@/components/superAdmin/masterData/list/MobileListAgreement";
 import useNotification from "@/hooks/useNotification";
-import HeaderContent from "@/components/superAdmin/masterData/HeaderContent";
-import BodyContent from "@/components/superAdmin/masterData/BodyContent";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
@@ -36,7 +31,7 @@ function Agreement() {
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsloading] = useState(false);
+  const [isLoading, setIsloading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const { notify, contextHolder: notificationContextHolder  } = useNotification();
@@ -192,59 +187,69 @@ function Agreement() {
 
   return (
     <Layout pageTitle={title}>
-        <HeaderContent justify="between">
-            <div className="flex justify-start items-center">
-            </div>
-                <div className="flex justify-end items-center gap-2 lg:gap-4">
-                    <Dropdown menu={{ items: dropdownItems, onClick: handleStatusChange, style: { textAlign: "right" } }}
-                        placement="bottomRight"
-                    >
-                        <Button icon={<FilterOutlined />} style={{ textTransform: "capitalize" }}>
-                            {isLargeScreen ? (statusFilter == "all" ? "all status" : statusFilter) : ""}
-                        </Button>
-                    </Dropdown>
+            <div className='w-full flex flex-col gap-4'>
+                <div className='w-full flex justify-between items-center'>
+                    <p className='text-xl font-semibold text-blue-6'>Agreement List</p>
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
                         onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
                     >
-                        {isLargeScreen ? `Add` : ""}
+                        {isLargeScreen ? `New` : ""}
                     </Button>
                 </div>
-        </HeaderContent>
-        <BodyContent gap="0">
-            {!isLoading ? (
-                <>
-                    <div ref={containerRef} className="w-full h-[92%]">
-                        <Table
+                    <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
+                        <div className='flex gap-2'>
+                        </div>
+                        <div className='flex gap-2'>
+                            <div className='flex flex-col justify-start items-start gap-1'>
+                                <label className='hidden lg:block text-sm font-semibold leading-none'>Status</label>
+                                <Dropdown
+                                    menu={{ items: dropdownItems, onClick: handleStatusChange, style: { textAlign: "right" } }}
+                                    placement="bottomRight"
+                                >
+                                    <Button icon={<FilterOutlined />} style={{ textTransform: "capitalize" }}>
+                                        {isLargeScreen ? (statusFilter == "all" ? "all status" : statusFilter) : ""}
+                                    </Button>
+                                </Dropdown>
+                            </div>  
+                        </div>
+                    </div>
+                {!isLoading ? (
+                    <>
+                        <div>
+                            <Table
                                 rowKey={(record) => record.id}
-                                size="small" pagination={false}
+                                size="small"
+                                pagination={false}
                                 columns={columns}
                                 dataSource={datas}
-                                scroll={{y: containerHeight - 50}}
+                                scroll={{x: 'max-content'}}
                                 bordered
                                 tableLayout="auto"
                             />
                         </div>
-                        <div className="w-full h-[8%] flex justify-end items-end overflow-hidden">
-                        <Pagination
-                            total={totalItems}
-                            defaultPageSize={limit}
-                            defaultCurrent={page}
-                            onChange={(newPage, newLimit) => {
-                                router.push(
-                                `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
-                                )
-                            }}
-                            size='small'
-                            align={'end'}
-                        />
+                        <div>
+                            <Pagination
+                                total={totalItems}
+                                defaultPageSize={limit}
+                                defaultCurrent={page}
+                                onChange={(newPage, newLimit) => {
+                                    router.push(
+                                    `/super-admin/${title}?page=${newPage}&limit=${newLimit}`
+                                    )
+                                }}
+                                size='small'
+                                align={'end'}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <div className="w-full h-96">                    
+                        <LoadingSpin/>
                     </div>
-                </>
-            ) : (
-            <LoadingSpin/>
-            )}
-        </BodyContent>
+                )}
+            </div>
         {notificationContextHolder}
     </Layout>
   );

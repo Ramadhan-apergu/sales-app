@@ -68,7 +68,7 @@ export default function Login() {
         notify('success', 'Success', 'Login successful!');
   
         // Redirect setelah login sukses
-        window.location.href = `/${dataValidate.role}/dashboard`;
+        window.location.href = `/${dataValidate.role}/home`;
       } catch (error) {
         const message =
           error?.response?.data?.message ||

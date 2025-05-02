@@ -1,10 +1,10 @@
 import ProcessFetch from "./processFetch"
 
 export default class ItemFetch extends ProcessFetch {
-  static async get(offset = 0, limit = 10, displayname = '', itemid = '') {
+  static async get(offset = 0, limit = 10, displayname = '', itemid = '', itemprocessfamily = '') {
     try {
       const response = await this.axios.get('/master/items', {
-        params: { offset, limit, displayname, itemid },
+        params: { offset, limit, displayname, itemid, itemprocessfamily },
       })
       return new this().processResponse(response)
     } catch (error) {

@@ -11,15 +11,13 @@ import {
 import useNotification from '@/hooks/useNotification';
 import { useParams, useRouter } from 'next/navigation';
 import CustomerFetch from '@/modules/salesApi/customer';
-import HeaderContent from '@/components/superAdmin/masterData/HeaderContent';
-import BodyContent from '@/components/superAdmin/masterData/BodyContent';
 import { customerAliases } from '@/utils/aliases';
 import LoadingSpin from '@/components/superAdmin/LoadingSpin';
-import InputForm from '@/components/superAdmin/masterData/InputForm';
+import InputForm from '@/components/superAdmin/InputForm';
 import { deleteResponseHandler, getByIdResponseHandler } from '@/utils/responseHandlers';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { formatDateToShort } from '@/utils/formatDate';
-import EmptyCustom from '@/components/superAdmin/masterData/EmptyCustom';
+import EmptyCustom from '@/components/superAdmin/EmptyCustom';
 
 export default function Detail() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -28,7 +26,7 @@ export default function Detail() {
   const isLargeScreen = useBreakpoint('lg')
   const { slug } = useParams()
   const [data, setData] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [modal, contextHolder] = Modal.useModal()
 
   useEffect(() => {
@@ -161,102 +159,103 @@ export default function Detail() {
   };
 
   return (
-    <Layout pageTitle="Customer Details">
-                <HeaderContent justify='between'>
-                    <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
-                        {isLargeScreen ? 'List' : ''}
-                    </Button>
-                    {data && (
-                        <div className="flex justify-center items-center gap-2">
-                            {/* <Button icon={<DeleteOutlined />} danger type={'primary'} onClick={deleteModal}>{isLargeScreen ? 'Delete' : ''}</Button> */}
-                            <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
-                            {contextHolder}
-                            <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
-                                <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
-                            </Dropdown>
-                        </div>
-                    )}
-                </HeaderContent>
-                <BodyContent gap='12'>
-                    {!isLoading ? (
-                        <>
-                            {data ? (
-                                <div className='w-full h-full flex flex-col gap-8'>
-                                    <div className='w-full flex flex-col px-4'>
-                                        <p className='text-2xl font-semibold'>Customer</p>
-                                        <div className='w-full flex lg:text-lg'>
-                                            <p className='w-2/3 lg:w-1/2'>
-                                                {data.internalid + ' / ' + data.companyname}
-                                            </p>
-                                            <div className='w-1/3 lg:w-1/2 flex justify-end'>
-                                                <div>
-                                                    <Tag style={{textTransform: 'capitalize'}} color={data.status =='active' ? 'green' : 'red'}>{data.status}</Tag>
+    <Layout>
+        <div className='w-full flex flex-col gap-4'>
+            <div className='w-full flex justify-between items-center'>
+                <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Customer Details</p>
+                <Button icon={<UnorderedListOutlined />} type='link' onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
+                    {isLargeScreen ? 'List' : ''}
+                </Button>
+            </div>
+                {!isLoading ? (
+                    <>
+                        {data ? (
+                                    <div className='w-full flex flex-col gap-4'>
+                                        <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
+                                                <div className='w-full lg:w-1/2 flex gap-1 flex-col'>
+                                                    <p className='w-full lg:text-lg'>
+                                                        {data.internalid + ' / ' + data.companyname}
+                                                    </p>
+                                                    <div>
+                                                        <Tag style={{textTransform: 'capitalize', fontSize: '16px'}} color={data.status =='active' ? 'green' : 'red'}>{data.status}</Tag>
+                                                    </div>
                                                 </div>
+                                                <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                                                    <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
+                                                    {contextHolder}
+                                                    <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
+                                                        <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
+                                                    </Dropdown>
                                             </div>
                                         </div>
+                                        <div className='w-full flex flex-col gap-8'>
+                                            <InputForm
+                                                isReadOnly={true}
+                                                type="primary"
+                                                payload={general}
+                                                data={[
+                                                    { key: 'id', input: 'input', isAlias: true },
+                                                    { key: 'internalid', input: 'input', isAlias: true },
+                                                    { key: 'entityid', input: 'input', isAlias: true },
+                                                    { key: 'companyname', input: 'input', isAlias: true },
+                                                    { key: 'category', input: 'input', isAlias: false },
+                                                    { key: 'createdby', input: 'input', isAlias: true },
+                                                    { key: 'createddate', input: 'input', isAlias: true },
+                                                ]}
+                                                aliases={customerAliases}
+                                            />
+                                            <InputForm
+                                                isReadOnly={true}
+                                                type="contact"
+                                                payload={contact}
+                                                data={[
+                                                    { key: 'email', input: 'input', isAlias: false },
+                                                    { key: 'phone', input: 'input', isAlias: false },
+                                                    { key: 'altphone', input: 'input', isAlias: true },
+                                                    { key: 'addressee', input: 'input', isAlias: true },
+                                                ]}
+                                                aliases={customerAliases}
+                                            />
+                                            <InputForm
+                                                isReadOnly={true}
+                                                type="address"
+                                                payload={address}
+                                                data={[
+                                                    { key: 'addr1', input: 'input', isAlias: true },
+                                                    { key: 'city', input: 'input', isAlias: false },
+                                                    { key: 'state', input: 'input', isAlias: false },
+                                                    { key: 'zip', input: 'input', isAlias: false },
+                                                    { key: 'defaultaddress', input: 'input', isAlias: true },
+                                                ]}
+                                                aliases={customerAliases}
+                                            />
+                                            <InputForm
+                                                isReadOnly={true}
+                                                type="financial"
+                                                payload={financial}
+                                                data={[
+                                                    { key: 'creditlimit', input: 'input', isAlias: true },
+                                                    { key: 'overduebalance', input: 'input', isAlias: true },
+                                                    { key: 'currency', input: 'input', isAlias: false },
+                                                    { key: 'resalenumber', input: 'input', isAlias: true },
+                                                    { key: 'terms', input: 'input', isAlias: true },
+                                                ]}
+                                                aliases={customerAliases}
+                                            />
+                                        </div>
                                     </div>
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="general"
-                                        payload={general}
-                                        data={[
-                                            { key: 'id', input: 'input', isAlias: true },
-                                            { key: 'internalid', input: 'input', isAlias: true },
-                                            { key: 'entityid', input: 'input', isAlias: true },
-                                            { key: 'companyname', input: 'input', isAlias: true },
-                                            { key: 'category', input: 'input', isAlias: false },
-                                            { key: 'createdby', input: 'input', isAlias: true },
-                                            { key: 'createddate', input: 'input', isAlias: true },
-                                        ]}
-                                        aliases={customerAliases}
-                                    />
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="contact"
-                                        payload={contact}
-                                        data={[
-                                            { key: 'email', input: 'input', isAlias: false },
-                                            { key: 'phone', input: 'input', isAlias: false },
-                                            { key: 'altphone', input: 'input', isAlias: true },
-                                            { key: 'addressee', input: 'input', isAlias: true },
-                                        ]}
-                                        aliases={customerAliases}
-                                    />
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="address"
-                                        payload={address}
-                                        data={[
-                                            { key: 'addr1', input: 'input', isAlias: true },
-                                            { key: 'city', input: 'input', isAlias: false },
-                                            { key: 'state', input: 'input', isAlias: false },
-                                            { key: 'zip', input: 'input', isAlias: false },
-                                            { key: 'defaultaddress', input: 'input', isAlias: true },
-                                        ]}
-                                        aliases={customerAliases}
-                                    />
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="financial"
-                                        payload={financial}
-                                        data={[
-                                            { key: 'creditlimit', input: 'input', isAlias: true },
-                                            { key: 'overduebalance', input: 'input', isAlias: true },
-                                            { key: 'currency', input: 'input', isAlias: false },
-                                            { key: 'resalenumber', input: 'input', isAlias: true },
-                                            { key: 'terms', input: 'input', isAlias: true },
-                                        ]}
-                                        aliases={customerAliases}
-                                    />
-                                </div>
-                            ) : (
+                        ) : (
+                            <div className='w-full h-96'>
                                 <EmptyCustom/>
-                            )}
-                        </>
-                    ) : (
-                        <LoadingSpin/>
-                    )}
-                </BodyContent>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                        <div className='w-full h-96'>
+                            <LoadingSpin/>
+                        </div>
+                )}
+        </div>
         {contextNotify}
     </Layout>
   );

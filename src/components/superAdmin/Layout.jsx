@@ -1,141 +1,215 @@
-'use client'
+'use client';
 
-import React, { useEffect, useState, useRo } from 'react';
-import { PiSpeedometer, PiSwap  } from "react-icons/pi";
-import { HiOutlineTruck, HiOutlineFolder, HiOutlineUser, HiArrowUturnLeft, HiOutlineInboxStack, HiOutlineWrenchScrewdriver } from "react-icons/hi2";
-import { HiOutlinePrinter } from "react-icons/hi";
-import { Breadcrumb, Button, Drawer, Layout, Menu, theme } from 'antd';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-    MenuOutlined
-  } from '@ant-design/icons'
+import { Breadcrumb, Button, Drawer, Layout, Menu, theme } from 'antd';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
-const { Header, Sider, Content } = Layout;
+import {
+  UserOutlined,
+  FileAddOutlined,
+  UnorderedListOutlined,
+  FileTextOutlined,
+  FileDoneOutlined,
+  FileSearchOutlined,
+  SolutionOutlined,
+  ShoppingCartOutlined,
+  ProfileOutlined,
+  DeliveredProcedureOutlined,
+  FileProtectOutlined,
+  BarChartOutlined,
+  MenuOutlined,
+  DashboardOutlined,
+  SwapOutlined,
+  AppstoreOutlined
+} from '@ant-design/icons';
+import { PiSpeedometer, PiSwap } from 'react-icons/pi';
+import { HiOutlineFolder, HiOutlinePrinter } from 'react-icons/hi';
+import {HiOutlineTruck} from'react-icons/hi2'
 
-const App = ({children, pageTitle}) => {
+const { Header, Content, Footer, Sider } = Layout;
 
-  const basePath = '/super-admin'
-  const [itemSelected, setItemSelected] = useState({})
-  const [breadcrumbTitle, setBreadcrumbTitle] = useState([])
-  const [openDrawer, setOpenDrawer] = useState(false);
-  const isLargeScreen = useBreakpoint('lg')
+const prefix = '/super-admin';
 
+const headerItems = [
+  { key: `${prefix}/home`, label: 'Home' },
+  { key: `${prefix}/sales-order`, label: 'Sales Order' },
+  { key: `${prefix}/delivery-order`, label: 'Delivery' },
+  { key: `${prefix}/invoice`, label: 'Invoice' },
+  { key: `${prefix}/master-data`, label: 'Master Data' },
+  { key: `${prefix}/report`, label: 'Report' },
+];
+
+const siderMenuPerPage = {
+  '/sales-order': [
+    { key: '/sales-order/dashboard', label: 'SO Dashboard', icon: <FileDoneOutlined /> },
+    { key: '/sales-order', label: 'SO List', icon: <UnorderedListOutlined /> },
+    { key: '/sales-order/enter', label: 'SO Enter', icon: <FileAddOutlined /> },
+  ],
+  '/delivery-order': [
+    { key: '/delivery-order/dashboard', label: 'DO Dashboard', icon: <DeliveredProcedureOutlined /> },
+    { key: '/delivery-order', label: 'DO List', icon: <UnorderedListOutlined /> },
+    { key: '/delivery-order/enter', label: 'DO Enter', icon: <FileAddOutlined /> },
+  ],
+  '/invoice': [
+    { key: '/invoice/dashboard', label: 'Invoice Dashboard', icon: <FileProtectOutlined /> },
+    { key: '/invoice', label: 'Invoice List', icon: <UnorderedListOutlined /> },
+    { key: '/invoice/enter', label: 'Invoice Enter', icon: <FileAddOutlined /> },
+  ],
+  '/master-data': [
+    { key: '/master-data/customer', label: 'Customer', icon: <SolutionOutlined /> },
+    { key: '/master-data/item', label: 'Item', icon: <ShoppingCartOutlined /> },
+    { key: '/master-data/agreement', label: 'Agreement', icon: <ProfileOutlined /> },
+  ],
+  '/report': [
+    { key: '/report/dashboard', label: 'Report Dashboard', icon: <BarChartOutlined /> },
+    { key: '/report/sales-order', label: 'SO Report', icon: <BarChartOutlined /> },
+    { key: '/report/penjualan', label: 'Penjualan', icon: <BarChartOutlined /> },
+  ],
+};
+  
+  const menuItems = [
+    {
+      key: '/home',
+      icon: <DashboardOutlined />,
+      label: 'Home',
+      path: `${prefix}/home`
+    },
+    {
+      key: 'sub1',
+      icon: <SwapOutlined />,
+      label: 'Sales Order',
+      children: [
+        {
+          key: '/sales-order',
+          label: 'SO List',
+          path: `${prefix}/sales-order`
+        },
+        {
+          key: '/sales-order/enter',
+          label: 'SO Enter',
+          path: `${prefix}/sales-order/enter`
+        },
+      ]
+    },
+    {
+      key: 'sub2',
+      icon: <SwapOutlined />,
+      label: 'Delivery Order',
+      children: [
+        {
+          key: '/delivery-order',
+          label: 'DO List',
+          path: `${prefix}/delivery-order`
+        },
+        {
+          key: '/delivery-order/enter', // FIXED typo dari "elivery-order"
+          label: 'DO Enter',
+          path: `${prefix}/delivery-order/enter`
+        },
+      ]
+    },
+    {
+      key: 'sub3',
+      icon: <FileTextOutlined />,
+      label: 'Invoice',
+      children: [
+        {
+          key: '/invoice',
+          label: 'Invoice List',
+          path: `${prefix}/invoice`
+        },
+        {
+          key: '/invoice/enter',
+          label: 'Invoice Enter',
+          path: `${prefix}/invoice/enter`
+        },
+      ]
+    },
+    {
+      key: 'sub4',
+      icon: <AppstoreOutlined />,
+      label: 'Master Data',
+      children: [
+        {
+          key: '/master-data/customer',
+          label: 'Customer',
+          path: `${prefix}/master-data/customer`
+        },
+        {
+          key: '/master-data/item',
+          label: 'Item',
+          path: `${prefix}/master-data/item`
+        },
+        {
+          key: '/master-data/agreement',
+          label: 'Agreement',
+          path: `${prefix}/master-data/agreement`
+        },
+      ]
+    },
+    {
+      key: 'sub5',
+      icon: <BarChartOutlined />,
+      label: 'Reports',
+      children: [
+        {
+          key: '/report/sales-order',
+          label: 'SO Report',
+          path: `${prefix}/report/sales-order`
+        },
+        {
+          key: '/report/penjualan',
+          label: 'Penjualan',
+          path: `${prefix}/report/penjualan`
+        },
+      ]
+    },
+  ];
+  
+
+const LayoutTesting = ({ children }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const isLargeScreen = useBreakpoint('lg');
+const [openDrawer, setOpenDrawer] = useState(false);
 
-  const menuItems = [
-    {
-      key: '1',
-      icon: <PiSpeedometer />,
-      label: 'Dashboard',
-      path: `${basePath}/dashboard`
-    },
-    {
-      key: '2',
-      icon: <PiSwap />,
-      label: 'Sales Order',
-      path: `${basePath}/sales-order`
-    },
-    {
-      key: '3',
-      icon: <HiOutlineTruck />,
-      label: 'Delivery Order',
-      path: `${basePath}/delivery-order`
-    },
-    {
-        key: '4',
-        icon: <HiOutlinePrinter />,
-        label: 'Invoice',
-        path: `${basePath}/invoice`
-    },
-    {
-        key: '5',
-        icon: <HiArrowUturnLeft />,
-        label: 'Retur',
-        path: `${basePath}/retur`
-    },
-    {
-        key: '6',
-        icon: <HiOutlineInboxStack />,
-        label: 'Inventory',
-        path: `${basePath}/inventory`
-    },
-    {
-        key: 'sub1',
-        icon: <HiOutlineFolder />,
-        label: 'Master Data',
-        children: [
-            {
-                key: '7',
-                label: 'Customer',
-                path: `${basePath}/master-data/customer`
-            },
-            {
-                key: '8',
-                label: 'Item',
-                path: `${basePath}/master-data/item`
-            },
-            {
-                key: '9',
-                label: 'Agreement',
-                path: `${basePath}/master-data/agreement`
-            },
-        ]
-    },
-    // {
-    //     key: 'sub2',
-    //     icon: <HiOutlineWrenchScrewdriver />,
-    //     label: 'Administration',
-    //     children: [
-    //         {
-    //             key: '10',
-    //             label: 'Users Access',
-    //             path: `${basePath}/administration/users-access`
-    //         },
-    //         {
-    //             key: '11',
-    //             label: 'Access All Report',
-    //             path: `${basePath}/system-management/access-all-report`
-    //         },
-    //     ]
-    // },
-  ]
+  const segments = pathname.split('/').filter(Boolean);
+  const baseSegment = segments[0];
+  const pageSegment = segments[1] || 'home';
+  const currentBasePath = `/${baseSegment}/${pageSegment}`;
 
-  const router = useRouter();
+  const siderKey = `/${pageSegment}`;
+  const siderItems = siderMenuPerPage[siderKey] || [];
 
-  const flattenItems = (items) =>
-    items.flatMap(item => item.children ? [item, ...flattenItems(item.children)] : [item]);
+  const removePrefixPath = `/${pathname.split('/').filter(Boolean).slice(1).join('/')}`;
+  const selectedSider = () => {
+    const exactMatch = siderItems.find((item) => item.key === removePrefixPath);
+  
+    if (exactMatch) {
+      return exactMatch.key;
+    }
+  
+    const partialMatch = siderItems.find((item) => removePrefixPath.includes(item.key));
+  
+    return partialMatch ? partialMatch.key : '';
+  };
 
-  const allItems = flattenItems(menuItems);
-
-  useEffect(() => {
-    const flattenItems = (items) => {
-      return items.flatMap(item => 
-        item.children ? [item, ...flattenItems(item.children)] : [item]
-      );
+  const breadcrumbItems = segments.map((segment, index) => {
+    const url = '/' + segments.slice(0, index + 1).join('/');
+    return {
+      title: <Link href={url}>{segment.charAt(0).toUpperCase() + segment.slice(1)}</Link>,
     };
-  
-    const allItems = flattenItems(menuItems);
-    const matchedItem = allItems.find(item => pathname.startsWith(item.path));
-  
-    setItemSelected(matchedItem || {});
+  });
 
-    const splitPathname = pathname.split('/');
-    const breadcrumbTitle = splitPathname
-      .slice(2)
-      .map(title => ({
-        title: /^[a-f0-9\-]{36}$/.test(title) ? title : title.replace(/-/g, ' ')
-      }));
-    
-    setBreadcrumbTitle(breadcrumbTitle);
-  }, [pathname]);
+  const handleNavSider = ({ key }) => {
+    const routeNext = [prefix, key].join('/');
 
-  const menuHandle = (e) => {
-    const clickedItem = allItems.find(item => item.key === e.key);
-    if (clickedItem?.path) {
-      router.push(clickedItem.path);
+    if (pathname !== routeNext) {
+      router.push(routeNext);
     }
   };
 
@@ -146,68 +220,78 @@ const App = ({children, pageTitle}) => {
     setOpenDrawer(false);
   };
 
+  const menuHandle = (e) => {
+    const clickedItem = allItems.find(item => item.key === e.key);
+    if (clickedItem?.path) {
+      router.push(clickedItem.path);
+    }
+  };
+
+  const flattenItems = (items) =>
+    items.flatMap(item => item.children ? [item, ...flattenItems(item.children)] : [item]);
+
+  const allItems = flattenItems(menuItems);
+
   return (
-<Layout style={{ minHeight: '100dvh' }}>
-      <Header style={{ height: '8dvh', width: '100%', background: '#fff', padding: 0, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <img src={'/images/karya-group-logo.webp'} alt='karya group logo' className='h-full py-2 px-4'/>
-        <div className='lg:hidden'>
-            <Button icon={<MenuOutlined />} variant='outlined' color='blue' style={{marginRight:'16px'}} onClick={showDrawer}/>
+    <Layout style={{ width: '100%', minHeight: '100dvh' }}>
+      <Header style={{padding: 0}} className="flex items-center justify-between">
+        <div className="h-full ml-4 lg:ml-12 py-2">
+          <img className="h-full filter brightness-0 invert" src="/images/karya-group-logo.webp" alt="Karya Group Logo" />
+        </div>
+        <div className="hidden lg:block">
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectedKeys={[currentBasePath]}
+            items={headerItems.map(item => ({
+              key: item.key,
+              label: <Link href={item.key}>{item.label}</Link>,
+            }))}
+          />
+        </div>
+        <div className='mr-4 lg:mr-12'>
+            <div className='lg:hidden'>
+                <Button icon={<MenuOutlined />} variant='outlined' color='blue' style={{marginRight:'16px'}} onClick={showDrawer}/>
+            </div>
         </div>
       </Header>
 
-      <Layout>
-        <div className='hidden lg:block w-[20vw] xl:w-[15vw] h-[92dvh] bg-white'>
+      <div className="flex-1 px-4 lg:px-12 pb-4 pt-4 lg:pt-0 lg:pb-12">
+        <div className='hidden lg:block'>
+            <Breadcrumb style={{margin: '16px 0'}} items={breadcrumbItems} />
+        </div>
+        
+        <Layout className="py-4 lg:py-6" style={{ background: colorBgContainer, borderRadius: borderRadiusLG }}>
+          {pageSegment !== 'home' && (
             <Sider
-            width="100%"
-            style={{ height: '100%', background: '#fff', overflow:'auto', scrollbarWidth: 'thin', scrollbarGutter: 'stable'}}
+              width={200}
+              style={{
+                background: colorBgContainer,
+                display: isLargeScreen ? 'block' : 'none',
+              }}
             >
-                <Menu
-                    onClick={menuHandle}
-                    theme="light"
-                    mode="inline"
-                    selectedKeys={[itemSelected.key]}
-                    style={{border:'none'}}
-                    items={menuItems}
-                />
+              <Menu
+                onClick={handleNavSider}
+                mode="inline"
+                selectedKeys={[selectedSider()]}
+                defaultOpenKeys={[selectedSider().split('/').slice(0, 2).join('/')]}
+                style={{ height: '100%' }}
+                items={siderItems}
+              />
             </Sider>
-        </div>
+          )}
 
-        <div className='w-[100vw] lg:w-[80vw] xl:w-[85vw] h-[92dvh] bg-gray-3'>
-            <Content
-            style={{
-                height: '100%',
-                width: '100%',
-                background: '#f5f5f5 ',
-                padding: isLargeScreen ? '1.25rem' : '1rem',
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection:'column',
-                gap: '8px'
-            }}
-            >
-                <div className='w-full hidden h-[5%] lg:flex justify-start item-center'>
-                    <Breadcrumb
-                        style={{textTransform: 'capitalize'}}
-                        items={breadcrumbTitle}
-                    />
-                </div>
-
-                <div className='w-full lg:hidden h-[5%] flex justify-start item-center'>
-                    <p className='text-xl capitalize'>{pageTitle || '-'}</p>
-                </div>
-
-                <div className='w-full h-[95%] pb-1 overflow-auto' style={{scrollbarWidth:'thin'}}>
-                    {children}
-                </div>
-            </Content>
-        </div>
-      </Layout>
+          <Content className="px-4 lg:px-6">
+            {children}
+          </Content>
+        </Layout>
+      </div>
       <Drawer title="Menu" onClose={onClose} open={openDrawer}>
         <Menu
             onClick={menuHandle}
             theme="light"
             mode="inline"
-            selectedKeys={[itemSelected.key]}
+            selectedKeys={[]}
             style={{border:'none'}}
             items={menuItems}
         />
@@ -215,4 +299,5 @@ const App = ({children, pageTitle}) => {
     </Layout>
   );
 };
-export default App;
+
+export default LayoutTesting;

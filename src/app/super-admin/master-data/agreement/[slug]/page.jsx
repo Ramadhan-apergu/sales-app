@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useEffect, useState } from 'react';
-import { Button, Divider, Dropdown, Modal, Tag } from 'antd';
+import { Button, Divider, Dropdown, Modal, Table, Tag } from 'antd';
 import Layout from '@/components/superAdmin/Layout';
 import {
   EditOutlined,
@@ -11,17 +11,25 @@ import {
 import useNotification from '@/hooks/useNotification';
 import { useParams, useRouter } from 'next/navigation';
 import CustomerFetch from '@/modules/salesApi/customer';
-import HeaderContent from '@/components/superAdmin/masterData/HeaderContent';
-import BodyContent from '@/components/superAdmin/masterData/BodyContent';
-import { customerAliases } from '@/utils/aliases';
+import { agreementAliases, customerAliases, itemAliases } from '@/utils/aliases';
 import LoadingSpin from '@/components/superAdmin/LoadingSpin';
-import InputForm from '@/components/superAdmin/masterData/InputForm';
+import InputForm from '@/components/superAdmin/InputForm';
 import { deleteResponseHandler, getByIdResponseHandler } from '@/utils/responseHandlers';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { formatDateToShort } from '@/utils/formatDate';
-import EmptyCustom from '@/components/superAdmin/masterData/EmptyCustom';
+import EmptyCustom from '@/components/superAdmin/EmptyCustom';
 import AgreementFetch from '@/modules/salesApi/agreement';
-import EditableTable from '@/components/superAdmin/masterData/EditableTable';
+import ItemFetch from '@/modules/salesApi/item';
+
+function TableCustom({data, keys, aliases}) {
+    const columns = keys.map((key) => ({
+        title: aliases?.[key] || key,
+        dataIndex: key,
+        key: key,
+      }));
+    
+      return <Table columns={columns} dataSource={data} rowKey="id" bordered pagination={false} scroll={{ x: 'max-content' }}/>;
+}
 
 export default function Detail() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -39,9 +47,7 @@ export default function Detail() {
             setIsLoading(true)
             const response = await AgreementFetch.getById(slug)
             const resData = getByIdResponseHandler(response, notify)
-            console.log(JSON.stringify(resData, null, 2))
             setData(resData)
-            
             if (resData) {
                 mapingGroup(resData)
             }
@@ -113,13 +119,87 @@ export default function Detail() {
   const [agreementLines, setAgreementLines] = useState(
     Object.fromEntries(fieldGroups.agreement_lines.map(key => [key, '']))
   )
+  const [agreementGroupItems, setAgreementGroupItems] = useState([])
+  const [agreementLinesWithItem, setAgreementLinesWithItem] = useState([])
+
+  useEffect(() => {
+    async function getDataItem() {
+        try {
+            if ( agreementGroups.agreement_groups && typeof agreementGroups.agreement_groups === 'object' && agreementGroups.agreement_groups !== null && 'id' in agreementGroups.agreement_groups ) {
+                let items = []
+                
+                if (agreementGroups.agreement_groups.itemcategory) {
+                    const getItem = await getItemByCategory(agreementGroups.agreement_groups.itemcategory)
+                    if (getItem) {
+                        items = getItem.list
+                    }
+                }
+
+                setAgreementGroupItems(items)
+        
+            }
+            
+            if ( agreementLines.agreement_lines && Array.isArray(agreementLines.agreement_lines) && agreementLines.agreement_lines.length > 0) {
+
+                const promises = agreementLines.agreement_lines.map(async (agreement) => {
+                    let item = { displayname: '', price: '', unitstype: '' }
+                
+                    const getItem = await getItemById(agreement.itemid)
+                    if (getItem) {
+                        item = {
+                            displayname: getItem.displayname,
+                            price: getItem.price,
+                            unitstype: getItem.unitstype,
+                        }
+                    }
+                
+                    return { ...agreement, ...item }
+                })
+                
+                const result = await Promise.all(promises)
+                setAgreementLinesWithItem(result)
+            }
+        } catch (error) {
+            notify('error', 'Failed', 'Fetch data item')
+        }
+    }
+    getDataItem()
+  },[agreementGroups, agreementLines] )
+
+  async function getItemById(id) {
+    try {
+        const response = await ItemFetch.getById(id)
+        if (response.status_code == 200 && response.data) {
+            return response.data
+        } else {
+            return null
+        }
+    } catch (error) {
+        notify('error', 'Failed', 'Fetch data item')
+    }
+  }
+
+  async function getItemByCategory(category) {
+    try {
+        const response = await ItemFetch.get(0, 1000, null, null, category)
+        if (response.status_code == 200 && response.data) {
+            return response.data
+        } else {
+            return null
+        }
+    } catch (error) {
+        notify('error', 'Failed', 'Fetch data item')
+    }
+  }
 
 
   function mapingGroup(data) {
     const pick = (keys) => 
       keys.reduce((obj, k) => {
         if (['createddate', "effectivedate","enddate"].includes(k)) {
-            obj[k] = data[k] != null ? formatDateToShort(data[k]) : ''
+            obj[k] = data[k] != null ? formatDateToShort(data[k]) : data[k]
+        } else if(['customform'].includes(k)) {
+            obj[k] = data[k] != null ? formOptions[parseInt(data[k] - 1)].label : data[k]
         } else {
             obj[k] = data[k] != null ? data[k] : ''
         }
@@ -156,99 +236,179 @@ export default function Detail() {
     }
   };
 
+  const formOptions = [
+    { label: 'Discount Percentage (%)', value: '1' },
+    { label: 'Special Price (Rp)', value: '2' },
+    { label: 'Payment Method', value: '3' },
+    { label: 'Free Item', value: '4' },
+    { label: 'Discount Group', value: '5' },
+]
+
+const keys = [
+    [
+        "displayname",
+        "price",
+        "unitstype",
+        "qtymin",
+        "qtyminunit",
+        "qtymax",
+        "qtymaxunit",
+        "discountpercent",
+        "perunit",
+    ],
+    [
+        "displayname",
+        "price",
+        "unitstype",
+        "qtymin",
+        "qtyminunit",
+        "qtymax",
+        "qtymaxunit",
+        "discountnominal",
+        "perunit",
+    ],
+    [
+        "displayname",
+        "price",
+        "unitstype",
+        "qtymin",
+        "qtyminunit",
+        "qtymax",
+        "qtymaxunit",
+        "paymenttype",
+        "discountnominal",
+        "perunit",
+    ],
+    [
+        "displayname",
+        "price",
+        "unitstype",
+        "qtymin",
+        "qtyminunit",
+        "qtymax",
+        "qtymaxunit",
+        "qtyfree",
+        "perunit",
+      ],
+      ['itemid', 'displayname']
+]
+
   return (
-    <Layout pageTitle="Customer Details">
-                <HeaderContent justify='between'>
-                    <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
-                        {isLargeScreen ? 'List' : ''}
-                    </Button>
-                    {data && (
-                        <div className="flex justify-center items-center gap-2">
-                            {/* <Button icon={<DeleteOutlined />} danger type={'primary'} onClick={deleteModal}>{isLargeScreen ? 'Delete' : ''}</Button> */}
-                            <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
-                            {contextHolder}
-                            <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
-                                <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
-                            </Dropdown>
-                        </div>
-                    )}
-                </HeaderContent>
-                <BodyContent gap='12'>
-                    {!isLoading ? (
-                        <>
-                            {data ? (
-                                <div className='w-full h-full flex flex-col gap-8'>
-                                    <div className='w-full flex flex-col px-4'>
-                                        <p className='text-2xl font-semibold capitalize'>{title}</p>
-                                        <div className='w-full flex lg:text-lg'>
-                                            <p className='w-2/3 lg:w-1/2'>
-                                                {data.agreementcode + ' / ' + data.agreementname}
-                                            </p>
-                                            <div className='w-1/3 lg:w-1/2 flex justify-end'>
+    <Layout>
+    <div className='w-full flex flex-col gap-4'>
+        <div className='w-full flex justify-between items-center'>
+            <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Agreement Details</p>
+            <Button icon={<UnorderedListOutlined />} type='link' onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
+                {isLargeScreen ? 'List' : ''}
+            </Button>
+        </div>
+            {!isLoading ? (
+                <>
+                    {data ? (
+                                <div className='w-full flex flex-col gap-4'>
+                                    <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
+                                            <div className='w-full lg:w-1/2 flex gap-1 flex-col'>
+                                                <p className='w-full lg:text-lg'>
+                                                    {data.agreementcode + ' / ' + data.agreementname}
+                                                </p>
                                                 <div>
-                                                    <Tag style={{textTransform: 'capitalize'}} color={data.status =='active' ? 'green' : 'red'}>{data.status}</Tag>
+                                                    <Tag style={{textTransform: 'capitalize', fontSize: '16px'}} color={data.status =='active' ? 'green' : 'red'}>{data.status}</Tag>
                                                 </div>
                                             </div>
+                                            <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                                                <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
+                                                {contextHolder}
+                                                <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
+                                                    <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
+                                                </Dropdown>
                                         </div>
                                     </div>
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="Primary"
-                                        payload={general}
-                                        data={[
-                                            { key: 'id', input: 'input', isAlias: true },
-                                            { key: 'customform', input: 'input', isAlias: true },
-                                            { key: 'agreementcode', input: 'input', isAlias: true },
-                                            { key: 'agreementname', input: 'input', isAlias: true },
-                                            { key: 'effectivedate', input: 'input', isAlias: false },
-                                            { key: 'enddate', input: 'input', isAlias: true },
-                                            { key: 'status', input: 'input', isAlias: true },
-                                            { key: 'description', input: 'input', isAlias: true },
-                                            { key: 'createdby', input: 'input', isAlias: true },
-                                            { key: 'createddate', input: 'input', isAlias: true },
+                                    <div className='w-full flex flex-col gap-8'>
+                                        <InputForm
+                                            isReadOnly={true}
+                                            type="Primary"
+                                            payload={general}
+                                            data={[
+                                                { key: 'id', input: 'input', isAlias: true },
+                                                { key: 'customform', input: 'input', isAlias: true },
+                                                { key: 'agreementcode', input: 'input', isAlias: true },
+                                                { key: 'agreementname', input: 'input', isAlias: true },
+                                                { key: 'effectivedate', input: 'input', isAlias: false },
+                                                { key: 'enddate', input: 'input', isAlias: true },
+                                                { key: 'status', input: 'input', isAlias: true },
+                                                { key: 'description', input: 'input', isAlias: true },
+                                                { key: 'createdby', input: 'input', isAlias: true },
+                                                { key: 'createddate', input: 'input', isAlias: true },
 
-                                        ]}
-                                        aliases={customerAliases}
-                                    />
-                                    <InputForm
-                                        isReadOnly={true}
-                                        type="agreement groups"
-                                        payload={agreementGroups.agreement_groups}
-                                        data={[
-                                            { key: 'id', input: 'input', isAlias: false },
-                                            { key: 'agreementid', input: 'input', isAlias: false },
-                                            { key: 'itemcategory', input: 'input', isAlias: false },
-                                            { key: 'qtymin', input: 'input', isAlias: false },
-                                            { key: 'qtymax', input: 'input', isAlias: false },
-                                            { key: 'discountnominal', input: 'input', isAlias: false },
-                                            { key: 'qtyfree', input: 'input', isAlias: false },
-                                            { key: 'unitfree', input: 'input', isAlias: false },
-                                        ]}
-                                        aliases={customerAliases}
-                                    />
-                                    <div className='w-full flex flex-col gap-2'>
-                                    <Divider
-                                        style={{ margin: '0', textTransform: 'capitalize', borderColor: '#1677ff' }}
-                                        orientation="left"
-                                        >
-                                        Agreement Lines
-                                    </Divider>
-                                    <EditableTable
-                                    data={agreementLines.agreement_lines}
-                                    onChange={(e) => {console.log(e)}}
-                                    isReadOnly={true}
-                                    />
+                                            ]}
+                                            aliases={agreementAliases}
+                                        />
+                                        {data.customform != 5 ? (
+                                            <div className='w-full flex flex-col gap-4'>
+                                                <Divider
+                                                        style={{
+                                                        margin: '0',
+                                                        textTransform: 'capitalize',
+                                                        borderColor: '#1677ff',
+                                                        }}
+                                                        orientation="left"
+                                                    >
+                                                    {formOptions[(parseInt(data.customform) - 1)].label} Detail    
+                                                </Divider>
+                                                <TableCustom
+                                                data={agreementLinesWithItem}
+                                                keys={keys[(parseInt(data.customform) - 1)]}
+                                                aliases={agreementAliases}/>
+                                            </div>
+                                        ) : (
+                                            <div className='w-full flex flex-col gap-8'>
+                                                <InputForm
+                                                    isReadOnly={true}
+                                                    type="agreement groups"
+                                                    title='agreement groups (Price / Items)'
+                                                    payload={agreementGroups.agreement_groups}
+                                                    data={[
+                                                        { key: 'id', input: 'input', isAlias: false },
+                                                        { key: 'agreementid', input: 'input', isAlias: false },
+                                                        { key: 'itemcategory', input: 'input', isAlias: false },
+                                                        { key: 'qtymin', input: 'input', isAlias: false },
+                                                        { key: 'qtymax', input: 'input', isAlias: false },
+                                                        { key: 'discountnominal', input: 'input', isAlias: false },
+                                                        { key: 'qtyfree', input: 'input', isAlias: false },
+                                                        { key: 'unitfree', input: 'input', isAlias: false },
+                                                    ]}
+                                                    aliases={customerAliases}
+                                                />
+                                                <div className='w-full flex flex-col gap-4'>
+                                                    <Divider
+                                                        style={{
+                                                        margin: '0',
+                                                        textTransform: 'capitalize',
+                                                        borderColor: '#1677ff',
+                                                        }}
+                                                        orientation="left"
+                                                    >
+                                                        Agreement Groups Detail
+                                                    </Divider>
+                                                    <TableCustom data={agreementGroupItems} keys={keys[(parseInt(data.customform) - 1)]} aliases={agreementAliases}/>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                            ) : (
-                                <EmptyCustom/>
-                            )}
-                        </>
                     ) : (
-                        <LoadingSpin/>
+                        <div className='w-full h-96'>
+                            <EmptyCustom/>
+                        </div>
                     )}
-                </BodyContent>
-        {contextNotify}
-    </Layout>
+                </>
+            ) : (
+                    <div className='w-full h-96'>
+                        <LoadingSpin/>
+                    </div>
+            )}
+    </div>
+    {contextNotify}
+</Layout>
   );
 }
