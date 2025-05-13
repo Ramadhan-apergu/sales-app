@@ -167,7 +167,7 @@ function SalesOrder() {
       fixed: isLargeScreen ? 'left' : '',
       render: (text, record) => (
         <Link href={`/super-admin/${title}/${record.id}`}>
-          {text}
+          {text || '-'}
         </Link>)
     },
     {

@@ -14,10 +14,11 @@ import CustomerFetch from '@/modules/salesApi/customer';
 import { customerAliases } from '@/utils/aliases';
 import LoadingSpin from '@/components/superAdmin/LoadingSpin';
 import InputForm from '@/components/superAdmin/InputForm';
-import { deleteResponseHandler, getByIdResponseHandler } from '@/utils/responseHandlers';
+import { deleteResponseHandler, getByIdResponseHandler, updateResponseHandler } from '@/utils/responseHandlers';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { formatDateToShort } from '@/utils/formatDate';
 import EmptyCustom from '@/components/superAdmin/EmptyCustom';
+import LoadingSpinProcessing from '@/components/superAdmin/LoadingSpinProcessing';
 
 export default function Detail() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -27,6 +28,7 @@ export default function Detail() {
   const { slug } = useParams()
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false)
   const [modal, contextHolder] = Modal.useModal()
 
   useEffect(() => {
@@ -136,7 +138,8 @@ export default function Detail() {
   const items = [
     {
       key: '1',
-      label: 'Approve'
+      label: 'Approve',
+      disabled: data?.status == 'active'
     },
     {
       key: '2',
@@ -148,7 +151,7 @@ export default function Detail() {
   const handleClickAction = ({ key }) => {
     switch (key) {
       case '1':
-        notify('success', 'Approve Boongan', ':P');
+        handleApproval()
         break;
       case '2':
         deleteModal();
@@ -157,6 +160,18 @@ export default function Detail() {
         console.warn('Unhandled action:', key);
     }
   };
+
+  async function handleApproval() {
+    try {
+        setIsLoadingSubmit(true)
+        const response = await CustomerFetch.updateApproval(data.id)
+        updateResponseHandler(response, notify)
+    } catch (error) {
+        notify('error', 'Error', 'Failed approval customer')
+    } finally {
+        setIsLoadingSubmit(false)
+    }
+  }
 
   return (
     <Layout>
@@ -257,6 +272,9 @@ export default function Detail() {
                 )}
         </div>
         {contextNotify}
+        {isLoadingSubmit && (
+            <LoadingSpinProcessing/>
+        )}
     </Layout>
   );
 }

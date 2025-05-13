@@ -1,765 +1,1369 @@
-// 'use client';
+"use client";
 
-// import React, {useEffect, useRef, useState } from 'react';
-// import { Button, Divider, Table, Modal, Input, Pagination, Switch } from 'antd';
-// import Layout from '@/components/superAdmin/Layout';
-// import {
-//     CheckOutlined,
-//   LeftOutlined,
-// } from '@ant-design/icons';
-// import useNotification from '@/hooks/useNotification';
-// import { useRouter } from 'next/navigation';
-// import { agreementAliases } from '@/utils/aliases';
-// import LoadingSpin from '@/components/superAdmin/LoadingSpin';
-// import InputForm from '@/components/superAdmin/InputForm';
-// import { createResponseHandler, getResponseHandler } from '@/utils/responseHandlers';
-// import LoadingSpinProcessing from '@/components/superAdmin/LoadingSpinProcessing';
-// import { useBreakpoint } from '@/hooks/useBreakpoint';
-// import ItemFetch from '@/modules/salesApi/item';
-// import Search from 'antd/es/input/Search';
-// import AgreementFetch from '@/modules/salesApi/agreement';
+import React, { useEffect, useReducer, useRef, useState } from "react";
+import {
+  Button,
+  Checkbox,
+  Collapse,
+  Divider,
+  Empty,
+  Form,
+  List,
+  Modal,
+  Select,
+  Table,
+  Tooltip,
+} from "antd";
+import Layout from "@/components/superAdmin/Layout";
+import {
+  CheckOutlined,
+  InfoCircleOutlined,
+  LeftOutlined,
+} from "@ant-design/icons";
 
-// function SelectItem({ onselect }) {
-//     const isLargeScreen = useBreakpoint("lg");
-//     const [page, setPage] = useState(1);
-//     const offset = (page - 1) * 50;
-//     const [searchName, setSearchName] = useState("");
-//     const [searchCode, setSearchCode] = useState();
-//     const [datas, setDatas] = useState([]);
-//     const [totalItems, setTotalItems] = useState(0);
-//     const [isLoading, setIsloading] = useState(true);
-  
-//     const { notify, contextHolder: notificationContextHolder } = useNotification();
-//     const title = 'item';
-  
-//     const fetchData = async () => {
-//       try {
-//         setIsloading(true);
-//         const response = await ItemFetch.get(
-//           offset,
-//           50,
-//           searchName === '' ? null : searchName,
-//           !searchCode || searchCode === '' ? null : searchCode
-//         );
-//         const resData = getResponseHandler(response, notify);
-//         if (resData) {
-//           setDatas(resData.list);
-//           setTotalItems(resData.total_items);
-//         }
-//       } catch (error) {
-//         notify('error', 'Error', error?.message || "Internal Server error");
-//       } finally {
-//         setIsloading(false);
-//       }
-//     };
-  
-//     useEffect(() => {
-//       if (!searchCode && searchName === "") {
-//         fetchData();
-//       }
-//     }, [page]);
-  
-//     const handleEnter = (e) => {
-//       if (e.key === "Enter") {
-//         fetchData();
-//       }
-//     };
-  
-//     const columns = [
-//       {
-//         title: 'Internal ID',
-//         dataIndex: 'id',
-//         key: 'id',
-//         onHeaderCell: () => ({ style: { minWidth: 200 } }),
-//         onCell: () => ({ style: { minWidth: 200 } }),
-//       },
-//       {
-//         title: 'Item Name/Number',
-//         dataIndex: 'displayname',
-//         key: 'displayname',
-//         fixed: isLargeScreen ? 'left' : '',
-//         render: (text) => <span>{text}</span>,
-//         onHeaderCell: () => ({ style: { minWidth: 200 } }),
-//         onCell: () => ({ style: { minWidth: 200 } }),
-//       },
-//       {
-//         title: 'Display Name/Code',
-//         dataIndex: 'itemid',
-//         key: 'itemid',
-//         onHeaderCell: () => ({ style: { minWidth: 180 } }),
-//         onCell: () => ({ style: { minWidth: 180 } }),
-//       },
-//       {
-//         title: 'Item Process Family',
-//         dataIndex: 'itemprocessfamily',
-//         key: 'itemprocessfamily',
-//         onHeaderCell: () => ({ style: { minWidth: 200 } }),
-//         onCell: () => ({ style: { minWidth: 200 } }),
-//       },
-//     ];
-  
-//     return (
-//       <div className='w-full flex flex-col gap-2'>
-//         {notificationContextHolder}
-//         <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
-//           <div className='flex gap-2'>
-//             <div className='flex flex-col justify-start items-start gap-1'>
-//               <label className='hidden lg:block text-sm font-semibold leading-none'>Code</label>
-//               <Input
-//                 value={searchCode}
-//                 onChange={(e) => setSearchCode(e.target.value)}
-//                 onKeyDown={handleEnter}
-//                 placeholder={isLargeScreen ? '' : 'Code'}
-//                 allowClear
-//               />
-//             </div>
-//             <div className='flex flex-col justify-start items-start gap-1'>
-//               <label className='hidden lg:block text-sm font-semibold leading-none'>Display Name</label>
-//               <Search
-//                 placeholder={isLargeScreen ? '' : 'Name'}
-//                 allowClear
-//                 value={searchName}
-//                 onChange={(e) => {
-//                   setSearchName(e.target.value);
-//                 }}
-//                 onSearch={fetchData}
-//                 onKeyDown={(e) => handleEnter(e)}
-//               />
-//             </div>
-//           </div>
-//         </div>
-  
-//         {!isLoading ? (
-//           <>
-//             <Table
-//               rowKey={(record) => record.id}
-//               size="small"
-//               pagination={false}
-//               columns={columns}
-//               dataSource={datas}
-//               scroll={{ x: 'max-content' }}
-//               bordered
-//               tableLayout="auto"
-//               onRow={(record) => ({
-//                 onClick: () => onselect(record),
-//               })}
-//             />
-//             <div className='mt-2 flex justify-end'>
-//               <Pagination
-//                 total={totalItems}
-//                 pageSize={50}
-//                 current={page}
-//                 onChange={(newPage) => setPage(newPage)}
-//                 size='small'
-//               />
-//             </div>
-//           </>
-//         ) : (
-//           <div className="w-full h-96">
-//             <LoadingSpin />
-//           </div>
-//         )}
-//       </div>
-//     );
-//   }
+import useNotification from "@/hooks/useNotification";
+import { useRouter } from "next/navigation";
+import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import CustomerFetch from "@/modules/salesApi/customer";
+import {
+  createResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
+import InputForm from "@/components/superAdmin/InputForm";
+import SalesOrderFetch from "@/modules/salesApi/salesOrder";
+import ItemFetch from "@/modules/salesApi/item";
+import convertToLocalDate from "@/utils/convertToLocalDate";
+import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+import dayjs from "dayjs";
 
-//   function GroupItemList({ category }) {
-//     const isLargeScreen = useBreakpoint("lg");
-//     const [page, setPage] = useState(1);
-//     const offset = (page - 1) * 50;
-//     const [datas, setDatas] = useState([]);
-//     const [totalItems, setTotalItems] = useState(0);
-//     const [isLoading, setIsloading] = useState(false);
-  
-//     const { notify, contextHolder: notificationContextHolder } = useNotification();
-  
-//     const fetchData = async () => {
-//       try {
-//         setIsloading(true);
-//         const response = await ItemFetch.get(
-//           offset,
-//           50,
-//           null,
-//           null,
-//           category
-//         );
-//         const resData = getResponseHandler(response, notify);
-//         if (resData) {
-//           setDatas(resData.list);
-//           setTotalItems(resData.total_items);
-//         }
-//       } catch (error) {
-//         notify('error', 'Error', error?.message || "Internal Server error");
-//       } finally {
-//         setIsloading(false);
-//       }
-//     };
-  
-//     useEffect(() => {
-//       if (category) {
-//         fetchData();
-//       }
-//     }, [page, category]);
-  
-//     const columns = [
-//       {
-//         title: 'Item Name/Number',
-//         dataIndex: 'displayname',
-//         key: 'displayname',
-//         fixed: isLargeScreen ? 'left' : '',
-//         render: (text) => <span>{text}</span>,
-//         onHeaderCell: () => ({ style: { minWidth: 200 } }),
-//         onCell: () => ({ style: { minWidth: 200 } }),
-//       },
-//       {
-//         title: 'Display Name/Code',
-//         dataIndex: 'itemid',
-//         key: 'itemid',
-//         onHeaderCell: () => ({ style: { minWidth: 180 } }),
-//         onCell: () => ({ style: { minWidth: 180 } }),
-//       }
-//     ];
-  
-//     return (
-//       <div className='w-full flex flex-col gap-2'>
-//         {notificationContextHolder}
-//         {!isLoading ? (
-//             <>            
-//                 <Table
-//                 rowKey={(record) => record.id}
-//                 size="small"
-//                 pagination={false}
-//                 columns={columns}
-//                 dataSource={datas}
-//                 scroll={{ x: 'max-content' }}
-//                 bordered
-//                 tableLayout="auto"
-//                 />
-//                 <div className='mt-2 flex justify-end'>
-//                 <Pagination
-//                 total={totalItems}
-//                 pageSize={50}
-//                 current={page}
-//                 onChange={(newPage) => setPage(newPage)}
-//                 size='small'
-//                 />
-//             </div>
-//             </>
-//         ) : (
-//           <div className="w-full h-96">
-//             <LoadingSpin />
-//           </div>
-//         )}
-//       </div>
-//     );
-//   }
-  
+function TableCustom({ data, keys, aliases, onDelete }) {
+  const columns = [
+    ...keys.map((key) => ({
+      title: aliases?.[key] || key,
+      dataIndex: key,
+      key: key,
+      align: "right", // semua kolom di-align ke kanan
+    })),
+    {
+      title: "Action",
+      key: "action",
+      align: "right", // kolom action juga ke kanan
+      render: (_, record) => (
+        <Button type="link" onClick={() => onDelete(record)}>
+          Delete
+        </Button>
+      ),
+    },
+  ];
 
-//   function TableCustom({ data, keys, aliases, onDelete }) {
-//     const columns = [
-//       ...keys.map((key) => ({
-//         title: aliases?.[key] || key,
-//         dataIndex: key,
-//         key: key,
-//         align: 'right', // semua kolom di-align ke kanan
-//       })),
-//       {
-//         title: 'Action',
-//         key: 'action',
-//         align: 'right', // kolom action juga ke kanan
-//         render: (_, record) => (
-//           <Button type="link" onClick={() => onDelete(record)}>
-//             Delete
-//           </Button>
-//         ),
-//       },
-//     ];
-  
-//     const dataWithKey = data.map((item, idx) => ({ ...item, _key: `row-${idx}` }));
-  
-//     return (
-//       <Table
-//         columns={columns}
-//         dataSource={dataWithKey}
-//         rowKey="_key"
-//         bordered
-//         pagination={false}
-//         scroll={{ x: 'max-content' }}
-//       />
-//     );
-//   }
-  
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      rowKey="lineid"
+      bordered
+      pagination={false}
+      scroll={{ x: "max-content" }}
+    />
+  );
+}
 
+export default function AgreementNew() {
+  const { notify, contextHolder: contextNotify } = useNotification();
+  const router = useRouter();
+  const isLargeScreen = useBreakpoint("lg");
+  const [modal, contextHolder] = Modal.useModal();
+  const title = "sales order";
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-// export default function AgreementNew() {
-//   const { notify, contextHolder: contextNotify } = useNotification();
-//   const router = useRouter();
-//   const isLargeScreen = useBreakpoint('lg')
-//   const [modal, contextHolder] = Modal.useModal()
-//     const title = 'agreement'
+  const [dataCustomer, setDataCustomer] = useState([]);
+  const [customerSelected, setCustomerSelected] = useState({});
 
-//   const [payloadSummary, setPayloadSummary] = useState({
-//     "subtotalbruto": 210000,
-//     "discounttotal": 1000,
-//     "subtotal": 9000,
-//     "taxtotal": 0,
-//     "total": 9000,
-//   });
+  const [dataItem, setDataItem] = useState([]);
+  const [itemSelected, setItemSelected] = useState(null);
 
-//   const [payloadGeneral, setPayloadGeneral] = useState({
-//     "entity": "f41a1de3-1ffd-45af-96d8-8bfcb38cbb1f",
-//     "tranid": "001/IV/25",
-//     "trandate": "{{trandate}}",
-//     "salesrep": "sales_indoor",
-//     "otherrefnum": "PO/000092/25/04/2025",
-//   });
+  useEffect(() => {
+    async function fetchCustomer() {
+      try {
+        const response = await CustomerFetch.get(0, 1000, "active");
+        const resData = getResponseHandler(response);
 
-//   const [payloadBilling, setPayloadBilling] = useState({
-//     "term": "Net 30",
-//     "paymentoption": "{{paymentoption}}",
-//   });
+        if (resData) {
+          const addLabelCustomer = resData.list.map((customer) => {
+            return {
+              ...customer,
+              label: customer.companyname,
+              value: customer.id,
+            };
+          });
+          setDataCustomer(addLabelCustomer);
+        }
+      } catch (error) {
+        notify("error", "Error", "Failed get data customer");
+      }
+    }
+    fetchCustomer();
 
-//   const [payloadShipping, setPayloadShipping] = useState({
-//     "shippingoption": "{{$randomStreetAddress}}}",
-//     "shippingaddress": "{{shippingaddress}}",
-//   });
-  
+    async function fetchItem() {
+      try {
+        const response = await ItemFetch.get(0, 1000);
+        const resData = getResponseHandler(response);
 
-//   const [isPayloadGroupItem, setIsPayloadGroupItem] = useState(false)
+        if (resData) {
+          const addLabelItem = resData.list.map((item) => {
+            return {
+              ...item,
+              label: item.displayname,
+              value: item.id,
+            };
+          });
+          setDataItem(addLabelItem);
+        }
+      } catch (error) {
+        notify("error", "Error", "Failed get data item");
+      }
+    }
+    fetchItem();
+  }, []);
 
-//     useEffect(() => {
-//         if(payloadGroup.itemcategory) {
+  const initialState = {
+    payloadPrimary: {
+      entity: "",
+      trandate: dayjs(new Date()),
+      salesrep: "sales_indoor",
+      otherrefnum: "",
+    },
+    payloadSummary: {
+      subtotalbruto: 0,
+      discounttotal: 0,
+      subtotal: 0,
+      taxtotal: 0,
+      total: 0,
+    },
+    payloadBilling: {
+      term: "Net 30",
+      paymentoption: "",
+    },
+    payloadShipping: {
+      shippingoption: "",
+      shippingaddress: "",
+      shippingtype: 0,
+    },
+    dataTableItem: [],
+  };
 
-//         }
-//     }, [payloadGroup])
+  function reducer(state, action) {
+    switch (action.type) {
+      case "SET_PRIMARY":
+        return {
+          ...state,
+          payloadPrimary: {
+            ...state.payloadPrimary,
+            ...action.payload,
+          },
+        };
+      case "SET_SUMMARY":
+        return {
+          ...state,
+          payloadSummary: {
+            ...state.payloadSummary,
+            ...action.payload,
+          },
+        };
+      case "SET_BILLING":
+        return {
+          ...state,
+          payloadBilling: {
+            ...state.payloadBilling,
+            ...action.payload,
+          },
+        };
+      case "SET_SHIPPING":
+        return {
+          ...state,
+          payloadShipping: {
+            ...state.payloadShipping,
+            ...action.payload,
+          },
+        };
+      case "SET_ITEMS":
+        return {
+          ...state,
+          dataTableItem: action.payload,
+        };
+      case "RESET":
+        return initialState;
+      default:
+        return state;
+    }
+  }
 
-//     const [payloadDetail, setPayloadDetail] = useState([])
+  const [state, dispatch] = useReducer(reducer, initialState);
 
+  const shipAddressOptions = [
+    { label: "Custom", value: 0 },
+    { label: "Default Address", value: 1 },
+  ];
 
-//     const [isLoadingSubmit, setIsLoadingSubmit] = useState(false)
-//     const [isLoading, setIsLoading] = useState(false)
+  const termOptions = [
+    { label: "Net 30", value: "Net 30" },
+    { label: "Net 90", value: "Net 90" },
+    { label: "Net 120", value: "Net 120" },
+  ];
 
-//     const handleChangePayload = (type, payload) => {
-//             switch (type) {
-//             case 'customform':
-//             setPayloadCustomForm(payload);
-//                 break;
-//             case 'primary':
-//               setPayloadGeneral(payload);
-//               break;
-//             case 'detail':
-//               setPayloadDetail(payload);
-//               break;
-//             case 'detailinit':
-//                 setPayloadDetailInit(payload);
-//                 payloadDetailInitRef.current = payload;
-//                 break;
-//           }
-//     }
-//     const keys =
-//         [
-//             "item",
-//             "quantity",
-//             "units",
-//             "description",
-//             "rate",
-//             "discount1",
-//             "value1",
-//             "discountvalue1",
-//             "perunit1",
-//             "discount2",
-//             "value2",
-//             "discountvalue2",
-//             "perunit2",
-//             "discount3",
-//             "value3",
-//             "discountvalue3",
-//             "perunit3",
-//             "subtotal",
-//             "totalamount",
-//             "qtyfree",
-//             "unitfree",
-//             "taxable",
-//             "taxrate",
-//             "totaldiscount"
-//         ]
+  const paymentOptions = [
+    { label: "Cash", value: "cash" },
+    { label: "Credit", value: "credit" },
+  ];
 
-//     const itemprocessfamilyOptions = [
-//         { label: 'Assoy Cetak', value: 'Assoy Cetak' },
-//         { label: 'K-Item', value: 'K-Item' },
-//         { label: 'Emboss', value: 'Emboss' },
-//         { label: 'C-Item', value: 'C-Item' },
-//         { label: 'B-Item', value: 'B-Item' },
-//         { label: 'HD 35B', value: 'HD 35B' },
-//         { label: 'PP', value: 'PP' },
-//         { label: 'HDP', value: 'HDP' },
-//         { label: 'Assoy PE', value: 'Assoy PE' },
-//         { label: 'PE Gulungan', value: 'PE Gulungan' },
-//     ]
+  const keyTableItem = [
+    "displayname",
+    "quantity",
+    "units",
+    "rate",
+    "description",
+    "discountname1",
+    "value1",
+    "discountvalue1",
+    "perunit1",
+    "discountname2",
+    "value2",
+    "discountvalue2",
+    "perunit2",
+    "discountname3",
+    "value3",
+    "discountvalue3",
+    "perunit3",
+    "subtotal",
+    "totalamount",
+    "qtyfree",
+    "unitfree",
+    "taxable",
+    "taxrate",
+    "taxvalue",
+    "totaldiscount",
+  ];
 
-//     const statusOptions = [
-//         { label: 'Active', value: 'active' },
-//         { label: 'Inactive', value: 'inactive' },
-//         { label: 'Dispute', value: 'dispute' },
-//         { label: 'Pending Approval', value: 'pending approval' },
-//     ]
+  const [dataTableItem, setDataTableItem] = useState([]);
 
-//     const unitOptions = [
-//         { label: 'KG', value: 'kg' },
-//         { label: 'Bal', value: 'bal' },
-//     ]
+  const initialStateItemTable = {
+    item: {
+      item: "",
+      quantity: 0,
+      units: "",
+      description: "",
+      rate: 0,
+      discount: 0,
+      displayname: "",
+      itemprocessfamily: "",
+      stock: 0,
+      itemid: "",
+    },
+    discount1: {
+      discount1: "",
+      discountname1: "",
+      value1: 0,
+      discountvalue1: "",
+      perunit1: "",
+    },
+    discount2: {
+      discount2: "",
+      discountname2: "",
+      value2: 0,
+      discountvalue2: "",
+      perunit2: "",
+    },
+    discount3: {
+      discount3: "",
+      discountname3: "",
+      value3: 0,
+      discountvalue3: "",
+      perunit3: "",
+    },
+    summary: {
+      subtotal: 0,
+      totalamount: 0,
+      qtyfree: 0,
+      unitfree: "",
+      totaldiscount: 0,
+    },
+    tax: {
+      taxable: false,
+      taxrate: 0,
+      taxvalue: 0,
+    },
+  };
 
-//     const paymentOptions = [
-//         { label: 'Cash', value: 'cash' },
-//         { label: 'Credit', value: 'credit' },
-//     ]
+  function reducerItemTable(state, action) {
+    switch (action.type) {
+      case "SET_ITEM":
+        return {
+          ...state,
+          item: {
+            ...state.item,
+            ...action.payload,
+          },
+        };
+      case "SET_DISCOUNT1":
+        return {
+          ...state,
+          discount1: {
+            ...state.discount1,
+            ...action.payload,
+          },
+        };
+      case "SET_DISCOUNT2":
+        return {
+          ...state,
+          discount2: {
+            ...state.discount2,
+            ...action.payload,
+          },
+        };
+      case "SET_DISCOUNT3":
+        return {
+          ...state,
+          discount3: {
+            ...state.discount3,
+            ...action.payload,
+          },
+        };
+      case "SET_SUMMARY":
+        return {
+          ...state,
+          summary: {
+            ...state.summary,
+            ...action.payload,
+          },
+        };
+      case "SET_TAX":
+        return {
+          ...state,
+          tax: {
+            ...state.tax,
+            ...action.payload,
+          },
+        };
+      case "RESET":
+        return initialStateItemTable;
+      default:
+        return state;
+    }
+  }
 
-//     const dataInput = [
-//         [
-//             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymax", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymaxunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "discountpercent", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "perunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//         ],
-//         [
-//             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymax", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymaxunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "discountnominal", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "perunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//         ],
-//         [
-//             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymax", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymaxunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "paymenttype", input: 'select', options: paymentOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "discountnominal", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "perunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//         ],
-//         [
-//             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-//             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymax", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtymaxunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "qtyfree", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//             {key: "perunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
-//           ]
-//     ]
+  const [stateItemTable, dispatchItemTable] = useReducer(
+    reducerItemTable,
+    initialStateItemTable
+  );
 
-//     function toInitialObject(keys) {
-//         return Object.fromEntries(keys.map(key => [key, '']));
-//     }
+  const [isModalItemOpen, setIsModalItemOpen] = useState(false);
 
-//     const [payloadDetailInit, setPayloadDetailInit] = useState(toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1]));
+  const [discountItems, setDiscountItems] = useState([]);
 
-//     const payloadDetailInitRef = useRef(payloadDetailInit)
+  function handleAddItem() {
+    if (!state.payloadPrimary.entity || state.payloadPrimary.entity == "") {
+      notify(
+        "error",
+        "Error",
+        "Select the customer first in the customer section"
+      );
+      return;
+    }
 
-//     useEffect(() => {
-//         const customForm = parseInt(payloadCustomForm.customform)
-//         if (customForm < 5) {
-//           const initValueDetail = toInitialObject(keys[customForm - 1])
-//           setPayloadDetailInit(initValueDetail)
-//           payloadDetailInitRef.current = initValueDetail;
-//           setPayloadDetail([])
-//         }
-//       }, [payloadCustomForm])
+    if (!state.payloadPrimary.trandate || state.payloadPrimary.trandate == "") {
+      notify(
+        "error",
+        "Error",
+        "Fill in the trandate first in the primary section"
+      );
+      return;
+    }
 
+    if (
+      !state.payloadBilling.paymentoption ||
+      state.payloadBilling.paymentoption == ""
+    ) {
+      notify(
+        "error",
+        "Error",
+        "Select the payment type first in the billing section"
+      );
+      return;
+    }
 
-//       const handleSubmit = async () => {
-//         setIsLoadingSubmit(true);
-//         try {
+    setIsModalItemOpen(true);
+  }
 
-//             const payload = {
-//                 ...payloadGeneral,
-//                 customform: parseInt(payloadCustomForm.customform),
-//                 agreement_lines: payloadDetail.map((line) => {
-//                     return {
-//                         itemid: line.id,
-//                         baseprice: line.price,
-//                         basepriceunit: line.unitstype,
-//                         qtymin: line.qtymin,
-//                         qtyminunit: line.qtyminunit,
-//                         qtymax: line.qtymax,
-//                         qtymaxunit: line.qtymaxunit,
-//                         discountnominal: line?.discountnominal || 0,
-//                         discountpercent: line?.discountpercent || 0,
-//                         paymenttype: line?.paymenttype || "" ,
-//                         qtyfree: line?.qtyfree || 0,
-//                         perunit: line?.perunit
-//                     }
-//                 }),
-//                 agreement_groups: {...payloadGroup}
-//             }
+  function handleModalItemCancel() {
+    dispatchItemTable({ type: "RESET" });
+    setItemSelected(null);
+    setIsModalItemOpen(false);
+  }
 
-//             console.log(payload)
-    
-//             const {customform, agreementcode, agreementname, status} = payload
-    
-//             if (!customform) {
-//                 notify('error', 'Error', 'Customer Form is required');
-//                 return null;
-//               }
-    
-//               if (!agreementcode) {
-//                 notify('error', 'Error', 'Agreement Code required');
-//                 return null;
-//               }
-    
-//               if (!agreementname) {
-//                 notify('error', 'Error', 'Agreement Name required');
-//                 return null;
-//               }
-    
-//               if (!status) {
-//                 notify('error', 'Error', 'Status required');
-//                 return null;
-//               }
-    
-//           const response = await AgreementFetch.add(payload);
-    
-//           const resData = createResponseHandler(response, notify);
+  async function handleModalItemOk() {
+    if (!stateItemTable.item.item) {
+      notify("error", "Error", "Select item first");
+      return;
+    }
 
-//           if (resData) {
-//             router.push(`/super-admin/master-data/${title}/${resData}`)
-//           }
+    if (stateItemTable.item.quantity <= 0) {
+      notify("error", "Error", "Please enter a quantity greater than 0.");
+      return;
+    }
 
-//         } catch (error) {
-//           notify('error', 'Error', error.message || 'Internal server error');
-//         } finally {
-//           setIsLoadingSubmit(false);
-//         }
-//       };
+    if (stateItemTable.tax.taxable && stateItemTable.tax.taxrate <= 0) {
+      notify("error", "Error", "Please enter a tax rate greater than 0.");
+      return;
+    }
 
-//       const formOptions = [
-//         { label: 'Discount Percentage (%)', value: '1' },
-//         { label: 'Special Price (Rp)', value: '2' },
-//         { label: 'Payment Method', value: '3' },
-//         { label: 'Free Item', value: '4' },
-//         { label: 'Discount Group', value: '5' },
-//     ]
+    const discountItem = await getDiscount(
+      state.payloadPrimary.entity,
+      stateItemTable.item.item,
+      convertToLocalDate(state.payloadPrimary.trandate),
+      stateItemTable.item.quantity,
+      stateItemTable.item.itemprocessfamily
+    );
 
-//     function handleSelectItem(record) {
-//         const mapped = {
-//           ...payloadDetailInit,
-//           id: record.id,
-//           itemid: record.itemid,
-//           price: record.price,
-//           unitstype: record.unitstype,
-//           displayname: record.displayname,
-//         };
-      
-//         payloadDetailInitRef.current = mapped;
-//         setPayloadDetailInit(mapped);
-//       }
+    setDiscountItems((prev) => [...prev, discountItem]);
 
-//     function handleAddModalForm() {
-//         const instance = modal.confirm({
-//           icon: null,
-//           width: 850,
-//           footer: null,
-//           content: (
-//             <div className="w-full flex flex-col gap-4 justify-end">
-//               <InputForm
-//                 type="detailinit"
-//                 title="Add Detail"
-//                 payload={payloadDetailInitRef.current}
-//                 data={dataInput[parseInt(payloadCustomForm.customform - 1)]}
-//                 onChange={handleChangePayload}
-//                 aliases={agreementAliases}
-//               />
-//               <div className="flex gap-2 justify-end">
-//                 <Button onClick={() => {
-//                     const reset = toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1]);
-//                     setPayloadDetailInit(reset);
-//                     instance.destroy()
-//                 }}
-//                     variant="outlined">
-//                   Cancel
-//                 </Button>
-//                 <Button
-//                   type="primary"
-//                   onClick={() => {
-//                     handleAddDetail(instance);
-//                   }}
-//                 >
-//                   OK
-//                 </Button>
-//               </div>
-//             </div>
-//           ),
-//         });
-//       }
-      
-//     function handleAddModalItem() {
-//         const instance = modal.confirm({
-//           icon: null,
-//           footer: null,
-//           width: 850,
-//           content: (
-//             <div className="w-full flex flex-col gap-4 justify-end">
-//                 <SelectItem onselect={(record) => {
-//                     handleSelectItem(record);
-//                     instance.destroy()
-//                     handleAddModalForm()
-//                 }}/>
-//               <div className="flex gap-2 justify-end">
-//                 <Button onClick={() => {
-//                     const reset = toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1]);
-//                     setPayloadDetailInit(reset);
-//                     instance.destroy()
-//                 }}
-//                     variant="outlined">
-//                   Cancel
-//                 </Button>
-//               </div>
-//             </div>
-//           ),
-//         });
-//       }
+    handleAddItemToTable();
 
-//       function handleAddDetail(instance) {
-//         const currentPayload = payloadDetailInitRef.current;
-      
-//         const isAnyEmpty = Object.values(currentPayload).some(
-//           (value) => value === '' || value === null || value === undefined
-//         );
-      
-//         if (isAnyEmpty) {
-//           notify('error', 'Error', 'All fields are required');
-//           return;
-//         }
-      
-//         setPayloadDetail((prev) => [
-//           ...prev,
-//           currentPayload,
-//         ]);
-      
-//         const reset = toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1]);
-//         setPayloadDetailInit(reset);
-//         payloadDetailInitRef.current = reset;
-//         instance.destroy();
-//       }
+    handleModalItemCancel();
+  }
 
-//       function handleDeleteDetail(record) {
-//         console.log(payloadDetail)
-//         setPayloadDetail((prev) => prev.filter((item) => item.itemid !== record.itemid));
-//       }
+  function handleAddItemToTable() {
+    const subtotal = stateItemTable.item.quantity * stateItemTable.item.rate;
+    const totalamount = subtotal;
+    const taxrate = stateItemTable.tax.taxable
+      ? Number(stateItemTable.tax.taxrate)
+      : 0;
 
-//   return (
-//     <>
-//             <Layout pageTitle="">
-//                 <div className='w-full flex flex-col gap-4'>
-//                     <div className='w-full flex justify-between items-center'>
-//                         <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Add New Agreement</p>
-//                     </div>
-//                         <div className='w-full flex flex-col gap-4'>
-//                             <div className='w-full flex flex-col lg:flex-row justify-between items-start'>
-//                                     <div className='w-full lg:w-1/2 flex gap-1'>
-//                                         <Button icon={<LeftOutlined />} onClick={() => router.back()}>
-//                                             {isLargeScreen ? 'Back' : ''}
-//                                         </Button>
-//                                     </div>
-//                                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-//                                         <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
-//                                             {isLargeScreen ? 'Submit' : ''}
-//                                         </Button>
-//                                 </div>
-//                             </div>
-//                             <div className='w-full flex flex-col gap-8'>
-//                                         <InputForm
-//                                             title={'primary'}
-//                                             type="primary"
-//                                             payload={payloadGeneral}
-//                                             data={[
-//                                                 { key: 'entity', input: 'input', isAlias: true,
-//                                                     rules: [
-//                                                     { required: true, message: `${agreementAliases['entity']} is required` },
-//                                                 ], },
-//                                                 { key: 'tranid', input: 'select', isAlias: true, options: statusOptions,
-//                                                     rules: [
-//                                                         { required: true, message: `tranid is required` },]
-//                                                  },
-//                                                 { key: 'trandate', input: 'date', isAlias: true,
-//                                                     rules: [
-//                                                         { required: true, message: `${agreementAliases['trandate']} is required` },]
-//                                                 },
-//                                                 { key: 'sales-rep', input: 'input', isAlias: true },
-//                                                 { key: 'otherrefnum', input: 'input', isAlias: true },
-//                                             ]}
-//                                             aliases={agreementAliases}
-//                                             onChange={handleChangePayload}
-//                                         />
-//                                             <div className='w-full flex flex-col gap-4'>
-//                                                 <Divider
-//                                                         style={{
-//                                                         margin: '0',
-//                                                         textTransform: 'capitalize',
-//                                                         borderColor: '#1677ff',
-//                                                         }}
-//                                                         orientation="left"
-//                                                     >
-//                                                     {formOptions[(parseInt(payloadCustomForm.customform) - 1)].label} Detail    
-//                                                 </Divider>
-//                                                 <div className='flex justify-end'>
-//                                                     <Button type='primary' onClick={handleAddModalItem}>Add</Button>
-//                                                 </div>
-//                                                 <TableCustom onDelete={handleDeleteDetail} data={payloadDetail} keys={keys[(parseInt(payloadCustomForm.customform) - 1)]} aliases={agreementAliases}/>
-//                                             </div>
+    const taxvalue = stateItemTable.tax.taxable
+      ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
+      : 0;
 
-//                                             <InputForm
-//                                             title='billing'
-//                                             type="billing"
-//                                             payload={payloadBilling}
-//                                             data={[
-//                                                 { key: 'term', input: 'input', isAlias: true },
-//                                                 { key: 'paymentoption', input: 'input', isAlias: true },
-//                                             ]}
-//                                             aliases={agreementAliases}
-//                                             onChange={handleChangePayload}
-//                                         />
+    dispatchItemTable({
+      type: "SET_SUMMARY",
+      payload: {
+        subtotal,
+        totalamount,
+      },
+    });
 
-//                                             <InputForm
-//                                             type="summary"
-//                                             title='Form Type'
-//                                             payload={payloadSummary}
-//                                             data={[
-//                                             ]}
-//                                             onChange={handleChangePayload}
-//                                             aliases={agreementAliases}
-//                                             />
-//                             </div>
-//                         </div>
-//                 </div>
-//             </Layout>
-//             {isLoadingSubmit && (
-//                 <LoadingSpinProcessing/>
-//             )}
-//         {contextHolder}
-//         {contextNotify}
-//     </>
-//   );
-// }
+    dispatchItemTable({
+      type: "SET_TAX",
+      payload: {
+        taxvalue,
+        taxrate,
+      },
+    });
+
+    const mergePayloadItemTable = {
+      lineid: crypto.randomUUID(),
+
+      ...stateItemTable.item,
+
+      ...stateItemTable.discount1,
+
+      ...stateItemTable.discount2,
+
+      ...stateItemTable.discount3,
+
+      subtotal,
+      totalamount,
+      qtyfree: stateItemTable.summary.qtyfree,
+      unitfree: stateItemTable.summary.unitfree,
+      totaldiscount: stateItemTable.summary.totaldiscount,
+
+      taxable: stateItemTable.tax.taxable,
+      taxrate,
+      taxvalue,
+    };
+
+    setDataTableItem((prev) => [...prev, mergePayloadItemTable]);
+  }
+
+  async function getDiscount(cust_id, item_id, trandate, qty, item_categories) {
+    try {
+      let initData = {
+        id: itemSelected,
+        displayname: stateItemTable.item.displayname,
+        discount: [],
+      };
+
+      if (stateItemTable.item.discount && stateItemTable.item.discount > 0) {
+        initData.discount.push({
+          id: "itemdiscount",
+          type: "Discount Item",
+          discounttype: "nominal",
+          discount: "Discount Price",
+          value: stateItemTable.item.discount,
+          discountvalue: "rp",
+          perunit: "",
+          paymenttype: "",
+          isChecked: false,
+        });
+      }
+
+      const resAgreement = await SalesOrderFetch.getSoAgreement(
+        item_id,
+        cust_id,
+        qty,
+        trandate
+      );
+
+      const dataAgreement = getResponseHandler(resAgreement);
+      if (dataAgreement && dataAgreement.length > 0) {
+        const discountAgreement = dataAgreement.map((agreement) => {
+          return {
+            id: agreement.agreementid,
+            type:
+              agreement.paymenttype != ""
+                ? "Discount Payment"
+                : "Discount Agreement",
+            discounttype: agreement.discounttype,
+            discount: agreement.agreementname,
+            value: agreement.discountvalue,
+            discountvalue:
+              agreement.discounttype == "nominal"
+                ? "rp"
+                : agreement.discounttype == "percent"
+                ? "%"
+                : "",
+            perunit: agreement.perunit,
+            paymenttype: agreement?.paymenttype || "",
+            isChecked: false,
+          };
+        });
+        initData.discount.push(...discountAgreement);
+      }
+
+      // const resAgreementGroup = await SalesOrderFetch.getSoAgreementGroup(
+      //   item_categories,
+      //   cust_id,
+      //   qty,
+      //   trandate
+      // );
+
+      // const dataAgreementGroup = getResponseHandler(resAgreementGroup);
+
+      // if (
+      //   dataAgreementGroup &&
+      //   dataAgreementGroup[itemSelected.itemprocessfamily]
+      // ) {
+      //   const discountAgreementGroup =
+      //     dataAgreementGroup[itemSelected.itemprocessfamily];
+
+      //   initData.discount.push({
+      //     id: discountAgreementGroup.agreementid,
+      //     type: "Discount Agreement",
+      //     discounttype:
+      //       discountAgreementGroup.unitfree == "" ? "nominal" : "freeitem",
+      //     discount: discountAgreementGroup.agreementname,
+      //     value: discountAgreementGroup.discountvalue,
+      //     discountvalue: discountAgreementGroup?.unitfree == "" ? "rp" : "",
+      //     perunit: discountAgreementGroup.unitfree,
+      //     paymenttype: "",
+      //     isChecked: false,
+      //   });
+      // }
+      return initData;
+    } catch (error) {
+      notify("error", "Error", "Failed get data discount");
+      return null;
+    }
+  }
+
+  function handleDiscountSelected(isChecked, discount, itemid) {
+    let updatedItem = dataTableItem.find((item) => item.item === itemid);
+
+    if (updatedItem) {
+      // Jika dicentang (Checked)
+      if (isChecked) {
+        if (discount.type === "Discount Item") {
+          if (!updatedItem.discount1) {
+            updatedItem = {
+              ...updatedItem,
+              discountname1: discount.discount,
+              discount1: discount.id,
+              discountvalue1: discount.discountvalue,
+              perunit1: discount.perunit,
+              value1: discount.value,
+            };
+          } else return;
+        } else if (discount.type === "Discount Agreement") {
+          if (!updatedItem.discount2) {
+            updatedItem = {
+              ...updatedItem,
+              discountname2: discount.discount,
+              discount2: discount.id,
+              discountvalue2: discount.discountvalue,
+              perunit2: discount.perunit,
+              value2: discount.value,
+            };
+          } else return;
+        } else if (discount.type === "Discount Payment") {
+          if (!updatedItem.discount3) {
+            updatedItem = {
+              ...updatedItem,
+              discountname3: discount.discount,
+              discount3: discount.id,
+              discountvalue3: discount.discountvalue,
+              perunit3: discount.perunit,
+              value3: discount.value,
+            };
+          } else return;
+        }
+      }
+
+      // Jika tidak dicentang (Unchecked)
+      else {
+        if (
+          discount.type === "Discount Item" &&
+          updatedItem.discount1 === discount.id
+        ) {
+          updatedItem = {
+            ...updatedItem,
+            discountname1: "",
+            discount1: "",
+            discountvalue1: "",
+            perunit1: "",
+            value1: 0,
+          };
+        } else if (
+          discount.type === "Discount Agreement" &&
+          updatedItem.discount2 === discount.id
+        ) {
+          updatedItem = {
+            ...updatedItem,
+            discountname2: "",
+            discount2: "",
+            discountvalue2: "",
+            perunit2: "",
+            value2: 0,
+          };
+        } else if (
+          discount.type === "Discount Payment" &&
+          updatedItem.discount3 === discount.id
+        ) {
+          updatedItem = {
+            ...updatedItem,
+            discountname3: "",
+            discount3: "",
+            discountvalue3: "",
+            perunit3: "",
+            value3: 0,
+          };
+        } else return;
+      }
+
+      // Update item ke table
+      const updatedDataTableItem = dataTableItem.map((item) =>
+        item.item === itemid ? updatedItem : item
+      );
+      setDataTableItem(updatedDataTableItem);
+
+      // Update status isChecked di discountItems
+      const updatedDiscountItems = discountItems.map((item) => {
+        if (item.id === itemid) {
+          return {
+            ...item,
+            discount: item.discount.map((dis) => {
+              if (dis.id === discount.id) {
+                return {
+                  ...dis,
+                  isChecked,
+                };
+              }
+              return dis;
+            }),
+          };
+        }
+        return item;
+      });
+      setDiscountItems(updatedDiscountItems);
+    }
+  }
+
+  const getValueDiscount = (discountValue, value, totalamount) => {
+    switch (discountValue) {
+      case "rp":
+        return value;
+      case "%":
+        return (totalamount * value) / 100;
+      default:
+        return 0;
+    }
+  };
+
+  useEffect(() => {
+    let updatedDataTableItem = dataTableItem.map((dataItem) => {
+      let data = { ...dataItem };
+
+      data.totalamount = data.quantity * data.rate;
+
+      const discount1 = getValueDiscount(data.discountvalue1, data.value1, data.totalamount);
+      const discount2 = getValueDiscount(data.discountvalue2, data.value2, data.totalamount);
+      const discount3 = getValueDiscount(data.discountvalue3, data.value3, data.totalamount);
+
+      const totaldiscount = discount1 + discount2 + discount3;
+
+      data.subtotal = data.totalamount - totaldiscount;
+      data.totaldiscount = totaldiscount;
+
+      if (["kg", "bal"].includes(data.perunit2?.toLowerCase?.())) {
+        data.qtyfree = data.value2;
+        data.unitfree = data.perunit2;
+      }
+
+      if (data.taxable) {
+        data.taxvalue = Math.ceil(
+          (data.subtotal / (1 + data.taxrate / 100)) * (data.taxrate / 100)
+        );
+      }
+
+      return data;
+    });
+
+    // Cek apakah ada perubahan signifikan sebelum update
+    const isChanged =
+      JSON.stringify(updatedDataTableItem) !== JSON.stringify(dataTableItem);
+    if (isChanged) {
+      setDataTableItem(updatedDataTableItem);
+    }
+
+    // Hitung summary
+    const subtotalbruto = updatedDataTableItem.reduce(
+      (acc, curr) => acc + curr.totalamount,
+      0
+    );
+    const subtotal = updatedDataTableItem.reduce(
+      (acc, curr) => acc + curr.subtotal,
+      0
+    );
+    const discounttotal = updatedDataTableItem.reduce(
+      (acc, curr) => acc + curr.totaldiscount,
+      0
+    );
+
+    const setSummary = {
+      subtotalbruto,
+      discounttotal,
+      subtotal,
+      taxtotal: 0,
+      total: subtotal,
+    };
+
+    dispatch({ type: "SET_SUMMARY", payload: setSummary });
+  }, [dataTableItem]);
+
+  function formatRupiah(number) {
+    return number.toLocaleString("id-ID") + ",-";
+  }
+
+  function handleDeleteTableItem(record) {
+    setDataTableItem((prev) =>
+      prev.filter((item) => item.lineid !== record.lineid)
+    );
+
+    setDiscountItems((prev) =>
+      prev.filter((discount) => discount.id !== record.item)
+    );
+  }
+
+  const handleSubmit = async () => {
+    setIsLoadingSubmit(true);
+    try {
+      let payloadToInsert = {
+        ...state.payloadPrimary,
+        ...state.payloadSummary,
+        ...state.payloadBilling,
+      };
+
+      let shippingaddress = state.payloadShipping?.shippingaddress || "";
+      let shippingoption = state.payloadShipping?.shippingoption || "";
+
+      payloadToInsert = {
+        ...payloadToInsert,
+        shippingaddress,
+        shippingoption,
+      };
+
+      if (dataTableItem.length <= 0) {
+        throw new Error("Please enter order items");
+      }
+
+      const sales_order_items = dataTableItem.map((data) => {
+        return {
+          item: data.item,
+          quantity: data.quantity,
+          units: data.units,
+          description: data.description,
+          rate: data.rate,
+          discount1: "",
+          value1: data.value1,
+          discountvalue1: data.discountvalue1,
+          perunit1: data.perunit1,
+          discount2: data.discount2,
+          value2: data.value2,
+          discountvalue2: data.discountvalue2 == "rp" ? 0 : 1,
+          perunit2: data.perunit2,
+          discount3: data.discount3,
+          value3: data.value3,
+          discountvalue3: data.discountvalue3 == "rp" ? 0 : 1,
+          perunit3: data.perunit3,
+          subtotal: data.subtotal,
+          totalamount: data.totalamount,
+          qtyfree: data.qtyfree,
+          unitfree: data.unitfree == "kg" ? 0 : 1,
+          taxable: data.taxable,
+          taxrate: data.taxrate,
+          totaldiscount: data.totaldiscount,
+        };
+      });
+
+      payloadToInsert = { ...payloadToInsert, sales_order_items };
+
+      if (!payloadToInsert.entity) {
+        throw new Error("Customer is required");
+      }
+
+      if (!payloadToInsert.trandate) {
+        throw new Error("Date is required");
+      }
+
+      if (!payloadToInsert.subtotal) {
+        throw new Error("Subtotal invalid");
+      }
+
+      if (!payloadToInsert.total) {
+        throw new Error("Total invalid");
+      }
+
+      if (
+        !payloadToInsert.sales_order_items ||
+        payloadToInsert.sales_order_items.length == 0
+      ) {
+        throw new Error("Please enter a value greater than 0.");
+      }
+
+      const response = await SalesOrderFetch.add(payloadToInsert);
+
+      const resData = createResponseHandler(response, notify);
+
+      if (resData) {
+        router.push(`/super-admin/sales-order/${resData}`)
+      }
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      setIsLoadingSubmit(false);
+    }
+  };
+
+  return (
+    <>
+      <Layout pageTitle="">
+        <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex justify-between items-center">
+            <p className="text-xl lg:text-2xl font-semibold text-blue-6">
+              Sales Order Enter
+            </p>
+          </div>
+          <div className="w-full flex flex-col gap-4">
+            <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+              <div className="w-full lg:w-1/2 flex gap-1"></div>
+              <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                <Button type={"primary"} icon={<CheckOutlined />} onClick={handleSubmit}>
+                  {isLargeScreen ? "Submit" : ""}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Customer
+              </Divider>
+              <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                <Form layout="vertical">
+                  <Form.Item
+                    label={<span className="capitalize">Customer</span>}
+                    name="customer"
+                    style={{ margin: 0 }}
+                    className="w-full"
+                    labelCol={{ style: { padding: 0 } }}
+                    rules={[
+                      { required: true, message: `Customer is required` },
+                    ]}
+                  >
+                    <Select
+                      showSearch
+                      placeholder="Select a customer"
+                      optionFilterProp="label"
+                      onChange={(_, customer) => {
+                        setCustomerSelected(customer);
+                        setDataTableItem([]);
+                        setDiscountItems([]);
+                        dispatch({ type: "RESET" });
+                        dispatch({
+                          type: "SET_SHIPPING",
+                          payload: { shippingaddress: customer.addressee },
+                        });
+                        dispatch({
+                          type: "SET_PRIMARY",
+                          payload: { entity: customer.id },
+                        });
+                      }}
+                      onSearch={{}}
+                      options={dataCustomer}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
+            </div>
+          </div>
+          <InputForm
+            title="primary"
+            type="SET_PRIMARY"
+            payload={state.payloadPrimary}
+            data={[
+              {
+                key: "entity",
+                input: "input",
+                isAlias: true,
+                isRead: true,
+                rules: [{ required: true, message: ` is required` }],
+                placeholder: "Auto-filled after selecting a customer",
+              },
+              {
+                key: "trandate",
+                input: "date",
+                isAlias: true,
+                rules: [{ required: true, message: ` is required` }],
+              },
+              {
+                key: "salesrep",
+                input: "input",
+                isAlias: true,
+                isRead: true,
+              },
+              {
+                key: "otherrefnum",
+                input: "input",
+                isAlias: true,
+                rules: [{ required: true, message: ` is required` }],
+                placeholder: "Entry No. PO customer",
+              },
+            ]}
+            aliases={[]}
+            onChange={(type, payload) => {
+              dispatch({ type, payload });
+            }}
+          />
+          <InputForm
+            title="shipping"
+            type="SET_SHIPPING"
+            payload={state.payloadShipping}
+            data={[
+              {
+                key: "shippingtype",
+                input: "select",
+                options: shipAddressOptions,
+                isAlias: true,
+              },
+              {
+                key:
+                  state.payloadShipping.shippingtype == 1
+                    ? "shippingaddress"
+                    : "shippingoption",
+                input: "text",
+                isAlias: true,
+              },
+            ]}
+            aliases={[]}
+            onChange={(type, payload) => {
+              console.log(payload);
+              dispatch({ type, payload });
+            }}
+          />
+          <InputForm
+            title="billing"
+            type="SET_BILLING"
+            payload={state.payloadBilling}
+            data={[
+              {
+                key: "term",
+                input: "select",
+                options: termOptions,
+                isAlias: true,
+              },
+              {
+                key: "paymentoption",
+                input: "select",
+                options: paymentOptions,
+                isAlias: true,
+                rules: [{ required: true, message: ` is required` }],
+              },
+            ]}
+            aliases={[]}
+            onChange={(type, payload) => {
+              dispatch({ type, payload });
+            }}
+          />
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Item
+              </Divider>
+              <div className="flex justify-end">
+                <Button type="primary" onClick={handleAddItem}>
+                  Add
+                </Button>
+              </div>
+              <TableCustom
+                onDelete={handleDeleteTableItem}
+                data={dataTableItem}
+                keys={keyTableItem}
+                aliases={{}}
+              />
+            </div>
+          </div>
+          {discountItems && discountItems.length > 0 && (
+            <div className="w-full flex flex-col gap-8">
+              <Collapse
+                accordion
+                items={discountItems.map((discountItem) => ({
+                  key: discountItem.id,
+                  label: discountItem.displayname,
+                  children: (
+                    <div className="w-full flex lg:pr-2 flex-col">
+                      <List
+                        size="small"
+                        itemLayout="horizontal"
+                        dataSource={discountItem.discount || []}
+                        header="Discount 1"
+                        renderItem={(item, index) => (
+                          <>
+                            {item.type == "Discount Item" && (
+                              <List.Item>
+                                <Checkbox
+                                  checked={item.isChecked}
+                                  style={{ marginRight: "16px" }}
+                                  onChange={(e) => {
+                                    handleDiscountSelected(
+                                      e.target.checked,
+                                      item,
+                                      discountItem.id
+                                    );
+                                  }}
+                                />
+                                <List.Item.Meta
+                                  title={<p>{item.discount}</p>}
+                                  description={`Type: ${
+                                    item.discounttype
+                                  }, Value: ${
+                                    item.discounttype == "nominal"
+                                      ? "Rp. " + item.value
+                                      : item.discounttype == "percent"
+                                      ? item.value + "%"
+                                      : item.value
+                                  }`}
+                                />
+                              </List.Item>
+                            )}
+                          </>
+                        )}
+                      />
+                      <List
+                        size="small"
+                        itemLayout="horizontal"
+                        dataSource={discountItem.discount || []}
+                        header="Discount 2"
+                        renderItem={(item, index) => (
+                          <>
+                            {item.type == "Discount Agreement" && (
+                              <List.Item>
+                                <Checkbox
+                                  checked={item.isChecked}
+                                  onChange={(e) => {
+                                    handleDiscountSelected(
+                                      e.target.checked,
+                                      item,
+                                      discountItem.id
+                                    );
+                                  }}
+                                  defaultChecked={false}
+                                  style={{ marginRight: "16px" }}
+                                />
+                                <List.Item.Meta
+                                  title={<p>{item.discount}</p>}
+                                  description={`Type: ${
+                                    item.discounttype
+                                  }, Value: ${
+                                    item.discounttype == "nominal"
+                                      ? "Rp. " + item.value
+                                      : item.discounttype == "percent"
+                                      ? item.value + "%"
+                                      : item.value
+                                  }`}
+                                />
+                              </List.Item>
+                            )}
+                          </>
+                        )}
+                      />
+                      <List
+                        size="small"
+                        itemLayout="horizontal"
+                        dataSource={discountItem.discount || []}
+                        header={
+                          <div className="flex justify-start items-center gap-2">
+                            <p>Discount 3</p>
+                            <Tooltip title="Discount is only available when using an eligible payment method.">
+                              <InfoCircleOutlined className="text-sm" />
+                            </Tooltip>
+                          </div>
+                        }
+                        renderItem={(item, index) => (
+                          <>
+                            {item.type == "Discount Payment" && (
+                              <List.Item>
+                                <Checkbox
+                                  checked={item.isChecked}
+                                  disabled={
+                                    item.paymenttype !=
+                                    state.payloadBilling.paymentoption
+                                  }
+                                  onChange={(e) => {
+                                    handleDiscountSelected(
+                                      e.target.checked,
+                                      item,
+                                      discountItem.id
+                                    );
+                                  }}
+                                  defaultChecked={false}
+                                  style={{ marginRight: "16px" }}
+                                />
+                                <List.Item.Meta
+                                  title={<p>{item.discount}</p>}
+                                  description={`Type: ${
+                                    item.discounttype
+                                  }, Value: ${
+                                    item.discounttype == "nominal"
+                                      ? "Rp. " + item.value
+                                      : item.discounttype == "percent"
+                                      ? item.value + "%"
+                                      : item.value
+                                  }, Payment: ${item.paymenttype}`}
+                                />
+                              </List.Item>
+                            )}
+                          </>
+                        )}
+                      />
+                    </div>
+                  ),
+                }))}
+              />
+            </div>
+          )}
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Summary
+              </Divider>
+              <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
+                <div className="flex w-full">
+                  <p className="w-1/2">Subtotal</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.subtotalbruto)}
+                  </p>
+                </div>
+                <div className="flex w-full">
+                  <p className="w-1/2">Discount Item</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.discounttotal)}
+                  </p>
+                </div>
+                <div className="flex w-full">
+                  <p className="w-1/2">Subtotal (After Discount)</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.subtotal)} Incl. PPN
+                  </p>
+                </div>
+                <div className="flex w-full">
+                  <p className="w-1/2">Tax Total</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.taxtotal)}
+                  </p>
+                </div>
+                <hr className="border-gray-5" />
+                <div className="flex w-full font-semibold">
+                  <p className="w-1/2">Total</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.total)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+      {isLoadingSubmit && <LoadingSpinProcessing />}
+      {contextNotify}
+      <Modal
+        open={isModalItemOpen}
+        onOk={handleModalItemOk}
+        onCancel={handleModalItemCancel}
+        width={850}
+        cancelText="Cancel"
+      >
+        <div className="w-full mt-6">
+          <div className="w-full flex flex-col gap-4 mt-6">
+            <div className="w-full flex flex-col gap-8">
+              <div className="w-full flex flex-col gap-2">
+                <Divider
+                  style={{
+                    margin: "0",
+                    textTransform: "capitalize",
+                    borderColor: "#1677ff",
+                  }}
+                  orientation="left"
+                >
+                  Item
+                </Divider>
+                <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                  <p>Display Name</p>
+                  <Select
+                    value={itemSelected}
+                    showSearch
+                    placeholder="Select an item"
+                    optionFilterProp="label"
+                    onChange={(_, item) => {
+                      const isDuplicate = dataTableItem.some(
+                        (tableItem) => tableItem.item === item.value
+                      );
+
+                      if (isDuplicate) {
+                        notify("error", "Error", "Item has been added.");
+                        return;
+                      }
+
+                      setItemSelected(item.value);
+
+                      dispatchItemTable({
+                        type: "SET_ITEM",
+                        payload: {
+                          item: item.id,
+                          units: item.unitstype,
+                          rate: item.price,
+                          discount: item.discount,
+                          displayname: item.displayname,
+                          itemprocessfamily: item.itemprocessfamily,
+                          stock: item.stock,
+                          itemid: item.itemid,
+                        },
+                      });
+                    }}
+                    onSearch={{}}
+                    options={dataItem}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </div>
+            </div>
+            <InputForm
+              title="Item Quantity"
+              type="SET_ITEM"
+              payload={stateItemTable.item}
+              data={[
+                {
+                  key: "item",
+                  input: "input",
+                  isAlias: true,
+                  isRead: true,
+                },
+                {
+                  key: "quantity",
+                  input: "number",
+                  isAlias: true,
+                },
+                {
+                  key: "units",
+                  input: "input",
+                  isAlias: true,
+                  isRead: true,
+                },
+                {
+                  key: "rate",
+                  input: "input",
+                  isAlias: true,
+                  isRead: true,
+                },
+                {
+                  key: "description",
+                  input: "text",
+                  isAlias: true,
+                },
+              ]}
+              aliases={[]}
+              onChange={(type, payload) => {
+                dispatchItemTable({ type, payload });
+              }}
+            />
+            <InputForm
+              title="Tax Item"
+              type="SET_TAX"
+              payload={stateItemTable.tax}
+              data={[
+                {
+                  key: "taxable",
+                  input: "select",
+                  options: [
+                    { label: "Yes", value: true },
+                    { label: "No", value: false },
+                  ],
+                  isAlias: true,
+                },
+                {
+                  key: "taxrate",
+                  input: "number",
+                  isAlias: true,
+                  disabled: !stateItemTable.tax.taxable,
+                },
+              ]}
+              aliases={[]}
+              onChange={(type, payload) => {
+                dispatchItemTable({ type, payload });
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
+}

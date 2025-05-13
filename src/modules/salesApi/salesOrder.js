@@ -20,4 +20,35 @@ export default class SalesOrderFetch extends ProcessFetch {
       return new this().processError(error)
     }
   }
+  static async getSoAgreement(item_id = '', cust_id = '', qty = 0, trandate = '') {
+    try {
+      const response = await this.axios.get('/trx/so/get-agreement', {
+        params: { item_id, cust_id, qty, trandate },
+      })
+      return new this().processResponse(response)
+    } catch (error) {
+      return new this().processError(error)
+    }
+  }
+
+  static async getSoAgreementGroup(item_categories = '', cust_id = '', qty = 0, trandate = '') {
+    try {
+      const response = await this.axios.get('/trx/so/get-agreement-group', {
+        params: { item_categories, cust_id, qty, trandate },
+      })
+      return new this().processResponse(response)
+    } catch (error) {
+      return new this().processError(error)
+    }
+  }
+
+  static async add(payload) {
+    try {
+      const response = await this.axios.post('/trx/sales-order', payload)
+      return new this().processResponse(response)
+    } catch (error) {
+      return new this().processError(error)
+    }
+  }
+  
 }

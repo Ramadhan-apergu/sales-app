@@ -47,4 +47,5 @@ export default class AgreementFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+  
 }

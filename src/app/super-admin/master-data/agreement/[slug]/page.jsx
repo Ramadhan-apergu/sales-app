@@ -40,6 +40,7 @@ export default function Detail() {
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [modal, contextHolder] = Modal.useModal()
+  const [agreementGroupType, setAgreementGroupType] = useState('nominal')
 
   useEffect(() => {
     async function fetchData() {
@@ -48,8 +49,19 @@ export default function Detail() {
             const response = await AgreementFetch.getById(slug)
             const resData = getByIdResponseHandler(response, notify)
             setData(resData)
+            console.log(resData)
+
             if (resData) {
                 mapingGroup(resData)
+
+                if (resData.agreement_groups) {
+                    const agreementGroups = resData.agreement_groups
+                    if (agreementGroups?.qtyfree > 0  && agreementGroups.unitfree != "") {
+                        setAgreementGroupType('freeitem')
+                    } else {
+                        setAgreementGroupType('nominal')
+                    }
+                }
             }
 
         } catch (error) {
@@ -157,6 +169,7 @@ export default function Detail() {
                 })
                 
                 const result = await Promise.all(promises)
+                console.log(result)
                 setAgreementLinesWithItem(result)
             }
         } catch (error) {
@@ -212,10 +225,10 @@ export default function Detail() {
   }
 
   const items = [
-    {
-      key: '1',
-      label: 'Approve'
-    },
+    // {
+    //   key: '1',
+    //   label: 'Approve'
+    // },
     {
       key: '2',
       label: 'Delete',
@@ -289,8 +302,29 @@ const keys = [
         "qtymaxunit",
         "qtyfree",
         "perunit",
-      ],
+    ],
       ['itemid', 'displayname']
+]
+
+const dataformAgreementGroups = [
+    [
+        { key: 'id', input: 'input', isAlias: false },
+        { key: 'agreementid', input: 'input', isAlias: false },
+        { key: 'itemcategory', input: 'input', isAlias: false },
+        { key: 'qtymin', input: 'input', isAlias: false },
+        { key: 'qtymax', input: 'input', isAlias: false },
+        { key: 'discountnominal', input: 'input', isAlias: false },
+    ],
+    [
+        { key: 'id', input: 'input', isAlias: false },
+        { key: 'agreementid', input: 'input', isAlias: false },
+        { key: 'itemcategory', input: 'input', isAlias: false },
+        { key: 'qtymin', input: 'input', isAlias: false },
+        { key: 'qtymax', input: 'input', isAlias: false },
+        { key: 'qtyfree', input: 'input', isAlias: false },
+        { key: 'unitfree', input: 'input', isAlias: false },
+        { key: 'itemfree', input: 'input', isAlias: false },
+    ]
 ]
 
   return (
@@ -365,18 +399,9 @@ const keys = [
                                                 <InputForm
                                                     isReadOnly={true}
                                                     type="agreement groups"
-                                                    title='agreement groups (Price / Items)'
+                                                    title={`agreement groups (${agreementGroupType == 'nominal' ? 'Price' : 'Free Item'})`}
                                                     payload={agreementGroups.agreement_groups}
-                                                    data={[
-                                                        { key: 'id', input: 'input', isAlias: false },
-                                                        { key: 'agreementid', input: 'input', isAlias: false },
-                                                        { key: 'itemcategory', input: 'input', isAlias: false },
-                                                        { key: 'qtymin', input: 'input', isAlias: false },
-                                                        { key: 'qtymax', input: 'input', isAlias: false },
-                                                        { key: 'discountnominal', input: 'input', isAlias: false },
-                                                        { key: 'qtyfree', input: 'input', isAlias: false },
-                                                        { key: 'unitfree', input: 'input', isAlias: false },
-                                                    ]}
+                                                    data={agreementGroupType == 'nominal' ? dataformAgreementGroups[0] : dataformAgreementGroups[1]}
                                                     aliases={customerAliases}
                                                 />
                                                 <div className='w-full flex flex-col gap-4'>

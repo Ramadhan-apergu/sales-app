@@ -175,8 +175,9 @@ export default function Detail() {
 }
 
 const termOptions = [
-    { label: 'Net 30', value: 'net 30' },
-    { label: 'Net 90', value: 'net 90' },
+    {label: 'Net 30', value: 'Net 30'},
+    {label: 'Net 90', value: 'Net 90'},
+    {label: 'Net 120', value: 'Net 120'},
 ]
 
   return (

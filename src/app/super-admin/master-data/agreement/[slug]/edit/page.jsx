@@ -258,6 +258,7 @@ function SelectItem({ onselect }) {
   
 
   function TableCustom({ data, keys, aliases, onDelete }) {
+    console.log(data)
     const columns = [
       ...keys.map((key) => ({
         title: aliases?.[key] || key,
@@ -301,6 +302,7 @@ export default function AgreementEdit() {
   const [modal, contextHolder] = Modal.useModal()
   const title = 'agreement'
   const [data, setData] = useState(null)
+  const [dataItem, setDataItem] = useState(null)
 
     useEffect(() => {
       async function fetchData() {
@@ -312,6 +314,73 @@ export default function AgreementEdit() {
 
               if (resData) {
                   mapingGroup(resData)
+
+                  if (resData.agreement_lines && resData.agreement_lines.length > 0) {
+                      const promises = resData.agreement_lines.map(async (agreement) => {
+                            let item = { id: '', itemid: '', displayname: '', price: 0, unitstype: ''}
+                        
+                            const getItem = await getItemById(agreement.itemid)
+                            if (getItem) {
+                                item = {
+                                    id: getItem.id,
+                                    itemid: getItem.itemid,
+                                    displayname: getItem.displayname,
+                                    price: getItem.price,
+                                    unitstype: getItem.unitstype
+                                }
+                            }
+
+                            const {
+                                qtymin,
+                                qtyminunit,
+                                qtymax,
+                                qtymaxunit,
+                                discountpercent,
+                                discountnominal,
+                                paymenttype,
+                                qtyfree,
+                                perunit
+                            } = agreement
+                        
+                            return { 
+                                qtymin,
+                                qtyminunit,
+                                qtymax,
+                                qtymaxunit,
+                                discountpercent,
+                                discountnominal,
+                                paymenttype,
+                                qtyfree,
+                                perunit,
+                                ...item 
+                            }
+                        })
+                        
+                        const result = await Promise.all(promises)
+                        setPayloadDetail(result)
+                  }
+
+                  if (resData.agreement_groups) {
+                    let items = []
+                    
+                    if (resData.agreement_groups.itemcategory) {
+                        const getItem = await getItemByCategory(resData.agreement_groups.itemcategory)
+                        if (getItem) {
+                            items = getItem.list
+                        }
+                    }
+    
+                    setPayloadDetail(items)
+                  }
+
+                  if (resData.agreement_groups) {
+                    const agreementGroups = resData.agreement_groups
+                    if (agreementGroups?.qtyfree > 0  && agreementGroups.unitfree != "") {
+                        setIsPayloadGroupItem(true)
+                    } else {
+                        setIsPayloadGroupItem(false)
+                    }
+                }
               }
   
           } catch (error) {
@@ -324,6 +393,28 @@ export default function AgreementEdit() {
           }
       }
       fetchData()
+
+        const fetchDataItem = async () => {
+          try {
+            const response = await ItemFetch.get(0, 1000, null, null, null);
+            const resData = getResponseHandler(response)
+        
+            if (resData) {
+                const dataWithLabel = resData.list.map((item) => {
+                    return {
+                        ...item,
+                        label: item.displayname,
+                        value: item.id
+                    }
+                })
+                setDataItem(dataWithLabel)
+            }
+          } catch (error) {
+              notify('error', 'Error', error?.message || "Internal Server error");
+          }
+        };
+
+        fetchDataItem()
     }, [])
 
   const [payloadCustomForm, setPayloadCustomForm] = useState({
@@ -347,14 +438,9 @@ export default function AgreementEdit() {
             "qtymax": 0,
             "discountnominal": 0,
             "qtyfree": 0,
-            "unitfree": ""
+            "unitfree": "",
+            "itemfree": ""
     })
-
-    useEffect(() => {
-        if(payloadGroup.itemcategory) {
-
-        }
-    }, [payloadGroup])
 
     const [payloadDetail, setPayloadDetail] = useState([])
 
@@ -362,10 +448,38 @@ export default function AgreementEdit() {
     const [isLoadingSubmit, setIsLoadingSubmit] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
+    
+      async function getItemById(id) {
+        try {
+            const response = await ItemFetch.getById(id)
+            if (response.status_code == 200 && response.data) {
+                return response.data
+            } else {
+                return null
+            }
+        } catch (error) {
+            notify('error', 'Failed', 'Fetch data item')
+        }
+      }
+    
+      async function getItemByCategory(category) {
+        try {
+            const response = await ItemFetch.get(0, 1000, null, null, category)
+            if (response.status_code == 200 && response.data) {
+                return response.data
+            } else {
+                return null
+            }
+        } catch (error) {
+            notify('error', 'Failed', 'Fetch data item')
+        }
+      }
+
     const handleChangePayload = (type, payload) => {
             switch (type) {
             case 'customform':
             setPayloadCustomForm(payload);
+            clearPayloadDetail()
                 break;
             case 'primary':
               setPayloadGeneral(payload);
@@ -375,6 +489,7 @@ export default function AgreementEdit() {
               setPayloadDetail(payload);
               break;
             case 'group':
+                console.log(payload)
               setPayloadGroup(payload);
               break;
               case 'detailinit':
@@ -475,7 +590,7 @@ export default function AgreementEdit() {
             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-            {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
+            {key: "price", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
@@ -488,7 +603,7 @@ export default function AgreementEdit() {
             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-            {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
+            {key: "price", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
@@ -501,7 +616,7 @@ export default function AgreementEdit() {
             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-            {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
+            {key: "price", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
@@ -515,7 +630,7 @@ export default function AgreementEdit() {
             {key: "id", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "itemid", input: 'input', isAlias: false, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "displayname", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
-            {key: "price", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
+            {key: "price", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "unitstype", input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}], disabled: true},
             {key: "qtymin", input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}]},
             {key: "qtyminunit", input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}]},
@@ -540,9 +655,12 @@ export default function AgreementEdit() {
           const initValueDetail = toInitialObject(keys[customForm - 1])
           setPayloadDetailInit(initValueDetail)
           payloadDetailInitRef.current = initValueDetail;
-          setPayloadDetail([])
         }
       }, [payloadCustomForm])
+
+      function clearPayloadDetail() {
+        setPayloadDetail([])
+      }
 
 
       const handleSubmit = async () => {
@@ -568,10 +686,14 @@ export default function AgreementEdit() {
                         perunit: line?.perunit
                     }
                 }),
-                agreement_groups: {...payloadGroup}
+                agreement_groups: {
+                    ...payloadGroup,
+                    qtyfree: payloadGroup?.qtyfree || 0,
+                    unitfree: payloadGroup?.unitfree || "",
+                    itemfree: payloadGroup?.itemfree || "",
+                    discountnominal: payloadGroup?.discountnominal || 0
+                }
             }
-
-            console.log(payload)
     
             const {customform, agreementcode, agreementname, status} = payload
     
@@ -739,7 +861,8 @@ export default function AgreementEdit() {
           setPayloadCustomForm(customformData)
           setPayloadGeneral(generalData)
           setPayloadGroup(data.agreement_groups)
-          setPayloadDetail(data.agreement_lines)
+        //   setPayloadDetail(data.agreement_lines)
+        //   console.log('masuk')
       }
 
   return (
@@ -803,7 +926,7 @@ export default function AgreementEdit() {
                                                         },
                                                         { key: 'effectivedate', input: 'date', isAlias: true },
                                                         { key: 'enddate', input: 'date', isAlias: true },
-                                                        { key: 'description', input: 'input', isAlias: true },
+                                                        { key: 'description', input: 'text', isAlias: true },
                                                     ]}
                                                     aliases={agreementAliases}
                                                     onChange={handleChangePayload}
@@ -831,7 +954,18 @@ export default function AgreementEdit() {
                                                             <Switch
                                                             size='small'
                                                                 checked={isPayloadGroupItem}
-                                                                onChange={()=> setIsPayloadGroupItem(!isPayloadGroupItem)}
+                                                                onChange={
+                                                                    ()=> {
+                                                                        setIsPayloadGroupItem(!isPayloadGroupItem);
+                                                                        setPayloadGroup((prev) => ({
+                                                                            ...prev,
+                                                                            discountnominal: 0,
+                                                                            qtyfree: 0,
+                                                                            unitfree: '',
+                                                                            itemfree: ''
+                                                                        }))
+                                                                    }
+                                                                }
                                                             />
                                                             <p className='font-semibold'>Free Item Type</p>
                                                         </div>
@@ -841,6 +975,8 @@ export default function AgreementEdit() {
                                                                 type="group"
                                                                 payload={payloadGroup}
                                                                 data={[
+                                                                    { key: 'id', input: 'input', isAlias: false, isRead: true },
+                                                                    { key: 'agreementid', input: 'input', isAlias: false, isRead: true },
                                                                     { key: 'itemcategory', input: 'select', options: itemprocessfamilyOptions, isAlias: true, rules: [{required: true, message: 'is required!'}] },
                                                                     { key: 'qtymin', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
                                                                     { key: 'qtymax', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
@@ -855,11 +991,14 @@ export default function AgreementEdit() {
                                                                 type="group"
                                                                 payload={payloadGroup}
                                                                 data={[
+                                                                    { key: 'id', input: 'input', isAlias: false, isRead: true },
+                                                                    { key: 'agreementid', input: 'input', isAlias: false, isRead: true },
                                                                     { key: 'itemcategory', input: 'select', options: itemprocessfamilyOptions, isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                                    { key: 'qtymin', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                                    { key: 'qtymax', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                                    { key: 'qtyfree', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
-                                                                    { key: 'unitfree', input: 'input', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtymin', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtymax', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'qtyfree', input: 'number', isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'unitfree', input: 'select', options: unitOptions, isAlias: true, rules: [{required: true, message: 'is required!'}] },
+                                                                    { key: 'itemfree', input: 'select', options: dataItem, isAlias: false },
                                                                 ]}
                                                                 aliases={agreementAliases}
                                                                 onChange={handleChangePayload}

@@ -1,114 +1,101 @@
-export function createResponseHandler(response, notifyFn) {
+function callNotify(notifyFn, ...args) {
+    if (typeof notifyFn === 'function') {
+      notifyFn(...args);
+    }
+  }
+  
+  export function createResponseHandler(response, notifyFn) {
     switch (response.status_code) {
-      case 201:
       case 200:
-        notifyFn('success', 'Successful');
-        return response.data.id
+      case 201:
+        callNotify(notifyFn, 'success', 'Successful');
+        return response.data.id;
       default:
         if (Array.isArray(response.errors)) {
           response.errors.forEach((err) =>
-            notifyFn('error', response.message, err)
+            callNotify(notifyFn, 'error', response.message, err)
           );
         } else {
-          notifyFn(
-            'error',
-            `Failed`,
-            'Please try again!'
-          );
+          callNotify(notifyFn, 'error', 'Failed', 'Please try again!');
         }
-        return null
+        return null;
     }
-}
-
-export function updateResponseHandler(response, notifyFn) {
+  }
+  
+  export function updateResponseHandler(response, notifyFn) {
     switch (response.status_code) {
-      case 201:
       case 200:
-        notifyFn('success', 'Successful');
-        return response.data.id
+      case 201:
+        callNotify(notifyFn, 'success', 'Successful');
+        return response.data.id;
       default:
         if (Array.isArray(response.errors)) {
           response.errors.forEach((err) =>
-            notifyFn('error', response.message, err)
+            callNotify(notifyFn, 'error', response.message, err)
           );
         } else {
-          notifyFn(
-            'error',
-            `Failed`,
-            'Please try again!'
-          );
+          callNotify(notifyFn, 'error', 'Failed', 'Please try again!');
         }
-        return null
+        return null;
     }
-}
-
-export function getByIdResponseHandler(response, notifyFn) {
+  }
+  
+  export function getByIdResponseHandler(response, notifyFn) {
     switch (response.status_code) {
-      case 201:
       case 200:
-        return response.data
-      case 404:
+      case 201:
+        return response.data;
       case 400:
-        notifyFn('error', 'Failed', 'Data not found');
-        return null
-      default:
-        if (Array.isArray(response.errors)) {
-          response.errors.forEach((err) =>
-            notifyFn('error', response.message, err)
-          );
-        } else {
-          notifyFn(
-            'error',
-            `Failed`,
-            'Please try again!'
-          );
-        }
-        return null
-    }
-}
-
-export function getResponseHandler(response, notifyFn) {
-    switch (response.status_code) {
-      case 201:
-      case 200:
-        return response.data
       case 404:
-      case 400:
-        notifyFn('error', 'Failed', 'Data not found');
-        return null
+        callNotify(notifyFn, 'error', 'Failed', 'Data not found');
+        return null;
       default:
         if (Array.isArray(response.errors)) {
           response.errors.forEach((err) =>
-            notifyFn('error', response.message, err)
+            callNotify(notifyFn, 'error', response.message, err)
           );
         } else {
-          notifyFn(
-            'error',
-            `Failed`,
-            'Please try again!'
-          );
+          callNotify(notifyFn, 'error', 'Failed', 'Please try again!');
         }
-        return null
+        return null;
     }
-}
-
-export function deleteResponseHandler(response, notifyFn) {
+  }
+  
+  export function getResponseHandler(response, notifyFn) {
+    switch (response.status_code) {
+      case 200:
+      case 201:
+        return response.data;
+      case 400:
+      case 404:
+        callNotify(notifyFn, 'error', 'Failed', 'Data not found');
+        return null;
+      default:
+        if (Array.isArray(response.errors)) {
+          response.errors.forEach((err) =>
+            callNotify(notifyFn, 'error', response.message, err)
+          );
+        } else {
+          callNotify(notifyFn, 'error', 'Failed', 'Please try again!');
+        }
+        return null;
+    }
+  }
+  
+  export function deleteResponseHandler(response, notifyFn) {
     switch (response.status_code) {
       case 204:
-        notifyFn('success', 'Successful');
-        return true
+        callNotify(notifyFn, 'success', 'Successful');
+        return true;
       default:
         if (Array.isArray(response.errors)) {
           response.errors.forEach((err) =>
-            notifyFn('error', response.message, err)
+            callNotify(notifyFn, 'error', response.message, err)
           );
         } else {
-          notifyFn(
-            'error',
-            `Failed`,
-            'Please try again!'
-          );
+          callNotify(notifyFn, 'error', 'Failed', 'Please try again!');
         }
-        return false
+        return false;
     }
-}
+  }
+  

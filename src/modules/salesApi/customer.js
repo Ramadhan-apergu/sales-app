@@ -39,6 +39,15 @@ export default class CustomerFetch extends ProcessFetch {
     }
   }
 
+  static async updateApproval(id) {
+    try {
+      const response = await this.axios.put(`/master/customers/approval/${id}`)
+      return new this().processResponse(response)
+    } catch (error) {
+      return new this().processError(error)
+    }
+  }
+
   static async delete(id) {
     try {
       const response = await this.axios.delete(`/master/customers/${id}`)
@@ -47,4 +56,5 @@ export default class CustomerFetch extends ProcessFetch {
       return new this().processError(error)
     }
   }
+
 }

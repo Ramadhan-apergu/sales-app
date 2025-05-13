@@ -11,7 +11,8 @@ export default function InputForm({
   isReadOnly = false,
   isLargeScreen = true,
   aliases = {},
-  title = null
+  title = null,
+  isSingleCol = false
 }) {
   const [form] = Form.useForm();
 
@@ -43,19 +44,23 @@ export default function InputForm({
       <Form
         form={form}
         layout="vertical"
-        className="w-full grid grid-cols-1 lg:grid-cols-2 px-4 gap-4"
+        className={`w-full grid grid-cols-1 ${isSingleCol ? 'lg:grid-cols-1' : 'lg:grid-cols-2'} px-4 gap-4`}
         onValuesChange={handleValuesChange}
       >
-        {data.map(({ key, input, options = [], isAlias = false, props = {}, rules = [] , disabled = false}) => {
+        {data.map(({ key, input, options = [], isAlias = false, props = {}, rules = [] , disabled = false, isRead = false, placeholder = undefined}) => {
           const label = isAlias ? aliases[key] || key : key;
 
           let inputComponent;
           switch (input) {
             case 'number':
-              inputComponent = <InputNumber {...props} style={{ width: '100%' }} readOnly={isReadOnly} />;
+              inputComponent = (
+                <InputNumber {...props} style={{ width: '100%' }} readOnly={isReadOnly} disabled={disabled} placeholder={placeholder}/>
+              );
               break;
             case 'select':
-              inputComponent = <Select options={options} {...props} style={{ width: '100%' }} readOnly={isReadOnly} />;
+              inputComponent = (
+                <Select options={options} {...props} style={{ width: '100%' }} readOnly={isReadOnly || isRead} placeholder={placeholder}/>
+              );
               break;
             case 'date':
               inputComponent = (
@@ -63,13 +68,27 @@ export default function InputForm({
                   {...props}
                   style={{ width: '100%' }}
                   format={props?.format || 'YYYY-MM-DD'}
-                  disabled={isReadOnly || disabled}
+                  disabled={isReadOnly || disabled || isRead}
+                placeholder={placeholder}
+                />
+              );
+              break;
+            case 'text':
+              inputComponent = (
+                <Input.TextArea
+                  {...props}
+                  readOnly={isReadOnly || isRead}
+                  disabled={disabled}
+                  autoSize={{ minRows: 3, maxRows: 6 }}
+                placeholder={placeholder}
                 />
               );
               break;
             case 'input':
             default:
-              inputComponent = <Input {...props} readOnly={isReadOnly} disabled={disabled}/>;
+              inputComponent = (
+                <Input {...props} readOnly={isReadOnly || isRead} disabled={disabled} placeholder={placeholder}/>
+              );
               break;
           }
 

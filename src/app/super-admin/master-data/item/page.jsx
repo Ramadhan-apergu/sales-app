@@ -172,7 +172,7 @@ function Item() {
     <Layout pageTitle={title}>
             <div className='w-full flex flex-col gap-4'>
                 <div className='w-full flex justify-between items-center'>
-                    <p className='text-xl font-semibold text-blue-6'>Item List</p>
+                    <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Item List</p>
                         <Button
                         type="primary"
                         icon={<PlusOutlined />}
