@@ -43,6 +43,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import { formatDateToShort } from "@/utils/formatDate";
 import AgreementFetch from "@/modules/salesApi/agreement";
+import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -66,7 +67,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
   );
 }
 
-export default function AgreementNew() {
+export default function Detail() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const { slug } = useParams();
   const router = useRouter();
@@ -361,7 +362,7 @@ export default function AgreementNew() {
   }
 
   const handleEdit = () => {
-    router.push(`/super-admin/master-data/${title}/${data.id}/edit`);
+    router.push(`/super-admin/${title}/${data.id}/edit`);
   };
 
   const [modal, contextHolder] = Modal.useModal();
@@ -421,196 +422,210 @@ export default function AgreementNew() {
               {isLargeScreen ? "List" : ""}
             </Button>
           </div>
-          {!isLoading && data?.id ? (
-            <div className="w-full flex flex-col gap-4">
-              <div className="w-full flex flex-col lg:flex-row justify-between items-start">
-                <div className="w-full lg:w-1/2 flex gap-1 flex-col">
-                  <p className="w-full lg:text-lg">
-                    {data.id + " / " + data.customer}
-                  </p>
-                  <div>
-                    <Tag
-                      style={{ textTransform: "capitalize", fontSize: "16px" }}
-                      color={
-                        data.status.toLowerCase() == "open" ? "green" : "red"
-                      }
-                    >
-                      {data.status}
-                    </Tag>
-                  </div>
-                </div>
-                <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-                  <Button
-                    icon={<EditOutlined />}
-                    type={"primary"}
-                    onClick={handleEdit}
-                  >
-                    {isLargeScreen ? "Edit" : ""}
-                  </Button>
-                  {contextHolder}
-                  <Dropdown
-                    menu={{ items, onClick: handleClickAction }}
-                    placement="bottomRight"
-                  >
-                    <Button icon={!isLargeScreen ? <MoreOutlined /> : null}>
-                      {isLargeScreen ? "Action" : ""}
-                    </Button>
-                  </Dropdown>
-                </div>
-              </div>
-              <InputForm
-                title="customer"
-                type="SET_CUSTOMER"
-                payload={state.payloadCustomer}
-                data={[
-                  {
-                    key: "customer",
-                    input: "input",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                ]}
-                aliases={[]}
-              />
-              <InputForm
-                title="primary"
-                type="SET_PRIMARY"
-                payload={state.payloadPrimary}
-                data={[
-                  {
-                    key: "entity",
-                    input: "input",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                  {
-                    key: "trandate",
-                    input: "input",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                  {
-                    key: "salesrep",
-                    input: "input",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                  {
-                    key: "otherrefnum",
-                    input: "input",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                ]}
-                aliases={[]}
-              />
-              <InputForm
-                title="shipping"
-                type="SET_SHIPPING"
-                payload={state.payloadShipping}
-                data={[
-                  {
-                    key: "shippingoption",
-                    input: "text",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                  {
-                    key: "shippingaddress",
-                    input: "text",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                ]}
-                aliases={[]}
-              />
-              <InputForm
-                title="billing"
-                type="SET_BILLING"
-                payload={state.payloadBilling}
-                data={[
-                  {
-                    key: "term",
-                    input: "input",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                  {
-                    key: "paymentoption",
-                    input: "input",
-                    isAlias: true,
-                    isRead: true,
-                  },
-                ]}
-                aliases={[]}
-              />
-              <div className="w-full flex flex-col gap-8">
+          {!isLoading ? (
+            <>
+              {data && data.id ? (
                 <div className="w-full flex flex-col gap-4">
-                  <Divider
-                    style={{
-                      margin: "0",
-                      textTransform: "capitalize",
-                      borderColor: "#1677ff",
-                    }}
-                    orientation="left"
-                  >
-                    Item
-                  </Divider>
-                  <TableCustom
-                    data={dataTableItem}
-                    keys={keyTableItem}
-                    aliases={{}}
+                  <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+                    <div className="w-full lg:w-1/2 flex gap-1 flex-col">
+                      <p className="w-full lg:text-lg">
+                        {data.id + " / " + data.customer}
+                      </p>
+                      <div>
+                        <Tag
+                          style={{
+                            textTransform: "capitalize",
+                            fontSize: "16px",
+                          }}
+                          color={
+                            data.status.toLowerCase() == "open"
+                              ? "green"
+                              : "red"
+                          }
+                        >
+                          {data.status}
+                        </Tag>
+                      </div>
+                    </div>
+                    <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                      <Button
+                        icon={<EditOutlined />}
+                        type={"primary"}
+                        onClick={handleEdit}
+                      >
+                        {isLargeScreen ? "Edit" : ""}
+                      </Button>
+                      {contextHolder}
+                      <Dropdown
+                        menu={{ items, onClick: handleClickAction }}
+                        placement="bottomRight"
+                      >
+                        <Button icon={!isLargeScreen ? <MoreOutlined /> : null}>
+                          {isLargeScreen ? "Action" : ""}
+                        </Button>
+                      </Dropdown>
+                    </div>
+                  </div>
+                  <InputForm
+                    title="customer"
+                    type="SET_CUSTOMER"
+                    payload={state.payloadCustomer}
+                    data={[
+                      {
+                        key: "customer",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                    ]}
+                    aliases={[]}
                   />
-                </div>
-              </div>
-              <div className="w-full flex flex-col gap-8">
-                <div className="w-full flex flex-col gap-2">
-                  <Divider
-                    style={{
-                      margin: "0",
-                      textTransform: "capitalize",
-                      borderColor: "#1677ff",
-                    }}
-                    orientation="left"
-                  >
-                    Summary
-                  </Divider>
-                  <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
-                    <div className="flex w-full">
-                      <p className="w-1/2">Subtotal</p>
-                      <p className="w-1/2 text-end">
-                        {formatRupiah(state.payloadSummary.subtotalbruto)}
-                      </p>
+                  <InputForm
+                    title="primary"
+                    type="SET_PRIMARY"
+                    payload={state.payloadPrimary}
+                    data={[
+                      {
+                        key: "entity",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "trandate",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "salesrep",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "otherrefnum",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                    ]}
+                    aliases={[]}
+                  />
+                  <InputForm
+                    title="shipping"
+                    type="SET_SHIPPING"
+                    payload={state.payloadShipping}
+                    data={[
+                      {
+                        key: "shippingoption",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "shippingaddress",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                    ]}
+                    aliases={[]}
+                  />
+                  <InputForm
+                    title="billing"
+                    type="SET_BILLING"
+                    payload={state.payloadBilling}
+                    data={[
+                      {
+                        key: "term",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "paymentoption",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                    ]}
+                    aliases={[]}
+                  />
+                  <div className="w-full flex flex-col gap-8">
+                    <div className="w-full flex flex-col gap-4">
+                      <Divider
+                        style={{
+                          margin: "0",
+                          textTransform: "capitalize",
+                          borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                      >
+                        Item
+                      </Divider>
+                      <TableCustom
+                        data={dataTableItem}
+                        keys={keyTableItem}
+                        aliases={{}}
+                      />
                     </div>
-                    <div className="flex w-full">
-                      <p className="w-1/2">Discount Item</p>
-                      <p className="w-1/2 text-end">
-                        {formatRupiah(state.payloadSummary.discounttotal)}
-                      </p>
-                    </div>
-                    <div className="flex w-full">
-                      <p className="w-1/2">Subtotal (After Discount)</p>
-                      <p className="w-1/2 text-end">
-                        {formatRupiah(state.payloadSummary.subtotal)} Incl. PPN
-                      </p>
-                    </div>
-                    <div className="flex w-full">
-                      <p className="w-1/2">Tax Total</p>
-                      <p className="w-1/2 text-end">
-                        {formatRupiah(state.payloadSummary.taxtotal)}
-                      </p>
-                    </div>
-                    <hr className="border-gray-5" />
-                    <div className="flex w-full font-semibold">
-                      <p className="w-1/2">Total</p>
-                      <p className="w-1/2 text-end">
-                        {formatRupiah(state.payloadSummary.total)}
-                      </p>
+                  </div>
+                  <div className="w-full flex flex-col gap-8">
+                    <div className="w-full flex flex-col gap-2">
+                      <Divider
+                        style={{
+                          margin: "0",
+                          textTransform: "capitalize",
+                          borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                      >
+                        Summary
+                      </Divider>
+                      <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
+                        <div className="flex w-full">
+                          <p className="w-1/2">Subtotal</p>
+                          <p className="w-1/2 text-end">
+                            {formatRupiah(state.payloadSummary.subtotalbruto)}
+                          </p>
+                        </div>
+                        <div className="flex w-full">
+                          <p className="w-1/2">Discount Item</p>
+                          <p className="w-1/2 text-end">
+                            {formatRupiah(state.payloadSummary.discounttotal)}
+                          </p>
+                        </div>
+                        <div className="flex w-full">
+                          <p className="w-1/2">Subtotal (After Discount)</p>
+                          <p className="w-1/2 text-end">
+                            {formatRupiah(state.payloadSummary.subtotal)} Incl.
+                            PPN
+                          </p>
+                        </div>
+                        <div className="flex w-full">
+                          <p className="w-1/2">Tax Total</p>
+                          <p className="w-1/2 text-end">
+                            {formatRupiah(state.payloadSummary.taxtotal)}
+                          </p>
+                        </div>
+                        <hr className="border-gray-5" />
+                        <div className="flex w-full font-semibold">
+                          <p className="w-1/2">Total</p>
+                          <p className="w-1/2 text-end">
+                            {formatRupiah(state.payloadSummary.total)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              ) : (
+                <div className="w-full h-96">
+                  <EmptyCustom />
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-full h-96">
               <LoadingSpin />
