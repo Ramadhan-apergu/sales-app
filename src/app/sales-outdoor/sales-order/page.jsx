@@ -11,7 +11,7 @@ export default function SalesOrder() {
 
     return (
         <Layout>
-            <div className='w-full h-full overflow-y-auto overflow-x-hidden relative'>
+            <div className='w-full h-full overflow-y-auto overflow-x-hidden relative' style={{scrollbarWidth: 'none'}}>
                 <FixedHeaderBar bgColor="bg-blue-6"/>
                 <Header
                 title={'Sales Order'}

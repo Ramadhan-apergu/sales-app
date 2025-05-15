@@ -13,7 +13,7 @@ export default function TabBar() {
 
   const items = [
     {
-      path: '/dashboard',
+      path: '/home',
       title: 'Home',
       icon: {
         solid: HiHome,

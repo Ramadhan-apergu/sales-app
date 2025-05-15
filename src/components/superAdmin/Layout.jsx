@@ -36,7 +36,11 @@ const headerItems = [
   { key: `${prefix}/sales-order`, label: 'Sales Order' },
   { key: `${prefix}/delivery-order`, label: 'Delivery' },
   { key: `${prefix}/invoice`, label: 'Invoice' },
+  { key: `${prefix}/payment`, label: 'Payment' },
+  { key: `${prefix}/credit-memo`, label: 'Credit Memo' },
   { key: `${prefix}/master-data`, label: 'Master Data' },
+  { key: `${prefix}/customer-deals`, label: 'Customer Deals' },
+  { key: `${prefix}/adjustment-stock`, label: 'Adjustment Stock' },
   { key: `${prefix}/report`, label: 'Report' },
 ];
 
@@ -238,7 +242,7 @@ const [openDrawer, setOpenDrawer] = useState(false);
         <div className="h-full ml-4 lg:ml-12 py-2">
           <img className="h-full filter brightness-0 invert" src="/images/karya-group-logo.webp" alt="Karya Group Logo" />
         </div>
-        <div className="hidden lg:block">
+        <div className="hidden w-1/2 lg:block">
           <Menu
             theme="dark"
             mode="horizontal"
