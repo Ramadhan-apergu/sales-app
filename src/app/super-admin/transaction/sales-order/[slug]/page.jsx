@@ -20,6 +20,7 @@ import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
   EditOutlined,
+  FileAddOutlined,
   InfoCircleOutlined,
   LeftOutlined,
   MoreOutlined,
@@ -362,7 +363,7 @@ export default function Detail() {
   }
 
   const handleEdit = () => {
-    router.push(`/super-admin/${title}/${data.id}/edit`);
+    router.push(`/super-admin/transaction/${title}/${data.id}/edit`);
   };
 
   const [modal, contextHolder] = Modal.useModal();
@@ -416,7 +417,7 @@ export default function Detail() {
               icon={<UnorderedListOutlined />}
               type="link"
               onClick={() => {
-                router.push(`/super-admin/${title}`);
+                router.push(`/super-admin/transaction/${title}`);
               }}
             >
               {isLargeScreen ? "List" : ""}
@@ -449,12 +450,25 @@ export default function Detail() {
                     </div>
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
+                        icon={<FileAddOutlined />}
+                        type={"primary"}
+                        onClick={() => {
+                          router.push(
+                            `/super-admin/transaction/delivery-order/enter?salesOrderId=${data.id}`
+                          );
+                        }}
+                      >
+                        {isLargeScreen ? "Fulfill" : ""}
+                      </Button>
+
+                      <Button
                         icon={<EditOutlined />}
                         type={"primary"}
                         onClick={handleEdit}
                       >
                         {isLargeScreen ? "Edit" : ""}
                       </Button>
+
                       {contextHolder}
                       <Dropdown
                         menu={{ items, onClick: handleClickAction }}
