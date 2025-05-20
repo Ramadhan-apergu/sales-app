@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { Suspense, useEffect, useReducer, useRef, useState } from "react";
 import {
   Button,
   Checkbox,
@@ -650,17 +650,23 @@ const [isLoading, setIsLoading] = useState(true);
   );
 }
 
-export default function DeliveryOrderEnterPage() {
+function InvoiceOrderContent() {
   const searchParams = useSearchParams();
-  const fulfillmentId = searchParams.get("fulfillmentId");
+  const salesOrderId = searchParams.get("salesOrderId");
 
+  return salesOrderId ? (
+    <Enter salesOrderId={salesOrderId} />
+  ) : (
+    <DeliveryOrderSelect />
+  );
+}
+
+export default function InvoiceOrderEnterPage() {
   return (
     <Layout>
-      {fulfillmentId ? (
-        <Enter fulfillmentId={fulfillmentId} />
-      ) : (
-        <DeliveryOrderSelect />
-      )}
+      <Suspense fallback={<LoadingSpinProcessing/>}>
+        <InvoiceOrderContent />
+      </Suspense>
     </Layout>
   );
 }

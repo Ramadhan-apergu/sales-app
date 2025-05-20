@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { Suspense, useEffect, useReducer, useRef, useState } from "react";
 import {
   Button,
   Checkbox,
@@ -418,9 +418,6 @@ function Enter({ salesOrderId }) {
               dispatch({ type, payload });
             }}
           />
-          <pre>{JSON.stringify(dataSalesOrder, null, 2)}</pre>
-          {/* <pre>{JSON.stringify(dataCustomer, null, 2)}</pre> */}
-          <pre>{JSON.stringify(dataSalesOrderItemRetrieve, null, 2)}</pre>
         </div>
       </div>
       {isLoadingSubmit && <LoadingSpinProcessing />}
@@ -429,17 +426,23 @@ function Enter({ salesOrderId }) {
   );
 }
 
-export default function DeliveryOrderEnterPage() {
+function DeliveryOrderContent() {
   const searchParams = useSearchParams();
   const salesOrderId = searchParams.get("salesOrderId");
 
+  return salesOrderId ? (
+    <Enter salesOrderId={salesOrderId} />
+  ) : (
+    <SalesOrderSelect />
+  );
+}
+
+export default function DeliveryOrderEnterPage() {
   return (
     <Layout>
-      {salesOrderId ? (
-        <Enter salesOrderId={salesOrderId} />
-      ) : (
-        <SalesOrderSelect />
-      )}
+      <Suspense fallback={<LoadingSpinProcessing/>}>
+        <DeliveryOrderContent />
+      </Suspense>
     </Layout>
   );
 }
