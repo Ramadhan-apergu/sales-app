@@ -14,7 +14,7 @@ export default class SalesOrderFetch extends ProcessFetch {
 
   static async getById(id) {
     try {
-      const response = await this.axios.get(`/trx/sales-order/${id}`)
+      const response = await this.axios.get(`/trx/sales-order/${encodeURIComponent(id)}`)
       return new this().processResponse(response)
     } catch (error) {
       return new this().processError(error)
