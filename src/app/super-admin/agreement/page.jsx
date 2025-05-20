@@ -10,7 +10,7 @@ export default function Page() {
 
   useEffect(() => {
     // Redirect setelah komponen mount
-    router.replace('/super-admin/master-data/customer');
+    router.replace('/super-admin/agreement/apply');
   }, [router]);
 
   return (
