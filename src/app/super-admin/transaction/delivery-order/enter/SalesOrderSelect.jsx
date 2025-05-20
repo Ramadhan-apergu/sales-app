@@ -1,6 +1,6 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, FilterOutlined, PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -45,8 +45,8 @@ function SalesOrder() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
-  const [dateRange, setDateRange] = useState(['', '']);
-  const title = "sales-order";
+  const [dateRange, setDateRange] = useState(["", ""]);
+  const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -110,7 +110,7 @@ function SalesOrder() {
   }, []);
 
   const handleEdit = (record) => {
-    router.push(`/super-admin/${title}/${record.id}/edit`);
+    router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
   const handleStatusChange = ({ key }) => {
@@ -177,7 +177,9 @@ function SalesOrder() {
       key: "otherrefnum",
       fixed: isLargeScreen ? "left" : "",
       render: (text, record) => (
-        <Link href={`/super-admin/${title}/${record.id}`}>{text || "-"}</Link>
+        <Link href={`/super-admin/transaction/${title}/enter?salesOrderId=${record.id}`}>
+          {text || "-"}
+        </Link>
       ),
     },
     {
@@ -197,26 +199,6 @@ function SalesOrder() {
         >
           {text}
         </Tag>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      fixed: "right",
-      align: "right",
-      width: isLargeScreen ? 87 : 30,
-      render: (_, record) => (
-        <div className="flex justify-center items-center gap-2">
-          <Button
-            type={"link"}
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            {isLargeScreen ? "Edit" : ""}
-          </Button>
-          {contextHolder}
-        </div>
       ),
     },
   ];
@@ -239,12 +221,21 @@ function SalesOrder() {
   // };
 
   return (
-    <Layout>
+    <>
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Sales Order List
+            Delivery Order Enter - Select SO
           </p>
+          <Button
+            icon={<UnorderedListOutlined />}
+            type="link"
+            onClick={() => {
+              router.push(`/super-admin/transaction/${title}`);
+            }}
+          >
+            {isLargeScreen ? "List" : ""}
+          </Button>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
@@ -263,7 +254,7 @@ function SalesOrder() {
                 options={dataCustomer}
                 dropdownStyle={{ minWidth: "250px", whiteSpace: "nowrap" }}
                 onChange={(value, option) => {
-                  setSearchName(option?.companyname || '');
+                  setSearchName(option?.companyname || "");
                 }}
                 allowClear
               />
@@ -277,11 +268,11 @@ function SalesOrder() {
                   showTime={false}
                   format="YYYY-MM-DD"
                   onChange={(value, dateString) => {
-                    setDateRange(dateString)
+                    setDateRange(dateString);
                   }}
-                //   onOk={(val) => {
-                //     console.log(val);
-                //   }}
+                  //   onOk={(val) => {
+                  //     console.log(val);
+                  //   }}
                 />
               </div>
             </div>
@@ -346,7 +337,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"
@@ -361,11 +352,11 @@ function SalesOrder() {
         )}
       </div>
       {notificationContextHolder}
-    </Layout>
+    </>
   );
 }
 
-export default function SalesOrderPage() {
+export default function SalesOrderSelect() {
   return (
     <Suspense fallback={<LoadingSpinProcessing />}>
       <SalesOrder />

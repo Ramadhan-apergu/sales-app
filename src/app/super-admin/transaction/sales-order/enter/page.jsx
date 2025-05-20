@@ -17,14 +17,13 @@ import {
 import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
-  CloseOutlined,
   InfoCircleOutlined,
   LeftOutlined,
-  SaveOutlined,
+  UnorderedListOutlined,
 } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
@@ -38,7 +37,6 @@ import ItemFetch from "@/modules/salesApi/item";
 import convertToLocalDate from "@/utils/convertToLocalDate";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
-import AgreementFetch from "@/modules/salesApi/agreement";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -64,7 +62,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
     <Table
       columns={columns}
       dataSource={data}
-      rowKey="id"
+      rowKey="lineid"
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
@@ -77,10 +75,8 @@ export default function Enter() {
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
   const [modal, contextHolder] = Modal.useModal();
-  const title = "sales order";
+  const title = "sales-order";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-
-  const { slug } = useParams();
 
   const [dataCustomer, setDataCustomer] = useState([]);
   const [customerSelected, setCustomerSelected] = useState({});
@@ -88,29 +84,27 @@ export default function Enter() {
   const [dataItem, setDataItem] = useState([]);
   const [itemSelected, setItemSelected] = useState(null);
 
-  const [data, setData] = useState({});
-
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
-    async function fetchSalesOrder() {
+    async function fetchCustomer() {
       try {
-        const response = await SalesOrderFetch.getById(slug);
+        const response = await CustomerFetch.get(0, 1000, "active");
         const resData = getResponseHandler(response);
 
         if (resData) {
-          setData(resData);
-          mappingDataSalesOrder(resData);
-          mappingCustomer(resData.entity);
-          mappingItem(resData.sales_order_items);
+          const addLabelCustomer = resData.list.map((customer) => {
+            return {
+              ...customer,
+              label: customer.companyname,
+              value: customer.id,
+            };
+          });
+          setDataCustomer(addLabelCustomer);
         }
       } catch (error) {
-        notify("error", "Error", "Failed get data Sales Order");
-      } finally {
-        setIsLoading(false);
+        notify("error", "Error", "Failed get data customer");
       }
     }
-    fetchSalesOrder();
+    fetchCustomer();
 
     async function fetchItem() {
       try {
@@ -133,178 +127,6 @@ export default function Enter() {
     }
     fetchItem();
   }, []);
-
-  async function fetchCustomer() {
-    try {
-      let resData = null;
-      const response = await CustomerFetch.get(0, 1000, "active");
-      resData = getResponseHandler(response);
-
-      if (resData) {
-        const addLabelCustomer = resData.list.map((customer) => {
-          return {
-            ...customer,
-            label: customer.companyname,
-            value: customer.id,
-          };
-        });
-        resData = addLabelCustomer;
-      }
-      return resData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data customer");
-    }
-  }
-
-  async function mappingCustomer(id) {
-    const customers = await fetchCustomer();
-
-    if (customers) {
-      setDataCustomer(customers);
-
-      const findCustomer = customers.find((customer) => customer.id == id);
-
-      if (findCustomer) {
-        setCustomerSelected(findCustomer);
-      }
-    }
-  }
-
-  async function mappingItem(salesOrderItems) {
-    if (salesOrderItems && salesOrderItems.length > 0) {
-      const dataSalesOrderFetch = await Promise.all(
-        salesOrderItems.map(async (so) => {
-          let data = so;
-
-          const item = await fetchItemById(data.item);
-
-          if (item) {
-            data = {
-              ...data,
-              itemid: item.itemid,
-              displayname: item.displayname,
-            };
-          } else {
-            data = {
-              ...data,
-              itemid: "",
-              displayname: "",
-            };
-          }
-
-          if (data.discountvalue1 && data.value1) {
-            data = {
-              ...data,
-              discountname1: "Discount Price",
-              discount1: "itemdiscount",
-            };
-          } else {
-            data = {
-              ...data,
-              discountname1: "",
-              discount1: "",
-              discountvalue1: data?.discountvalue1 || "",
-              value1: data?.value1 || "",
-            };
-          }
-
-          if (data.discount2) {
-            const agreement = await fetchAgreementById(data.discount2);
-            data = {
-              ...data,
-              discountname2: agreement ? agreement.agreementname : "",
-              discountvalue2: data.discountvalue2 == 1 ? "rp" : "%",
-            };
-          } else {
-            data = {
-              ...data,
-              discountname2: "",
-              discountvalue2: "",
-              discount2: "",
-            };
-          }
-
-          if (data.discount3) {
-            const agreement = await fetchAgreementById(data.discount3);
-            data = {
-              ...data,
-              discountname3: agreement ? agreement.agreementname : "",
-              discountvalue3: data.discountvalue3 == 1 ? "rp" : "%",
-            };
-          } else {
-            data = {
-              ...data,
-              discountname3: "",
-              discountvalue3: "",
-              discount3: "",
-            };
-          }
-
-          return data;
-        })
-      );
-      setDataTableItem(dataSalesOrderFetch);
-    }
-  }
-
-  async function fetchItemById(id) {
-    try {
-      const response = await ItemFetch.getById(id);
-      const resData = getResponseHandler(response);
-      return resData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data item");
-    }
-  }
-
-  async function fetchAgreementById(id) {
-    try {
-      const response = await AgreementFetch.getById(id);
-      const resData = getResponseHandler(response);
-      return resData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data agreement");
-    }
-  }
-
-  async function mappingDataSalesOrder(data) {
-    dispatch({
-      type: "SET_PRIMARY",
-      payload: {
-        entity: data.entity,
-        trandate: dayjs(data.trandate),
-        salesrep: data.salesrep,
-        otherrefnum: data.otherrefnum,
-      },
-    });
-
-    dispatch({
-      type: "SET_SUMMARY",
-      payload: {
-        subtotalbruto: data.subtotalbruto,
-        discounttotal: data.discounttotal,
-        subtotal: data.subtotal,
-        taxtotal: data.taxtotal,
-        total: data.total,
-      },
-    });
-
-    dispatch({
-      type: "SET_BILLING",
-      payload: {
-        term: data.term,
-        paymentoption: data.paymentoption,
-      },
-    });
-
-    dispatch({
-      type: "SET_SHIPPING",
-      payload: {
-        shippingoption: data.shippingoption,
-        shippingaddress: data.shippingaddress,
-      },
-    });
-  }
 
   const initialState = {
     payloadPrimary: {
@@ -955,7 +777,7 @@ export default function Enter() {
 
   function handleDeleteTableItem(record) {
     setDataTableItem((prev) =>
-      prev.filter((item) => item.id !== record.id)
+      prev.filter((item) => item.lineid !== record.lineid)
     );
 
     setDiscountItems((prev) =>
@@ -1039,12 +861,12 @@ export default function Enter() {
         throw new Error("Please enter a value greater than 0.");
       }
 
-      const response = await SalesOrderFetch.update(slug, payloadToInsert);
+      const response = await SalesOrderFetch.add(payloadToInsert);
 
       const resData = createResponseHandler(response, notify);
 
       if (resData) {
-        router.push(`/super-admin/sales-order/${resData}`);
+        router.push(`/super-admin/transaction/sales-order/${resData}`);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -1059,10 +881,19 @@ export default function Enter() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              Edit Sales Order
+              Sales Order Enter
             </p>
+            <Button
+              icon={<UnorderedListOutlined />}
+              type="link"
+              onClick={() => {
+                router.push(`/super-admin/transaction/${title}`);
+              }}
+            >
+              {isLargeScreen ? "List" : ""}
+            </Button>
           </div>
-          {/* <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-4">
             <div className="w-full flex flex-col lg:flex-row justify-between items-start">
               <div className="w-full lg:w-1/2 flex gap-1"></div>
               <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
@@ -1075,445 +906,358 @@ export default function Enter() {
                 </Button>
               </div>
             </div>
-          </div> */}
-          {!isLoading ? (
-            <>
-              {data ? (
-                <div className="w-full flex flex-col gap-4">
-                  <div className="w-full flex flex-col lg:flex-row justify-between items-start">
-                    <div className="w-full lg:w-1/2 flex gap-1">
-                      <Button
-                        icon={<CloseOutlined />}
-                        onClick={() => router.back()}
-                      >
-                        {isLargeScreen ? "Cancel" : ""}
-                      </Button>
-                    </div>
-                    <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-                      <Button
-                        type={"primary"}
-                        icon={<SaveOutlined />}
-                        onClick={handleSubmit}
-                      >
-                        {isLargeScreen ? "Save" : ""}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="w-full flex flex-col gap-8">
-                    <div className="w-full flex flex-col gap-2">
-                      <Divider
-                        style={{
-                          margin: "0",
-                          textTransform: "capitalize",
-                          borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                      >
-                        Customer
-                      </Divider>
-                      <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                        <Form layout="vertical">
-                          {customerSelected.value && (
-                            <Form.Item
-                              label={
-                                <span className="capitalize">Customer</span>
-                              }
-                              name="customer"
-                              style={{ margin: 0 }}
-                              className="w-full"
-                              labelCol={{ style: { padding: 0 } }}
-                              rules={[
-                                {
-                                  required: true,
-                                  message: `Customer is required`,
-                                },
-                              ]}
-                            >
-                              <Select
-                                showSearch
-                                placeholder="Select a customer"
-                                defaultValue={customerSelected.value}
-                                optionFilterProp="label"
-                                onChange={(_, customer) => {
-                                  setCustomerSelected(customer);
-                                  setDataTableItem([]);
-                                  setDiscountItems([]);
-                                  dispatch({ type: "RESET" });
-                                  dispatch({
-                                    type: "SET_SHIPPING",
-                                    payload: {
-                                      shippingaddress: customer.addressee,
-                                    },
-                                  });
-                                  dispatch({
-                                    type: "SET_PRIMARY",
-                                    payload: { entity: customer.id },
-                                  });
-                                }}
-                                onSearch={{}}
-                                options={dataCustomer}
-                                style={{ width: "100%" }}
-                              />
-                            </Form.Item>
-                          )}
-                          {!customerSelected.value && (
-                            <Form.Item
-                              label={
-                                <span className="capitalize">Customer</span>
-                              }
-                              name="customer"
-                              style={{ margin: 0 }}
-                              className="w-full"
-                              labelCol={{ style: { padding: 0 } }}
-                              rules={[
-                                {
-                                  required: true,
-                                  message: `Customer is required`,
-                                },
-                              ]}
-                            >
-                              <Select
-                                showSearch
-                                placeholder="Select a customer"
-                                optionFilterProp="label"
-                                onChange={(_, customer) => {
-                                  setCustomerSelected(customer);
-                                  setDataTableItem([]);
-                                  setDiscountItems([]);
-                                  dispatch({ type: "RESET" });
-                                  dispatch({
-                                    type: "SET_SHIPPING",
-                                    payload: {
-                                      shippingaddress: customer.addressee,
-                                    },
-                                  });
-                                  dispatch({
-                                    type: "SET_PRIMARY",
-                                    payload: { entity: customer.id },
-                                  });
-                                }}
-                                onSearch={{}}
-                                options={dataCustomer}
-                                style={{ width: "100%" }}
-                              />
-                            </Form.Item>
-                          )}
-                        </Form>
-                      </div>
-                    </div>
-                  </div>
-                  <InputForm
-                    title="primary"
-                    type="SET_PRIMARY"
-                    payload={state.payloadPrimary}
-                    data={[
-                      {
-                        key: "entity",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                        rules: [{ required: true, message: ` is required` }],
-                        placeholder: "Auto-filled after selecting a customer",
-                      },
-                      {
-                        key: "trandate",
-                        input: "date",
-                        isAlias: true,
-                        rules: [{ required: true, message: ` is required` }],
-                      },
-                      {
-                        key: "salesrep",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "otherrefnum",
-                        input: "input",
-                        isAlias: true,
-                        rules: [{ required: true, message: ` is required` }],
-                        placeholder: "Entry No. PO customer",
-                      },
+          </div>
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Customer
+              </Divider>
+              <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                <Form layout="vertical">
+                  <Form.Item
+                    label={<span className="capitalize">Customer</span>}
+                    name="customer"
+                    style={{ margin: 0 }}
+                    className="w-full"
+                    labelCol={{ style: { padding: 0 } }}
+                    rules={[
+                      { required: true, message: `Customer is required` },
                     ]}
-                    aliases={[]}
-                    onChange={(type, payload) => {
-                      dispatch({ type, payload });
-                    }}
-                  />
-                  <InputForm
-                    title="shipping"
-                    type="SET_SHIPPING"
-                    payload={state.payloadShipping}
-                    data={[
-                      {
-                        key: "shippingtype",
-                        input: "select",
-                        options: shipAddressOptions,
-                        isAlias: true,
-                      },
-                      {
-                        key:
-                          state.payloadShipping.shippingtype == 1
-                            ? "shippingaddress"
-                            : "shippingoption",
-                        input: "text",
-                        isAlias: true,
-                      },
-                    ]}
-                    aliases={[]}
-                    onChange={(type, payload) => {
-                      console.log(payload);
-                      dispatch({ type, payload });
-                    }}
-                  />
-                  <InputForm
-                    title="billing"
-                    type="SET_BILLING"
-                    payload={state.payloadBilling}
-                    data={[
-                      {
-                        key: "term",
-                        input: "select",
-                        options: termOptions,
-                        isAlias: true,
-                      },
-                      {
-                        key: "paymentoption",
-                        input: "select",
-                        options: paymentOptions,
-                        isAlias: true,
-                        rules: [{ required: true, message: ` is required` }],
-                      },
-                    ]}
-                    aliases={[]}
-                    onChange={(type, payload) => {
-                      dispatch({ type, payload });
-                    }}
-                  />
-                  <div className="w-full flex flex-col gap-8">
-                    <div className="w-full flex flex-col gap-2">
-                      <Divider
-                        style={{
-                          margin: "0",
-                          textTransform: "capitalize",
-                          borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                      >
-                        Item
-                      </Divider>
-                      <div className="flex justify-end">
-                        <Button type="primary" onClick={handleAddItem}>
-                          Add
-                        </Button>
-                      </div>
-                      <TableCustom
-                        onDelete={handleDeleteTableItem}
-                        data={dataTableItem}
-                        keys={keyTableItem}
-                        aliases={{}}
+                  >
+                    <Select
+                      showSearch
+                      placeholder="Select a customer"
+                      optionFilterProp="label"
+                      value={customerSelected}
+                      onChange={(_, customer) => {
+                        setCustomerSelected(customer);
+                        setDataTableItem([]);
+                        setDiscountItems([]);
+                        dispatch({ type: "RESET" });
+                        dispatch({
+                          type: "SET_SHIPPING",
+                          payload: { shippingaddress: customer.addressee },
+                        });
+                        dispatch({
+                          type: "SET_PRIMARY",
+                          payload: { entity: customer.id },
+                        });
+                      }}
+                      onSearch={{}}
+                      options={dataCustomer}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
+            </div>
+          </div>
+          <InputForm
+            title="primary"
+            type="SET_PRIMARY"
+            payload={state.payloadPrimary}
+            data={[
+              {
+                key: "entity",
+                input: "input",
+                isAlias: true,
+                isRead: true,
+                rules: [{ required: true, message: ` is required` }],
+                placeholder: "Auto-filled after selecting a customer",
+              },
+              {
+                key: "trandate",
+                input: "date",
+                isAlias: true,
+                rules: [{ required: true, message: ` is required` }],
+              },
+              {
+                key: "salesrep",
+                input: "input",
+                isAlias: true,
+                isRead: true,
+              },
+              {
+                key: "otherrefnum",
+                input: "input",
+                isAlias: true,
+                rules: [{ required: true, message: ` is required` }],
+                placeholder: "Entry No. PO customer",
+              },
+            ]}
+            aliases={[]}
+            onChange={(type, payload) => {
+              dispatch({ type, payload });
+            }}
+          />
+          <InputForm
+            title="shipping"
+            type="SET_SHIPPING"
+            payload={state.payloadShipping}
+            data={[
+              {
+                key: "shippingtype",
+                input: "select",
+                options: shipAddressOptions,
+                isAlias: true,
+              },
+              {
+                key:
+                  state.payloadShipping.shippingtype == 1
+                    ? "shippingaddress"
+                    : "shippingoption",
+                input: "text",
+                isAlias: true,
+              },
+            ]}
+            aliases={[]}
+            onChange={(type, payload) => {
+              console.log(payload);
+              dispatch({ type, payload });
+            }}
+          />
+          <InputForm
+            title="billing"
+            type="SET_BILLING"
+            payload={state.payloadBilling}
+            data={[
+              {
+                key: "term",
+                input: "select",
+                options: termOptions,
+                isAlias: true,
+              },
+              {
+                key: "paymentoption",
+                input: "select",
+                options: paymentOptions,
+                isAlias: true,
+                rules: [{ required: true, message: ` is required` }],
+              },
+            ]}
+            aliases={[]}
+            onChange={(type, payload) => {
+              dispatch({ type, payload });
+            }}
+          />
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Item
+              </Divider>
+              <div className="flex justify-end">
+                <Button type="primary" onClick={handleAddItem}>
+                  Add
+                </Button>
+              </div>
+              <TableCustom
+                onDelete={handleDeleteTableItem}
+                data={dataTableItem}
+                keys={keyTableItem}
+                aliases={{}}
+              />
+            </div>
+          </div>
+          {discountItems && discountItems.length > 0 && (
+            <div className="w-full flex flex-col gap-8">
+              <Collapse
+                accordion
+                items={discountItems.map((discountItem) => ({
+                  key: discountItem.id,
+                  label: discountItem.displayname,
+                  children: (
+                    <div className="w-full flex lg:pr-2 flex-col">
+                      <List
+                        size="small"
+                        itemLayout="horizontal"
+                        dataSource={discountItem.discount || []}
+                        header="Discount 1"
+                        renderItem={(item, index) => (
+                          <>
+                            {item.type == "Discount Item" && (
+                              <List.Item>
+                                <Checkbox
+                                  checked={item.isChecked}
+                                  style={{ marginRight: "16px" }}
+                                  onChange={(e) => {
+                                    handleDiscountSelected(
+                                      e.target.checked,
+                                      item,
+                                      discountItem.id
+                                    );
+                                  }}
+                                />
+                                <List.Item.Meta
+                                  title={<p>{item.discount}</p>}
+                                  description={`Type: ${
+                                    item.discounttype
+                                  }, Value: ${
+                                    item.discounttype == "nominal"
+                                      ? "Rp. " + item.value
+                                      : item.discounttype == "percent"
+                                      ? item.value + "%"
+                                      : item.value
+                                  }`}
+                                />
+                              </List.Item>
+                            )}
+                          </>
+                        )}
+                      />
+                      <List
+                        size="small"
+                        itemLayout="horizontal"
+                        dataSource={discountItem.discount || []}
+                        header="Discount 2"
+                        renderItem={(item, index) => (
+                          <>
+                            {item.type == "Discount Agreement" && (
+                              <List.Item>
+                                <Checkbox
+                                  checked={item.isChecked}
+                                  onChange={(e) => {
+                                    handleDiscountSelected(
+                                      e.target.checked,
+                                      item,
+                                      discountItem.id
+                                    );
+                                  }}
+                                  defaultChecked={false}
+                                  style={{ marginRight: "16px" }}
+                                />
+                                <List.Item.Meta
+                                  title={<p>{item.discount}</p>}
+                                  description={`Type: ${
+                                    item.discounttype
+                                  }, Value: ${
+                                    item.discounttype == "nominal"
+                                      ? "Rp. " + item.value
+                                      : item.discounttype == "percent"
+                                      ? item.value + "%"
+                                      : item.value
+                                  }`}
+                                />
+                              </List.Item>
+                            )}
+                          </>
+                        )}
+                      />
+                      <List
+                        size="small"
+                        itemLayout="horizontal"
+                        dataSource={discountItem.discount || []}
+                        header={
+                          <div className="flex justify-start items-center gap-2">
+                            <p>Discount 3</p>
+                            <Tooltip title="Discount is only available when using an eligible payment method.">
+                              <InfoCircleOutlined className="text-sm" />
+                            </Tooltip>
+                          </div>
+                        }
+                        renderItem={(item, index) => (
+                          <>
+                            {item.type == "Discount Payment" && (
+                              <List.Item>
+                                <Checkbox
+                                  checked={item.isChecked}
+                                  disabled={
+                                    item.paymenttype !=
+                                    state.payloadBilling.paymentoption
+                                  }
+                                  onChange={(e) => {
+                                    handleDiscountSelected(
+                                      e.target.checked,
+                                      item,
+                                      discountItem.id
+                                    );
+                                  }}
+                                  defaultChecked={false}
+                                  style={{ marginRight: "16px" }}
+                                />
+                                <List.Item.Meta
+                                  title={<p>{item.discount}</p>}
+                                  description={`Type: ${
+                                    item.discounttype
+                                  }, Value: ${
+                                    item.discounttype == "nominal"
+                                      ? "Rp. " + item.value
+                                      : item.discounttype == "percent"
+                                      ? item.value + "%"
+                                      : item.value
+                                  }, Payment: ${item.paymenttype}`}
+                                />
+                              </List.Item>
+                            )}
+                          </>
+                        )}
                       />
                     </div>
-                  </div>
-                  {discountItems && discountItems.length > 0 && (
-                    <div className="w-full flex flex-col gap-8">
-                      <Collapse
-                        accordion
-                        items={discountItems.map((discountItem) => ({
-                          key: discountItem.id,
-                          label: discountItem.displayname,
-                          children: (
-                            <div className="w-full flex lg:pr-2 flex-col">
-                              <List
-                                size="small"
-                                itemLayout="horizontal"
-                                dataSource={discountItem.discount || []}
-                                header="Discount 1"
-                                renderItem={(item, index) => (
-                                  <>
-                                    {item.type == "Discount Item" && (
-                                      <List.Item>
-                                        <Checkbox
-                                          checked={item.isChecked}
-                                          style={{ marginRight: "16px" }}
-                                          onChange={(e) => {
-                                            handleDiscountSelected(
-                                              e.target.checked,
-                                              item,
-                                              discountItem.id
-                                            );
-                                          }}
-                                        />
-                                        <List.Item.Meta
-                                          title={<p>{item.discount}</p>}
-                                          description={`Type: ${
-                                            item.discounttype
-                                          }, Value: ${
-                                            item.discounttype == "nominal"
-                                              ? "Rp. " + item.value
-                                              : item.discounttype == "percent"
-                                              ? item.value + "%"
-                                              : item.value
-                                          }`}
-                                        />
-                                      </List.Item>
-                                    )}
-                                  </>
-                                )}
-                              />
-                              <List
-                                size="small"
-                                itemLayout="horizontal"
-                                dataSource={discountItem.discount || []}
-                                header="Discount 2"
-                                renderItem={(item, index) => (
-                                  <>
-                                    {item.type == "Discount Agreement" && (
-                                      <List.Item>
-                                        <Checkbox
-                                          checked={item.isChecked}
-                                          onChange={(e) => {
-                                            handleDiscountSelected(
-                                              e.target.checked,
-                                              item,
-                                              discountItem.id
-                                            );
-                                          }}
-                                          defaultChecked={false}
-                                          style={{ marginRight: "16px" }}
-                                        />
-                                        <List.Item.Meta
-                                          title={<p>{item.discount}</p>}
-                                          description={`Type: ${
-                                            item.discounttype
-                                          }, Value: ${
-                                            item.discounttype == "nominal"
-                                              ? "Rp. " + item.value
-                                              : item.discounttype == "percent"
-                                              ? item.value + "%"
-                                              : item.value
-                                          }`}
-                                        />
-                                      </List.Item>
-                                    )}
-                                  </>
-                                )}
-                              />
-                              <List
-                                size="small"
-                                itemLayout="horizontal"
-                                dataSource={discountItem.discount || []}
-                                header={
-                                  <div className="flex justify-start items-center gap-2">
-                                    <p>Discount 3</p>
-                                    <Tooltip title="Discount is only available when using an eligible payment method.">
-                                      <InfoCircleOutlined className="text-sm" />
-                                    </Tooltip>
-                                  </div>
-                                }
-                                renderItem={(item, index) => (
-                                  <>
-                                    {item.type == "Discount Payment" && (
-                                      <List.Item>
-                                        <Checkbox
-                                          checked={item.isChecked}
-                                          disabled={
-                                            item.paymenttype !=
-                                            state.payloadBilling.paymentoption
-                                          }
-                                          onChange={(e) => {
-                                            handleDiscountSelected(
-                                              e.target.checked,
-                                              item,
-                                              discountItem.id
-                                            );
-                                          }}
-                                          defaultChecked={false}
-                                          style={{ marginRight: "16px" }}
-                                        />
-                                        <List.Item.Meta
-                                          title={<p>{item.discount}</p>}
-                                          description={`Type: ${
-                                            item.discounttype
-                                          }, Value: ${
-                                            item.discounttype == "nominal"
-                                              ? "Rp. " + item.value
-                                              : item.discounttype == "percent"
-                                              ? item.value + "%"
-                                              : item.value
-                                          }, Payment: ${item.paymenttype}`}
-                                        />
-                                      </List.Item>
-                                    )}
-                                  </>
-                                )}
-                              />
-                            </div>
-                          ),
-                        }))}
-                      />
-                    </div>
-                  )}
-                  <div className="w-full flex flex-col gap-8">
-                    <div className="w-full flex flex-col gap-2">
-                      <Divider
-                        style={{
-                          margin: "0",
-                          textTransform: "capitalize",
-                          borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                      >
-                        Summary
-                      </Divider>
-                      <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
-                        <div className="flex w-full">
-                          <p className="w-1/2">Subtotal</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.subtotalbruto)}
-                          </p>
-                        </div>
-                        <div className="flex w-full">
-                          <p className="w-1/2">Discount Item</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.discounttotal)}
-                          </p>
-                        </div>
-                        <div className="flex w-full">
-                          <p className="w-1/2">Subtotal (After Discount)</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.subtotal)} Incl.
-                            PPN
-                          </p>
-                        </div>
-                        <div className="flex w-full">
-                          <p className="w-1/2">Tax Total</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.taxtotal)}
-                          </p>
-                        </div>
-                        <hr className="border-gray-5" />
-                        <div className="flex w-full font-semibold">
-                          <p className="w-1/2">Total</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.total)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full h-96">
-                  <EmptyCustom />
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="w-full h-96">
-              <LoadingSpin />
+                  ),
+                }))}
+              />
             </div>
           )}
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Summary
+              </Divider>
+              <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
+                <div className="flex w-full">
+                  <p className="w-1/2">Subtotal</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.subtotalbruto)}
+                  </p>
+                </div>
+                <div className="flex w-full">
+                  <p className="w-1/2">Discount Item</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.discounttotal)}
+                  </p>
+                </div>
+                <div className="flex w-full">
+                  <p className="w-1/2">Subtotal (After Discount)</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.subtotal)} Incl. PPN
+                  </p>
+                </div>
+                <div className="flex w-full">
+                  <p className="w-1/2">Tax Total</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.taxtotal)}
+                  </p>
+                </div>
+                <hr className="border-gray-5" />
+                <div className="flex w-full font-semibold">
+                  <p className="w-1/2">Total</p>
+                  <p className="w-1/2 text-end">
+                    {formatRupiah(state.payloadSummary.total)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </Layout>
       {isLoadingSubmit && <LoadingSpinProcessing />}
