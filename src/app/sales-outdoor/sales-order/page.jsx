@@ -168,7 +168,7 @@ export default function SalesOrder() {
             <DatePicker
                 value={startDate}
                 onChange={setStartDate}
-                format="DD MMMM YYYY"
+                format="DD/MM/YYYY"
                 style={{ width: '100%' }}
                 allowClear
             />
@@ -179,7 +179,7 @@ export default function SalesOrder() {
             <DatePicker
                 value={endDate}
                 onChange={setEndDate}
-                format="DD MMMM YYYY"
+                format="DD/MM/YYYY"
                 style={{ width: '100%' }}
                 allowClear
             />
@@ -238,7 +238,7 @@ export default function SalesOrder() {
                 >
                     <CardList
                     data={{
-                        id: order.tranid,
+                        id: order.otherrefnum,
                         customerName: order.customer,
                         date: order.trandate,
                         status: order.status,
