@@ -37,7 +37,6 @@ const headerItems = [
   { key: `${prefix}/home`, label: "Home" },
   { key: `${prefix}/transaction`, label: "Transaction" },
   { key: `${prefix}/master-data`, label: "Master Data" },
-  { key: `${prefix}/agreement`, label: "Agreement" },
   { key: `${prefix}/inventory`, label: "Inventory" },
   { key: `${prefix}/report`, label: "Report" },
 ];
@@ -82,10 +81,8 @@ const siderMenuPerPage = {
       label: "Agreement",
       icon: <ProfileOutlined />,
     },
-  ],
-    "/agreement": [
-    {
-      key: "/agreement/apply",
+        {
+      key: "/master-data/apply-agreement",
       label: "Apply Agreement",
       icon: <ProfileOutlined />,
     },
