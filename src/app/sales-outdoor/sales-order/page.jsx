@@ -257,7 +257,9 @@ export default function SalesOrder() {
                 <div className="p-4 text-center text-gray-500">Tidak ada lagi data untuk dimuat</div>
             )}
 
-            <FloatingButton />
+            <Link href="/sales-outdoor/sales-order/new">
+                <FloatingButton />
+            </Link>
             </div>
         </div>
         </Layout>

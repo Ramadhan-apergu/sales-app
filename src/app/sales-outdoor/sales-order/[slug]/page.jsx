@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Layout from '@/components/salesOutdoor/Layout';
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
 import SalesOrderFetch from '@/modules/salesApi/salesOrder';
-import { Button, Table, Spin, Empty } from 'antd';
+import { Button, Table, Spin, Empty, Divider, } from 'antd';
 
 export default function SalesOrderDetail() {
   const params = useParams();
@@ -14,15 +14,83 @@ export default function SalesOrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // daftar key untuk kolom tabel
+  const keyTableItem = [
+    "displayname",
+    "quantity",
+    "units",
+    "rate",
+    "description",
+    "discountname1",
+    "value1",
+    "discountvalue1",
+    "perunit1",
+    "discountname2",
+    "value2",
+    "discountvalue2",
+    "perunit2",
+    "discountname3",
+    "value3",
+    "discountvalue3",
+    "perunit3",
+    "subtotal",
+    "totalamount",
+    "totaldiscount",
+    "qtyfree",
+    "unitfree",
+    "taxable",
+    "taxrate",
+    "taxvalue",
+    "backordered",
+  ];
+
+  function formatRupiah(number) {
+    return number?.toLocaleString("id-ID") + ",-";
+  }
+
+  // generate kolom tabel berdasarkan keyTableItem
+  const itemColumns = keyTableItem.map((key) => ({
+    title: key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase()),
+    dataIndex: key,
+    key,
+    align: [
+      'quantity',
+      'rate',
+      'value1',
+      'discountvalue1',
+      'perunit1',
+      'value2',
+      'discountvalue2',
+      'perunit2',
+      'value3',
+      'discountvalue3',
+      'perunit3',
+      'subtotal',
+      'totalamount',
+      'totaldiscount',
+      'qtyfree',
+      'taxrate',
+      'taxvalue',
+      'backordered'
+    ].includes(key) ? 'right' : 'left',
+    onHeaderCell: () => ({
+    className: 'text-sm'
+    }),
+    onCell: () => ({
+      className: 'text-xs'
+    }),
+  }));
+
   // Fetch detail order
   useEffect(() => {
     const fetchOrder = async () => {
       if (!params.slug) return;
-      
+
       setLoading(true);
       try {
         const response = await SalesOrderFetch.getById(params.slug);
-        
         if (response.status_code === 200) {
           setOrder(response.data);
         } else {
@@ -42,41 +110,6 @@ export default function SalesOrderDetail() {
   const handleBack = () => {
     window.history.back();
   };
-
-  // Kolom tabel item
-  const itemColumns = [
-    {
-      title: 'Item',
-      dataIndex: 'displayname',
-      key: 'displayname',
-    },
-    {
-      title: 'Qty',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      align: 'right',
-    },
-    {
-      title: 'Satuan',
-      dataIndex: 'units',
-      key: 'units',
-      align: 'center',
-    },
-    {
-      title: 'Rate',
-      dataIndex: 'rate',
-      key: 'rate',
-      align: 'right',
-      render: (text) => `${Number(text).toLocaleString()}`
-    },
-    {
-      title: 'Total',
-      dataIndex: 'totalamount',
-      key: 'totalamount',
-      align: 'right',
-      render: (text) => `${Number(text).toLocaleString()}`
-    }
-  ];
 
   return (
     <Layout>
@@ -102,8 +135,8 @@ export default function SalesOrderDetail() {
               <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
                 <Button onClick={handleBack} className="mb-2">← Kembali</Button>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-4">
-                  <div className="mb-3">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="mb-2">
                     <h3 className="font-semibold text-gray-700 mb-2 text-center text-2xl">Sales Order Details</h3>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
@@ -120,12 +153,30 @@ export default function SalesOrderDetail() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Customer</h3>
+                    <Divider
+                        style={{
+                        marginBottom: "8px",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                    >
+                        Customer
+                    </Divider>
                     <span>{order.customer}</span>
                   </div>
                   
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Primary</h3>
+                    <Divider
+                        style={{
+                        marginBottom: "8px",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                    >
+                        Primary
+                    </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Entity:</span>
@@ -147,7 +198,16 @@ export default function SalesOrderDetail() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Shipping</h3>
+                    <Divider
+                        style={{
+                        marginBottom: "8px",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                    >
+                        Shipping
+                    </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Shipping Option:</span>
@@ -161,7 +221,16 @@ export default function SalesOrderDetail() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Billing</h3>
+                    <Divider
+                        style={{
+                        marginBottom: "8px",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                    >
+                        Billing
+                    </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Term:</span>
@@ -176,46 +245,62 @@ export default function SalesOrderDetail() {
                 </div>
 
                 <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Daftar Item</h3>
-                    <div className="overflow-x-auto">
-                        <Table
-                        columns={itemColumns}
-                        dataSource={order.sales_order_items}
-                        pagination={false}
-                        rowKey="id"
-                        bordered
-                        size="small"
-                        scroll={{ x: 'max-content' }}
-                        className="text-xs md:text-sm"
-                        />
-                    </div>
+                  <Divider
+                        style={{
+                        marginBottom: "8px",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                    >
+                        Item
+                    </Divider>
+                  <div className="overflow-x-auto">
+                    <Table
+                      columns={itemColumns}
+                      dataSource={order.sales_order_items}
+                      pagination={false}
+                      rowKey="id"
+                      bordered
+                      size="small"
+                      scroll={{ x: 'max-content' }}
+                    />
+                  </div>
                 </div>
 
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-2">
-                    <div className="flex justify-between">
-                        <span className="text-gray-500">Subtotal:</span>
-                        <span className="font-medium">{Number(order.subtotalbruto).toLocaleString()}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                        <span className="text-gray-500">Discount Item:</span>
-                        <span className="font-medium">{Number(order.discounttotal).toLocaleString()}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                        <span className="text-gray-500">Subtotal (After Discount):</span>
-                        <span className="font-medium">{Number(order.subtotal).toLocaleString()}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                        <span className="text-gray-500">Tax Total:</span>
-                        <span className="font-medium">{Number(order.taxtotal).toLocaleString()}</span>
-                    </div>
-
-                    <div className="flex justify-between pt-2 border-t mt-2">
-                        <span className="text-gray-500 font-medium">Total:</span>
-                        <span className="font-bold text-lg">{Number(order.total).toLocaleString()}</span>
-                    </div>
+                <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
+                  <div className="flex w-full">
+                    <p className="w-1/2 text-sm">Subtotal</p>
+                    <p className="w-1/2 text-end text-sm">
+                      {formatRupiah(order.subtotalbruto)}
+                    </p>
+                  </div>
+                  <div className="flex w-full">
+                    <p className="w-1/2 text-sm">Discount Item</p>
+                    <p className="w-1/2 text-end text-sm">
+                      {formatRupiah(order.discounttotal)}
+                    </p>
+                  </div>
+                  <div className="flex w-full">
+                    <p className="w-1/2 text-sm">Subtotal (After Discount)</p>
+                    <p className="w-1/2 text-end text-sm">
+                      {formatRupiah(order.subtotal)} Incl.
+                      PPN
+                    </p>
+                  </div>
+                  <div className="flex w-full">
+                    <p className="w-1/2 text-sm">Tax Total</p>
+                    <p className="w-1/2 text-end text-sm">
+                      {formatRupiah(order.taxtotal)}
+                    </p>
+                  </div>
+                  <hr className="border-gray-5" />
+                  <div className="flex w-full font-semibold">
+                    <p className="w-1/2 text-sm">Total</p>
+                    <p className="w-1/2 text-end text-sm">
+                      {formatRupiah(order.total)}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
