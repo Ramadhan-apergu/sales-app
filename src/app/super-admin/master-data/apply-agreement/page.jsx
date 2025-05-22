@@ -36,14 +36,15 @@ function Agreement() {
   const [modal, contextHolder] = Modal.useModal();
   const { notify, contextHolder: notificationContextHolder  } = useNotification();
 
-  const title = "agreement";
+  const title = "apply-agreement";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsloading(true);
 
-        const response = await AgreementFetch.get(offset, limit, statusFilter);
+        console.log(offset)
+        const response = await AgreementFetch.getAgreementApply(offset, limit);
 
         const resData = getResponseHandler(response, notify)
 
@@ -60,7 +61,7 @@ function Agreement() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter]);
+  }, [page, limit, pathname]);
 
   const dropdownItems = [
     { key: "1", label: "All Status" },
@@ -79,14 +80,14 @@ function Agreement() {
   };
 
   const handleEdit = (record) => {
-    router.push(`/super-admin/master-data/${title}/${record.id}/edit`);
+    router.push(`/super-admin/master-data/${title}/${record.customerid}/edit`);
   };
 
   const columns = [
     {
-      title: "Agreement Code",
-      dataIndex: "agreementcode",
-      key: "agreementcode",
+      title: "Customer Code",
+      dataIndex: "customercode",
+      key: "customercode",
       onHeaderCell: () => ({
         style: { minWidth: 200 },
       }),
@@ -95,12 +96,12 @@ function Agreement() {
       }),
     },
     {
-      title: "Agreement Name",
-      dataIndex: "agreementname",
-      key: "agreementname",
+      title: "Customer",
+      dataIndex: "customer",
+      key: "customer",
       fixed: "left",
       render: (text, record) => (
-        <Link href={`/super-admin/master-data/${title}/${record.id}`}>
+        <Link href={`/super-admin/master-data/${title}/${record.customercode}`}>
           {text}
         </Link>
       ),
@@ -109,55 +110,6 @@ function Agreement() {
       }),
       onCell: () => ({
         style: { minWidth: 200 },
-      }),
-    },
-    {
-      title: "Category",
-      dataIndex: "category",
-      key: "category",
-      onHeaderCell: () => ({
-        style: { minWidth: 100 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 100 },
-      }),
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text) => (
-        <Tag color={text === "active" ? "success" : "error"}>{text}</Tag>
-      ),
-      onHeaderCell: () => ({
-        style: { minWidth: 100 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 100 },
-      }),
-    },
-    {
-      title: "Effective Date",
-      dataIndex: "effectivedate",
-      key: "effectivedate",
-      render: (text) => <span>{formatDateToShort(text)}</span>,
-      onHeaderCell: () => ({
-        style: { minWidth: 150 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 150 },
-      }),
-    },
-    {
-      title: "End Date",
-      dataIndex: "enddate",
-      key: "enddate",
-      render: (text) => <span>{formatDateToShort(text)}</span>,
-      onHeaderCell: () => ({
-        style: { minWidth: 150 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 150 },
       }),
     },
     {
@@ -189,7 +141,7 @@ function Agreement() {
     <Layout pageTitle={title}>
             <div className='w-full flex flex-col gap-4'>
                 <div className='w-full flex justify-between items-center'>
-                    <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Agreement List</p>
+                    <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Apply Agreement List</p>
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
@@ -198,7 +150,7 @@ function Agreement() {
                         {isLargeScreen ? `New` : ""}
                     </Button>
                 </div>
-                    <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
+                    {/* <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
                         <div className='flex gap-2'>
                         </div>
                         <div className='flex gap-2'>
@@ -214,12 +166,12 @@ function Agreement() {
                                 </Dropdown>
                             </div>  
                         </div>
-                    </div>
+                    </div> */}
                 {!isLoading ? (
                     <>
                         <div>
                             <Table
-                                rowKey={(record) => record.id}
+                                rowKey={(record) => record.customercode}
                                 size="small"
                                 pagination={false}
                                 columns={columns}
@@ -235,6 +187,7 @@ function Agreement() {
                                 defaultPageSize={limit}
                                 defaultCurrent={page}
                                 onChange={(newPage, newLimit) => {
+                                    console.log(newPage)
                                     router.push(
                                     `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
                                     )

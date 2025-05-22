@@ -14,7 +14,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 10;
 
 function Customer() {
   const searchParams = useSearchParams();
@@ -24,7 +24,7 @@ function Customer() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1) * limit;
+  const offset = (page - 1);
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -212,7 +212,7 @@ function Customer() {
                                 defaultCurrent={page}
                                 onChange={(newPage, newLimit) => {
                                     router.push(
-                                    `/super-admin/${title}?page=${newPage}&limit=${newLimit}`
+                                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
                                     )
                                 }}
                                 size='small'
