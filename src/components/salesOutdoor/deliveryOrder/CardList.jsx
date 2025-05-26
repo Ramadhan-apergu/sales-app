@@ -3,20 +3,32 @@
 import { useEffect, useState } from "react"
 import { HiOutlineTicket } from "react-icons/hi2";
 import { HiCalendarDateRange } from "react-icons/hi2";
+import { HiCheckCircle, HiClock, HiXCircle } from "react-icons/hi";
 
-import { HiCheckCircle, HiTruck } from "react-icons/hi";
+function formatDate(isoString) {
+  if (!isoString) return '-';
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
 function Icon({ title }) {
     let IconComponent = null;
     let style = ''
     switch (title) {
-        case 'finish':
+        case 'approved':
             IconComponent = HiCheckCircle;
-            style = 'text-sm text-green-7'
+            style = 'text-green-7'
             break;
-        case 'in delivery':
-            IconComponent = HiTruck;
-            style = 'text-sm text-orange-5'
+        case 'pending':
+            IconComponent = HiClock;
+            style = 'text-orange-5'
+            break;
+        case 'rejected':
+            IconComponent = HiXCircle;
+            style = 'text-red-7'
             break;
         default:
             IconComponent = null;
@@ -33,17 +45,17 @@ export default function CardList({ data }) {
 
     useEffect(() => {
         const status = data?.status;
-        if (status === 'in delivery') {
+        if (status === 'pending') {
             setStatusClass({
                 text: 'text-orange-5',
                 bg: 'bg-orange-5',
             });
-        } else if (status === 'canceled') {
+        } else if (status === 'rejected') {
             setStatusClass({
                 text: 'text-red-7',
                 bg: 'bg-red-7',
             });
-        } else if (status === 'finish') {
+        } else if (status === 'approved') {
             setStatusClass({
                 text: 'text-green-7',
                 bg: 'bg-green-7',
@@ -64,14 +76,10 @@ export default function CardList({ data }) {
                     <p className="text-sm font-semibold">{data?.id || '-'}</p>
                 </div>
                 <div className="h-full flex flex-col justify-between">
-                    <div className="h-12 bg-gray-3 rounded border border-gray-5 flex justify-center px-2">
-                        <div className="w-8/12 h-full flex flex-col justify-center items-start">
+                    <div className="bg-gray-3 p-2 rounded border border-gray-5 flex justify-left px-2">
+                        <div className="w-full h-full flex flex-col justify-left items-start">
                             <p className="text-xs text-gray-12/70">Customer</p>
                             <p className="text-sm truncate w-full">{data?.customerName || '-'}</p>
-                        </div>
-                        <div className="w-4/12 h-full flex flex-col justify-center items-start">
-                            <p className="text-xs text-gray-12/70">Courier</p>
-                            <p className="text-sm truncate w-full capitalize">{data?.courier || '-'}</p>
                         </div>
                     </div>
                     <div className="flex justify-between">
@@ -81,7 +89,7 @@ export default function CardList({ data }) {
                         </div>
                         <div className="flex gap-1 items-center justify-start">
                             <HiCalendarDateRange className="text-sm text-gray-12/70"/>
-                            <p className="text-xs text-gray-12/70">{data?.date || '-'}</p>
+                            <p className="text-xs text-gray-12/70">{formatDate(data?.date)}</p>
                         </div>
                     </div>
                 </div>

@@ -237,13 +237,14 @@ export default function SalesOrder() {
                     scroll={false}
                 >
                     <CardList
-                    data={{
-                        id: order.otherrefnum,
-                        customerName: order.customer,
-                        date: order.trandate,
-                        status: order.status,
-                        total: order.total
-                    }}
+                        key={order.delivery_id}
+                        data={{
+                            id: order.otherrefnum,
+                            customerName: order.customer,
+                            date: order.trandate,
+                            status: order.status,
+                            total: order.total
+                        }}
                     />
                 </Link>
                 ))

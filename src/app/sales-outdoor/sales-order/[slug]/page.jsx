@@ -151,20 +151,6 @@ export default function SalesOrderDetail() {
                       </span>
                     </div>
                   </div>
-
-                  <div>
-                    <Divider
-                        style={{
-                        marginBottom: "8px",
-                        textTransform: "capitalize",
-                        borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                    >
-                        Customer
-                    </Divider>
-                    <span>{order.customer}</span>
-                  </div>
                   
                   <div>
                     <Divider
@@ -179,20 +165,24 @@ export default function SalesOrderDetail() {
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
+                        <span className="text-gray-500">Customer:</span>
+                        <span className="text-right">{order.customer}</span>
+                      </div>
+                      <div className="flex justify-between">
                         <span className="text-gray-500">Entity:</span>
-                        <span>{order.entity}</span>
+                        <span className="text-right">{order.entity}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Trandate:</span>
-                        <span>{new Date(order.trandate).toLocaleDateString('id-ID')}</span>
+                        <span className="text-right">{new Date(order.trandate).toLocaleDateString('id-ID')}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Sales Rep:</span>
-                        <span>{order.salesrep}</span>
+                        <span className="text-right">{order.salesrep}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Otherrefnum:</span>
-                        <span>{order.otherrefnum}</span>
+                        <span className="text-right">{order.otherrefnum}</span>
                       </div>
                     </div>
                   </div>
@@ -211,11 +201,11 @@ export default function SalesOrderDetail() {
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Shipping Option:</span>
-                        <span>{order.shippingoption}</span>
+                        <span className="text-right">{order.shippingoption}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Shipping Address:</span>
-                        <span>{order.shippingaddress}</span>
+                        <span className="text-right">{order.shippingaddress}</span>
                       </div>
                     </div>
                   </div>
@@ -234,11 +224,11 @@ export default function SalesOrderDetail() {
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Term:</span>
-                        <span>{order.term}</span>
+                        <span className="text-right">{order.term}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Payment Option:</span>
-                        <span>{order.paymentoption}</span>
+                        <span className="text-right">{order.paymentoption}</span>
                       </div>
                     </div>
                   </div>
@@ -271,33 +261,33 @@ export default function SalesOrderDetail() {
                 <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
                   <div className="flex w-full">
                     <p className="w-1/2 text-sm">Subtotal</p>
-                    <p className="w-1/2 text-end text-sm">
+                    <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.subtotalbruto)}
                     </p>
                   </div>
                   <div className="flex w-full">
                     <p className="w-1/2 text-sm">Discount Item</p>
-                    <p className="w-1/2 text-end text-sm">
+                    <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.discounttotal)}
                     </p>
                   </div>
                   <div className="flex w-full">
                     <p className="w-1/2 text-sm">Subtotal (After Discount)</p>
-                    <p className="w-1/2 text-end text-sm">
+                    <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.subtotal)} Incl.
                       PPN
                     </p>
                   </div>
                   <div className="flex w-full">
                     <p className="w-1/2 text-sm">Tax Total</p>
-                    <p className="w-1/2 text-end text-sm">
+                    <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.taxtotal)}
                     </p>
                   </div>
                   <hr className="border-gray-5" />
                   <div className="flex w-full font-semibold">
                     <p className="w-1/2 text-sm">Total</p>
-                    <p className="w-1/2 text-end text-sm">
+                    <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.total)}
                     </p>
                   </div>
