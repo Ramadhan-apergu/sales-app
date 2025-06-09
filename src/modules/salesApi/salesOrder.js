@@ -27,6 +27,18 @@ export default class SalesOrderFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async getByIdWithEncodeUri(id) {
+    try {
+      const response = await this.axios.get(
+        `/trx/sales-order/${encodeURIComponent(id)}`
+      );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
   static async getSoAgreement(
     item_id = "",
     cust_id = "",
