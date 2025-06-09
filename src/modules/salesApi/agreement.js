@@ -94,5 +94,14 @@ export default class AgreementFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+    static async deleteApplyAgreement(id) {
+    try {
+      const response = await this.axios.delete(`/master/agreement-apply/${id}`);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
   
 }

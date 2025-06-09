@@ -139,7 +139,7 @@ export default function Detail() {
     {
       key: '1',
       label: 'Approve',
-      disabled: data?.status == 'active'
+      disabled: data?.status.toLowerCase() == 'active'
     },
     {
       key: '2',
@@ -166,6 +166,7 @@ export default function Detail() {
         setIsLoadingSubmit(true)
         const response = await CustomerFetch.updateApproval(data.id)
         updateResponseHandler(response, notify)
+        router.refresh()
     } catch (error) {
         notify('error', 'Error', 'Failed approval customer')
     } finally {
@@ -191,9 +192,11 @@ export default function Detail() {
                                                     <p className='w-full lg:text-lg'>
                                                         {data.internalid + ' / ' + data.companyname}
                                                     </p>
-                                                    <div>
-                                                        <Tag style={{textTransform: 'capitalize', fontSize: '16px'}} color={data.status =='active' ? 'green' : 'red'}>{data.status}</Tag>
-                                                    </div>
+                                                    {data && data.status && (
+                                                        <div>
+                                                            <Tag style={{textTransform: 'capitalize', fontSize: '16px'}} color={data.status.toLowerCase() =='active' ? 'green' : 'orange'}>{data.status}</Tag>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                                                     <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>

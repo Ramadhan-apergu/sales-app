@@ -101,7 +101,7 @@ function Agreement() {
       fixed: "left",
       render: (text, record) => (
         <Link href={`/super-admin/master-data/${title}/${record.id}`}>
-          {text}
+          {text || '-'} 
         </Link>
       ),
       onHeaderCell: () => ({
@@ -127,7 +127,7 @@ function Agreement() {
       dataIndex: "status",
       key: "status",
       render: (text) => (
-        <Tag color={text === "active" ? "success" : "error"}>{text}</Tag>
+        <Tag className="capitalize" color={text.toLowerCase() === "active" ? "green" : text.toLowerCase() === "pending approval" ? "orange" : "red"}>{text}</Tag>
       ),
       onHeaderCell: () => ({
         style: { minWidth: 100 },

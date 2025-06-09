@@ -303,7 +303,7 @@ export default function AgreementNew() {
     
             const fetchDataItem = async () => {
               try {
-                const response = await ItemFetch.get(0, 1000, null, null, null);
+                const response = await ItemFetch.get(0, 10000, null, null, null);
                 const resData = getResponseHandler(response)
             
                 if (resData) {

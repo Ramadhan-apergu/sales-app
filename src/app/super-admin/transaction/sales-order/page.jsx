@@ -36,7 +36,7 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1) * limit;
+  const offset = (page - 1);
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -85,7 +85,7 @@ function SalesOrder() {
       try {
         setIsloading(true);
 
-        const response = await CustomerFetch.get(0, 1000, null);
+        const response = await CustomerFetch.get(0, 10000, null);
 
         const resData = getResponseHandler(response, notify);
 
@@ -113,56 +113,6 @@ function SalesOrder() {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
-  const handleStatusChange = ({ key }) => {
-    dropdownItems.forEach((item) => {
-      if (item.key == key) {
-        const label = item.label.toLocaleLowerCase();
-        if (label != statusFilter.toLocaleLowerCase()) {
-          switch (label) {
-            case "all status":
-              setStatusFilter("all");
-              break;
-            // case 'pending approval':
-            //     setStatusFilter('pending')
-            //     break;
-            default:
-              setStatusFilter(item.label);
-          }
-        }
-      }
-    });
-  };
-
-  const dropdownItems = [
-    {
-      key: "1",
-      label: "All Status",
-    },
-    {
-      key: "2",
-      label: "Open",
-    },
-    {
-      key: "3",
-      label: "Fulfilled ",
-    },
-    {
-      key: "4",
-      label: "Partially Fulfilled",
-    },
-    {
-      key: "5",
-      label: "Credit Hold",
-    },
-    {
-      key: "6",
-      label: "Closed",
-    },
-    {
-      key: "7",
-      label: "Pending Approval",
-    },
-  ];
 
   const columns = [
     {
@@ -194,7 +144,19 @@ function SalesOrder() {
       render: (text, record) => (
         <Tag
           color={
-            record.status.toLocaleLowerCase() == "open" ? "green" : "error"
+            ["open", "fulfilled", "closed"].includes(
+              record.status.toLowerCase()
+            )
+              ? "green"
+              : ["partially fulfilled", "pending approval"].includes(
+                  record.status.toLowerCase()
+                )
+              ? "orange"
+              : ["credit hold", "canceled"].includes(
+                  record.status.toLowerCase()
+                )
+              ? "red"
+              : "default"
           }
         >
           {text}
@@ -328,7 +290,11 @@ function SalesOrder() {
                 options={[
                   { value: "all", label: "All" },
                   { value: "open", label: "Open" },
-                  { value: "close", label: "Close" },
+                  { value: "fulfilled", label: "Fulfilled" },
+                  { value: "partially fulfilled", label: "Partially Fulfilled" },
+                  { value: "credit hold", label: "Credit Hold" },
+                  { value: "closed", label: "Closed" },
+                  { value: "pending approval", label: "Pending Approval" },
                 ]}
                 dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
                 dropdownAlign={{ points: ["tr", "br"] }}

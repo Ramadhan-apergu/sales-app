@@ -337,13 +337,13 @@ export default function EnterPage() {
     const items = [
     {
       key: "1",
-      label: "Approve",
+      label: "Print",
     },
-    {
-      key: "2",
-      label: "Cancel",
-      danger: true,
-    },
+    // {
+    //   key: "2",
+    //   label: "Cancel",
+    //   danger: true,
+    // },
   ];
 
     const handleClickAction = ({ key }) => {
@@ -376,7 +376,7 @@ export default function EnterPage() {
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Invoice Enter
+            Invoice Details
           </p>
           <Button
             icon={<UnorderedListOutlined />}
@@ -392,20 +392,6 @@ export default function EnterPage() {
           <>
             {data ? (
               <div className="w-full flex flex-col gap-4">
-                {/* <div className="w-full flex flex-col gap-4">
-                  <div className="w-full flex flex-col lg:flex-row justify-between items-start">
-                    <div className="w-full lg:w-1/2 flex gap-1"></div>
-                    <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-                      <Button
-                        type={"primary"}
-                        icon={<CheckOutlined />}
-                        onClick={handleSubmit}
-                      >
-                        {isLargeScreen ? "Submit" : ""}
-                      </Button>
-                    </div>
-                  </div>
-                </div> */}
                 <div className="w-full flex flex-col lg:flex-row justify-between items-start">
                   <div className="w-full lg:w-1/2 flex gap-1 flex-col">
                     <p className="w-full lg:text-lg">
@@ -417,11 +403,17 @@ export default function EnterPage() {
                           textTransform: "capitalize",
                           fontSize: "16px",
                         }}
-                        color={
-                          data.status.toLowerCase() == "open"
-                            ? "green"
-                            : "red"
-                        }
+                          color={
+                            ["paid in full"].includes(
+                              data.status.toLowerCase()
+                            )
+                              ? "green"
+                              : [
+                                  "partial paid", "open"
+                                ].includes(data.status.toLowerCase())
+                              ? "orange"
+                              : "default"
+                          }
                       >
                         {data.status}
                       </Tag>

@@ -103,7 +103,7 @@ function Item() {
       fixed: isLargeScreen ? 'left' : '',
       render: (text, record) => (
         <Link href={`/super-admin/master-data/${title}/${record.id}`}>
-          {text}
+          {text || '-'}
         </Link>),
       onHeaderCell: () => ({
         style: { minWidth: 200 },
