@@ -14,7 +14,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT = 50;
 
 function Customer() {
   const searchParams = useSearchParams();
@@ -134,7 +134,7 @@ function Customer() {
       dataIndex: 'status',
       key: 'status',
       render: (text, record) => (
-        <Tag color={record.status == 'active' ? 'success' : 'error'}>
+        <Tag color={record.status.toLowerCase() == 'active' ? 'green' : 'orange'} className="capitalize">
             {text}
         </Tag>
       )

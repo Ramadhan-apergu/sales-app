@@ -85,7 +85,7 @@ export default function AgreementApplyNew() {
   useEffect(() => {
     const fetchDataCusomer = async () => {
       try {
-        const response = await CustomerFetch.get(0, 1000, "active");
+        const response = await CustomerFetch.get(0, 10000, "active");
 
         const resData = getResponseHandler(response, notify);
 
@@ -110,7 +110,7 @@ export default function AgreementApplyNew() {
 
     const fetchDataAgreement = async () => {
       try {
-        const response = await AgreementFetch.get(0, 1000, "active");
+        const response = await AgreementFetch.get(0, 10000, "active");
 
         const resData = getResponseHandler(response, notify);
 

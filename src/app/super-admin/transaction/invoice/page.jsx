@@ -86,7 +86,7 @@ function SalesOrder() {
       try {
         setIsloading(true);
 
-        const response = await CustomerFetch.get(0, 1000, null);
+        const response = await CustomerFetch.get(0, 10000, null);
 
         const resData = getResponseHandler(response, notify);
 
@@ -113,57 +113,6 @@ function SalesOrder() {
   const handleEdit = (record) => {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
-
-  const handleStatusChange = ({ key }) => {
-    dropdownItems.forEach((item) => {
-      if (item.key == key) {
-        const label = item.label.toLocaleLowerCase();
-        if (label != statusFilter.toLocaleLowerCase()) {
-          switch (label) {
-            case "all status":
-              setStatusFilter("all");
-              break;
-            // case 'pending approval':
-            //     setStatusFilter('pending')
-            //     break;
-            default:
-              setStatusFilter(item.label);
-          }
-        }
-      }
-    });
-  };
-
-  const dropdownItems = [
-    {
-      key: "1",
-      label: "All Status",
-    },
-    {
-      key: "2",
-      label: "Open",
-    },
-    {
-      key: "3",
-      label: "Fulfilled ",
-    },
-    {
-      key: "4",
-      label: "Partially Fulfilled",
-    },
-    {
-      key: "5",
-      label: "Credit Hold",
-    },
-    {
-      key: "6",
-      label: "Closed",
-    },
-    {
-      key: "7",
-      label: "Pending Approval",
-    },
-  ];
 
   const columns = [
     {
@@ -195,7 +144,11 @@ function SalesOrder() {
       render: (text, record) => (
         <Tag
           color={
-            record.status.toLocaleLowerCase() == "open" ? "green" : "error"
+            ["paid in full"].includes(record.status.toLowerCase())
+              ? "green"
+              : ["partial paid", "open"].includes(record.status.toLowerCase())
+              ? "orange"
+              : "default"
           }
         >
           {text}
@@ -329,9 +282,10 @@ function SalesOrder() {
                 options={[
                   { value: "all", label: "All" },
                   { value: "open", label: "Open" },
-                  { value: "close", label: "Close" },
+                  { value: "partially paid", label: "Partially Paid" },
+                  { value: "paid in full", label: "Paid in Full" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                dropdownStyle={{ minWidth: "150px", whiteSpace: "nowrap" }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

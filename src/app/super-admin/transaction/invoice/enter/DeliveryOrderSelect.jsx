@@ -85,7 +85,7 @@ function DeliveryOrder() {
       try {
         setIsloading(true);
 
-        const response = await CustomerFetch.get(0, 1000, null);
+        const response = await CustomerFetch.get(0, 10000, null);
 
         const resData = getResponseHandler(response, notify);
 

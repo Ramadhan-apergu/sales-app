@@ -117,7 +117,7 @@ export default function AgreementApplyDetail() {
 
     const fetchDataAgreement = async () => {
       try {
-        const response = await AgreementFetch.get(0, 1000, "active");
+        const response = await AgreementFetch.get(0, 10000, "active");
 
         const resData = getResponseHandler(response, notify);
 

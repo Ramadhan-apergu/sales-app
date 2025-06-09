@@ -29,4 +29,13 @@ export default class InvoiceFetch extends ProcessFetch {
       return new this().processError(error)
     }
   }
+
+      static async update(id, payload) {
+    try {
+      const response = await this.axios.put(`/trx/invoices/${id}`, payload)
+      return new this().processResponse(response)
+    } catch (error) {
+      return new this().processError(error)
+    }
+  }
 }

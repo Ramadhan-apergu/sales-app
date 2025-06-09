@@ -396,7 +396,7 @@ export default function AgreementEdit() {
 
         const fetchDataItem = async () => {
           try {
-            const response = await ItemFetch.get(0, 1000, null, null, null);
+            const response = await ItemFetch.get(0, 10000, null, null, null);
             const resData = getResponseHandler(response)
         
             if (resData) {
@@ -464,7 +464,7 @@ export default function AgreementEdit() {
     
       async function getItemByCategory(category) {
         try {
-            const response = await ItemFetch.get(0, 1000, null, null, category)
+            const response = await ItemFetch.get(0, 10000, null, null, category)
             if (response.status_code == 200 && response.data) {
                 return response.data
             } else {
