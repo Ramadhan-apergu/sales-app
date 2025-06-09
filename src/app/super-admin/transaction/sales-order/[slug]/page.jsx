@@ -35,6 +35,7 @@ import CustomerFetch from "@/modules/salesApi/customer";
 import {
   createResponseHandler,
   getResponseHandler,
+  updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
@@ -368,22 +369,37 @@ export default function Detail() {
 
   const [modal, contextHolder] = Modal.useModal();
 
-  const items = [
-    {
-      key: "1",
-      label: "Approve",
-    },
-    {
-      key: "2",
-      label: "Cancel",
-      danger: true,
-    },
-  ];
+const items = [
+  {
+    key: "1",
+    label: "Approve",
+    disabled: !data.status || data.status.toLowerCase() !== 'pending approval',
+  },
+  {
+    key: "2",
+    label: "Cancel",
+    danger: true,
+    disabled: !data.status || data.status.toLowerCase() !== 'pending approval',
+  },
+];
 
+
+  async function handleApproval() {
+    try {
+        setIsLoadingSubmit(true)
+        const response = await SalesOrderFetch.approveSoPending(data.id, 'approved')
+        updateResponseHandler(response, notify)
+        router.refresh()
+    } catch (error) {
+        notify('error', 'Error', 'Failed approval customer')
+    } finally {
+        setIsLoadingSubmit(false)
+    }
+  }
   const handleClickAction = ({ key }) => {
     switch (key) {
       case "1":
-        notify("success", "Approve Boongan", ":P");
+        handleApproval()
         break;
       case "2":
         deleteModal();
@@ -404,6 +420,20 @@ export default function Detail() {
       },
     });
   };
+
+    const handleDelete = async (id) => {
+      try {
+        const response = await SalesOrderFetch.approveSoPending(id, 'rejected');
+  
+        const resData = updateResponseHandler(response, notify);
+  
+        if (resData) {
+          router.push(`/super-admin/master-data/${title}`);
+        }
+      } catch (error) {
+        notify("error", "Error", error?.message || "Internal Server error");
+      }
+    };
 
   return (
     <>
@@ -439,9 +469,20 @@ export default function Detail() {
                             fontSize: "16px",
                           }}
                           color={
-                            data.status.toLowerCase() == "open"
+                            ["open", "fulfilled", "closed"].includes(
+                              data.status.toLowerCase()
+                            )
                               ? "green"
-                              : "red"
+                              : [
+                                  "partially fulfilled",
+                                  "pending approval",
+                                ].includes(data.status.toLowerCase())
+                              ? "orange"
+                              : ["credit hold", "canceled"].includes(
+                                  data.status.toLowerCase()
+                                )
+                              ? "red"
+                              : "default"
                           }
                         >
                           {data.status}

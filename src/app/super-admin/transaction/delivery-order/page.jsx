@@ -37,7 +37,7 @@ function DeliveryOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1) * limit;
+  const offset = (page - 1);
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -85,7 +85,7 @@ function DeliveryOrder() {
       try {
         setIsloading(true);
 
-        const response = await CustomerFetch.get(0, 1000, null);
+        const response = await CustomerFetch.get(0, 10000, null);
 
         const resData = getResponseHandler(response, notify);
 
@@ -113,56 +113,6 @@ function DeliveryOrder() {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
-  const handleStatusChange = ({ key }) => {
-    dropdownItems.forEach((item) => {
-      if (item.key == key) {
-        const label = item.label.toLocaleLowerCase();
-        if (label != statusFilter.toLocaleLowerCase()) {
-          switch (label) {
-            case "all status":
-              setStatusFilter("all");
-              break;
-            // case 'pending approval':
-            //     setStatusFilter('pending')
-            //     break;
-            default:
-              setStatusFilter(item.label);
-          }
-        }
-      }
-    });
-  };
-
-  const dropdownItems = [
-    {
-      key: "1",
-      label: "All Status",
-    },
-    {
-      key: "2",
-      label: "Open",
-    },
-    {
-      key: "3",
-      label: "Fulfilled ",
-    },
-    {
-      key: "4",
-      label: "Partially Fulfilled",
-    },
-    {
-      key: "5",
-      label: "Credit Hold",
-    },
-    {
-      key: "6",
-      label: "Closed",
-    },
-    {
-      key: "7",
-      label: "Pending Approval",
-    },
-  ];
 
   const columns = [
     {
@@ -191,8 +141,9 @@ function DeliveryOrder() {
       key: "shipstatus",
       render: (text, record) => (
         <Tag
+        className="capitalize"
           color={
-            record.shipstatus.toLocaleLowerCase() == "open" ? "green" : "error"
+            record.shipstatus.toLocaleLowerCase() == "open" ? "green" : "red"
           }
         >
           {text}

@@ -87,7 +87,7 @@ export default function Enter() {
   useEffect(() => {
     async function fetchCustomer() {
       try {
-        const response = await CustomerFetch.get(0, 1000, "active");
+        const response = await CustomerFetch.get(0, 10000, "active");
         const resData = getResponseHandler(response);
 
         if (resData) {
@@ -108,7 +108,7 @@ export default function Enter() {
 
     async function fetchItem() {
       try {
-        const response = await ItemFetch.get(0, 1000);
+        const response = await ItemFetch.get(0, 10000);
         const resData = getResponseHandler(response);
 
         if (resData) {

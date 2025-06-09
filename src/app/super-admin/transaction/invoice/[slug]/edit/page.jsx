@@ -1,29 +1,35 @@
 "use client";
 
-import React, { Suspense, useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import {
   Button,
   Checkbox,
   Collapse,
   Divider,
+  Dropdown,
   Empty,
   Form,
   List,
   Modal,
   Select,
   Table,
+  Tag,
   Tooltip,
 } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
+  CloseOutlined,
+  EditOutlined,
+  FileAddOutlined,
   InfoCircleOutlined,
   LeftOutlined,
+  SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
@@ -38,9 +44,9 @@ import convertToLocalDate from "@/utils/convertToLocalDate";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
-import DeliveryOrderSelect from "./DeliveryOrderSelect";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import { formatDateToShort } from "@/utils/formatDate";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -74,15 +80,17 @@ function TableCustom({ data, keys, aliases, onDelete }) {
   );
 }
 
-function Enter({ fulfillmentId }) {
+export default function EnterPage() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
   const [modal, contextHolder] = Modal.useModal();
   const title = "invoice";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const { slug } = useParams();
 
+  const [data, setData] = useState(null);
 
   const [dataFulfillment, setDataFulfillment] = useState({});
   const [dataSalesOrder, setDataSalesOrder] = useState({});
@@ -162,150 +170,91 @@ const [isLoading, setIsLoading] = useState(true);
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchInvoice() {
       try {
-        const fulfillmentRes = await FullfillmentFetch.getById(fulfillmentId);
-        const fulfillmentData = getResponseHandler(fulfillmentRes);
-        if (!fulfillmentData)
-          throw new Error("Failed to fetch item fulfillment");
+        const response = await InvoiceFetch.getById(slug);
+        const resData = getResponseHandler(response);
 
-        const salesOrderRes = await SalesOrderFetch.getById(
-          fulfillmentData.salesorderid
-        );
-        const salesOrderData = getResponseHandler(salesOrderRes);
-        if (!salesOrderData) throw new Error("Failed to fetch sales order");
+        console.log(resData);
 
-        const customerRes = await CustomerFetch.getById(salesOrderData.entity);
-        const customerData = getResponseHandler(customerRes);
-        if (!customerData) throw new Error("Failed to fetch customer");
-
-        const soItemRes = await FullfillmentFetch.getSoItem(
-          fulfillmentData.salesorderid
-        );
-        let soItemData = getResponseHandler(soItemRes);
-        if (!soItemData) throw new Error("Failed to fetch sales order items");
-
-        setDataFulfillment(fulfillmentData);
-        setDataSalesOrder(salesOrderData);
-        setDataCustomer(customerData);
-        setDataSalesOrderItemRetrieve(soItemData);
-        setDataTableItem(
-          fulfillmentData.fulfillment_items.map((fulfillment) => {
-            const findItemSo = salesOrderData.sales_order_items.find(
-              (soItem) => soItem.item === fulfillment.item
-            );
-
-            const itemSo = soItemData.find(
-              (item) => item.id === fulfillment.item
-            );
-            const displayname = itemSo?.displayname || "";
-
-            if (findItemSo) {
-              if (fulfillment.memo !== "free item") {
-                const quantity = fulfillment.quantity;
-                const rate = findItemSo.rate;
-                const amount = quantity * rate;
-                const totaldiscount = findItemSo.totaldiscount;
-                const subtotal = amount - totaldiscount;
-                const taxrate = findItemSo.taxrate;
-                const taxvalue = findItemSo.taxable
-                  ? Math.ceil((amount / (1 + taxrate / 100)) * (taxrate / 100))
-                  : 0;
-
-                return {
-                  item: fulfillment.item,
-                  displayname,
-                  quantity,
-                  units: fulfillment.units,
-                  quantity2: 0,
-                  units2: "",
-                  rate,
-                  amount,
-                  totaldiscount,
-                  subtotal,
-                  taxrate,
-                  taxvalue,
-                  memo: fulfillment.memo,
-                  lineid: crypto.randomUUID(),
-                };
-              } else {
-                return {
-                  item: fulfillment.item,
-                  displayname,
-                  quantity: fulfillment.quantity,
-                  units: fulfillment.units,
-                  quantity2: 0,
-                  units2: "",
-                  rate: 0,
-                  amount: 0,
-                  totaldiscount: 0,
-                  subtotal: 0,
-                  taxrate: 0,
-                  taxvalue: 0,
-                  memo: fulfillment.memo,
-                  lineid: crypto.randomUUID(),
-                };
-              }
-            }
-
-            return {
-              item: fulfillment.item,
-              displayname,
-              quantity: fulfillment.quantity,
-              units: fulfillment.units,
-              quantity2: 0,
-              units2: "",
-              rate: 0,
-              amount: 0,
-              totaldiscount: 0,
-              subtotal: 0,
-              taxrate: 0,
-              taxvalue: 0,
-              memo: fulfillment.memo,
-              lineid: crypto.randomUUID(),
-            };
-          })
-        );
-
-        dispatch({
-          type: "SET_PRIMARY",
-          payload: {
-            salesorderid: fulfillmentData.salesorderid,
-            fulfillmentid: fulfillmentData.id,
-            entity: salesOrderData.entity,
-            trandate: dayjs(new Date()),
-            salesordernum: salesOrderData.otherrefnum,
-            fulfillmentnum: fulfillmentData.tranid,
-            customer: customerData.companyname,
-          },
-        });
-
-        dispatch({
-          type: "SET_SHIPPING",
-          payload: {
-            shippingaddress: customerData.addressee,
-          },
-        });
-
-        dispatch({
-          type: "SET_BILLING",
-          payload: {
-            term: salesOrderData.term,
-            billingaddress:
-              salesOrderData.shippingaddress != ""
-                ? salesOrderData.shippingaddress
-                : salesOrderData.shippingoption,
-          },
-        });
+        if (resData) {
+          setData(resData);
+          mappingDataInvoice(resData);
+        }
       } catch (error) {
-        notify("error", "Error", error.message || "Failed to fetch data");
+        console.log(error);
+        notify("error", "Error", "Failed get data Invoice");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    };
+    }
+    fetchInvoice();
+  }, [slug, router]);
 
-    fetchData();
-  }, [fulfillmentId, router]);
+  async function getItem(id) {
+    try {
+      const response = await ItemFetch.getById(id);
+      const resData = getResponseHandler(response);
+      return resData;
+    } catch (error) {
+      notify("error", "Error", "Failed get data Item");
+    }
+  }
+
+  async function mappingDataInvoice(data) {
+    dispatch({
+      type: "SET_PRIMARY",
+      payload: {
+        salesorderid: data.salesorderid,
+        fulfillmentid: data.fulfillmentid,
+        entity: data.entity,
+        trandate: dayjs(data.trandate),
+        memo: data.memo,
+        salesordernum: data.salesordernum,
+        fulfillmentnum: data.fulfillmentnum,
+        customer: data.customer,
+      },
+    });
+
+    dispatch({
+      type: "SET_SHIPPING",
+      payload: {
+        shippingaddress: data.shippingaddress,
+      },
+    });
+
+    dispatch({
+      type: "SET_BILLING",
+      payload: {
+        billingaddress: data.billingaddress,
+        term: data.term,
+      },
+    });
+
+    dispatch({
+      type: "SET_SUMMARY",
+      payload: {
+        totalamount: data.totalamount,
+        discounttotal: data.discounttotal,
+        subtotal: data.subtotal,
+        taxtotal: data.taxtotal,
+        amount: data.amount,
+      },
+    });
+
+    let updatedInvoiceItems = await Promise.all(
+      data.invoice_items.map(async (invoiceItem) => {
+        const item = await getItem(invoiceItem.item);
+        return {
+          ...invoiceItem,
+          displayname: item ? item.displayname : "",
+          lineid: crypto.randomUUID(),
+        };
+      })
+    );
+
+    setDataTableItem(updatedInvoiceItems);
+  }
 
   const shipAddressOptions = [
     { label: "Custom", value: 0 },
@@ -338,7 +287,13 @@ const [isLoading, setIsLoading] = useState(true);
         ...state.payloadSummary,
         ...state.payloadBilling,
         ...state.payloadShipping,
+        subtotalbruto: state.payloadSummary.totalamount,
+        total: state.payloadSummary.amount
       };
+
+      delete payloadToInsert.customer
+      delete payloadToInsert.totalamount
+      delete payloadToInsert.amount
 
       const invoice_items = dataTableItem.map((data) => {
         return {
@@ -358,7 +313,7 @@ const [isLoading, setIsLoading] = useState(true);
 
       payloadToInsert = { ...payloadToInsert, invoice_items };
 
-      const response = await InvoiceFetch.create(payloadToInsert);
+      const response = await InvoiceFetch.update(slug, payloadToInsert);
 
       const resData = createResponseHandler(response, notify);
 
@@ -383,54 +338,17 @@ const [isLoading, setIsLoading] = useState(true);
     { label: "Net 120", value: "Net 120" },
   ];
 
-  const getValueDiscount = (discountValue, value, totalamount) => {
-    switch (discountValue) {
-      case "rp":
-        return value;
-      case "%":
-        return (totalamount * value) / 100;
-      default:
-        return 0;
-    }
-  };
-
-  useEffect(() => {
-    let totalamount = 0;
-    let discounttotal = 0;
-    let subtotal = 0;
-    let taxtotal = 0;
-    let amount = 0;
-
-    dataTableItem.forEach((item) => {
-      if (item.memo !== "free item") {
-        totalamount += item.amount;
-        discounttotal += item.totaldiscount;
-        subtotal += item.subtotal;
-        amount += item.subtotal;
-      }
-    });
-
-    dispatch({
-      type: "SET_SUMMARY",
-      payload: {
-        totalamount,
-        discounttotal,
-        subtotal,
-        taxtotal,
-        amount,
-      },
-    });
-  }, [dataTableItem]);
-
   function formatRupiah(number) {
     return number.toLocaleString("id-ID") + ",-";
   }
+
+
   return (
-    <>
+    <Layout>
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Invoice Enter
+            Edit Invoice
           </p>
           <Button
             icon={<UnorderedListOutlined />}
@@ -444,20 +362,25 @@ const [isLoading, setIsLoading] = useState(true);
         </div>
         {!isLoading ? (
           <>
-            {dataFulfillment.id ? (
+            {data ? (
               <div className="w-full flex flex-col gap-4">
-                <div className="w-full flex flex-col gap-4">
-                  <div className="w-full flex flex-col lg:flex-row justify-between items-start">
-                    <div className="w-full lg:w-1/2 flex gap-1"></div>
-                    <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-                      <Button
-                        type={"primary"}
-                        icon={<CheckOutlined />}
-                        onClick={handleSubmit}
-                      >
-                        {isLargeScreen ? "Submit" : ""}
-                      </Button>
-                    </div>
+                <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+                  <div className="w-full lg:w-1/2 flex gap-1">
+                    <Button
+                      icon={<CloseOutlined />}
+                      onClick={() => router.back()}
+                    >
+                      {isLargeScreen ? "Cancel" : ""}
+                    </Button>
+                  </div>
+                  <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                    <Button
+                      type={"primary"}
+                      icon={<SaveOutlined />}
+                      onClick={handleSubmit}
+                    >
+                      {isLargeScreen ? "Save" : ""}
+                    </Button>
                   </div>
                 </div>
                 <div className="w-full flex flex-col gap-8">
@@ -531,13 +454,7 @@ const [isLoading, setIsLoading] = useState(true);
                       >
                         Item
                       </Divider>
-                      {/* <div className="flex justify-end">
-                                    <Button type="primary" onClick={handleAddItem}>
-                                    Add
-                                    </Button>
-                                </div> */}
                       <TableCustom
-                        // onDelete={handleDeleteTableItem}
                         data={dataTableItem}
                         keys={keyTableItem}
                         aliases={{}}
@@ -646,27 +563,6 @@ const [isLoading, setIsLoading] = useState(true);
       </div>
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
-    </>
-  );
-}
-
-function InvoiceOrderContent() {
-  const searchParams = useSearchParams();
-  const fulfillmentId = searchParams.get("fulfillmentId");
-
-  return fulfillmentId ? (
-    <Enter fulfillmentId={fulfillmentId} />
-  ) : (
-    <DeliveryOrderSelect />
-  );
-}
-
-export default function InvoiceOrderEnterPage() {
-  return (
-    <Layout>
-      <Suspense fallback={<LoadingSpinProcessing/>}>
-        <InvoiceOrderContent />
-      </Suspense>
     </Layout>
   );
 }

@@ -8,17 +8,23 @@ import { Button, Divider, Dropdown, Modal, Table, Tag } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
 import {
+  CloseOutlined,
   EditOutlined,
   FileAddOutlined,
   MoreOutlined,
+  SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useNotification from "@/hooks/useNotification";
-import { deleteResponseHandler, getResponseHandler } from "@/utils/responseHandlers";
+import {
+  getResponseHandler,
+  updateResponseHandler,
+} from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import { formatDateToShort } from "@/utils/formatDate";
 import ItemFetch from "@/modules/salesApi/item";
+import dayjs from "dayjs";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -49,16 +55,14 @@ export default function Page() {
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
   const { notify, contextHolder: contextNotify } = useNotification();
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const initialState = {
     payloadPrimary: {
       createdfrom: "",
       customer: "",
-      dateso: "",
       entity: "",
-      id: "",
       memo: "",
-      numso: "",
       salesorderid: "",
       shipstatus: "",
       trandate: "",
@@ -96,7 +100,7 @@ export default function Page() {
     }
   }
 
-  const title = 'delivery-order'
+  const title = "delivery-order";
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
   const keyTableItem = [
@@ -144,14 +148,11 @@ export default function Page() {
       payload: {
         createdfrom: data.createdfrom,
         customer: data.customer,
-        dateso: formatDateToShort(data.dateso),
         entity: data.entity,
-        id: data.id,
         memo: data.memo,
-        numso: data.numso,
         salesorderid: data.salesorderid,
         shipstatus: data.shipstatus,
-        trandate: formatDateToShort(data.trandate),
+        trandate: dayjs(data.trandate),
         tranid: data.tranid,
       },
     });
@@ -179,61 +180,66 @@ export default function Page() {
     setDataTableItem(dataFulfillmentWithItem);
   };
 
-  const handleClickAction = ({ key }) => {
-    switch (key) {
-      case "1":
-        notify("success", "Print", ":P");
-        break;
-      case "2":
-        deleteModal();
-        break;
-      default:
-        console.warn("Unhandled action:", key);
+  const shippingOptions = [
+    { label: "Custom", value: 0 },
+    { label: "Default", value: 1 },
+  ];
+
+  const handleSubmit = async () => {
+    setIsLoadingSubmit(true);
+    try {
+      let payloadToInsert = {
+        ...state.payloadPrimary,
+        ...state.payloadSummary,
+      };
+
+      let shippingaddress =
+        state.payloadShipping.shippingtype == 1
+          ? state.payloadShipping?.shippingaddress || ""
+          : "";
+      let shippingoption =
+        state.payloadShipping.shippingtype == 0
+          ? state.payloadShipping?.shippingoption || ""
+          : "";
+
+      payloadToInsert = {
+        ...payloadToInsert,
+        shippingaddress,
+        shippingoption,
+      };
+
+      delete payloadToInsert.customer;
+
+      const fulfillment_items = dataTableItem.map((data) => {
+        return {
+          item: data.id,
+          memo: data.memo,
+          location: data.location,
+          quantityremaining: data.quantityremaining,
+          quantity: data.quantity,
+          units: data.units,
+        };
+      });
+
+      payloadToInsert = { ...payloadToInsert, fulfillment_items };
+
+      const response = await FullfillmentFetch.update(data.id, payloadToInsert);
+
+      const resData = updateResponseHandler(response, notify);
+
+        if (resData) {
+          router.push(`/super-admin/transaction/${title}/${resData}`);
+        }
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      setIsLoadingSubmit(false);
     }
   };
 
-  const handleEdit = () => {
-    router.push(`/super-admin/transaction/${title}/${data.id}/edit`);
-  };
-
-    const deleteModal = () => {
-    modal.confirm({
-      title: `Cancel ${title} "${data.customer}"?`,
-      content: "This action cannot be undone.",
-      okText: "Yes",
-      cancelText: "Cancel",
-      onOk: () => {
-        handleDelete(data.id);
-      },
-    });
-  };
-
-    const handleDelete = async (id) => {
-      try {
-        const response = await FullfillmentFetch.delete(id);
-  
-        const resData = deleteResponseHandler(response, notify);
-  
-        if (resData) {
-          router.push(`/super-admin/master-data/${title}`);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      }
-    };
-
-    const [modal, contextHolder] = Modal.useModal();
-
-      const items = [
-    {
-      key: "1",
-      label: "Print",
-    },
-    {
-      key: "2",
-      label: "Delete",
-      danger: true,
-    },
+  const statusOptions = [
+    { label: "Open", value: "open" },
+    { label: "Shipped", value: "shipped" },
   ];
 
   return (
@@ -242,7 +248,7 @@ export default function Page() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              Delivery Order Details
+              Edit Delivery Order
             </p>
             <Button
               icon={<UnorderedListOutlined />}
@@ -259,57 +265,22 @@ export default function Page() {
               {data && data.id ? (
                 <div className="w-full flex flex-col gap-4">
                   <div className="w-full flex flex-col lg:flex-row justify-between items-start">
-                    <div className="w-full lg:w-1/2 flex gap-1 flex-col">
-                      <p className="w-full lg:text-lg">
-                        {data.tranid + " / " + data.customer}
-                      </p>
-                      <div>
-                        <Tag
-                          style={{
-                            textTransform: "capitalize",
-                            fontSize: "16px",
-                          }}
-                          className="capitalize"
-                          color={
-                            data.shipstatus.toLowerCase() == "open"
-                              ? "green"
-                              : "red"
-                          }
-                        >
-                          {data.shipstatus}
-                        </Tag>
-                      </div>
+                    <div className="w-full lg:w-1/2 flex gap-1">
+                      <Button
+                        icon={<CloseOutlined />}
+                        onClick={() => router.back()}
+                      >
+                        {isLargeScreen ? "Cancel" : ""}
+                      </Button>
                     </div>
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
-                        icon={<FileAddOutlined />}
                         type={"primary"}
-                        onClick={() => {
-                          router.push(
-                            `/super-admin/transaction/invoice/enter?fulfillmentId=${data.id}`
-                          );
-                        }}
+                        icon={<SaveOutlined />}
+                        onClick={handleSubmit}
                       >
-                        {isLargeScreen ? "Bill" : ""}
+                        {isLargeScreen ? "Save" : ""}
                       </Button>
-
-                      <Button
-                        icon={<EditOutlined />}
-                        type={"primary"}
-                        onClick={handleEdit}
-                      >
-                        {isLargeScreen ? "Edit" : ""}
-                      </Button>
-
-                      {contextHolder}
-                      <Dropdown
-                        menu={{ items, onClick: handleClickAction }}
-                        placement="bottomRight"
-                      >
-                        <Button icon={!isLargeScreen ? <MoreOutlined /> : null}>
-                          {isLargeScreen ? "Action" : ""}
-                        </Button>
-                      </Dropdown>
                     </div>
                   </div>
                   <InputForm
@@ -327,7 +298,6 @@ export default function Page() {
                         key: "createdfrom",
                         input: "input",
                         isAlias: true,
-                        isRead: true,
                       },
                       {
                         key: "customer",
@@ -337,13 +307,13 @@ export default function Page() {
                       },
                       {
                         key: "trandate",
-                        input: "input",
+                        input: "date",
                         isAlias: true,
-                        isRead: true,
                       },
                       {
                         key: "shipstatus",
-                        input: "input",
+                        input: "select",
+                        options: statusOptions,
                         isAlias: true,
                         isRead: true,
                       },
@@ -351,40 +321,12 @@ export default function Page() {
                         key: "memo",
                         input: "text",
                         isAlias: true,
-                        isRead: true,
                       },
-                      //   {
-                      //     key: "dateso",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "entity",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "id",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "numso",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "salesorderid",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
                     ]}
                     aliases={[]}
+                    onChange={(type, payload) => {
+                      dispatch({ type, payload });
+                    }}
                   />
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-4">
@@ -405,25 +347,31 @@ export default function Page() {
                       />
                     </div>
                   </div>
+
                   <InputForm
                     title="shipping"
                     type="SET_SHIPPING"
                     payload={state.payloadShipping}
                     data={[
                       {
-                        key: "shippingaddress",
-                        input: "text",
+                        key: "shippingtype",
+                        input: "select",
+                        options: shippingOptions,
                         isAlias: true,
-                        isRead: true,
                       },
                       {
-                        key: "shippingoption",
+                        key:
+                          state.payloadShipping.shippingtype == 0
+                            ? "shippingoption"
+                            : "shippingaddress",
                         input: "text",
                         isAlias: true,
-                        isRead: true,
                       },
                     ]}
                     aliases={[]}
+                    onChange={(type, payload) => {
+                      dispatch({ type, payload });
+                    }}
                   />
                 </div>
               ) : (

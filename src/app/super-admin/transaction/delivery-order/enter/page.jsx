@@ -77,7 +77,7 @@ function Enter({ salesOrderId }) {
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
   const [modal, contextHolder] = Modal.useModal();
-  const title = "sales order";
+  const title = "delivery-order";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const [dataSalesOrder, setDataSalesOrder] = useState({});
@@ -154,7 +154,7 @@ function Enter({ salesOrderId }) {
 
         const soItemRes = await FullfillmentFetch.getSoItem(salesOrderId);
         let soItemData = getResponseHandler(soItemRes);
-        if (!soItemData) throw new Error("Failed to fetch sales order items");
+        if (!soItemData) throw new Error("Failed to fetch fulfillment items");
 
         // const salesOrderItem = salesOrderData.sales_order_items
 
@@ -268,11 +268,10 @@ function Enter({ salesOrderId }) {
       const response = await FullfillmentFetch.create(payloadToInsert);
 
       const resData = createResponseHandler(response, notify);
-      console.log(resData);
 
-      //   if (resData) {
-      //     router.push(`/super-admin/transaction/sales-order/${resData}`);
-      //   }
+        if (resData) {
+          router.push(`/super-admin/transaction/${title}/${resData}`);
+        }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {

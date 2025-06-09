@@ -17,6 +17,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
   createResponseHandler,
+  deleteResponseHandler,
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
@@ -114,7 +115,7 @@ export default function AgreementApplyDetail() {
     fetchDataApplyAgreement();
     // const fetchDataCusomer = async () => {
     //   try {
-    //     const response = await CustomerFetch.get(0, 1000, "active");
+    //     const response = await CustomerFetch.get(0, 10000, "active");
 
     //     const resData = getResponseHandler(response, notify);
 
@@ -139,7 +140,7 @@ export default function AgreementApplyDetail() {
 
     // const fetchDataAgreement = async () => {
     //   try {
-    //     const response = await AgreementFetch.get(0, 1000, "active");
+    //     const response = await AgreementFetch.get(0, 10000, "active");
 
     //     const resData = getResponseHandler(response, notify);
 
@@ -222,13 +223,56 @@ export default function AgreementApplyDetail() {
     setIsModal(false);
   }
 
+  const deleteModal = () => {
+    modal.confirm({
+      title: `Delete ${title} "${data.customer}"?`,
+      content: "This action cannot be undone.",
+      okText: "Yes, delete",
+      cancelText: "Cancel",
+      onOk: () => {
+        handleDelete(data.customerid);
+      },
+    });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await AgreementFetch.deleteApplyAgreement(id);
+
+      const resData = deleteResponseHandler(response, notify);
+
+      if (resData) {
+        router.push(`/super-admin/master-data/${title}`);
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    }
+  };
+
   const items = [
+    // {
+    //   key: '1',
+    //   label: 'Approve'
+    // },
     {
-      key: "1",
+      key: "2",
       label: "Delete",
       danger: true,
     },
   ];
+
+  const handleClickAction = ({ key }) => {
+    switch (key) {
+      case "1":
+        notify("success", "Approve Boongan", ":P");
+        break;
+      case "2":
+        deleteModal();
+        break;
+      default:
+        console.warn("Unhandled action:", key);
+    }
+  };
 
   return (
     <>
@@ -262,13 +306,17 @@ export default function AgreementApplyDetail() {
                       <Button
                         icon={<EditOutlined />}
                         type={"primary"}
-                        onClick={() => {router.push(`/super-admin/master-data/${title}/${data.customercode}/edit`)}}
+                        onClick={() => {
+                          router.push(
+                            `/super-admin/master-data/${title}/${data.customercode}/edit`
+                          );
+                        }}
                       >
                         {isLargeScreen ? "Edit" : ""}
                       </Button>
                       {contextHolder}
                       <Dropdown
-                        menu={{ items, onClick: "" /*handleClickAction*/ }}
+                        menu={{ items, onClick: handleClickAction }}
                         placement="bottomRight"
                       >
                         <Button icon={!isLargeScreen ? <MoreOutlined /> : null}>
