@@ -8,6 +8,19 @@ import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
 import SalesOrderFetch from '@/modules/salesApi/salesOrder';
 import { Button, Table, Spin, Empty, Divider, } from 'antd';
 
+const formatRupiah = (value) => {
+    const num = Number(value);
+    if (isNaN(num)) return 'Rp 0,-';
+    const numberCurrency = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(num);
+
+    return numberCurrency + ",-";
+};
+
 export default function SalesOrderDetail() {
   const params = useParams();
   const [order, setOrder] = useState(null);
@@ -44,13 +57,9 @@ export default function SalesOrderDetail() {
     "backordered",
   ];
 
-  function formatRupiah(number) {
-    return number?.toLocaleString("id-ID") + ",-";
-  }
-
   // generate kolom tabel berdasarkan keyTableItem
   const itemColumns = keyTableItem.map((key) => ({
-    title: key
+    title: (key === 'displayname' ? 'Item Name' : key)
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, str => str.toUpperCase()),
     dataIndex: key,
@@ -76,11 +85,29 @@ export default function SalesOrderDetail() {
       'backordered'
     ].includes(key) ? 'right' : 'left',
     onHeaderCell: () => ({
-    className: 'text-sm'
+      className: 'text-sm text-center', 
+      style: { textAlign: 'center' } 
     }),
     onCell: () => ({
       className: 'text-xs'
     }),
+    render: (text) => {
+    const shouldFormat = [
+      'rate',
+      'value1',
+      'discountvalue1',
+      'value2',
+      'discountvalue2',
+      'value3',
+      'discountvalue3',
+      'subtotal',
+      'totalamount',
+      'totaldiscount',
+      'taxvalue'
+    ].includes(key);
+    
+    return shouldFormat ? formatRupiah(text) : text;
+  }
   }));
 
   // Fetch detail order
@@ -169,11 +196,11 @@ export default function SalesOrderDetail() {
                         <span className="text-right">{order.customer}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Entity:</span>
+                        <span className="text-gray-500">Customer Entity:</span>
                         <span className="text-right">{order.entity}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Trandate:</span>
+                        <span className="text-gray-500">Transaction Date:</span>
                         <span className="text-right">{new Date(order.trandate).toLocaleDateString('id-ID')}</span>
                       </div>
                       <div className="flex justify-between">
@@ -181,7 +208,7 @@ export default function SalesOrderDetail() {
                         <span className="text-right">{order.salesrep}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Otherrefnum:</span>
+                        <span className="text-gray-500">Customer PO Number:</span>
                         <span className="text-right">{order.otherrefnum}</span>
                       </div>
                     </div>

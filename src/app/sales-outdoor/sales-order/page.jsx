@@ -32,6 +32,20 @@ export default function SalesOrder() {
 
     const isFilterActive = !!(statusFilter || startDate || endDate);
 
+    // Fungsi untuk memformat angka ke mata uang Rupiah
+    const formatRupiah = (value) => {
+        const num = Number(value);
+        if (isNaN(num)) return '0';
+        const numberCurrency = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(num);
+
+        return numberCurrency + ",-";
+    };
+
     const fetchOrders = useCallback(async (isInitial = false, overrideOffset, overrideLimit) => {
         if (loading || (!isInitial && !hasMore)) return;
         setLoading(true);
@@ -239,11 +253,11 @@ export default function SalesOrder() {
                     <CardList
                         key={order.delivery_id}
                         data={{
-                            id: order.otherrefnum,
+                            id: order.tranid,
                             customerName: order.customer,
                             date: order.trandate,
                             status: order.status,
-                            total: order.total
+                            total: formatRupiah(order.total)
                         }}
                     />
                 </Link>
