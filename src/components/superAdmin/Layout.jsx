@@ -24,10 +24,13 @@ import {
   AppstoreOutlined,
   CreditCardOutlined,
   DatabaseOutlined,
+  DownloadOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { PiSpeedometer, PiSwap } from "react-icons/pi";
 import { HiOutlineFolder, HiOutlinePrinter } from "react-icons/hi";
 import { HiOutlineTruck } from "react-icons/hi2";
+import Cookies from "js-cookie";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -81,13 +84,13 @@ const siderMenuPerPage = {
       label: "Agreement",
       icon: <ProfileOutlined />,
     },
-        {
+    {
       key: "/master-data/apply-agreement",
       label: "Apply Agreement",
       icon: <ProfileOutlined />,
     },
   ],
-      "/inventory": [
+  "/inventory": [
     {
       key: "/inventory/adjustment",
       label: "Stock Adjustment",
@@ -189,6 +192,18 @@ const menuItems = [
         path: `${prefix}/report/penjualan`,
       },
     ],
+  },
+  {
+    key: `logout`,
+    icon: <LogoutOutlined />,
+    label: "Logout",
+    onClick: () => {
+      Cookies.remove("x_atkn", { path: "/" });
+      Cookies.remove("u_ctx", { path: "/" });
+      Cookies.remove("role", { path: "/" });
+
+      window.location.href = "/auth/login";
+    },
   },
 ];
 
@@ -348,10 +363,18 @@ const LayoutTesting = ({ children }) => {
 
   const allItems = flattenItems(menuItems);
 
+  function logout() {
+    Cookies.remove("x_atkn", { path: "/" });
+    Cookies.remove("u_ctx", { path: "/" });
+    Cookies.remove("role", { path: "/" });
+
+    window.location.href = "/auth/login";
+  }
+
   return (
     <Layout style={{ width: "100%", minHeight: "100dvh" }}>
       <Header
-        style={{ padding: 0 }}
+        style={{ padding: 0, gap: "2rem" }}
         className="flex items-center justify-between"
       >
         <div className="h-full ml-4 lg:ml-12 py-2">
@@ -361,6 +384,7 @@ const LayoutTesting = ({ children }) => {
             alt="Karya Group Logo"
           />
         </div>
+
         <div className="hidden w-[700px] lg:block">
           <Menu
             theme="dark"
@@ -372,8 +396,9 @@ const LayoutTesting = ({ children }) => {
             }))}
           />
         </div>
-        <div className="mr-4 lg:mr-12">
-          <div className="lg:hidden">
+
+        <div className="lg:hidden mr-4 lg:mr-12">
+          <div className="">
             <Button
               icon={<MenuOutlined />}
               variant="outlined"
@@ -382,6 +407,15 @@ const LayoutTesting = ({ children }) => {
               onClick={showDrawer}
             />
           </div>
+        </div>
+        <div className="hidden lg:block mr-4 lg:mr-12">
+          <Button
+            color="danger"
+            variant="text"
+            icon={<LogoutOutlined />}
+            onClick={logout}
+            size="large"
+          ></Button>
         </div>
       </Header>
 
