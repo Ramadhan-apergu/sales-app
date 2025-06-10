@@ -46,15 +46,51 @@ import dayjs from "dayjs";
 import { formatDateToShort } from "@/utils/formatDate";
 import AgreementFetch from "@/modules/salesApi/agreement";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import { salesOrderAliases } from "@/utils/aliases";
+
+function formatRupiah(number) {
+  if (typeof number !== "number" || isNaN(number)) {
+    return "Rp0,-";
+  }
+
+  try {
+    return "Rp" + number.toLocaleString("id-ID") + ",-";
+  } catch (e) {
+    return "Rp0,-";
+  }
+}
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (
+        [
+          "rate",
+          "value1",
+          "value2",
+          "value3",
+          "subtotal",
+          "totalamount",
+          "taxvalue",
+          "totaldiscount",
+        ].includes(key)
+      ) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right", // semua kolom di-align ke kanan
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right", // semua kolom di-align ke kanan
+        };
+      }
+    }),
   ];
 
   return (
@@ -359,47 +395,47 @@ export default function Detail() {
 
   const [dataTableItem, setDataTableItem] = useState([]);
 
-  function formatRupiah(number) {
-    return number.toLocaleString("id-ID") + ",-";
-  }
-
   const handleEdit = () => {
     router.push(`/super-admin/transaction/${title}/${data.id}/edit`);
   };
 
   const [modal, contextHolder] = Modal.useModal();
 
-const items = [
-  {
-    key: "1",
-    label: "Approve",
-    disabled: !data.status || data.status.toLowerCase() !== 'pending approval',
-  },
-  {
-    key: "2",
-    label: "Cancel",
-    danger: true,
-    disabled: !data.status || data.status.toLowerCase() !== 'pending approval',
-  },
-];
-
+  const items = [
+    {
+      key: "1",
+      label: "Approve",
+      disabled:
+        !data.status || data.status.toLowerCase() !== "pending approval",
+    },
+    {
+      key: "2",
+      label: "Cancel",
+      danger: true,
+      disabled:
+        !data.status || data.status.toLowerCase() !== "pending approval",
+    },
+  ];
 
   async function handleApproval() {
     try {
-        setIsLoadingSubmit(true)
-        const response = await SalesOrderFetch.approveSoPending(data.id, 'approved')
-        updateResponseHandler(response, notify)
-        router.refresh()
+      setIsLoadingSubmit(true);
+      const response = await SalesOrderFetch.approveSoPending(
+        data.id,
+        "approved"
+      );
+      updateResponseHandler(response, notify);
+      router.refresh();
     } catch (error) {
-        notify('error', 'Error', 'Failed approval customer')
+      notify("error", "Error", "Failed approval customer");
     } finally {
-        setIsLoadingSubmit(false)
+      setIsLoadingSubmit(false);
     }
   }
   const handleClickAction = ({ key }) => {
     switch (key) {
       case "1":
-        handleApproval()
+        handleApproval();
         break;
       case "2":
         deleteModal();
@@ -421,19 +457,19 @@ const items = [
     });
   };
 
-    const handleDelete = async (id) => {
-      try {
-        const response = await SalesOrderFetch.approveSoPending(id, 'rejected');
-  
-        const resData = updateResponseHandler(response, notify);
-  
-        if (resData) {
-          router.push(`/super-admin/master-data/${title}`);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
+  const handleDelete = async (id) => {
+    try {
+      const response = await SalesOrderFetch.approveSoPending(id, "rejected");
+
+      const resData = updateResponseHandler(response, notify);
+
+      if (resData) {
+        router.push(`/super-admin/master-data/${title}`);
       }
-    };
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    }
+  };
 
   return (
     <>
@@ -533,7 +569,7 @@ const items = [
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={salesOrderAliases.customer}
                   />
                   <InputForm
                     title="primary"
@@ -565,7 +601,7 @@ const items = [
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={salesOrderAliases.primary}
                   />
                   <InputForm
                     title="shipping"
@@ -585,7 +621,7 @@ const items = [
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={salesOrderAliases.shipping}
                   />
                   <InputForm
                     title="billing"
@@ -605,7 +641,7 @@ const items = [
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={salesOrderAliases.billing}
                   />
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-4">
@@ -622,7 +658,7 @@ const items = [
                       <TableCustom
                         data={dataTableItem}
                         keys={keyTableItem}
-                        aliases={{}}
+                        aliases={salesOrderAliases.item}
                       />
                     </div>
                   </div>
@@ -658,12 +694,7 @@ const items = [
                             PPN
                           </p>
                         </div>
-                        <div className="flex w-full">
-                          <p className="w-1/2">Tax Total</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.taxtotal)}
-                          </p>
-                        </div>
+
                         <hr className="border-gray-5" />
                         <div className="flex w-full font-semibold">
                           <p className="w-1/2">Total</p>

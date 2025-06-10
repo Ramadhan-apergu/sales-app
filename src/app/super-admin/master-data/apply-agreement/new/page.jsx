@@ -313,10 +313,8 @@ function handleModalAgreementCancel() {
                         if (!findAgreementExisting) {
                             setAgreementSelectedTemp({
                               ...agreement,
-                              effectivedate: formatDateToShort(
-                                agreement.effectivedate
-                              ),
-                              enddate: formatDateToShort(agreement.enddate),
+                              effectivedate: agreement.effectivedate ? formatDateToShort(agreement.effectivedate) : agreement.effectivedate,
+                              enddate: agreement.enddate ? formatDateToShort(agreement.enddate) : agreement.enddate,
                               form: formOptions[agreement.customform],
                             });
                         } else {
