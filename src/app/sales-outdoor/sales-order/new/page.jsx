@@ -34,22 +34,57 @@ import ItemFetch from "@/modules/salesApi/item";
 import convertToLocalDate from "@/utils/convertToLocalDate";
 import dayjs from "dayjs";
 
-function TableCustom({ data, keys, aliases, onDelete }) {
+const formatRupiah = (value) => {
+    const num = Number(value);
+    if (isNaN(num)) return 'Rp 0,-';
+    const numberCurrency = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(num);
+
+    return numberCurrency + ",-";
+};
+
+function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
+  const textKeys = ['displayname', 'units', 'description', 'discountname1', 'discountvalue1', 'perunit1', 'discountname2', 'discountvalue2', 'perunit2', 'discountname3', 'discountvalue3', 'perunit3', 'unitfree'];
+
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      let column = {
+        title:
+          key === 'displayname'
+            ? 'Item Name'
+            : aliases?.[key] || key,
+        dataIndex: key,
+        key: key,
+        align: textKeys.includes(key) ? 'left' : 'right',
+        onHeaderCell: () => ({
+          className: 'text-sm text-center',
+          style: { textAlign: 'center' }  
+        }),
+      };
+
+      if (['rate', 'subtotal', 'totalamount', 'value1', 'value2', 'value3'].includes(key)) {
+        column.render = (value) => formatRupiah(value);
+      }
+
+      return column;
+    }),
     {
       title: "Action",
       key: "action",
-      align: "right", // kolom action juga ke kanan
+      align: "center",
       render: (_, record) => (
-        <Button type="link" onClick={() => onDelete(record)}>
-          Delete
-        </Button>
+        <>
+          <Button type="link" onClick={() => onEdit(record)}>
+            Edit
+          </Button>
+          <Button type="link" onClick={() => onDelete(record)}>
+            Delete
+          </Button>
+        </>
       ),
     },
   ];
@@ -78,6 +113,7 @@ export default function Enter() {
 
   const [dataItem, setDataItem] = useState([]);
   const [itemSelected, setItemSelected] = useState(null);
+  const [editItem, setEditItem] = useState(null); // State untuk melacak item yang sedang diedit
 
   useEffect(() => {
     async function fetchCustomer() {
@@ -341,6 +377,16 @@ export default function Enter() {
             ...action.payload,
           },
         };
+      case "SET_ALL":
+        return {
+          ...state,
+          item: action.payload.item,
+          discount1: action.payload.discount1,
+          discount2: action.payload.discount2,
+          discount3: action.payload.discount3,
+          summary: action.payload.summary,
+          tax: action.payload.tax,
+        };
       case "RESET":
         return initialStateItemTable;
       default:
@@ -354,11 +400,10 @@ export default function Enter() {
   );
 
   const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
   const [discountItems, setDiscountItems] = useState([]);
 
   function handleAddItem() {
-    if (!state.payloadPrimary.entity || state.payloadPrimary.entity == "") {
+    if (!state.payloadPrimary.entity || state.payloadPrimary.entity === "") {
       notify(
         "error",
         "Error",
@@ -367,7 +412,7 @@ export default function Enter() {
       return;
     }
 
-    if (!state.payloadPrimary.trandate || state.payloadPrimary.trandate == "") {
+    if (!state.payloadPrimary.trandate || state.payloadPrimary.trandate === "") {
       notify(
         "error",
         "Error",
@@ -378,7 +423,7 @@ export default function Enter() {
 
     if (
       !state.payloadBilling.paymentoption ||
-      state.payloadBilling.paymentoption == ""
+      state.payloadBilling.paymentoption === ""
     ) {
       notify(
         "error",
@@ -394,6 +439,7 @@ export default function Enter() {
   function handleModalItemCancel() {
     dispatchItemTable({ type: "RESET" });
     setItemSelected(null);
+    setEditItem(null); // Reset editItem saat modal ditutup
     setIsModalItemOpen(false);
   }
 
@@ -413,71 +459,153 @@ export default function Enter() {
       return;
     }
 
-    const discountItem = await getDiscount(
-      state.payloadPrimary.entity,
-      stateItemTable.item.item,
-      convertToLocalDate(state.payloadPrimary.trandate),
-      stateItemTable.item.quantity,
-      stateItemTable.item.itemprocessfamily
-    );
-
-    setDiscountItems((prev) => [...prev, discountItem]);
-
-    handleAddItemToTable();
-
-    handleModalItemCancel();
-  }
-
-  function handleAddItemToTable() {
     const subtotal = stateItemTable.item.quantity * stateItemTable.item.rate;
     const totalamount = subtotal;
     const taxrate = stateItemTable.tax.taxable
       ? Number(stateItemTable.tax.taxrate)
       : 0;
-
     const taxvalue = stateItemTable.tax.taxable
       ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
       : 0;
 
     dispatchItemTable({
       type: "SET_SUMMARY",
-      payload: {
-        subtotal,
-        totalamount,
-      },
+      payload: { subtotal, totalamount },
     });
 
     dispatchItemTable({
       type: "SET_TAX",
-      payload: {
-        taxvalue,
-        taxrate,
-      },
+      payload: { taxvalue, taxrate },
     });
 
     const mergePayloadItemTable = {
-      lineid: crypto.randomUUID(),
-
       ...stateItemTable.item,
-
       ...stateItemTable.discount1,
-
       ...stateItemTable.discount2,
-
       ...stateItemTable.discount3,
-
       subtotal,
       totalamount,
       qtyfree: stateItemTable.summary.qtyfree,
       unitfree: stateItemTable.summary.unitfree,
       totaldiscount: stateItemTable.summary.totaldiscount,
-
       taxable: stateItemTable.tax.taxable,
       taxrate,
       taxvalue,
     };
 
-    setDataTableItem((prev) => [...prev, mergePayloadItemTable]);
+    if (editItem) {
+      // Edit item yang ada
+      const currentDiscountItem = discountItems.find(
+        (di) => di.id === stateItemTable.item.item
+      );
+      const previousSelected = currentDiscountItem.discount
+        .filter((d) => d.isChecked)
+        .map((d) => d.id);
+
+      const discountItem = await getDiscount(
+        state.payloadPrimary.entity,
+        stateItemTable.item.item,
+        convertToLocalDate(state.payloadPrimary.trandate),
+        stateItemTable.item.quantity,
+        stateItemTable.item.itemprocessfamily
+      );
+
+      const updatedDiscountItem = {
+        ...discountItem,
+        discount: discountItem.discount.map((d) => ({
+          ...d,
+          isChecked: previousSelected.includes(d.id),
+        })),
+      };
+
+      setDiscountItems((prev) =>
+        prev.map((di) =>
+          di.id === stateItemTable.item.item ? updatedDiscountItem : di
+        )
+      );
+
+      setDataTableItem((prev) =>
+        prev.map((item) =>
+          item.lineid === editItem
+            ? { ...mergePayloadItemTable, lineid: editItem }
+            : item
+        )
+      );
+    } else {
+      // Tambah item baru
+      const discountItem = await getDiscount(
+        state.payloadPrimary.entity,
+        stateItemTable.item.item,
+        convertToLocalDate(state.payloadPrimary.trandate),
+        stateItemTable.item.quantity,
+        stateItemTable.item.itemprocessfamily
+      );
+
+      setDiscountItems((prev) => [...prev, discountItem]);
+
+      setDataTableItem((prev) => [
+        ...prev,
+        { ...mergePayloadItemTable, lineid: crypto.randomUUID() },
+      ]);
+    }
+
+    handleModalItemCancel();
+  }
+
+  function handleEditTableItem(record) {
+    dispatchItemTable({
+      type: "SET_ALL",
+      payload: {
+        item: {
+          item: record.item,
+          quantity: record.quantity,
+          units: record.units,
+          description: record.description,
+          rate: record.rate,
+          discount: record.discount,
+          displayname: record.displayname,
+          itemprocessfamily: record.itemprocessfamily,
+          stock: record.stock,
+          itemid: record.itemid,
+        },
+        discount1: {
+          discount1: record.discount1,
+          discountname1: record.discountname1,
+          value1: record.value1,
+          discountvalue1: record.discountvalue1,
+          perunit1: record.perunit1,
+        },
+        discount2: {
+          discount2: record.discount2,
+          discountname2: record.discountname2,
+          value2: record.value2,
+          discountvalue2: record.discountvalue2,
+          perunit2: record.perunit2,
+        },
+        discount3: {
+          discount3: record.discount3,
+          discountname3: record.discountname3,
+          value3: record.value3,
+          discountvalue3: record.discountvalue3,
+          perunit3: record.perunit3,
+        },
+        summary: {
+          subtotal: record.subtotal,
+          totalamount: record.totalamount,
+          qtyfree: record.qtyfree,
+          unitfree: record.unitfree,
+          totaldiscount: record.totaldiscount,
+        },
+        tax: {
+          taxable: record.taxable,
+          taxrate: record.taxrate,
+          taxvalue: record.taxvalue,
+        },
+      },
+    });
+    setItemSelected(record.item);
+    setEditItem(record.lineid);
+    setIsModalItemOpen(true);
   }
 
   async function getDiscount(cust_id, item_id, trandate, qty, item_categories) {
@@ -495,7 +623,7 @@ export default function Enter() {
           discounttype: "nominal",
           discount: "Discount Price",
           value: stateItemTable.item.discount,
-          discountvalue: "rp",
+          discountvalue: "",
           perunit: "",
           paymenttype: "",
           isChecked: false,
@@ -515,16 +643,16 @@ export default function Enter() {
           return {
             id: agreement.agreementid,
             type:
-              agreement.paymenttype != ""
+              agreement.paymenttype !== ""
                 ? "Discount Payment"
                 : "Discount Agreement",
             discounttype: agreement.discounttype,
             discount: agreement.agreementname,
             value: agreement.discountvalue,
             discountvalue:
-              agreement.discounttype == "nominal"
+              agreement.discounttype === "nominal"
                 ? "rp"
-                : agreement.discounttype == "percent"
+                : agreement.discounttype === "percent"
                 ? "%"
                 : "",
             perunit: agreement.perunit,
@@ -535,35 +663,6 @@ export default function Enter() {
         initData.discount.push(...discountAgreement);
       }
 
-      // const resAgreementGroup = await SalesOrderFetch.getSoAgreementGroup(
-      //   item_categories,
-      //   cust_id,
-      //   qty,
-      //   trandate
-      // );
-
-      // const dataAgreementGroup = getResponseHandler(resAgreementGroup);
-
-      // if (
-      //   dataAgreementGroup &&
-      //   dataAgreementGroup[itemSelected.itemprocessfamily]
-      // ) {
-      //   const discountAgreementGroup =
-      //     dataAgreementGroup[itemSelected.itemprocessfamily];
-
-      //   initData.discount.push({
-      //     id: discountAgreementGroup.agreementid,
-      //     type: "Discount Agreement",
-      //     discounttype:
-      //       discountAgreementGroup.unitfree == "" ? "nominal" : "freeitem",
-      //     discount: discountAgreementGroup.agreementname,
-      //     value: discountAgreementGroup.discountvalue,
-      //     discountvalue: discountAgreementGroup?.unitfree == "" ? "rp" : "",
-      //     perunit: discountAgreementGroup.unitfree,
-      //     paymenttype: "",
-      //     isChecked: false,
-      //   });
-      // }
       return initData;
     } catch (error) {
       notify("error", "Error", "Failed get data discount");
@@ -575,7 +674,6 @@ export default function Enter() {
     let updatedItem = dataTableItem.find((item) => item.item === itemid);
 
     if (updatedItem) {
-      // Jika dicentang (Checked)
       if (isChecked) {
         if (discount.type === "Discount Item") {
           if (!updatedItem.discount1) {
@@ -611,10 +709,7 @@ export default function Enter() {
             };
           } else return;
         }
-      }
-
-      // Jika tidak dicentang (Unchecked)
-      else {
+      } else {
         if (
           discount.type === "Discount Item" &&
           updatedItem.discount1 === discount.id
@@ -654,23 +749,18 @@ export default function Enter() {
         } else return;
       }
 
-      // Update item ke table
       const updatedDataTableItem = dataTableItem.map((item) =>
         item.item === itemid ? updatedItem : item
       );
       setDataTableItem(updatedDataTableItem);
 
-      // Update status isChecked di discountItems
       const updatedDiscountItems = discountItems.map((item) => {
         if (item.id === itemid) {
           return {
             ...item,
             discount: item.discount.map((dis) => {
               if (dis.id === discount.id) {
-                return {
-                  ...dis,
-                  isChecked,
-                };
+                return { ...dis, isChecked };
               }
               return dis;
             }),
@@ -696,7 +786,6 @@ export default function Enter() {
   useEffect(() => {
     let updatedDataTableItem = dataTableItem.map((dataItem) => {
       let data = { ...dataItem };
-
       data.totalamount = data.quantity * data.rate;
 
       const discount1 = getValueDiscount(data.discountvalue1, data.value1, data.totalamount);
@@ -722,14 +811,12 @@ export default function Enter() {
       return data;
     });
 
-    // Cek apakah ada perubahan signifikan sebelum update
     const isChanged =
       JSON.stringify(updatedDataTableItem) !== JSON.stringify(dataTableItem);
     if (isChanged) {
       setDataTableItem(updatedDataTableItem);
     }
 
-    // Hitung summary
     const subtotalbruto = updatedDataTableItem.reduce(
       (acc, curr) => acc + curr.totalamount,
       0
@@ -754,15 +841,10 @@ export default function Enter() {
     dispatch({ type: "SET_SUMMARY", payload: setSummary });
   }, [dataTableItem]);
 
-  function formatRupiah(number) {
-    return number.toLocaleString("id-ID") + ",-";
-  }
-
   function handleDeleteTableItem(record) {
     setDataTableItem((prev) =>
       prev.filter((item) => item.lineid !== record.lineid)
     );
-
     setDiscountItems((prev) =>
       prev.filter((discount) => discount.id !== record.item)
     );
@@ -807,16 +889,16 @@ export default function Enter() {
           perunit1: data.perunit1,
           discount2: data.discount2,
           value2: data.value2,
-          discountvalue2: data.discountvalue2 == "rp" ? 0 : 1,
+          discountvalue2: data.discountvalue2 === "rp" ? 0 : 1,
           perunit2: data.perunit2,
           discount3: data.discount3,
           value3: data.value3,
-          discountvalue3: data.discountvalue3 == "rp" ? 0 : 1,
+          discountvalue3: data.discountvalue3 === "rp" ? 0 : 1,
           perunit3: data.perunit3,
           subtotal: data.subtotal,
           totalamount: data.totalamount,
           qtyfree: data.qtyfree,
-          unitfree: data.unitfree == "kg" ? 0 : 1,
+          unitfree: data.unitfree === "kg" ? 0 : 1,
           taxable: data.taxable,
           taxrate: data.taxrate,
           totaldiscount: data.totaldiscount,
@@ -843,17 +925,16 @@ export default function Enter() {
 
       if (
         !payloadToInsert.sales_order_items ||
-        payloadToInsert.sales_order_items.length == 0
+        payloadToInsert.sales_order_items.length === 0
       ) {
         throw new Error("Please enter a value greater than 0.");
       }
 
       const response = await SalesOrderFetch.add(payloadToInsert);
-
       const resData = createResponseHandler(response, notify);
 
       if (resData) {
-        router.push(`/sales-outdoor/sales-order/${resData}`)
+        router.push(`/sales-outdoor/sales-order/${resData}`);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -867,378 +948,299 @@ export default function Enter() {
       <Layout>
         <FixedHeaderBar bgColor="bg-blue-6" />
         <div className="w-full relative p-4 mt-10">
-            <div className="max-w-3xl mx-auto">
-                <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
-                    <Button onClick={handleBack} className="mb-2">← Kembali</Button>
-
-                    <h3 className="font-semibold text-gray-700 mb-3 text-center text-2xl">Create Sales Order</h3>
-
-                    <div className="w-full flex flex-col gap-4">
-                        <div className="w-full flex flex-col justify-between items-start">
-                        <div className="w-full flex gap-1"></div>
-                        <div className="w-full flex justify-end items-center gap-2">
-                            <Button type={"primary"} icon={<CheckOutlined />} onClick={handleSubmit}>
-                                Submit
-                            </Button>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="w-full flex flex-col gap-8">
-                        <div className="w-full flex flex-col gap-2">
-                        <Divider
-                            style={{
-                            margin: "0",
-                            textTransform: "capitalize",
-                            borderColor: "#1677ff",
-                            }}
-                            orientation="left"
-                        >
-                            Customer
-                        </Divider>
-                        <div className="w-full flex flex-col">
-                            <Form layout="vertical">
-                            <Form.Item
-                                label={<span className="capitalize">Customer</span>}
-                                name="customer"
-                                style={{ margin: 0 }}
-                                className="w-full"
-                                labelCol={{ style: { padding: 0 } }}
-                                rules={[
-                                { required: true, message: `Customer is required` },
-                                ]}
-                            >
-                                <Select
-                                showSearch
-                                placeholder="Select a customer"
-                                optionFilterProp="label"
-                                value={customerSelected}
-                                onChange={(_, customer) => {
-                                    setCustomerSelected(customer);
-                                    setDataTableItem([]);
-                                    setDiscountItems([]);
-                                    dispatch({ type: "RESET" });
-                                    dispatch({
-                                    type: "SET_SHIPPING",
-                                    payload: { shippingaddress: customer.addressee },
-                                    });
-                                    dispatch({
-                                    type: "SET_PRIMARY",
-                                    payload: { entity: customer.id },
-                                    });
-                                }}
-                                onSearch={{}}
-                                options={dataCustomer}
-                                style={{ width: "100%" }}
-                                />
-                            </Form.Item>
-                            </Form>
-                        </div>
-                        </div>
-                    </div>
-                    <InputForm
-                        isSingleCol={true}
-                        title="primary"
-                        type="SET_PRIMARY"
-                        payload={state.payloadPrimary}
-                        data={[
-                        {
-                            key: "entity",
-                            input: "input",
-                            isAlias: true,
-                            isRead: true,
-                            rules: [{ required: true, message: ` is required` }],
-                            placeholder: "Auto-filled after selecting a customer",
-                        },
-                        {
-                            key: "trandate",
-                            input: "date",
-                            isAlias: true,
-                            rules: [{ required: true, message: ` is required` }],
-                        },
-                        {
-                            key: "salesrep",
-                            input: "input",
-                            isAlias: true,
-                            isRead: true,
-                        },
-                        {
-                            key: "otherrefnum",
-                            input: "input",
-                            isAlias: true,
-                            rules: [{ required: true, message: ` is required` }],
-                            placeholder: "Entry No. PO customer",
-                        },
-                        ]}
-                        aliases={[]}
-                        onChange={(type, payload) => {
-                        dispatch({ type, payload });
-                        }}
-                    />
-                    <InputForm
-                        isSingleCol={true}
-                        title="shipping"
-                        type="SET_SHIPPING"
-                        payload={state.payloadShipping}
-                        data={[
-                        {
-                            key: "shippingtype",
-                            input: "select",
-                            options: shipAddressOptions,
-                            isAlias: true,
-                        },
-                        {
-                            key:
-                            state.payloadShipping.shippingtype == 1
-                                ? "shippingaddress"
-                                : "shippingoption",
-                            input: "text",
-                            isAlias: true,
-                        },
-                        ]}
-                        aliases={[]}
-                        onChange={(type, payload) => {
-                        console.log(payload);
-                        dispatch({ type, payload });
-                        }}
-                    />
-                    <InputForm
-                        isSingleCol={true}
-                        title="billing"
-                        type="SET_BILLING"
-                        payload={state.payloadBilling}
-                        data={[
-                        {
-                            key: "term",
-                            input: "select",
-                            options: termOptions,
-                            isAlias: true,
-                        },
-                        {
-                            key: "paymentoption",
-                            input: "select",
-                            options: paymentOptions,
-                            isAlias: true,
-                            rules: [{ required: true, message: ` is required` }],
-                        },
-                        ]}
-                        aliases={[]}
-                        onChange={(type, payload) => {
-                        dispatch({ type, payload });
-                        }}
-                    />
-                    <div className="w-full flex flex-col gap-8">
-                        <div className="w-full flex flex-col gap-2">
-                        <Divider
-                            style={{
-                            margin: "0",
-                            textTransform: "capitalize",
-                            borderColor: "#1677ff",
-                            }}
-                            orientation="left"
-                        >
-                            Item
-                        </Divider>
-                        <div className="flex justify-end">
-                            <Button type="primary" onClick={handleAddItem}>
-                            Add
-                            </Button>
-                        </div>
-                        <TableCustom
-                            onDelete={handleDeleteTableItem}
-                            data={dataTableItem}
-                            keys={keyTableItem}
-                            aliases={{}}
-                        />
-                        </div>
-                    </div>
-                    {discountItems && discountItems.length > 0 && (
-                        <div className="w-full flex flex-col gap-8">
-                        <Collapse
-                            accordion
-                            items={discountItems.map((discountItem) => ({
-                            key: discountItem.id,
-                            label: discountItem.displayname,
-                            children: (
-                                <div className="w-full flex flex-col">
-                                <List
-                                    size="small"
-                                    itemLayout="horizontal"
-                                    dataSource={discountItem.discount || []}
-                                    header="Discount 1"
-                                    renderItem={(item, index) => (
-                                    <>
-                                        {item.type == "Discount Item" && (
-                                        <List.Item>
-                                            <Checkbox
-                                            checked={item.isChecked}
-                                            style={{ marginRight: "16px" }}
-                                            onChange={(e) => {
-                                                handleDiscountSelected(
-                                                e.target.checked,
-                                                item,
-                                                discountItem.id
-                                                );
-                                            }}
-                                            />
-                                            <List.Item.Meta
-                                            title={<p>{item.discount}</p>}
-                                            description={`Type: ${
-                                                item.discounttype
-                                            }, Value: ${
-                                                item.discounttype == "nominal"
-                                                ? "Rp. " + item.value
-                                                : item.discounttype == "percent"
-                                                ? item.value + "%"
-                                                : item.value
-                                            }`}
-                                            />
-                                        </List.Item>
-                                        )}
-                                    </>
-                                    )}
-                                />
-                                <List
-                                    size="small"
-                                    itemLayout="horizontal"
-                                    dataSource={discountItem.discount || []}
-                                    header="Discount 2"
-                                    renderItem={(item, index) => (
-                                    <>
-                                        {item.type == "Discount Agreement" && (
-                                        <List.Item>
-                                            <Checkbox
-                                            checked={item.isChecked}
-                                            onChange={(e) => {
-                                                handleDiscountSelected(
-                                                e.target.checked,
-                                                item,
-                                                discountItem.id
-                                                );
-                                            }}
-                                            defaultChecked={false}
-                                            style={{ marginRight: "16px" }}
-                                            />
-                                            <List.Item.Meta
-                                            title={<p>{item.discount}</p>}
-                                            description={`Type: ${
-                                                item.discounttype
-                                            }, Value: ${
-                                                item.discounttype == "nominal"
-                                                ? "Rp. " + item.value
-                                                : item.discounttype == "percent"
-                                                ? item.value + "%"
-                                                : item.value
-                                            }`}
-                                            />
-                                        </List.Item>
-                                        )}
-                                    </>
-                                    )}
-                                />
-                                <List
-                                    size="small"
-                                    itemLayout="horizontal"
-                                    dataSource={discountItem.discount || []}
-                                    header={
-                                    <div className="flex justify-start items-center gap-2">
-                                        <p>Discount 3</p>
-                                        <Tooltip title="Discount is only available when using an eligible payment method.">
-                                        <InfoCircleOutlined className="text-sm" />
-                                        </Tooltip>
-                                    </div>
-                                    }
-                                    renderItem={(item, index) => (
-                                    <>
-                                        {item.type == "Discount Payment" && (
-                                        <List.Item>
-                                            <Checkbox
-                                            checked={item.isChecked}
-                                            disabled={
-                                                item.paymenttype !=
-                                                state.payloadBilling.paymentoption
-                                            }
-                                            onChange={(e) => {
-                                                handleDiscountSelected(
-                                                e.target.checked,
-                                                item,
-                                                discountItem.id
-                                                );
-                                            }}
-                                            defaultChecked={false}
-                                            style={{ marginRight: "16px" }}
-                                            />
-                                            <List.Item.Meta
-                                            title={<p>{item.discount}</p>}
-                                            description={`Type: ${
-                                                item.discounttype
-                                            }, Value: ${
-                                                item.discounttype == "nominal"
-                                                ? "Rp. " + item.value
-                                                : item.discounttype == "percent"
-                                                ? item.value + "%"
-                                                : item.value
-                                            }, Payment: ${item.paymenttype}`}
-                                            />
-                                        </List.Item>
-                                        )}
-                                    </>
-                                    )}
-                                />
-                                </div>
-                            ),
-                            }))}
-                        />
-                        </div>
-                    )}
-                    <div className="w-full flex flex-col gap-8">
-                        <div className="w-full flex flex-col gap-2">
-                        <Divider
-                            style={{
-                            margin: "0",
-                            textTransform: "capitalize",
-                            borderColor: "#1677ff",
-                            }}
-                            orientation="left"
-                        >
-                            Summary
-                        </Divider>
-                        <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
-                            <div className="flex w-full">
-                            <p className="w-1/2 text-sm">Subtotal</p>
-                            <p className="w-1/2 text-end text-sm">
-                                {formatRupiah(state.payloadSummary.subtotalbruto)}
-                            </p>
-                            </div>
-                            <div className="flex w-full">
-                            <p className="w-1/2 text-sm">Discount Item</p>
-                            <p className="w-1/2 text-end text-sm">
-                                {formatRupiah(state.payloadSummary.discounttotal)}
-                            </p>
-                            </div>
-                            <div className="flex w-full">
-                            <p className="w-1/2 text-sm">Subtotal (After Discount)</p>
-                            <p className="w-1/2 text-end text-sm">
-                                {formatRupiah(state.payloadSummary.subtotal)} Incl. PPN
-                            </p>
-                            </div>
-                            <div className="flex w-full">
-                            <p className="w-1/2 text-sm">Tax Total</p>
-                            <p className="w-1/2 text-end text-sm">
-                                {formatRupiah(state.payloadSummary.taxtotal)}
-                            </p>
-                            </div>
-                            <hr className="border-gray-5" />
-                            <div className="flex w-full font-semibold">
-                            <p className="w-1/2 text-sm">Total</p>
-                            <p className="w-1/2 text-end text-sm">
-                                {formatRupiah(state.payloadSummary.total)}
-                            </p>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
+              <Button onClick={handleBack} className="mb-2">← Kembali</Button>
+              <h3 className="font-semibold text-gray-700 mb-3 text-center text-2xl">Create Sales Order</h3>
+              <div className="w-full flex flex-col gap-4">
+                <div className="w-full flex flex-col justify-between items-start">
+                  <div className="w-full flex gap-1"></div>
+                  <div className="w-full flex justify-end items-center gap-2">
+                    <Button type="primary" icon={<CheckOutlined />} onClick={handleSubmit}>
+                      Submit
+                    </Button>
+                  </div>
                 </div>
+              </div>
+              <div className="w-full flex flex-col gap-8">
+                <div className="w-full flex flex-col gap-2">
+                  <Divider
+                    style={{ margin: "0", textTransform: "capitalize", borderColor: "#1677ff" }}
+                    orientation="left"
+                  >
+                    Customer
+                  </Divider>
+                  <div className="w-full flex flex-col">
+                    <Form layout="vertical">
+                      <Form.Item
+                        label={<span className="capitalize">Customer</span>}
+                        name="customer"
+                        style={{ margin: 0 }}
+                        className="w-full"
+                        labelCol={{ style: { padding: 0 } }}
+                        rules={[{ required: true, message: `Customer is required` }]}
+                      >
+                        <Select
+                          showSearch
+                          placeholder="Select a customer"
+                          optionFilterProp="label"
+                          value={customerSelected}
+                          onChange={(_, customer) => {
+                            setCustomerSelected(customer);
+                            setDataTableItem([]);
+                            setDiscountItems([]);
+                            dispatch({ type: "RESET" });
+                            dispatch({
+                              type: "SET_SHIPPING",
+                              payload: { shippingaddress: customer.addressee },
+                            });
+                            dispatch({
+                              type: "SET_PRIMARY",
+                              payload: { entity: customer.id },
+                            });
+                          }}
+                          onSearch={{}}
+                          options={dataCustomer}
+                          style={{ width: "100%" }}
+                        />
+                      </Form.Item>
+                    </Form>
+                  </div>
+                </div>
+              </div>
+              <InputForm
+                isSingleCol={true}
+                title="primary"
+                type="SET_PRIMARY"
+                payload={state.payloadPrimary}
+                data={[
+                  { key: "entity", input: "input", isAlias: true, disabled: true, isRead: true, rules: [{ required: true, message: ` is required` }], placeholder: "Auto-filled after selecting a customer" },
+                  { key: "trandate", input: "date", isAlias: true, rules: [{ required: true, message: ` is required` }] },
+                  { key: "salesrep", input: "input", isAlias: true, isRead: true },
+                  { key: "otherrefnum", input: "input", isAlias: true, placeholder: "Entry No. PO customer" },
+                ]}
+                aliases={{
+                  entity: "Customer Entity",
+                  trandate: "Transaction Date",
+                  salesrep: "Sales Rep",
+                  otherrefnum: "Customer PO Number"
+                }}
+                onChange={(type, payload) => dispatch({ type, payload })}
+              />
+              <InputForm
+                isSingleCol={true}
+                title="shipping"
+                type="SET_SHIPPING"
+                payload={state.payloadShipping}
+                data={[
+                  {
+                    key: "shippingtype",
+                    input: "select",
+                    options: shipAddressOptions,
+                    isAlias: true
+                  },
+                  {
+                    key:
+                      state.payloadShipping.shippingtype === 1
+                        ? "shippingaddress"
+                        : "shippingoption",
+                    input: "text",
+                    isAlias: true,
+                    disabled: state.payloadShipping.shippingtype === 1
+                  }
+                ]}
+                aliases={{
+                  shippingtype: "Shipping Type",
+                  shippingaddress: "Shipping Address",
+                  shippingoption: "Shipping Option Address",
+                }}
+                onChange={(type, payload) => {
+                  if ("shippingaddress" in payload) {
+                    payload.shippingoption = "";
+                  }
+
+                  if (payload.shippingtype === 1) {
+                    payload.shippingoption = "";
+                  }
+
+                  dispatch({ type, payload });
+                }}
+              />
+              <InputForm
+                isSingleCol={true}
+                title="billing"
+                type="SET_BILLING"
+                payload={state.payloadBilling}
+                data={[
+                  { key: "term", input: "select", options: termOptions, isAlias: true },
+                  { key: "paymentoption", input: "select", options: paymentOptions, isAlias: true, rules: [{ required: true, message: ` is required` }] },
+                ]}
+                aliases={{
+                  paymentoption: "Payment Method",
+                }}
+                onChange={(type, payload) => dispatch({ type, payload })}
+              />
+              <div className="w-full flex flex-col gap-8">
+                <div className="w-full flex flex-col gap-2">
+                  <Divider
+                    style={{ margin: "0", textTransform: "capitalize", borderColor: "#1677ff" }}
+                    orientation="left"
+                  >
+                    Item
+                  </Divider>
+                  <div className="flex justify-end">
+                    <Button type="primary" onClick={handleAddItem}>
+                      Add
+                    </Button>
+                  </div>
+                  <TableCustom
+                    onDelete={handleDeleteTableItem}
+                    onEdit={handleEditTableItem}
+                    data={dataTableItem}
+                    keys={keyTableItem}
+                    aliases={{}}
+                  />
+                </div>
+              </div>
+              {discountItems && discountItems.length > 0 && (
+                <div className="w-full flex flex-col gap-8">
+                  <Collapse
+                    accordion
+                    items={discountItems.map((discountItem) => ({
+                      key: discountItem.id,
+                      label: discountItem.displayname,
+                      children: (
+                        <div className="w-full flex flex-col">
+                          <List
+                            size="small"
+                            itemLayout="horizontal"
+                            dataSource={discountItem.discount || []}
+                            header="Discount 1"
+                            renderItem={(item) => (
+                              <>
+                                {item.type === "Discount Item" && (
+                                  <List.Item>
+                                    <Checkbox
+                                      checked={item.isChecked}
+                                      style={{ marginRight: "16px" }}
+                                      onChange={(e) =>
+                                        handleDiscountSelected(e.target.checked, item, discountItem.id)
+                                      }
+                                    />
+                                    <List.Item.Meta
+                                      title={<p>{item.discount}</p>}
+                                      description={`Type: ${item.discounttype}, Value: ${
+                                        item.discounttype === "nominal" ? formatRupiah(item.value) : item.discounttype === "percent" ? item.value + "%" : item.value
+                                      }`}
+                                    />
+                                  </List.Item>
+                                )}
+                              </>
+                            )}
+                          />
+                          <List
+                            size="small"
+                            itemLayout="horizontal"
+                            dataSource={discountItem.discount || []}
+                            header="Discount 2"
+                            renderItem={(item) => (
+                              <>
+                                {item.type === "Discount Agreement" && (
+                                  <List.Item>
+                                    <Checkbox
+                                      checked={item.isChecked}
+                                      onChange={(e) =>
+                                        handleDiscountSelected(e.target.checked, item, discountItem.id)
+                                      }
+                                      style={{ marginRight: "16px" }}
+                                    />
+                                    <List.Item.Meta
+                                      title={<p>{item.discount}</p>}
+                                      description={`Type: ${item.discounttype}, Value: ${
+                                        item.discounttype === "nominal" ? "Rp. " + item.value : item.discounttype === "percent" ? item.value + "%" : item.value
+                                      }`}
+                                    />
+                                  </List.Item>
+                                )}
+                              </>
+                            )}
+                          />
+                          <List
+                            size="small"
+                            itemLayout="horizontal"
+                            dataSource={discountItem.discount || []}
+                            header={
+                              <div className="flex justify-start items-center gap-2">
+                                <p>Discount 3</p>
+                                <Tooltip title="Discount is only available when using an eligible payment method.">
+                                  <InfoCircleOutlined className="text-sm" />
+                                </Tooltip>
+                              </div>
+                            }
+                            renderItem={(item) => (
+                              <>
+                                {item.type === "Discount Payment" && (
+                                  <List.Item>
+                                    <Checkbox
+                                      checked={item.isChecked}
+                                      disabled={item.paymenttype !== state.payloadBilling.paymentoption}
+                                      onChange={(e) =>
+                                        handleDiscountSelected(e.target.checked, item, discountItem.id)
+                                      }
+                                      style={{ marginRight: "16px" }}
+                                    />
+                                    <List.Item.Meta
+                                      title={<p>{item.discount}</p>}
+                                      description={`Type: ${item.discounttype}, Value: ${
+                                        item.discounttype === "nominal" ? "Rp. " + item.value : item.discounttype === "percent" ? item.value + "%" : item.value
+                                      }, Payment: ${item.paymenttype}`}
+                                    />
+                                  </List.Item>
+                                )}
+                              </>
+                            )}
+                          />
+                        </div>
+                      ),
+                    }))}
+                  />
+                </div>
+              )}
+              <div className="w-full flex flex-col gap-8">
+                <div className="w-full flex flex-col gap-2">
+                  <Divider
+                    style={{ margin: "0", textTransform: "capitalize", borderColor: "#1677ff" }}
+                    orientation="left"
+                  >
+                    Summary
+                  </Divider>
+                  <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
+                    <div className="flex w-full">
+                      <p className="w-1/2 text-sm">Subtotal</p>
+                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.subtotalbruto)}</p>
+                    </div>
+                    <div className="flex w-full">
+                      <p className="w-1/2 text-sm">Discount Item</p>
+                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.discounttotal)}</p>
+                    </div>
+                    <div className="flex w-full">
+                      <p className="w-1/2 text-sm">Subtotal (After Discount)</p>
+                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.subtotal)} Incl. PPN</p>
+                    </div>
+                    <div className="flex w-full">
+                      <p className="w-1/2 text-sm">Tax Total</p>
+                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.taxtotal)}</p>
+                    </div>
+                    <hr className="border-gray-5" />
+                    <div className="flex w-full font-semibold">
+                      <p className="w-1/2 text-sm">Total</p>
+                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.total)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
       </Layout>
       {isLoadingSubmit && <LoadingSpinProcessing />}
@@ -1249,17 +1251,14 @@ export default function Enter() {
         onCancel={handleModalItemCancel}
         width={850}
         cancelText="Cancel"
+        title={editItem ? "Edit Item" : "Add Item"}
       >
         <div className="w-full mt-6">
           <div className="w-full flex flex-col gap-4 mt-6">
             <div className="w-full flex flex-col gap-8">
               <div className="w-full flex flex-col gap-2">
                 <Divider
-                  style={{
-                    margin: "0",
-                    textTransform: "capitalize",
-                    borderColor: "#1677ff",
-                  }}
+                  style={{ margin: "0", textTransform: "capitalize", borderColor: "#1677ff" }}
                   orientation="left"
                 >
                   Item
@@ -1282,7 +1281,6 @@ export default function Enter() {
                       }
 
                       setItemSelected(item.value);
-
                       dispatchItemTable({
                         type: "SET_ITEM",
                         payload: {
@@ -1300,6 +1298,7 @@ export default function Enter() {
                     onSearch={{}}
                     options={dataItem}
                     style={{ width: "100%" }}
+                    disabled={!!editItem} // Nonaktifkan saat mengedit
                   />
                 </div>
               </div>
@@ -1310,39 +1309,14 @@ export default function Enter() {
               type="SET_ITEM"
               payload={stateItemTable.item}
               data={[
-                {
-                  key: "item",
-                  input: "input",
-                  isAlias: true,
-                  isRead: true,
-                },
-                {
-                  key: "quantity",
-                  input: "number",
-                  isAlias: true,
-                },
-                {
-                  key: "units",
-                  input: "input",
-                  isAlias: true,
-                  isRead: true,
-                },
-                {
-                  key: "rate",
-                  input: "input",
-                  isAlias: true,
-                  isRead: true,
-                },
-                {
-                  key: "description",
-                  input: "text",
-                  isAlias: true,
-                },
+                { key: "item", input: "input", isAlias: true, isRead: true },
+                { key: "quantity", input: "number", isAlias: true },
+                { key: "units", input: "input", isAlias: true, isRead: true },
+                { key: "rate", input: "input", isAlias: true, isRead: true },
+                { key: "description", input: "text", isAlias: true },
               ]}
               aliases={[]}
-              onChange={(type, payload) => {
-                dispatchItemTable({ type, payload });
-              }}
+              onChange={(type, payload) => dispatchItemTable({ type, payload })}
             />
             <InputForm
               isSingleCol={true}
@@ -1350,26 +1324,11 @@ export default function Enter() {
               type="SET_TAX"
               payload={stateItemTable.tax}
               data={[
-                {
-                  key: "taxable",
-                  input: "select",
-                  options: [
-                    { label: "Yes", value: true },
-                    { label: "No", value: false },
-                  ],
-                  isAlias: true,
-                },
-                {
-                  key: "taxrate",
-                  input: "number",
-                  isAlias: true,
-                  disabled: !stateItemTable.tax.taxable,
-                },
+                { key: "taxable", input: "select", options: [{ label: "Yes", value: true }, { label: "No", value: false }], isAlias: true },
+                { key: "taxrate", input: "number", isAlias: true, disabled: !stateItemTable.tax.taxable },
               ]}
               aliases={[]}
-              onChange={(type, payload) => {
-                dispatchItemTable({ type, payload });
-              }}
+              onChange={(type, payload) => dispatchItemTable({ type, payload })}
             />
           </div>
         </div>
