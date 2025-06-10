@@ -20,7 +20,7 @@ export const itemAliases = {
     createddate: 'Created Date',
     id: 'ID',
     displayname: 'Display Name',
-    itemprocessfamily: 'Item Precessing Family',
+    itemprocessfamily: 'Item Processing Family',
     saleunit: 'Sale Unit',
     stockunit: 'Stock Unit',
     unitstype: 'Units Type',
@@ -52,4 +52,52 @@ export const agreementAliases = {
     customform: 'Custom Form',
     effectivedate: 'Effective Date',
     enddate: 'End Date',
+}
+
+export const salesOrderAliases = {
+    customer: {
+        customer: 'Customer'
+    },
+    primary: {
+        entity: 'ID customer',
+        trandate: 'Date',
+        salesrep: 'Sales Rep',
+        otherrefnum: 'PO #'
+    },
+    shipping: {
+        shippingoption: 'Custom Address',
+        shippingaddress: 'Default Address'
+    },
+    billing: {
+        term: 'Term',
+        paymentoption: 'Payment Option'
+    },
+    item: {
+        displayname: 'Item',
+        quantity: 'Qty',
+        units: 'Unit',
+        rate: 'Rate',
+        description: 'Description',
+        discountname1: 'Discount 1',
+        discountname2: 'Discount 2',
+        discountname3: 'Discount 3',
+        discountvalue1: '% / Rp',
+        discountvalue2: '% / Rp',
+        discountvalue3: '% / Rp',
+        value1: 'Discount Value 1',
+        value2: 'Discount Value 2',
+        value3: 'Discount Value 3',
+        perunit1: 'Per Unit 1',
+        perunit2: 'Per Unit 2',
+        perunit3: 'Per Unit 3',
+        subtotal: 'Total Amount (After Discount)',
+        totalamount: 'Total Amount',
+        totaldiscount: 'Total Discount',
+        qtyfree: 'Free Qty',
+        taxable: 'Taxable',
+        taxrate: 'Tax Rate',
+        taxvalue: 'Tax Value',
+        unitfree: 'Unit Free',
+        backordered: 'Back Ordered'
+    }
 }

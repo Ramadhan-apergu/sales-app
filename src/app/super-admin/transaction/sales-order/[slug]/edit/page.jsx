@@ -39,15 +39,52 @@ import convertToLocalDate from "@/utils/convertToLocalDate";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import AgreementFetch from "@/modules/salesApi/agreement";
+import { salesOrderAliases } from "@/utils/aliases";
+
+function formatRupiah(number) {
+  if (typeof number !== "number" || isNaN(number)) {
+    return "Rp0,-";
+  }
+
+  try {
+    return "Rp" + number.toLocaleString("id-ID") + ",-";
+  } catch (e) {
+    return "Rp0,-";
+  }
+}
 
 function TableCustom({ data, keys, aliases, onDelete }) {
+
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (
+        [
+          "rate",
+          "value1",
+          "value2",
+          "value3",
+          "subtotal",
+          "totalamount",
+          "taxvalue",
+          "totaldiscount",
+        ].includes(key)
+      ) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right", // semua kolom di-align ke kanan
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right", // semua kolom di-align ke kanan
+        };
+      }
+    }),
     {
       title: "Action",
       key: "action",
@@ -949,14 +986,8 @@ export default function Enter() {
     dispatch({ type: "SET_SUMMARY", payload: setSummary });
   }, [dataTableItem]);
 
-  function formatRupiah(number) {
-    return number.toLocaleString("id-ID") + ",-";
-  }
-
   function handleDeleteTableItem(record) {
-    setDataTableItem((prev) =>
-      prev.filter((item) => item.id !== record.id)
-    );
+    setDataTableItem((prev) => prev.filter((item) => item.id !== record.id));
 
     setDiscountItems((prev) =>
       prev.filter((discount) => discount.id !== record.item)
@@ -1235,7 +1266,7 @@ export default function Enter() {
                         placeholder: "Entry No. PO customer",
                       },
                     ]}
-                    aliases={[]}
+                    aliases={salesOrderAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -1260,7 +1291,7 @@ export default function Enter() {
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={salesOrderAliases.shipping}
                     onChange={(type, payload) => {
                       console.log(payload);
                       dispatch({ type, payload });
@@ -1285,7 +1316,7 @@ export default function Enter() {
                         rules: [{ required: true, message: ` is required` }],
                       },
                     ]}
-                    aliases={[]}
+                    aliases={salesOrderAliases.billing}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -1311,7 +1342,7 @@ export default function Enter() {
                         onDelete={handleDeleteTableItem}
                         data={dataTableItem}
                         keys={keyTableItem}
-                        aliases={{}}
+                        aliases={salesOrderAliases.item}
                       />
                     </div>
                   </div>

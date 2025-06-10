@@ -98,8 +98,8 @@ function Item() {
     },
     {
       title: 'Item Name/Number',
-      dataIndex: 'displayname',
-      key: 'displayname',
+      dataIndex: 'itemid',
+      key: 'itemid',
       fixed: isLargeScreen ? 'left' : '',
       render: (text, record) => (
         <Link href={`/super-admin/master-data/${title}/${record.id}`}>
@@ -114,8 +114,8 @@ function Item() {
     },
     {
       title: 'Display Name/Code',
-      dataIndex: 'itemid',
-      key: 'itemid',
+      dataIndex: 'displayname',
+      key: 'displayname',
       onHeaderCell: () => ({
         style: { minWidth: 180 },
       }),
