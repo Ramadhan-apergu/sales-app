@@ -1,6 +1,6 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { DownloadOutlined, EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -23,6 +23,11 @@ import { getResponseHandler } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
+import useNavigateWithParams from "@/hooks/useNavigateWithParams";
+import dayjs from "dayjs";
+import Search from "antd/es/input/Search";
+import DeliveryStatusFetch from "@/modules/salesApi/report/deliveryStatus";
+import InvoiceStatusFetch from "@/modules/salesApi/report/invoiceStatus";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -36,6 +41,10 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
+  const customer = searchParams.get("customer");
+  const startdate = searchParams.get("startdate");
+  const enddate = searchParams.get("enddate");
+  const doc_numb = searchParams.get("doc_numb");
   const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
@@ -46,28 +55,49 @@ function SalesOrder() {
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
-  const title = "sales-order";
+  const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
+
+  const navigate = useNavigateWithParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsloading(true);
 
-        const response = await SalesOrderFetch.get(
+        const page = parseInt(
+          searchParams.get("page") || `${DEFAULT_PAGE}`,
+          10
+        );
+        const limit = parseInt(
+          searchParams.get("limit") || `${DEFAULT_LIMIT}`,
+          10
+        );
+        const customer = searchParams.get("customer");
+        const startdate = searchParams.get("startdate");
+        const enddate = searchParams.get("enddate");
+        const doc_numb = searchParams.get("doc_numb");
+        const offset = page - 1;
+
+        const response = await InvoiceStatusFetch.get(
           offset,
           limit,
-          statusFilter,
-          searchName,
-          dateRange[0],
-          dateRange[1]
+          customer,
+          startdate,
+          enddate,
+          doc_numb
         );
 
         const resData = getResponseHandler(response, notify);
 
         if (resData) {
-          setDatas(resData.list);
+          setDatas(
+            resData.list.map((item, i) => ({
+              ...item,
+              key: i,
+            }))
+          );
           setTotalItems(resData.total_items);
         }
       } catch (error) {
@@ -78,7 +108,16 @@ function SalesOrder() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter, searchName, dateRange]);
+  }, [
+    page,
+    limit,
+    pathname,
+    statusFilter,
+    customer,
+    startdate,
+    enddate,
+    doc_numb,
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,54 +152,45 @@ function SalesOrder() {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
+  const baseUrl = "/super-admin/status/invoice";
+
   const columns = [
     {
-      title: "Date",
-      dataIndex: "trandate",
-      key: "trandate",
+      title: "SO Date",
+      dataIndex: "invoice_date",
+      key: "invoice_date",
       render: (text) => <p>{formatDateToShort(text)}</p>,
     },
     {
       title: "Document Number",
-      dataIndex: "tranid",
-      key: "tranid",
+      dataIndex: "doc_numb",
+      key: "doc_numb",
       fixed: isLargeScreen ? "left" : "",
       render: (text, record) => (
-        <Link href={`/super-admin/transaction/${title}/${record.id}`}>
+        <Link href={`/super-admin/status/${title}/${record.delivery_id}`}>
           {text || "-"}
         </Link>
       ),
     },
     {
-      title: "Customer",
+      title: "Customer Name",
       dataIndex: "customer",
       key: "customer",
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text, record) => (
-        <Tag
-          color={
-            ["open", "fulfilled", "closed"].includes(
-              record.status.toLowerCase()
-            )
-              ? "green"
-              : ["partially fulfilled", "pending approval"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "orange"
-              : ["credit hold", "canceled"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "red"
-              : "default"
-          }
-        >
-          {text}
-        </Tag>
-      ),
+      title: "Total Amount",
+      dataIndex: "total_amount",
+      key: "total_amount",
+    },
+    {
+      title: "Amount due",
+      dataIndex: "amountdue",
+      key: "amountdue",
+    },
+    {
+      title: "Sales Rep",
+      dataIndex: "sales_rep",
+      key: "sales_rep",
     },
     {
       title: "Actions",
@@ -173,10 +203,10 @@ function SalesOrder() {
           <Button
             type={"link"}
             size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
+            icon={<DownloadOutlined />}
+            onClick={() => {}}
           >
-            {isLargeScreen ? "Edit" : ""}
+            {isLargeScreen ? "Download" : ""}
           </Button>
           {contextHolder}
         </div>
@@ -184,84 +214,101 @@ function SalesOrder() {
     },
   ];
 
-  // const fetchData = async () => {
-  //   try {
-  //     setIsloading(true);
-  //     const response = await SalesOrderFetch.get(offset, limit, statusFilter, searchName);
-  //     const resData = getResponseHandler(response, notify)
-
-  //     if (resData) {
-  //         setDatas(resData.list)
-  //         setTotalItems(resData.total_items)
-  //     }
-  //   } catch (error) {
-  //       notify('error', 'Error', error?.message || "Internal Server error");
-  //   } finally {
-  //     setIsloading(false);
-  //   }
-  // };
-
   return (
     <Layout>
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Sales Order List
+            Invoice Status List
           </p>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() =>
-              router.push(`/super-admin/transaction/${title}/enter`)
-            }
-          >
-            {isLargeScreen ? `Enter` : ""}
-          </Button>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
             <div className="hidden lg:flex flex-col justify-start items-start gap-1">
               <label className="text-sm font-semibold leading-none">
-                Customer Name
+                No. Doc
               </label>
-              <Select
-                showSearch
-                placeholder="Select a person"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={dataCustomer}
-                styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
-                onChange={(value, option) => {
-                  setSearchName(option?.companyname || "");
+
+              <Search
+                placeholder="Input Doc Number"
+                onSearch={(value) => {
+                  navigate(`${baseUrl}`, {
+                    customer,
+                    startdate,
+                    enddate,
+                    page,
+                    limit,
+                    doc_numb: value,
+                  });
                 }}
+                value={doc_numb}
+                enterButton
                 allowClear
               />
             </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Date
-              </label>
-              <div className="flex justify-center items-start gap-2">
-                <RangePicker
-                  showTime={false}
-                  format="YYYY-MM-DD"
-                  onChange={(value, dateString) => {
-                    setDateRange(dateString);
+            <div className="flex gap-2">
+              <div className="hidden lg:flex flex-col justify-start items-start gap-1">
+                <label className="text-sm font-semibold leading-none">
+                  Customer Name
+                </label>
+                <Select
+                  showSearch
+                  value={customer || undefined}
+                  placeholder="Select a person"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={dataCustomer}
+                  styles={{
+                    popup: {
+                      root: {
+                        minWidth: 250,
+                        whiteSpace: "nowrap",
+                      },
+                    },
                   }}
-                  //   onOk={(val) => {
-                  //     console.log(val);
-                  //   }}
+                  onChange={(value, option) => {
+                    navigate(`${baseUrl}`, {
+                      customer: option?.companyname,
+                      startdate,
+                      enddate,
+                      page,
+                      limit,
+                      doc_numb,
+                    });
+                  }}
+                  allowClear
                 />
+              </div>
+              <div className="flex flex-col justify-start items-start gap-1">
+                <label className="hidden lg:block text-sm font-semibold leading-none">
+                  Date
+                </label>
+                <div className="flex justify-center items-start gap-2">
+                  <RangePicker
+                    showTime={false}
+                    format="YYYY-MM-DD"
+                    value={[
+                      startdate ? dayjs(startdate) : null,
+                      enddate ? dayjs(enddate) : null,
+                    ]}
+                    onChange={(value, dateString) => {
+                      navigate(`${baseUrl}`, {
+                        customer,
+                        startdate: dateString[0],
+                        enddate: dateString[1],
+                        page,
+                        limit,
+                        doc_numb,
+                      });
+                    }}
+                    //   onOk={(val) => {
+                    //     console.log(val);
+                    //   }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -277,42 +324,17 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
                 allowClear
-                dropdownAlign={{ points: ["tr", "br"] }}
-              />
-            </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Status
-              </label>
-              <Select
-                defaultValue="all"
-                onChange={(e) => {
-                  setStatusFilter(e);
-                }}
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "fulfilled", label: "Fulfilled" },
-                  {
-                    value: "partially fulfilled",
-                    label: "Partially Fulfilled",
-                  },
-                  { value: "credit hold", label: "Credit Hold" },
-                  { value: "closed", label: "Closed" },
-                  { value: "pending approval", label: "Pending Approval" },
-                ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
@@ -322,7 +344,7 @@ function SalesOrder() {
           <>
             <div>
               <Table
-                rowKey={(record) => record.id}
+                rowKey="key"
                 size="small"
                 pagination={false}
                 columns={columns}
@@ -338,9 +360,17 @@ function SalesOrder() {
                 defaultPageSize={limit}
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
-                  router.push(
-                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
-                  );
+                  //   router.push(
+                  //     `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                  //   );
+                  navigate(`${baseUrl}`, {
+                    customer,
+                    startdate,
+                    enddate,
+                    page: newPage,
+                    limit: newLimit,
+                    doc_numb,
+                  });
                 }}
                 size="small"
                 align={"end"}

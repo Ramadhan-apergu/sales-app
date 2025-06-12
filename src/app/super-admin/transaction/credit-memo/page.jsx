@@ -38,7 +38,7 @@ function List() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1);
+  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -114,7 +114,6 @@ function List() {
   const handleEdit = (record) => {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
-
 
   const columns = [
     {
@@ -219,7 +218,14 @@ function List() {
                     .includes(input.toLowerCase())
                 }
                 options={dataCustomer}
-                dropdownStyle={{ minWidth: "250px", whiteSpace: "nowrap" }}
+                styles={{
+    popup: {
+      root: {
+        minWidth: 250,
+        whiteSpace: "nowrap",
+      },
+    },
+  }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -255,9 +261,16 @@ function List() {
                     .includes(input.toLowerCase())
                 }
                 options={dataCustomer}
-                dropdownStyle={{ minWidth: "250px", whiteSpace: "nowrap" }}
-                onChange={(e) => {
-                  setSearchName(e);
+                styles={{
+    popup: {
+      root: {
+        minWidth: 250,
+        whiteSpace: "nowrap",
+      },
+    },
+  }}
+                onChange={(value, option) => {
+                  setSearchName(option?.companyname || "");
                 }}
                 allowClear
                 dropdownAlign={{ points: ["tr", "br"] }}
@@ -276,7 +289,10 @@ function List() {
                   { value: "all", label: "All" },
                   { value: "open", label: "Open" },
                   { value: "fulfilled", label: "Fulfilled" },
-                  { value: "partially fulfilled", label: "Partially Fulfilled" },
+                  {
+                    value: "partially fulfilled",
+                    label: "Partially Fulfilled",
+                  },
                   { value: "credit hold", label: "Credit Hold" },
                   { value: "closed", label: "Closed" },
                   { value: "pending approval", label: "Pending Approval" },

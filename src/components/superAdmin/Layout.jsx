@@ -38,6 +38,7 @@ const prefix = "/super-admin";
 
 const headerItems = [
   { key: `${prefix}/home`, label: "Home" },
+  { key: `${prefix}/status`, label: "Status" },
   { key: `${prefix}/transaction`, label: "Transaction" },
   { key: `${prefix}/master-data`, label: "Master Data" },
   { key: `${prefix}/inventory`, label: "Inventory" },
@@ -97,20 +98,27 @@ const siderMenuPerPage = {
       icon: <DatabaseOutlined />,
     },
   ],
-  "/report": [
+  "/status": [
     {
-      key: "/report/dashboard",
-      label: "Report Dashboard",
-      icon: <BarChartOutlined />,
+      key: "/status/delivery",
+      label: "Delivery Status",
+      icon: <DeliveredProcedureOutlined />,
     },
+    {
+      key: "/status/invoice",
+      label: "Invoice Status",
+      icon: <FileProtectOutlined />,
+    },
+  ],
+  "/report": [
     {
       key: "/report/sales-order",
       label: "SO Report",
       icon: <BarChartOutlined />,
     },
     {
-      key: "/report/penjualan",
-      label: "Penjualan",
+      key: "/report/sales",
+      label: "Sales",
       icon: <BarChartOutlined />,
     },
   ],
@@ -187,9 +195,9 @@ const menuItems = [
         path: `${prefix}/report/sales-order`,
       },
       {
-        key: `${prefix}/report/penjualan`,
-        label: "Penjualan",
-        path: `${prefix}/report/penjualan`,
+        key: `${prefix}/report/sales`,
+        label: "Sales",
+        path: `${prefix}/report/sales`,
       },
     ],
   },
@@ -206,86 +214,6 @@ const menuItems = [
     },
   },
 ];
-
-// const menuItems = [
-//   {
-//     key: "/home",
-//     icon: <DashboardOutlined />,
-//     label: "Home",
-//     path: `${prefix}/home`,
-//   },
-//   {
-//     key: "sub1",
-//     icon: <SwapOutlined />,
-//     label: "Transaction",
-//     children: [
-//       {
-//         key: "/transaction/sales-order",
-//         label: "Sales Order",
-//         path: `${prefix}/transaction/sales-order`,
-//       },
-//       {
-//         key: "/transaction/delivery-order",
-//         label: "Delivery Order",
-//         path: `${prefix}/transaction/delivery-order`,
-//       },
-//       {
-//         key: "/transaction/invoice",
-//         label: "Invoice",
-//         path: `${prefix}/transaction/invoice`,
-//       },
-//       {
-//         key: "/transaction/payment",
-//         label: "Payment",
-//         path: `${prefix}/transaction/payment`,
-//       },
-//       {
-//         key: "/transaction/credit-memo",
-//         label: "Credit Memo",
-//         path: `${prefix}/transaction/credit-memo`,
-//       },
-//     ],
-//   },
-//   {
-//     key: "sub4",
-//     icon: <AppstoreOutlined />,
-//     label: "Master Data",
-//     children: [
-//       {
-//         key: "/master-data/customer",
-//         label: "Customer",
-//         path: `${prefix}/master-data/customer`,
-//       },
-//       {
-//         key: "/master-data/item",
-//         label: "Item",
-//         path: `${prefix}/master-data/item`,
-//       },
-//       {
-//         key: "/master-data/agreement",
-//         label: "Agreement",
-//         path: `${prefix}/master-data/agreement`,
-//       },
-//     ],
-//   },
-//   {
-//     key: "sub5",
-//     icon: <BarChartOutlined />,
-//     label: "Reports",
-//     children: [
-//       {
-//         key: "/report/sales-order",
-//         label: "SO Report",
-//         path: `${prefix}/report/sales-order`,
-//       },
-//       {
-//         key: "/report/penjualan",
-//         label: "Penjualan",
-//         path: `${prefix}/report/penjualan`,
-//       },
-//     ],
-//   },
-// ];
 
 const LayoutTesting = ({ children }) => {
   const pathname = usePathname();
@@ -423,12 +351,14 @@ const LayoutTesting = ({ children }) => {
         <div className="hidden lg:block">
           <Breadcrumb style={{ margin: "16px 0" }} items={breadcrumbItems} />
         </div>
-
-        <Layout
-          className="py-4 lg:py-6"
-          style={{ background: colorBgContainer, borderRadius: borderRadiusLG }}
-        >
-          {pageSegment !== "home" && (
+        {pageSegment !== "home" ? (
+          <Layout
+            className="py-4 lg:py-6"
+            style={{
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
             <Sider
               width={200}
               style={{
@@ -447,11 +377,16 @@ const LayoutTesting = ({ children }) => {
                 items={siderItems}
               />
             </Sider>
-          )}
 
-          <Content className="px-4 lg:px-6">{children}</Content>
-        </Layout>
+            <Content className="px-4 lg:px-6 bg-none">{children}</Content>
+          </Layout>
+        ) : (
+          <Layout>
+            <Content>{children}</Content>
+          </Layout>
+        )}
       </div>
+
       <Drawer title="Menu" onClose={onClose} open={openDrawer}>
         <Menu
           onClick={menuHandle}
