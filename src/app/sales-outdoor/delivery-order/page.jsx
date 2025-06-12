@@ -75,8 +75,8 @@ export default function DeliveryOrder() {
     useEffect(() => {
         const statuses = [
         { key: 'open',   label: 'Open' },
-        { key: 'partially_paid', label: 'Partially Paid' },
-        { key: 'paid_in_full', label: 'Paid In Full' },
+        { key: 'partially_paid', label: 'Partially Shipped' },
+        { key: 'paid_in_full', label: 'Shipped' },
         ];
         async function fetchOverview() {
         try {
@@ -156,7 +156,7 @@ export default function DeliveryOrder() {
                 style={{ width: '100%' }}
                 allowClear
             >
-                {["open", "partially paid", "paid in full"]
+                {["open", "partially shipped", "shipped"]
                 .map(s => <Option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</Option>)
                 }
             </Select>

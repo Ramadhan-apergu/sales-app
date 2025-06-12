@@ -1311,8 +1311,8 @@ export default function Enter() {
               data={[
                 { key: "item", input: "input", isAlias: true, isRead: true },
                 { key: "quantity", input: "number", isAlias: true },
-                { key: "units", input: "input", isAlias: true, isRead: true },
-                { key: "rate", input: "input", isAlias: true, isRead: true },
+                { key: "units", input: "input", isAlias: true, disabled: true, isRead: true },
+                { key: "rate", input: "input", isAlias: true, disabled: true, isRead: true },
                 { key: "description", input: "text", isAlias: true },
               ]}
               aliases={[]}
