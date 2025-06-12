@@ -15,7 +15,9 @@ export default function Page() {
 
   return (
     <Layout>
-      <LoadingSpin />
+        <div className='min-h-96 flex justify-between items-center'>
+            <LoadingSpin />
+        </div>
     </Layout>
   );
 }

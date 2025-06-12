@@ -233,7 +233,14 @@ function DeliveryOrder() {
                     .includes(input.toLowerCase())
                 }
                 options={dataCustomer}
-                dropdownStyle={{ minWidth: "250px", whiteSpace: "nowrap" }}
+                styles={{
+    popup: {
+      root: {
+        minWidth: 250,
+        whiteSpace: "nowrap",
+      },
+    },
+  }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
