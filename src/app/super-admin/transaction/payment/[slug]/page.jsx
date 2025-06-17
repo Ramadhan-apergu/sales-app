@@ -44,6 +44,7 @@ import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import { paymentAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onChange }) {
   const columns = [
@@ -339,7 +340,7 @@ export default function Details() {
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={paymentAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -363,7 +364,7 @@ export default function Details() {
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={paymentAliases.payment}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                       console.log(payload);
@@ -385,7 +386,7 @@ export default function Details() {
                       onChange={handleChecked}
                       data={state.dataTableItem}
                       keys={keyTableItem}
-                      aliases={{}}
+                      aliases={paymentAliases.payment}
                     />
                   </div>
                   <div className="w-full flex flex-col gap-8">

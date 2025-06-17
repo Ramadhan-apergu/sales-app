@@ -41,6 +41,7 @@ import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import DeliveryOrderSelect from "./DeliveryOrderSelect";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import { invoiceAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -472,18 +473,18 @@ const [isLoading, setIsLoading] = useState(true);
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "salesorderid",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "fulfillmentid",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
+                    //   {
+                    //     key: "salesorderid",
+                    //     input: "input",
+                    //     isAlias: true,
+                    //     isRead: true,
+                    //   },
+                    //   {
+                    //     key: "fulfillmentid",
+                    //     input: "input",
+                    //     isAlias: true,
+                    //     isRead: true,
+                    //   },
                       {
                         key: "entity",
                         input: "input",
@@ -514,7 +515,7 @@ const [isLoading, setIsLoading] = useState(true);
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={invoiceAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -540,7 +541,7 @@ const [isLoading, setIsLoading] = useState(true);
                         // onDelete={handleDeleteTableItem}
                         data={dataTableItem}
                         keys={keyTableItem}
-                        aliases={{}}
+                        aliases={invoiceAliases.item}
                       />
                     </div>
                   </div>
@@ -555,7 +556,7 @@ const [isLoading, setIsLoading] = useState(true);
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={invoiceAliases.shipping}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -577,7 +578,7 @@ const [isLoading, setIsLoading] = useState(true);
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={invoiceAliases.billing}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -607,7 +608,7 @@ const [isLoading, setIsLoading] = useState(true);
                             {formatRupiah(state.payloadSummary.discounttotal)}
                           </p>
                         </div>
-                        <div className="flex w-full">
+                        {/* <div className="flex w-full">
                           <p className="w-1/2">Subtotal (After Discount)</p>
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.subtotal)} Incl.
@@ -619,7 +620,7 @@ const [isLoading, setIsLoading] = useState(true);
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.taxtotal)}
                           </p>
-                        </div>
+                        </div> */}
                         <hr className="border-gray-5" />
                         <div className="flex w-full font-semibold">
                           <p className="w-1/2">Total</p>

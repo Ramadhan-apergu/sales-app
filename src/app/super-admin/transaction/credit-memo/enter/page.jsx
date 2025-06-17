@@ -39,6 +39,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import CreditMemoFetch from "@/modules/salesApi/creditMemo";
+import { creditMemoAliases } from "@/utils/aliases";
 
 function TableCustom({
   data,
@@ -783,7 +784,7 @@ export default function Enter() {
                 }}
                 orientation="left"
               >
-                Customer
+                Customer Name
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                 <Form layout="vertical">
@@ -849,7 +850,7 @@ export default function Enter() {
                 isAlias: true,
               },
             ]}
-            aliases={[]}
+            aliases={creditMemoAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
@@ -875,7 +876,7 @@ export default function Enter() {
                 isRead: true,
               },
             ]}
-            aliases={[]}
+            aliases={creditMemoAliases.item}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
@@ -901,7 +902,7 @@ export default function Enter() {
               "taxrate1",
               "taxamount",
             ]}
-            aliases={{}}
+            aliases={creditMemoAliases.item}
             checkbox={false}
             keyRow={"item"}
           />
@@ -923,7 +924,7 @@ export default function Enter() {
                 onChange={handleChecked}
                 data={state.credit_memo_applies}
                 keys={keyTableItem}
-                aliases={{}}
+                aliases={creditMemoAliases.apply}
                 keyRow={"invoiceid"}
                 checkbox={true}
               />

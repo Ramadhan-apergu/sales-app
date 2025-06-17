@@ -28,6 +28,7 @@ import dayjs from "dayjs";
 import Search from "antd/es/input/Search";
 import DeliveryStatusFetch from "@/modules/salesApi/report/deliveryStatus";
 import InputForm from "@/components/superAdmin/InputForm";
+import { deliveryStatusAliases } from "@/utils/aliases";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -470,7 +471,7 @@ function SalesOrder() {
             data={[
               { key: "customer", input: "input", isAlias: true, isRead: true },
             ]}
-            aliases={[]}
+            aliases={deliveryStatusAliases}
           />
           <InputForm
             isReadOnly={true}
@@ -490,7 +491,7 @@ function SalesOrder() {
               { key: "so_status", input: "input", isAlias: true, isRead: true },
               { key: "unit_so", input: "input", isAlias: true, isRead: true },
             ]}
-            aliases={[]}
+            aliases={deliveryStatusAliases}
           />
           <InputForm
             isReadOnly={true}
@@ -534,7 +535,7 @@ function SalesOrder() {
                 isRead: true,
               },
             ]}
-            aliases={[]}
+            aliases={deliveryStatusAliases}
           />
         </div>
       </Modal>

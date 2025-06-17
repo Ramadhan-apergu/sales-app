@@ -47,6 +47,7 @@ import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { formatDateToShort } from "@/utils/formatDate";
+import { invoiceAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -395,18 +396,18 @@ export default function EnterPage() {
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "salesorderid",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "fulfillmentid",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
+                    //   {
+                    //     key: "salesorderid",
+                    //     input: "input",
+                    //     isAlias: true,
+                    //     isRead: true,
+                    //   },
+                    //   {
+                    //     key: "fulfillmentid",
+                    //     input: "input",
+                    //     isAlias: true,
+                    //     isRead: true,
+                    //   },
                       {
                         key: "entity",
                         input: "input",
@@ -437,7 +438,7 @@ export default function EnterPage() {
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={invoiceAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -457,7 +458,7 @@ export default function EnterPage() {
                       <TableCustom
                         data={dataTableItem}
                         keys={keyTableItem}
-                        aliases={{}}
+                        aliases={invoiceAliases.item}
                       />
                     </div>
                   </div>
@@ -472,7 +473,7 @@ export default function EnterPage() {
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={invoiceAliases.shipping}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -494,7 +495,7 @@ export default function EnterPage() {
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={invoiceAliases.billing}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -524,7 +525,7 @@ export default function EnterPage() {
                             {formatRupiah(state.payloadSummary.discounttotal)}
                           </p>
                         </div>
-                        <div className="flex w-full">
+                        {/* <div className="flex w-full">
                           <p className="w-1/2">Subtotal (After Discount)</p>
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.subtotal)} Incl.
@@ -536,7 +537,7 @@ export default function EnterPage() {
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.taxtotal)}
                           </p>
-                        </div>
+                        </div> */}
                         <hr className="border-gray-5" />
                         <div className="flex w-full font-semibold">
                           <p className="w-1/2">Total</p>

@@ -303,7 +303,6 @@ export default function Detail() {
     payloadShipping: {
       shippingoption: "",
       shippingaddress: "",
-      shippingtype: 0,
     },
     dataTableItem: [],
   };
@@ -610,7 +609,7 @@ export default function Detail() {
                     data={[
                       {
                         key: "shippingoption",
-                        input: "text",
+                        input: "input",
                         isAlias: true,
                         isRead: true,
                       },
