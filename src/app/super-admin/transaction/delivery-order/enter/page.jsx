@@ -1,6 +1,12 @@
 "use client";
 
-import React, { Suspense, useEffect, useReducer, useRef, useState } from "react";
+import React, {
+  Suspense,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   Checkbox,
@@ -39,6 +45,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import SalesOrderSelect from "./SalesOrderSelect";
+import { deliveryOrderAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -89,7 +96,7 @@ function Enter({ salesOrderId }) {
   const initialState = {
     payloadPrimary: {
       salesorderid: "",
-      createdform: "",
+      createdfrom: "",
       customer: "",
       entity: "",
       trandate: dayjs(new Date()),
@@ -97,15 +104,19 @@ function Enter({ salesOrderId }) {
       memo: "",
     },
     payloadShipping: {
-      shippingoption: "",
+      shippingoption: "custom",
       shippingaddress: "",
-      shippingtype: 0,
     },
   };
 
   const shippingOptions = [
     { label: "Custom", value: 0 },
     { label: "Default", value: 1 },
+  ];
+
+  const shippingOption = [
+    { label: "Custom", value: "custom" },
+    { label: "Default Address", value: "default address" },
   ];
 
   function reducer(state, action) {
@@ -190,18 +201,18 @@ function Enter({ salesOrderId }) {
           type: "SET_PRIMARY",
           payload: {
             salesorderid: salesOrderData.id,
-            createdform: salesOrderData.otherrefnum,
+            createdfrom: salesOrderData.otherrefnum,
             customer: customerData.companyname,
             entity: customerData.id,
           },
         });
 
-        dispatch({
-          type: "SET_SHIPPING",
-          payload: {
-            shippingaddress: customerData.addressee,
-          },
-        });
+        // dispatch({
+        //   type: "SET_SHIPPING",
+        //   payload: {
+        //     shippingaddress: customerData.addressee,
+        //   },
+        // });
       } catch (error) {
         notify("error", "Error", error.message || "Failed to fetch data");
       }
@@ -233,21 +244,7 @@ function Enter({ salesOrderId }) {
       let payloadToInsert = {
         ...state.payloadPrimary,
         ...state.payloadSummary,
-      };
-
-      let shippingaddress =
-        state.payloadShipping.shippingtype == 1
-          ? state.payloadShipping?.shippingaddress || ""
-          : "";
-      let shippingoption =
-        state.payloadShipping.shippingtype == 0
-          ? state.payloadShipping?.shippingoption || ""
-          : "";
-
-      payloadToInsert = {
-        ...payloadToInsert,
-        shippingaddress,
-        shippingoption,
+        ...state.payloadShipping
       };
 
       delete payloadToInsert.customer;
@@ -269,9 +266,9 @@ function Enter({ salesOrderId }) {
 
       const resData = createResponseHandler(response, notify);
 
-        if (resData) {
-          router.push(`/super-admin/transaction/${title}/${resData}`);
-        }
+      if (resData) {
+        router.push(`/super-admin/transaction/${title}/${resData}`);
+      }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
@@ -328,7 +325,7 @@ function Enter({ salesOrderId }) {
                 isRead: true,
               },
               {
-                key: "createdform",
+                key: "createdfrom",
                 input: "input",
                 isAlias: true,
                 isRead: true,
@@ -362,7 +359,7 @@ function Enter({ salesOrderId }) {
                 isAlias: true,
               },
             ]}
-            aliases={[]}
+            aliases={deliveryOrderAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
@@ -388,7 +385,7 @@ function Enter({ salesOrderId }) {
                 // onDelete={handleDeleteTableItem}
                 data={dataTableItem}
                 keys={keyTableItem}
-                aliases={{}}
+                aliases={deliveryOrderAliases.item}
               />
             </div>
           </div>
@@ -398,23 +395,35 @@ function Enter({ salesOrderId }) {
             payload={state.payloadShipping}
             data={[
               {
-                key: "shippingtype",
+                key: "shippingoption",
                 input: "select",
-                options: shippingOptions,
+                options: shippingOption,
                 isAlias: true,
               },
               {
-                key:
-                  state.payloadShipping.shippingtype == 0
-                    ? "shippingoption"
-                    : "shippingaddress",
+                key: "shippingaddress",
                 input: "text",
                 isAlias: true,
               },
             ]}
-            aliases={[]}
+            aliases={deliveryOrderAliases.shipping}
             onChange={(type, payload) => {
-              dispatch({ type, payload });
+              if (
+                payload.shippingoption != state.payloadShipping.shippingoption
+              ) {
+                dispatch({
+                  type,
+                  payload: {
+                    ...payload,
+                    shippingaddress:
+                      payload.shippingoption == "default address"
+                        ? dataCustomer.addressee || ""
+                        : "",
+                  },
+                });
+              } else {
+                dispatch({ type, payload });
+              }
             }}
           />
         </div>
@@ -439,7 +448,7 @@ function DeliveryOrderContent() {
 export default function DeliveryOrderEnterPage() {
   return (
     <Layout>
-      <Suspense fallback={<LoadingSpinProcessing/>}>
+      <Suspense fallback={<LoadingSpinProcessing />}>
         <DeliveryOrderContent />
       </Suspense>
     </Layout>

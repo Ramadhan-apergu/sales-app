@@ -183,9 +183,8 @@ export default function Enter() {
       paymentoption: "",
     },
     payloadShipping: {
-      shippingoption: "",
+      shippingoption: "custom",
       shippingaddress: "",
-      shippingtype: 0,
     },
     dataTableItem: [],
   };
@@ -241,6 +240,11 @@ export default function Enter() {
   const shipAddressOptions = [
     { label: "Custom", value: 0 },
     { label: "Default Address", value: 1 },
+  ];
+
+  const shipAddressOption = [
+    { label: "Custom", value: "custom" },
+    { label: "Default Address", value: "default address" },
   ];
 
   const termOptions = [
@@ -824,21 +828,7 @@ export default function Enter() {
         ...state.payloadPrimary,
         ...state.payloadSummary,
         ...state.payloadBilling,
-      };
-
-      let shippingaddress =
-        state.payloadShipping.shippingtype == 1
-          ? state.payloadShipping?.shippingaddress || ""
-          : "";
-      let shippingoption =
-        state.payloadShipping.shippingtype == 0
-          ? state.payloadShipping?.shippingoption || ""
-          : "";
-
-      payloadToInsert = {
-        ...payloadToInsert,
-        shippingaddress,
-        shippingoption,
+        ...state.payloadShipping,
       };
 
       if (dataTableItem.length <= 0) {
@@ -980,10 +970,6 @@ export default function Enter() {
                         setDiscountItems([]);
                         dispatch({ type: "RESET" });
                         dispatch({
-                          type: "SET_SHIPPING",
-                          payload: { shippingaddress: customer.addressee },
-                        });
-                        dispatch({
                           type: "SET_PRIMARY",
                           payload: { entity: customer.id },
                         });
@@ -1039,24 +1025,33 @@ export default function Enter() {
             payload={state.payloadShipping}
             data={[
               {
-                key: "shippingtype",
+                key: "shippingoption",
                 input: "select",
-                options: shipAddressOptions,
+                options: shipAddressOption,
                 isAlias: true,
               },
               {
-                key:
-                  state.payloadShipping.shippingtype == 1
-                    ? "shippingaddress"
-                    : "shippingoption",
+                key: "shippingaddress",
                 input: "text",
                 isAlias: true,
               },
             ]}
             aliases={salesOrderAliases.shipping}
             onChange={(type, payload) => {
-              console.log(payload);
-              dispatch({ type, payload });
+                if (payload.shippingoption != state.payloadShipping.shippingoption) {
+                    dispatch({
+                      type,
+                      payload: {
+                        ...payload,
+                        shippingaddress:
+                          payload.shippingoption == "default address"
+                            ? customerSelected.addressee || ""
+                            : "",
+                      },
+                    });
+                } else {
+                    dispatch({type, payload})
+                }
             }}
           />
           <InputForm

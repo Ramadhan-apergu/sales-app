@@ -12,7 +12,7 @@ import {
 } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
-import { agreementAliases } from "@/utils/aliases";
+import { agreementAliases, applyAgreementAliases } from "@/utils/aliases";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
@@ -91,7 +91,7 @@ export default function AgreementApplyDetail() {
   useEffect(() => {
     const fetchDataApplyAgreement = async () => {
       try {
-        const response = await AgreementFetch.getByCustCode(slug);
+        const response = await AgreementFetch.getByCustCode(decodeURIComponent(slug) || '');
 
         const resData = getResponseHandler(response, notify);
 
@@ -308,7 +308,7 @@ export default function AgreementApplyDetail() {
                         type={"primary"}
                         onClick={() => {
                           router.push(
-                            `/super-admin/master-data/${title}/${data.customercode}/edit`
+                            `/super-admin/master-data/${title}/${encodeURIComponent(data.customercode) || ""}/edit`
                           );
                         }}
                       >
@@ -346,7 +346,7 @@ export default function AgreementApplyDetail() {
                       }}
                       data={payloadAgreementList}
                       keys={["agreementcode", "agreementname", "effectivedate"]}
-                      aliases={[]}
+                      aliases={applyAgreementAliases.agreement}
                     />
                   </div>
                 </div>

@@ -15,10 +15,14 @@ import {
 } from "@ant-design/icons";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useNotification from "@/hooks/useNotification";
-import { deleteResponseHandler, getResponseHandler } from "@/utils/responseHandlers";
+import {
+  deleteResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import { formatDateToShort } from "@/utils/formatDate";
 import ItemFetch from "@/modules/salesApi/item";
+import { deliveryOrderAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -67,7 +71,6 @@ export default function Page() {
     payloadShipping: {
       shippingoption: "",
       shippingaddress: "",
-      shippingtype: 0,
     },
   };
 
@@ -96,7 +99,7 @@ export default function Page() {
     }
   }
 
-  const title = 'delivery-order'
+  const title = "delivery-order";
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
   const keyTableItem = [
@@ -161,7 +164,6 @@ export default function Page() {
       payload: {
         shippingaddress: data.shippingaddress,
         shippingoption: data.shippingoption,
-        shippingtype: data.shippingaddress == "" ? 0 : 1,
       },
     });
 
@@ -196,7 +198,7 @@ export default function Page() {
     router.push(`/super-admin/transaction/${title}/${data.id}/edit`);
   };
 
-    const deleteModal = () => {
+  const deleteModal = () => {
     modal.confirm({
       title: `Cancel ${title} "${data.customer}"?`,
       content: "This action cannot be undone.",
@@ -208,23 +210,23 @@ export default function Page() {
     });
   };
 
-    const handleDelete = async (id) => {
-      try {
-        const response = await FullfillmentFetch.delete(id);
-  
-        const resData = deleteResponseHandler(response, notify);
-  
-        if (resData) {
-          router.push(`/super-admin/master-data/${title}`);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
+  const handleDelete = async (id) => {
+    try {
+      const response = await FullfillmentFetch.delete(id);
+
+      const resData = deleteResponseHandler(response, notify);
+
+      if (resData) {
+        router.push(`/super-admin/master-data/${title}`);
       }
-    };
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    }
+  };
 
-    const [modal, contextHolder] = Modal.useModal();
+  const [modal, contextHolder] = Modal.useModal();
 
-      const items = [
+  const items = [
     {
       key: "1",
       label: "Print",
@@ -384,7 +386,7 @@ export default function Page() {
                       //     isRead: true,
                       //   },
                     ]}
-                    aliases={[]}
+                    aliases={deliveryOrderAliases.primary}
                   />
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-4">
@@ -401,7 +403,7 @@ export default function Page() {
                       <TableCustom
                         data={dataTableItem}
                         keys={keyTableItem}
-                        aliases={{}}
+                        aliases={deliveryOrderAliases.item}
                       />
                     </div>
                   </div>
@@ -411,19 +413,19 @@ export default function Page() {
                     payload={state.payloadShipping}
                     data={[
                       {
+                        key: "shippingoption",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
                         key: "shippingaddress",
                         input: "text",
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "shippingoption",
-                        input: "text",
-                        isAlias: true,
-                        isRead: true,
-                      },
                     ]}
-                    aliases={[]}
+                    aliases={deliveryOrderAliases.shipping}
                   />
                 </div>
               ) : (

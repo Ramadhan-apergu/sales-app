@@ -25,6 +25,8 @@ import InputForm from "@/components/superAdmin/InputForm";
 import { formatDateToShort } from "@/utils/formatDate";
 import ItemFetch from "@/modules/salesApi/item";
 import dayjs from "dayjs";
+import CustomerFetch from "@/modules/salesApi/customer";
+import { deliveryOrderAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -56,6 +58,7 @@ export default function Page() {
   const isLargeScreen = useBreakpoint("lg");
   const { notify, contextHolder: contextNotify } = useNotification();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [customerSelected, setCustomerSelected] = useState({})
 
   const initialState = {
     payloadPrimary: {
@@ -71,7 +74,6 @@ export default function Page() {
     payloadShipping: {
       shippingoption: "",
       shippingaddress: "",
-      shippingtype: 0,
     },
   };
 
@@ -142,6 +144,16 @@ export default function Page() {
     }
   }
 
+    async function fetchCustomerById(id) {
+    try {
+      const response = await CustomerFetch.getById(id);
+      const resData = getResponseHandler(response);
+      return resData;
+    } catch (error) {
+      notify("error", "Error", "Failed get data item");
+    }
+  }
+
   const mappingDataDeliveryOrder = async (data) => {
     dispatch({
       type: "SET_PRIMARY",
@@ -162,7 +174,6 @@ export default function Page() {
       payload: {
         shippingaddress: data.shippingaddress,
         shippingoption: data.shippingoption,
-        shippingtype: data.shippingaddress == "" ? 0 : 1,
       },
     });
 
@@ -178,11 +189,20 @@ export default function Page() {
     );
 
     setDataTableItem(dataFulfillmentWithItem);
+
+    const getCustomer = await fetchCustomerById(data.entity)
+
+    setCustomerSelected(getCustomer)
   };
 
   const shippingOptions = [
     { label: "Custom", value: 0 },
     { label: "Default", value: 1 },
+  ];
+
+  const shippingOption = [
+    { label: "Custom", value: "custom" },
+    { label: "Default Address", value: "default address" },
   ];
 
   const handleSubmit = async () => {
@@ -191,28 +211,14 @@ export default function Page() {
       let payloadToInsert = {
         ...state.payloadPrimary,
         ...state.payloadSummary,
-      };
-
-      let shippingaddress =
-        state.payloadShipping.shippingtype == 1
-          ? state.payloadShipping?.shippingaddress || ""
-          : "";
-      let shippingoption =
-        state.payloadShipping.shippingtype == 0
-          ? state.payloadShipping?.shippingoption || ""
-          : "";
-
-      payloadToInsert = {
-        ...payloadToInsert,
-        shippingaddress,
-        shippingoption,
+        ...state.payloadShipping
       };
 
       delete payloadToInsert.customer;
 
       const fulfillment_items = dataTableItem.map((data) => {
         return {
-          item: data.id,
+          item: data.item,
           memo: data.memo,
           location: data.location,
           quantityremaining: data.quantityremaining,
@@ -227,9 +233,9 @@ export default function Page() {
 
       const resData = updateResponseHandler(response, notify);
 
-        if (resData) {
-          router.push(`/super-admin/transaction/${title}/${resData}`);
-        }
+      if (resData) {
+        router.push(`/super-admin/transaction/${title}/${resData}`);
+      }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
@@ -298,6 +304,7 @@ export default function Page() {
                         key: "createdfrom",
                         input: "input",
                         isAlias: true,
+                        isRead: true
                       },
                       {
                         key: "customer",
@@ -323,7 +330,7 @@ export default function Page() {
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={deliveryOrderAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -343,7 +350,7 @@ export default function Page() {
                       <TableCustom
                         data={dataTableItem}
                         keys={keyTableItem}
-                        aliases={{}}
+                        aliases={deliveryOrderAliases.item}
                       />
                     </div>
                   </div>
@@ -354,23 +361,36 @@ export default function Page() {
                     payload={state.payloadShipping}
                     data={[
                       {
-                        key: "shippingtype",
+                        key: "shippingoption",
                         input: "select",
-                        options: shippingOptions,
+                        options: shippingOption,
                         isAlias: true,
                       },
                       {
-                        key:
-                          state.payloadShipping.shippingtype == 0
-                            ? "shippingoption"
-                            : "shippingaddress",
+                        key: "shippingaddress",
                         input: "text",
                         isAlias: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={deliveryOrderAliases.shipping}
                     onChange={(type, payload) => {
-                      dispatch({ type, payload });
+                      if (
+                        payload.shippingoption !=
+                        state.payloadShipping.shippingoption
+                      ) {
+                        dispatch({
+                          type,
+                          payload: {
+                            ...payload,
+                            shippingaddress:
+                              payload.shippingoption == "default address"
+                                ? customerSelected.addressee || ""
+                                : data.shippingaddress,
+                          },
+                        });
+                      } else {
+                        dispatch({ type, payload });
+                      }
                     }}
                   />
                 </div>

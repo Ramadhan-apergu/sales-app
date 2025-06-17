@@ -54,7 +54,6 @@ function formatRupiah(number) {
 }
 
 function TableCustom({ data, keys, aliases, onDelete }) {
-
   const columns = [
     ...keys.map((key) => {
       if (
@@ -364,7 +363,6 @@ export default function Enter() {
     payloadShipping: {
       shippingoption: "",
       shippingaddress: "",
-      shippingtype: 0,
     },
     dataTableItem: [],
   };
@@ -420,6 +418,11 @@ export default function Enter() {
   const shipAddressOptions = [
     { label: "Custom", value: 0 },
     { label: "Default Address", value: 1 },
+  ];
+
+  const shipAddressOption = [
+    { label: "Custom", value: "custom" },
+    { label: "Default Address", value: "default address" },
   ];
 
   const termOptions = [
@@ -1001,15 +1004,7 @@ export default function Enter() {
         ...state.payloadPrimary,
         ...state.payloadSummary,
         ...state.payloadBilling,
-      };
-
-      let shippingaddress = state.payloadShipping?.shippingaddress || "";
-      let shippingoption = state.payloadShipping?.shippingoption || "";
-
-      payloadToInsert = {
-        ...payloadToInsert,
-        shippingaddress,
-        shippingoption,
+        ...state.payloadShipping
       };
 
       if (dataTableItem.length <= 0) {
@@ -1277,24 +1272,36 @@ export default function Enter() {
                     payload={state.payloadShipping}
                     data={[
                       {
-                        key: "shippingtype",
+                        key: "shippingoption",
                         input: "select",
-                        options: shipAddressOptions,
+                        options: shipAddressOption,
                         isAlias: true,
                       },
                       {
-                        key:
-                          state.payloadShipping.shippingtype == 1
-                            ? "shippingaddress"
-                            : "shippingoption",
+                        key: "shippingaddress",
                         input: "text",
                         isAlias: true,
                       },
                     ]}
                     aliases={salesOrderAliases.shipping}
                     onChange={(type, payload) => {
-                      console.log(payload);
-                      dispatch({ type, payload });
+                      if (
+                        payload.shippingoption !=
+                        state.payloadShipping.shippingoption
+                      ) {
+                        dispatch({
+                          type,
+                          payload: {
+                            ...payload,
+                            shippingaddress:
+                              payload.shippingoption == "default address"
+                                ? customerSelected.addressee || ""
+                                : data.shippingaddress,
+                          },
+                        });
+                      } else {
+                        dispatch({ type, payload });
+                      }
                     }}
                   />
                   <InputForm

@@ -24,6 +24,7 @@ import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
+import { salesReportAliases } from "@/utils/aliases";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -119,7 +120,7 @@ function SalesOrder() {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
-  const aliases = [];
+  const aliases = salesReportAliases;
 
   const columns = [
     ...tableKeys.map((key) => ({

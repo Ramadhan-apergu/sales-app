@@ -38,6 +38,7 @@ import convertToLocalDate from "@/utils/convertToLocalDate";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
+import { paymentAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onChange }) {
   const columns = [
@@ -374,7 +375,7 @@ export default function Enter() {
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                 <Form layout="vertical">
                   <Form.Item
-                    label={<span className="capitalize">Customer</span>}
+                    label={<span className="capitalize">Customer Name</span>}
                     name="customer"
                     style={{ margin: 0 }}
                     className="w-full"
@@ -430,7 +431,7 @@ export default function Enter() {
                 isAlias: true,
               },
             ]}
-            aliases={[]}
+            aliases={paymentAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
@@ -452,7 +453,7 @@ export default function Enter() {
                 isAlias: true,
               },
             ]}
-            aliases={[]}
+            aliases={paymentAliases.payment}
             onChange={(type, payload) => {
               dispatch({ type, payload });
               console.log(payload);
@@ -474,7 +475,7 @@ export default function Enter() {
               onChange={handleChecked}
               data={state.dataTableItem}
               keys={keyTableItem}
-              aliases={{}}
+              aliases={paymentAliases.payment}
             />
           </div>
           <div className="w-full flex flex-col gap-8">
