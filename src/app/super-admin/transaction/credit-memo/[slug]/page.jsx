@@ -44,6 +44,7 @@ import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 import { formatDateToShort } from "@/utils/formatDate";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import { creditMemoAliases } from "@/utils/aliases";
 
 function TableCustom({
   data,
@@ -462,7 +463,9 @@ export default function Enter() {
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={{
+                        companyname: 'Customer Name'
+                    }}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -494,7 +497,7 @@ export default function Enter() {
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={creditMemoAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -520,7 +523,7 @@ export default function Enter() {
                         isRead: true,
                       },
                     ]}
-                    aliases={[]}
+                    aliases={creditMemoAliases.item}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
@@ -540,7 +543,7 @@ export default function Enter() {
                       "taxrate1",
                       "taxamount",
                     ]}
-                    aliases={{}}
+                    aliases={creditMemoAliases.item}
                     checkbox={false}
                     keyRow={"item"}
                   />
@@ -561,7 +564,7 @@ export default function Enter() {
                       <TableCustom
                         data={state.credit_memo_applies}
                         keys={keyTableItem}
-                        aliases={{}}
+                        aliases={creditMemoAliases.apply}
                         keyRow={"invoiceid"}
                         checkbox={false}
                       />

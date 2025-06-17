@@ -101,7 +101,7 @@ function Agreement() {
       key: "customer",
       fixed: "left",
       render: (text, record) => (
-        <Link href={`/super-admin/master-data/${title}/${record.customercode}`}>
+        <Link href={`/super-admin/master-data/${title}/${encodeURIComponent(record.customercode) || ""}`}>
           {text}
         </Link>
       ),

@@ -42,6 +42,7 @@ import PaymentFetch from "@/modules/salesApi/payment";
 import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 import { formatDateToShort } from "@/utils/formatDate";
 import InvoiceFetch from "@/modules/salesApi/invoice";
+import { creditMemoAliases } from "@/utils/aliases";
 
 function TableCustom({
   data,
@@ -943,25 +944,22 @@ export default function Enter() {
             </Button>
           </div>
 
-                    <div className="w-full flex flex-col lg:flex-row justify-between items-start">
-                      <div className="w-full lg:w-1/2 flex gap-1">
-                        <Button
-                          icon={<CloseOutlined />}
-                          onClick={() => router.back()}
-                        >
-                          {isLargeScreen ? "Cancel" : ""}
-                        </Button>
-                      </div>
-                      <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-                        <Button
-                          type={"primary"}
-                          icon={<SaveOutlined />}
-                          onClick={handleSubmit}
-                        >
-                          {isLargeScreen ? "Save" : ""}
-                        </Button>
-                      </div>
-                    </div>
+          <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+            <div className="w-full lg:w-1/2 flex gap-1">
+              <Button icon={<CloseOutlined />} onClick={() => router.back()}>
+                {isLargeScreen ? "Cancel" : ""}
+              </Button>
+            </div>
+            <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+              <Button
+                type={"primary"}
+                icon={<SaveOutlined />}
+                onClick={handleSubmit}
+              >
+                {isLargeScreen ? "Save" : ""}
+              </Button>
+            </div>
+          </div>
 
           {/* customer */}
           <div className="w-full flex flex-col gap-8">
@@ -983,7 +981,7 @@ export default function Enter() {
                     initialValues={{ customer: customerSelected?.id }}
                   >
                     <Form.Item
-                      label={<span className="capitalize">Customer</span>}
+                      label={<span className="capitalize">Customer Name</span>}
                       name="customer"
                       style={{ margin: 0 }}
                       className="w-full"
@@ -1045,7 +1043,7 @@ export default function Enter() {
                 isAlias: true,
               },
             ]}
-            aliases={[]}
+            aliases={creditMemoAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
@@ -1071,7 +1069,7 @@ export default function Enter() {
                 isRead: true,
               },
             ]}
-            aliases={[]}
+            aliases={creditMemoAliases.item}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
@@ -1097,7 +1095,7 @@ export default function Enter() {
               "taxrate1",
               "taxamount",
             ]}
-            aliases={{}}
+            aliases={creditMemoAliases.item}
             checkbox={false}
             keyRow={"item"}
           />
@@ -1119,7 +1117,7 @@ export default function Enter() {
                 onChange={handleChecked}
                 data={state.credit_memo_applies}
                 keys={keyTableItem}
-                aliases={{}}
+                aliases={creditMemoAliases.apply}
                 keyRow={"invoiceid"}
                 checkbox={true}
               />

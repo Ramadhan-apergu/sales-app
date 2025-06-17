@@ -173,8 +173,8 @@ function SalesOrder() {
     },
     {
       title: "Document Number",
-      dataIndex: "otherrefnum",
-      key: "otherrefnum",
+      dataIndex: "tranid",
+      key: "tranid",
       fixed: isLargeScreen ? "left" : "",
       render: (text, record) => (
         <Link href={`/super-admin/transaction/${title}/enter?salesOrderId=${record.id}`}>

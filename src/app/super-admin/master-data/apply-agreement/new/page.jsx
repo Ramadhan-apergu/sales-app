@@ -1,18 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Divider,
-  Table,
-  Modal,
-  Select,
-} from "antd";
+import { Button, Divider, Table, Modal, Select } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
-import { agreementAliases } from "@/utils/aliases";
+import { agreementAliases, applyAgreementAliases } from "@/utils/aliases";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
@@ -144,23 +138,22 @@ export default function AgreementApplyNew() {
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
     try {
+      if (payloadCustomer.customer == "") {
+        throw new Error("Customer is required");
+      }
 
-        if (payloadCustomer.customer == "") {
-            throw new Error('Customer is required')
-        }
+      if (payloadAgreementList.length == 0) {
+        throw new Error("Agreement list is required");
+      }
 
-        if (payloadAgreementList.length == 0) {
-            throw new Error('Agreement list is required')
-        }
-
-        const payloadToInsert = {
-            customerid : payloadCustomer.customer,
-            agreement_list: payloadAgreementList.map((agreement) => {
-                return {
-                    id: agreement.id
-                }
-            })
-        }
+      const payloadToInsert = {
+        customerid: payloadCustomer.customer,
+        agreement_list: payloadAgreementList.map((agreement) => {
+          return {
+            id: agreement.id,
+          };
+        }),
+      };
 
       const response = await AgreementFetch.addAgreementApply(payloadToInsert);
 
@@ -183,16 +176,16 @@ export default function AgreementApplyNew() {
     5: "Discount Group",
   };
 
-function handleModalAgreementOk() {
-  setpayloadAgreementList((prev) => [...prev, agreementSelectedTemp]);
-  setAgreementSelectedTemp(null);
-  setIsModal(false);
-}
+  function handleModalAgreementOk() {
+    setpayloadAgreementList((prev) => [...prev, agreementSelectedTemp]);
+    setAgreementSelectedTemp(null);
+    setIsModal(false);
+  }
 
-function handleModalAgreementCancel() {
-  setAgreementSelectedTemp(null);
-  setIsModal(false);
-}
+  function handleModalAgreementCancel() {
+    setAgreementSelectedTemp(null);
+    setIsModal(false);
+  }
 
   return (
     <>
@@ -240,7 +233,7 @@ function handleModalAgreementCancel() {
                   },
                 ]}
                 onChange={handleChangePayload}
-                aliases={agreementAliases}
+                aliases={applyAgreementAliases.customer}
               />
             </div>
             <div className="w-full flex flex-col gap-4">
@@ -255,13 +248,22 @@ function handleModalAgreementCancel() {
                 Agreement List
               </Divider>
               <div className="flex justify-end">
-                <Button type="primary" onClick={() => {setIsModal(true)}}>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setIsModal(true);
+                  }}
+                >
                   Add
                 </Button>
               </div>
               <TableCustom
                 onDelete={(agreement) => {
-                    setpayloadAgreementList((prev) => prev.filter((prevAgreement) => prevAgreement.id != agreement.id))
+                  setpayloadAgreementList((prev) =>
+                    prev.filter(
+                      (prevAgreement) => prevAgreement.id != agreement.id
+                    )
+                  );
                 }}
                 data={payloadAgreementList}
                 keys={[
@@ -270,7 +272,7 @@ function handleModalAgreementCancel() {
                   "effectivedate",
                   "enddate",
                 ]}
-                aliases={[]}
+                aliases={applyAgreementAliases.agreement}
               />
             </div>
           </div>
@@ -309,18 +311,24 @@ function handleModalAgreementCancel() {
                     placeholder="Select an item"
                     optionFilterProp="label"
                     onChange={(_, agreement) => {
-                        const findAgreementExisting = payloadAgreementList.find((itemAgreement) => itemAgreement.id == agreement.id)
-                        if (!findAgreementExisting) {
-                            setAgreementSelectedTemp({
-                              ...agreement,
-                              effectivedate: agreement.effectivedate ? formatDateToShort(agreement.effectivedate) : agreement.effectivedate,
-                              enddate: agreement.enddate ? formatDateToShort(agreement.enddate) : agreement.enddate,
-                              form: formOptions[agreement.customform],
-                            });
-                        } else {
-                            notify('error', 'Error', 'Agreement has been added' )
-                            setAgreementSelectedTemp(null)
-                        }
+                      const findAgreementExisting = payloadAgreementList.find(
+                        (itemAgreement) => itemAgreement.id == agreement.id
+                      );
+                      if (!findAgreementExisting) {
+                        setAgreementSelectedTemp({
+                          ...agreement,
+                          effectivedate: agreement.effectivedate
+                            ? formatDateToShort(agreement.effectivedate)
+                            : agreement.effectivedate,
+                          enddate: agreement.enddate
+                            ? formatDateToShort(agreement.enddate)
+                            : agreement.enddate,
+                          form: formOptions[agreement.customform],
+                        });
+                      } else {
+                        notify("error", "Error", "Agreement has been added");
+                        setAgreementSelectedTemp(null);
+                      }
                     }}
                     onSearch={{}}
                     options={dataAgreement}
@@ -330,7 +338,7 @@ function handleModalAgreementCancel() {
               </div>
             </div>
             <InputForm
-            key={agreementSelectedTemp?.agreementcode || "empty"}
+              key={agreementSelectedTemp?.agreementcode || "empty"}
               title="Agreement Details"
               type="agreementSelected"
               payload={agreementSelectedTemp}
@@ -360,7 +368,7 @@ function handleModalAgreementCancel() {
                   isRead: true,
                 },
               ]}
-              aliases={[]}
+              aliases={applyAgreementAliases.agreement}
             />
           </div>
         </div>

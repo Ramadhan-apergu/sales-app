@@ -37,7 +37,7 @@ import ItemFetch from "@/modules/salesApi/item";
 import convertToLocalDate from "@/utils/convertToLocalDate";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
-import { salesOrderAliases } from "@/utils/aliases";
+import { salesOrderAliases, stockAdjustmentAliases } from "@/utils/aliases";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 
 function formatRupiah(number) {
@@ -338,7 +338,7 @@ export default function Enter() {
                 isAlias: true,
               },
             ]}
-            aliases={{}}
+            aliases={stockAdjustmentAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
@@ -369,7 +369,7 @@ export default function Enter() {
                 onDelete={handleDeleteTableItem}
                 data={state.stock_opname_det}
                 keys={keyTableItem}
-                aliases={{}}
+                aliases={stockAdjustmentAliases.adjustment}
               />
             </div>
           </div>
@@ -490,7 +490,7 @@ export default function Enter() {
                     isRead: true,
                   },
                 ]}
-                aliases={{}}
+                aliases={stockAdjustmentAliases.adjustment}
                 onChange={(type, payload) => {
                   console.log(payload);
                   setItemTableTemp({
