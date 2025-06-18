@@ -1,11 +1,12 @@
 export const customerAliases = {
+  customerid: "Customer ID",
   companyname: "Customer Name",
   altphone: "Alt Phone",
   addressee: "Address EE",
-  addr1: "Address 1",
+  addr1: "Address",
   creditlimit: "Credit Limit",
   terms: "Term",
-  resalenumber: "Resale Number",
+  resalenumber: "NPWP / NIK",
   internalid: "Internal ID",
   entityid: "Entity ID",
   createdby: "Created By",
@@ -59,7 +60,8 @@ export const salesOrderAliases = {
     customer: "Customer",
   },
   primary: {
-    entity: "ID customer",
+    companyname: 'Customer Name',
+    entity: "Entity ID",
     trandate: "Date",
     salesrep: "Sales Rep",
     otherrefnum: "PO #",
@@ -121,8 +123,10 @@ export const deliveryOrderAliases = {
     memo: "Description",
     location: "Location",
     quantityremaining: "Remaining",
-    quantity: "Quantity 1",
-    units: "Units 1",
+    quantity1: "Quantity 1",
+    unit1: "Units 1",
+    quantity2: "Quantity 2",
+    unit2: "Units 2",
   },
   shipping: {
     shippingoption: "Shipping Option",
@@ -181,118 +185,118 @@ export const applyAgreementAliases = {
 };
 
 export const deliveryStatusAliases = {
-    customer: 'Customer Name',
-    so_numb: 'SO No',
-    so_date: 'SO Date',
-    displayname: 'Display Name',
-    itemid: 'Item ID',
-    qty_so: 'SO Qty',
-    so_status: 'SO Status',
-    unit_so: 'SO Unit',
-    delivery_numb: 'DO No',
-    delivery_date: 'DO Date',
-    delivery_status: 'DO Status',
-    unit_delivery: 'DO Unit',
-    back_ordered: 'Back Ordered'
-}
+  customer: "Customer Name",
+  so_numb: "SO No",
+  so_date: "SO Date",
+  displayname: "Display Name",
+  itemid: "Item ID",
+  qty_so: "SO Qty",
+  so_status: "SO Status",
+  unit_so: "SO Unit",
+  delivery_numb: "DO No",
+  delivery_date: "DO Date",
+  delivery_status: "DO Status",
+  unit_delivery: "DO Unit",
+  back_ordered: "Back Ordered",
+};
 
 export const paymentAliases = {
-    customer: {
-        customer: 'Customer Name'
-    },
-    primary: {
-        customer: 'Customer ID',
-        trandate: 'Date',
-        memo: 'Memo'
-    },
-    payment: {
-        paymentoption: 'Payment Option',
-        payment: 'Payment',
-        invoiceid: 'Invoice ID',
-        refnum: 'Ref No',
-        applydate: 'Date',
-        total: 'Total',
-        due: 'Amount Due',
-        amount: 'Payment'
-    }
-}
+  customer: {
+    customer: "Customer Name",
+  },
+  primary: {
+    customer: "Customer ID",
+    trandate: "Date",
+    memo: "Memo",
+  },
+  payment: {
+    paymentoption: "Payment Option",
+    payment: "Payment",
+    invoiceid: "Invoice ID",
+    refnum: "Ref No",
+    applydate: "Date",
+    total: "Total",
+    due: "Amount Due",
+    amount: "Payment",
+  },
+};
 
 export const creditMemoAliases = {
-    primary: {
-        entity: 'Customer ID',
-        trandate: 'Date',
-        memo: 'Memo',
-    },
-    item: {
-        unapplied: 'Unapplied',
-        applied: 'Applied',
-        item: 'Item ID',
-        displayname: 'Display Name',
-        quantity: 'Qty',
-        units: 'Unit',
-        itemdescription: 'Description',
-        rate: 'Rate',
-        taxable: 'Taxable',
-        amount: 'Total Amount',
-        taxrate1: 'Tax Rate',
-        taxamount: 'Tax Amount'
-    },
-    apply: {
-        invoiceid: 'Invoice ID',
-        refnum: 'Ref No',
-        trandate: 'Date',
-        due: 'Amount Due',
-        amount: 'Total Amount',
-        payment: 'Payment'
-    }
-}
+  primary: {
+    entity: "Customer ID",
+    trandate: "Date",
+    memo: "Memo",
+  },
+  item: {
+    unapplied: "Unapplied",
+    applied: "Applied",
+    item: "Item ID",
+    displayname: "Display Name",
+    quantity: "Qty",
+    units: "Unit",
+    itemdescription: "Description",
+    rate: "Rate",
+    taxable: "Taxable",
+    amount: "Total Amount",
+    taxrate1: "Tax Rate",
+    taxamount: "Tax Amount",
+  },
+  apply: {
+    invoiceid: "Invoice ID",
+    refnum: "Ref No",
+    trandate: "Date",
+    due: "Amount Due",
+    amount: "Total Amount",
+    payment: "Payment",
+  },
+};
 
 export const stockAdjustmentAliases = {
-    primary: {
-        trandate: 'Date',
-        memo: 'Memo'
-    },
-    adjustment: {
-        itemid: 'Item ID',
-        displayname: 'Display Name',
-        onhand: 'Onhand',
-        stockreal: 'Stock Real',
-        qty: 'Qty',
-        units: 'Unit',
-        price: 'Price'
-    }
-}
+  primary: {
+    trandate: "Date",
+    memo: "Memo",
+  },
+  adjustment: {
+    itemid: "Item ID",
+    displayname: "Display Name",
+    onhand: "Onhand",
+    stockreal: "Stock Real",
+    qty: "Qty",
+    units: "Unit",
+    price: "Price",
+  },
+};
 
 export const soReportAliases = {
-    id: 'ID',
-    so_numb: 'SO No',
-    trandate: 'Date',
-    kode_customer: 'Customer Code',
-    nama_customer: 'Customer Name',
-    sales: 'Sales Ref',
-    kode_barang: 'Item Code',
-    nama_barang: 'Display Name',
-    qty_so: 'SO Qty',
-    qty_kirim: 'DO Qty',
-    qty_sisa: 'Stock Qty',
-    satuan: 'Unit',
-    tgl_kirim: 'DO Date',
-    harga_satuan: 'Price @',
-    diskon_satuan: 'Discount @',
-    jumlah: 'Total'
-}
+  id: "ID",
+  so_numb: "SO No",
+  trandate: "Date",
+  kode_customer: "Customer Code",
+  nama_customer: "Customer Name",
+  sales: "Sales Ref",
+  kode_barang: "Item Code",
+  nama_barang: "Display Name",
+  qty_so: "SO Qty",
+  qty_kirim: "DO Qty",
+  qty_sisa: "Stock Qty",
+  satuan: "Unit",
+  tgl_kirim: "DO Date",
+  harga_satuan: "Price @",
+  diskon_satuan: "Discount @",
+  jumlah: "Total",
+};
 
 export const salesReportAliases = {
-    id: 'ID',
-    no_faktur: 'Invoice No',
-    trandate: 'Date',
-    kode_customer: 'Customer Code',
-    nama_customer: 'Customer Name',
-    sales: 'Sales Ref',
-    kode_barang: 'Item Code',
-    nama_barang: 'Display Name',
-    qty_faktur: 'Invoice Qty',
-    satuan: 'Unit',
-    harga: 'Price',
-    jumlah: 'Total'
-}
+  id: "ID",
+  no_faktur: "Invoice No",
+  trandate: "Date",
+  kode_customer: "Customer Code",
+  nama_customer: "Customer Name",
+  sales: "Sales Ref",
+  kode_barang: "Item Code",
+  nama_barang: "Display Name",
+  qty_faktur: "Invoice Qty",
+  satuan: "Unit",
+  harga: "Price",
+  jumlah: "Total",
+};

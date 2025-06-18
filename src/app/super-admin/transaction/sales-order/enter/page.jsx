@@ -127,10 +127,11 @@ export default function Enter() {
         const resData = getResponseHandler(response);
 
         if (resData) {
-          const addLabelCustomer = resData.list.map((customer) => {
+          console.log(resData.list);
+          const addLabelCustomer = resData.list.map((customer, i) => {
             return {
               ...customer,
-              label: customer.companyname,
+              label: customer.customerid || customer.companyname,
               value: customer.id,
             };
           });
@@ -166,6 +167,7 @@ export default function Enter() {
 
   const initialState = {
     payloadPrimary: {
+      companyname: "",
       entity: "",
       trandate: dayjs(new Date()),
       salesrep: "sales_indoor",
@@ -183,7 +185,7 @@ export default function Enter() {
       paymentoption: "",
     },
     payloadShipping: {
-      shippingoption: "custom",
+      notes: "",
       shippingaddress: "",
     },
     dataTableItem: [],
@@ -831,6 +833,8 @@ export default function Enter() {
         ...state.payloadShipping,
       };
 
+      delete payloadToInsert.companyname
+
       if (dataTableItem.length <= 0) {
         throw new Error("Please enter order items");
       }
@@ -888,6 +892,9 @@ export default function Enter() {
       ) {
         throw new Error("Please enter a value greater than 0.");
       }
+
+      console.log(payloadToInsert)
+      return
 
       const response = await SalesOrderFetch.add(payloadToInsert);
 
@@ -950,7 +957,7 @@ export default function Enter() {
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                 <Form layout="vertical">
                   <Form.Item
-                    label={<span className="capitalize">Customer</span>}
+                    label={<span className="capitalize">Customer ID</span>}
                     name="customer"
                     style={{ margin: 0 }}
                     className="w-full"
@@ -971,7 +978,16 @@ export default function Enter() {
                         dispatch({ type: "RESET" });
                         dispatch({
                           type: "SET_PRIMARY",
-                          payload: { entity: customer.id },
+                          payload: {
+                            entity: customer.id,
+                            companyname: customer.companyname,
+                          },
+                        });
+                        dispatch({
+                          type: "SET_SHIPPING",
+                          payload: {
+                            shippingaddress: customer.addressee,
+                          },
                         });
                       }}
                       //   onSearch={{}}
@@ -988,6 +1004,14 @@ export default function Enter() {
             type="SET_PRIMARY"
             payload={state.payloadPrimary}
             data={[
+              {
+                key: "companyname",
+                input: "input",
+                isAlias: true,
+                isRead: true,
+                rules: [{ required: true, message: ` is required` }],
+                placeholder: "Auto-filled after selecting a customer",
+              },
               {
                 key: "entity",
                 input: "input",
@@ -1025,33 +1049,20 @@ export default function Enter() {
             payload={state.payloadShipping}
             data={[
               {
-                key: "shippingoption",
-                input: "select",
-                options: shipAddressOption,
+                key: "shippingaddress",
+                input: "text",
                 isAlias: true,
+                isRead: true,
               },
               {
-                key: "shippingaddress",
+                key: "notes",
                 input: "text",
                 isAlias: true,
               },
             ]}
             aliases={salesOrderAliases.shipping}
             onChange={(type, payload) => {
-                if (payload.shippingoption != state.payloadShipping.shippingoption) {
-                    dispatch({
-                      type,
-                      payload: {
-                        ...payload,
-                        shippingaddress:
-                          payload.shippingoption == "default address"
-                            ? customerSelected.addressee || ""
-                            : "",
-                      },
-                    });
-                } else {
-                    dispatch({type, payload})
-                }
+              dispatch({ type, payload });
             }}
           />
           <InputForm
@@ -1273,12 +1284,12 @@ export default function Enter() {
                     {formatRupiah(state.payloadSummary.subtotal)} Incl. PPN
                   </p>
                 </div>
-                <div className="flex w-full">
+                {/* <div className="flex w-full">
                   <p className="w-1/2">Tax Total</p>
                   <p className="w-1/2 text-end">
                     {formatRupiah(state.payloadSummary.taxtotal)}
                   </p>
-                </div>
+                </div> */}
                 <hr className="border-gray-5" />
                 <div className="flex w-full font-semibold">
                   <p className="w-1/2">Total</p>

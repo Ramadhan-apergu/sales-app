@@ -94,7 +94,7 @@ function DeliveryOrder() {
             return {
               ...data,
               value: data.id,
-              label: data.companyname,
+              label: data.customerid || data.companyname,
             };
           });
           setDataCustomer(mapingCustomerOption);

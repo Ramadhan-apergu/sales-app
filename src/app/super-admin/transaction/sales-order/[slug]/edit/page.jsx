@@ -180,7 +180,7 @@ export default function Enter() {
         const addLabelCustomer = resData.list.map((customer) => {
           return {
             ...customer,
-            label: customer.companyname,
+            label: customer.customerid || customer.companyname,
             value: customer.id,
           };
         });
@@ -307,6 +307,8 @@ export default function Enter() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
+        tranid: data.tranid,
+        companyname: data.customer,
         entity: data.entity,
         trandate: dayjs(data.trandate),
         salesrep: data.salesrep,
@@ -336,7 +338,7 @@ export default function Enter() {
     dispatch({
       type: "SET_SHIPPING",
       payload: {
-        shippingoption: data.shippingoption,
+        notes: data.notes,
         shippingaddress: data.shippingaddress,
       },
     });
@@ -344,6 +346,8 @@ export default function Enter() {
 
   const initialState = {
     payloadPrimary: {
+      tranid: "",
+      companyname: "",
       entity: "",
       trandate: dayjs(new Date()),
       salesrep: "sales_indoor",
@@ -361,7 +365,7 @@ export default function Enter() {
       paymentoption: "",
     },
     payloadShipping: {
-      shippingoption: "",
+      notes: "",
       shippingaddress: "",
     },
     dataTableItem: [],
@@ -1004,8 +1008,10 @@ export default function Enter() {
         ...state.payloadPrimary,
         ...state.payloadSummary,
         ...state.payloadBilling,
-        ...state.payloadShipping
+        ...state.payloadShipping,
       };
+
+      delete payloadToInsert.companyname;
 
       if (dataTableItem.length <= 0) {
         throw new Error("Please enter order items");
@@ -1142,7 +1148,7 @@ export default function Enter() {
                           {customerSelected.value && (
                             <Form.Item
                               label={
-                                <span className="capitalize">Customer</span>
+                                <span className="capitalize">Customer ID</span>
                               }
                               name="customer"
                               style={{ margin: 0 }}
@@ -1173,7 +1179,10 @@ export default function Enter() {
                                   });
                                   dispatch({
                                     type: "SET_PRIMARY",
-                                    payload: { entity: customer.id },
+                                    payload: {
+                                      entity: customer.id,
+                                      companyname: customer.companyname,
+                                    },
                                   });
                                 }}
                                 onSearch={{}}
@@ -1234,12 +1243,26 @@ export default function Enter() {
                     payload={state.payloadPrimary}
                     data={[
                       {
+                        key: "companyname",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        rules: [{ required: true, message: ` is required` }],
+                        placeholder: "Auto-filled after selecting a customer",
+                      },
+                      {
                         key: "entity",
                         input: "input",
                         isAlias: true,
                         isRead: true,
                         rules: [{ required: true, message: ` is required` }],
                         placeholder: "Auto-filled after selecting a customer",
+                      },
+                      {
+                        key: "tranid",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
                       },
                       {
                         key: "trandate",
@@ -1272,36 +1295,20 @@ export default function Enter() {
                     payload={state.payloadShipping}
                     data={[
                       {
-                        key: "shippingoption",
-                        input: "select",
-                        options: shipAddressOption,
+                        key: "shippingaddress",
+                        input: "text",
                         isAlias: true,
+                        isRead: true,
                       },
                       {
-                        key: "shippingaddress",
+                        key: "notes",
                         input: "text",
                         isAlias: true,
                       },
                     ]}
                     aliases={salesOrderAliases.shipping}
                     onChange={(type, payload) => {
-                      if (
-                        payload.shippingoption !=
-                        state.payloadShipping.shippingoption
-                      ) {
-                        dispatch({
-                          type,
-                          payload: {
-                            ...payload,
-                            shippingaddress:
-                              payload.shippingoption == "default address"
-                                ? customerSelected.addressee || ""
-                                : data.shippingaddress,
-                          },
-                        });
-                      } else {
-                        dispatch({ type, payload });
-                      }
+                      dispatch({ type, payload });
                     }}
                   />
                   <InputForm
