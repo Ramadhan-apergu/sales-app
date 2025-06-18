@@ -59,17 +59,16 @@ export default function Detail() {
 
   const fieldGroups = {
     general: [
-      "id","internalid","entityid","companyname",
-      "category","status","createdby","createddate"
+      "customerid","internalid","companyname","status","createddate"
     ],
     contact: [
-      "addressee","phone","altphone","email"
+        "phone","altphone","email"
     ],
     address: [
-      "addr1","city","state","zip","defaultaddress"
+      "addr1","city","state","zip"
     ],
     financial: [
-      "creditlimit","overduebalance","currency",
+      "creditlimit","currency",
       "resalenumber","terms"
     ]
   }
@@ -212,12 +211,9 @@ export default function Detail() {
                                                 type="primary"
                                                 payload={general}
                                                 data={[
-                                                    { key: 'id', input: 'input', isAlias: true },
+                                                    { key: 'customerid', input: 'input', isAlias: true },
                                                     { key: 'internalid', input: 'input', isAlias: true },
-                                                    { key: 'entityid', input: 'input', isAlias: true },
                                                     { key: 'companyname', input: 'input', isAlias: true },
-                                                    { key: 'category', input: 'input', isAlias: false },
-                                                    { key: 'createdby', input: 'input', isAlias: true },
                                                     { key: 'createddate', input: 'input', isAlias: true },
                                                 ]}
                                                 aliases={customerAliases}
@@ -230,7 +226,6 @@ export default function Detail() {
                                                     { key: 'email', input: 'input', isAlias: false },
                                                     { key: 'phone', input: 'input', isAlias: false },
                                                     { key: 'altphone', input: 'input', isAlias: true },
-                                                    { key: 'addressee', input: 'input', isAlias: true },
                                                 ]}
                                                 aliases={customerAliases}
                                             />
@@ -243,7 +238,6 @@ export default function Detail() {
                                                     { key: 'city', input: 'input', isAlias: false },
                                                     { key: 'state', input: 'input', isAlias: false },
                                                     { key: 'zip', input: 'input', isAlias: false },
-                                                    { key: 'defaultaddress', input: 'input', isAlias: true },
                                                 ]}
                                                 aliases={customerAliases}
                                             />
@@ -253,7 +247,6 @@ export default function Detail() {
                                                 payload={financial}
                                                 data={[
                                                     { key: 'creditlimit', input: 'input', isAlias: true },
-                                                    { key: 'overduebalance', input: 'input', isAlias: true },
                                                     { key: 'currency', input: 'input', isAlias: false },
                                                     { key: 'resalenumber', input: 'input', isAlias: true },
                                                     { key: 'terms', input: 'input', isAlias: true },

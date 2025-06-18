@@ -148,6 +148,7 @@ export default function Detail() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
+        customer: data.customer,
         entity: data.entity,
         trandate: formatDateToShort(data.trandate),
         salesrep: data.salesrep,
@@ -177,7 +178,7 @@ export default function Detail() {
     dispatch({
       type: "SET_SHIPPING",
       payload: {
-        shippingoption: data.shippingoption,
+        notes: data.notes,
         shippingaddress: data.shippingaddress,
       },
     });
@@ -284,6 +285,7 @@ export default function Detail() {
       customer: "",
     },
     payloadPrimary: {
+      customer: "",
       entity: "",
       trandate: dayjs(new Date()),
       salesrep: "sales_indoor",
@@ -301,7 +303,7 @@ export default function Detail() {
       paymentoption: "",
     },
     payloadShipping: {
-      shippingoption: "",
+      notes: "",
       shippingaddress: "",
     },
     dataTableItem: [],
@@ -495,7 +497,7 @@ export default function Detail() {
                   <div className="w-full flex flex-col lg:flex-row justify-between items-start">
                     <div className="w-full lg:w-1/2 flex gap-1 flex-col">
                       <p className="w-full lg:text-lg">
-                        {data.id + " / " + data.customer}
+                        {data.tranid + " / " + data.customer}
                       </p>
                       <div>
                         <Tag
@@ -556,7 +558,7 @@ export default function Detail() {
                       </Dropdown>
                     </div>
                   </div>
-                  <InputForm
+                  {/* <InputForm
                     title="customer"
                     type="SET_CUSTOMER"
                     payload={state.payloadCustomer}
@@ -569,12 +571,18 @@ export default function Detail() {
                       },
                     ]}
                     aliases={salesOrderAliases.customer}
-                  />
+                  /> */}
                   <InputForm
                     title="primary"
                     type="SET_PRIMARY"
                     payload={state.payloadPrimary}
                     data={[
+                      {
+                        key: "customer",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
                       {
                         key: "entity",
                         input: "input",
@@ -608,13 +616,13 @@ export default function Detail() {
                     payload={state.payloadShipping}
                     data={[
                       {
-                        key: "shippingoption",
-                        input: "input",
+                        key: "shippingaddress",
+                        input: "text",
                         isAlias: true,
                         isRead: true,
                       },
                       {
-                        key: "shippingaddress",
+                        key: "notes",
                         input: "text",
                         isAlias: true,
                         isRead: true,
