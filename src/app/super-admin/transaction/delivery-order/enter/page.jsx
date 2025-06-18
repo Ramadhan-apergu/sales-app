@@ -1,6 +1,7 @@
 "use client";
 
 import React, {
+  memo,
   Suspense,
   useEffect,
   useReducer,
@@ -47,7 +48,7 @@ import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import SalesOrderSelect from "./SalesOrderSelect";
 import { deliveryOrderAliases } from "@/utils/aliases";
 
-function TableCustom({ data, keys, aliases, onDelete }) {
+function TableCustom({ data, keys, aliases, onEdit }) {
   const columns = [
     ...keys.map((key) => ({
       title: aliases?.[key] || key,
@@ -55,16 +56,16 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       key: key,
       align: "right", // semua kolom di-align ke kanan
     })),
-    // {
-    //   title: "Action",
-    //   key: "action",
-    //   align: "right", // kolom action juga ke kanan
-    //   render: (_, record) => (
-    //     <Button type="link" onClick={() => onDelete(record)}>
-    //       Delete
-    //     </Button>
-    //   ),
-    // },
+    {
+      title: "Action",
+      key: "action",
+      align: "right", // kolom action juga ke kanan
+      render: (_, record) => (
+        <Button type="link" onClick={() => onEdit(record)}>
+          Edit
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -93,6 +94,9 @@ function Enter({ salesOrderId }) {
     {}
   );
 
+  const [editItem, setEditItem] = useState(null);
+  const [isEditItem, setIsEditItem] = useState(false);
+
   const initialState = {
     payloadPrimary: {
       salesorderid: "",
@@ -104,20 +108,10 @@ function Enter({ salesOrderId }) {
       memo: "",
     },
     payloadShipping: {
-      shippingoption: "custom",
+      notes: "",
       shippingaddress: "",
     },
   };
-
-  const shippingOptions = [
-    { label: "Custom", value: 0 },
-    { label: "Default", value: 1 },
-  ];
-
-  const shippingOption = [
-    { label: "Custom", value: "custom" },
-    { label: "Default Address", value: "default address" },
-  ];
 
   function reducer(state, action) {
     switch (action.type) {
@@ -147,12 +141,6 @@ function Enter({ salesOrderId }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    // if (!salesOrderId) {
-    //   notify("error", "Missing Parameter", "Sales Order ID is required.");
-    //   router.back();
-    //   return;
-    // }
-
     const fetchData = async () => {
       try {
         const salesOrderRes = await SalesOrderFetch.getById(salesOrderId);
@@ -167,31 +155,23 @@ function Enter({ salesOrderId }) {
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch fulfillment items");
 
-        // const salesOrderItem = salesOrderData.sales_order_items
-
-        // soItemData = soItemData.map((item) => {
-        //     if (item.memo.toLowerCase() != 'free item') {
-        //         const findItemSo = salesOrderItem.find((itemSo) => itemSo.item == item.id)
-
-        //         if (findItemSo) {
-        //             return {
-        //                 ...item,
-        //                 quantityremaining: findItemSo.quantity - item.quantity
-        //             }
-        //         } else {
-        //             return item
-        //         }
-        //     } else {
-        //         return item
-        //     }
-        // })
-
         setDataSalesOrder(salesOrderData);
         setDataCustomer(customerData);
         setDataSalesOrderItemRetrieve(soItemData);
         setDataTableItem(
           soItemData.map((item) => ({
-            ...item,
+            displayname: item.displayname,
+            id: item.id,
+            itemid: item.itemid,
+            memo: item.memo,
+            quantityremaining: item.quantityremaining,
+            quantity1: item.quantity,
+            unit1: item.units,
+            quantity2:
+              item.units.toLowerCase() == "bal"
+                ? item.quantity * 1
+                : item.quantity / 2500,
+            unit2: "bal",
             location: "General Warehouse",
             lineid: crypto.randomUUID(),
           }))
@@ -201,18 +181,19 @@ function Enter({ salesOrderId }) {
           type: "SET_PRIMARY",
           payload: {
             salesorderid: salesOrderData.id,
-            createdfrom: salesOrderData.otherrefnum,
+            createdfrom: salesOrderData.tranid,
             customer: customerData.companyname,
             entity: customerData.id,
           },
         });
 
-        // dispatch({
-        //   type: "SET_SHIPPING",
-        //   payload: {
-        //     shippingaddress: customerData.addressee,
-        //   },
-        // });
+        dispatch({
+          type: "SET_SHIPPING",
+          payload: {
+            shippingaddress: customerData.addressee
+          },
+        });
+
       } catch (error) {
         notify("error", "Error", error.message || "Failed to fetch data");
       }
@@ -232,7 +213,10 @@ function Enter({ salesOrderId }) {
     "itemid",
     "location",
     "memo",
-    "quantity",
+    "quantity1",
+    "unit1",
+    "quantity2",
+    "unit2",
     "quantityremaining",
   ];
 
@@ -244,7 +228,7 @@ function Enter({ salesOrderId }) {
       let payloadToInsert = {
         ...state.payloadPrimary,
         ...state.payloadSummary,
-        ...state.payloadShipping
+        ...state.payloadShipping,
       };
 
       delete payloadToInsert.customer;
@@ -255,8 +239,10 @@ function Enter({ salesOrderId }) {
           memo: data.memo,
           location: data.location,
           quantityremaining: data.quantityremaining,
-          quantity: data.quantity,
-          units: data.units,
+          quantity: data.quantity1,
+          units: data.unit1,
+          quantity2: data.quantity2,
+          units2: data.unit2,
         };
       });
 
@@ -266,8 +252,18 @@ function Enter({ salesOrderId }) {
 
       const resData = createResponseHandler(response, notify);
 
+      if (payloadToInsert.shipstatus.toLowerCase() == "open") {
+        notify(
+          "info",
+          "Info",
+          "This Delivery Order is still in draft. Stock will be deducted once status is set to Shipped."
+        );
+      }
+
       if (resData) {
-        router.push(`/super-admin/transaction/${title}/${resData}`);
+        setTimeout(() => {
+          router.push(`/super-admin/transaction/${title}/${resData}`);
+        }, 3000);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -364,6 +360,30 @@ function Enter({ salesOrderId }) {
               dispatch({ type, payload });
             }}
           />
+
+          <InputForm
+            title="shipping"
+            type="SET_SHIPPING"
+            payload={state.payloadShipping}
+            data={[
+              {
+                key: "shippingaddress",
+                input: "text",
+                isAlias: true,
+                isRead: true
+              },
+              {
+                key: "notes",
+                input: "text",
+                isAlias: true,
+              },
+            ]}
+            aliases={deliveryOrderAliases.shipping}
+            onChange={(type, payload) => {
+              dispatch({ type, payload });
+            }}
+          />
+
           <div className="w-full flex flex-col gap-8">
             <div className="w-full flex flex-col gap-2">
               <Divider
@@ -382,54 +402,128 @@ function Enter({ salesOrderId }) {
                             </Button>
                           </div> */}
               <TableCustom
-                // onDelete={handleDeleteTableItem}
+                onEdit={(record) => {
+                  setEditItem(record);
+                  setIsEditItem(true);
+                }}
                 data={dataTableItem}
                 keys={keyTableItem}
                 aliases={deliveryOrderAliases.item}
               />
             </div>
           </div>
-          <InputForm
-            title="shipping"
-            type="SET_SHIPPING"
-            payload={state.payloadShipping}
-            data={[
-              {
-                key: "shippingoption",
-                input: "select",
-                options: shippingOption,
-                isAlias: true,
-              },
-              {
-                key: "shippingaddress",
-                input: "text",
-                isAlias: true,
-              },
-            ]}
-            aliases={deliveryOrderAliases.shipping}
-            onChange={(type, payload) => {
-              if (
-                payload.shippingoption != state.payloadShipping.shippingoption
-              ) {
-                dispatch({
-                  type,
-                  payload: {
-                    ...payload,
-                    shippingaddress:
-                      payload.shippingoption == "default address"
-                        ? dataCustomer.addressee || ""
-                        : "",
-                  },
-                });
-              } else {
-                dispatch({ type, payload });
-              }
-            }}
-          />
         </div>
       </div>
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
+      <Modal
+        open={isEditItem}
+        onOk={() => {
+          if (editItem.quantity1 > editItem.quantityremaining) {
+            notify(
+              "error",
+              "Failed",
+              "Quantity 1 cannot be more than the Remaining Quantity"
+            );
+            return;
+          }
+
+          const updatedDataTableItem = dataTableItem.map((item) => {
+            if (item.id == editItem.id) {
+              return editItem;
+            } else {
+              return item;
+            }
+          });
+
+          setDataTableItem(updatedDataTableItem);
+          setIsEditItem(false);
+        }}
+        onCancel={() => {
+          setIsEditItem(false);
+          setEditItem(null);
+        }}
+        width={850}
+        cancelText="Cancel"
+      >
+        <div className="w-full mt-6">
+          <div className="w-full flex flex-col gap-4 mt-6">
+            <InputForm
+              title="Edit Item"
+              type="SET_ITEM"
+              payload={editItem}
+              data={[
+                {
+                  key: "id",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "displayname",
+                  input: "number",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "itemid",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "memo",
+                  input: "text",
+                  isAlias: true,
+                },
+                {
+                  key: "quantity1",
+                  input: "number",
+                  isAlias: true,
+                },
+                {
+                  key: "unit1",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "quantity2",
+                  input: "number",
+                  isAlias: true,
+                },
+                {
+                  key: "unit2",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "quantityremaining",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "location",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+              ]}
+              aliases={[]}
+              onChange={(type, payload) => {
+                setEditItem((prev) => ({
+                  ...prev,
+                  quantity1: payload.quantity1,
+                  quantity2: payload.quantity2,
+                  memo: payload.memo,
+                }));
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }

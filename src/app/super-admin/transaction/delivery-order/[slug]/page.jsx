@@ -69,7 +69,7 @@ export default function Page() {
       tranid: "",
     },
     payloadShipping: {
-      shippingoption: "",
+      notes: "",
       shippingaddress: "",
     },
   };
@@ -108,8 +108,10 @@ export default function Page() {
     "memo",
     "location",
     "quantityremaining",
-    "quantity",
-    "units",
+    "quantity1",
+    "unit1",
+    "quantity2",
+    "unit2",
   ];
 
   useEffect(() => {
@@ -163,7 +165,7 @@ export default function Page() {
       type: "SET_SHIPPING",
       payload: {
         shippingaddress: data.shippingaddress,
-        shippingoption: data.shippingoption,
+        notes: data.notes,
       },
     });
 
@@ -171,10 +173,19 @@ export default function Page() {
       data.fulfillment_items.map(async (doItem) => {
         const item = await fetchItemById(doItem.item);
 
-        return {
+        let updateData = {
           ...doItem,
           displayname: item ? item.displayname : "",
+          quantity1: doItem.quantity,
+          unit1: doItem.units,
+          unit2: doItem.units2,
         };
+
+        delete updateData.quantity;
+        delete updateData.units;
+        delete updateData.units2;
+
+        return updateData;
       })
     );
 
@@ -388,6 +399,26 @@ export default function Page() {
                     ]}
                     aliases={deliveryOrderAliases.primary}
                   />
+                  <InputForm
+                    title="shipping"
+                    type="SET_SHIPPING"
+                    payload={state.payloadShipping}
+                    data={[
+                      {
+                        key: "shippingaddress",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "notes",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                    ]}
+                    aliases={deliveryOrderAliases.shipping}
+                  />
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-4">
                       <Divider
@@ -407,26 +438,6 @@ export default function Page() {
                       />
                     </div>
                   </div>
-                  <InputForm
-                    title="shipping"
-                    type="SET_SHIPPING"
-                    payload={state.payloadShipping}
-                    data={[
-                      {
-                        key: "shippingoption",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "shippingaddress",
-                        input: "text",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                    ]}
-                    aliases={deliveryOrderAliases.shipping}
-                  />
                 </div>
               ) : (
                 <div className="w-full h-96">

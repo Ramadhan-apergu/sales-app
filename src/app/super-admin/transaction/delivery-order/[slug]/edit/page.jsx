@@ -28,7 +28,7 @@ import dayjs from "dayjs";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { deliveryOrderAliases } from "@/utils/aliases";
 
-function TableCustom({ data, keys, aliases, onDelete }) {
+function TableCustom({ data, keys, aliases, onEdit }) {
   const columns = [
     ...keys.map((key) => ({
       title: aliases?.[key] || key,
@@ -36,6 +36,16 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       key: key,
       align: "right", // semua kolom di-align ke kanan
     })),
+    {
+      title: "Action",
+      key: "action",
+      align: "right", // kolom action juga ke kanan
+      render: (_, record) => (
+        <Button type="link" onClick={() => onEdit(record)}>
+          Edit
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -58,7 +68,7 @@ export default function Page() {
   const isLargeScreen = useBreakpoint("lg");
   const { notify, contextHolder: contextNotify } = useNotification();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [customerSelected, setCustomerSelected] = useState({})
+  const [customerSelected, setCustomerSelected] = useState({});
 
   const initialState = {
     payloadPrimary: {
@@ -72,7 +82,7 @@ export default function Page() {
       tranid: "",
     },
     payloadShipping: {
-      shippingoption: "",
+      notes: "",
       shippingaddress: "",
     },
   };
@@ -111,8 +121,10 @@ export default function Page() {
     "memo",
     "location",
     "quantityremaining",
-    "quantity",
-    "units",
+    "quantity1",
+    "unit1",
+    "quantity2",
+    "unit2",
   ];
 
   useEffect(() => {
@@ -144,7 +156,7 @@ export default function Page() {
     }
   }
 
-    async function fetchCustomerById(id) {
+  async function fetchCustomerById(id) {
     try {
       const response = await CustomerFetch.getById(id);
       const resData = getResponseHandler(response);
@@ -173,7 +185,7 @@ export default function Page() {
       type: "SET_SHIPPING",
       payload: {
         shippingaddress: data.shippingaddress,
-        shippingoption: data.shippingoption,
+        notes: data.notes,
       },
     });
 
@@ -181,29 +193,28 @@ export default function Page() {
       data.fulfillment_items.map(async (doItem) => {
         const item = await fetchItemById(doItem.item);
 
-        return {
+        let updateData = {
           ...doItem,
           displayname: item ? item.displayname : "",
+          quantity1: doItem.quantity,
+          unit1: doItem.units,
+          unit2: doItem.units2,
         };
+
+        delete updateData.quantity;
+        delete updateData.units;
+        delete updateData.units2;
+
+        return updateData;
       })
     );
 
     setDataTableItem(dataFulfillmentWithItem);
 
-    const getCustomer = await fetchCustomerById(data.entity)
+    const getCustomer = await fetchCustomerById(data.entity);
 
-    setCustomerSelected(getCustomer)
+    setCustomerSelected(getCustomer);
   };
-
-  const shippingOptions = [
-    { label: "Custom", value: 0 },
-    { label: "Default", value: 1 },
-  ];
-
-  const shippingOption = [
-    { label: "Custom", value: "custom" },
-    { label: "Default Address", value: "default address" },
-  ];
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -211,7 +222,7 @@ export default function Page() {
       let payloadToInsert = {
         ...state.payloadPrimary,
         ...state.payloadSummary,
-        ...state.payloadShipping
+        ...state.payloadShipping,
       };
 
       delete payloadToInsert.customer;
@@ -222,8 +233,10 @@ export default function Page() {
           memo: data.memo,
           location: data.location,
           quantityremaining: data.quantityremaining,
-          quantity: data.quantity,
-          units: data.units,
+          quantity: data.quantity1,
+          units: data.unit1,
+          quantity2: data.quantity2,
+          units2: data.unit2,
         };
       });
 
@@ -247,6 +260,9 @@ export default function Page() {
     { label: "Open", value: "open" },
     { label: "Shipped", value: "shipped" },
   ];
+
+  const [editItem, setEditItem] = useState(null);
+  const [isEditItem, setIsEditItem] = useState(false);
 
   return (
     <>
@@ -304,7 +320,7 @@ export default function Page() {
                         key: "createdfrom",
                         input: "input",
                         isAlias: true,
-                        isRead: true
+                        isRead: true,
                       },
                       {
                         key: "customer",
@@ -335,6 +351,29 @@ export default function Page() {
                       dispatch({ type, payload });
                     }}
                   />
+
+                  <InputForm
+                    title="shipping"
+                    type="SET_SHIPPING"
+                    payload={state.payloadShipping}
+                    data={[
+                      {
+                        key: "shippingaddress",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "notes",
+                        input: "text",
+                        isAlias: true,
+                      },
+                    ]}
+                    aliases={deliveryOrderAliases.shipping}
+                    onChange={(type, payload) => {
+                      dispatch({ type, payload });
+                    }}
+                  />
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-4">
                       <Divider
@@ -348,51 +387,16 @@ export default function Page() {
                         Item
                       </Divider>
                       <TableCustom
+                        onEdit={(record) => {
+                          setEditItem(record);
+                          setIsEditItem(true);
+                        }}
                         data={dataTableItem}
                         keys={keyTableItem}
                         aliases={deliveryOrderAliases.item}
                       />
                     </div>
                   </div>
-
-                  <InputForm
-                    title="shipping"
-                    type="SET_SHIPPING"
-                    payload={state.payloadShipping}
-                    data={[
-                      {
-                        key: "shippingoption",
-                        input: "select",
-                        options: shippingOption,
-                        isAlias: true,
-                      },
-                      {
-                        key: "shippingaddress",
-                        input: "text",
-                        isAlias: true,
-                      },
-                    ]}
-                    aliases={deliveryOrderAliases.shipping}
-                    onChange={(type, payload) => {
-                      if (
-                        payload.shippingoption !=
-                        state.payloadShipping.shippingoption
-                      ) {
-                        dispatch({
-                          type,
-                          payload: {
-                            ...payload,
-                            shippingaddress:
-                              payload.shippingoption == "default address"
-                                ? customerSelected.addressee || ""
-                                : data.shippingaddress,
-                          },
-                        });
-                      } else {
-                        dispatch({ type, payload });
-                      }
-                    }}
-                  />
                 </div>
               ) : (
                 <div className="w-full h-96">
@@ -408,6 +412,114 @@ export default function Page() {
         </div>
       </Layout>
       {contextNotify}
+      <Modal
+        open={isEditItem}
+        onOk={() => {
+          if (editItem.quantity1 > editItem.quantityremaining) {
+            notify(
+              "error",
+              "Failed",
+              "Quantity 1 cannot be more than the Remaining Quantity"
+            );
+            return;
+          }
+
+          const updatedDataTableItem = dataTableItem.map((item) => {
+            if (item.id == editItem.id) {
+              return editItem;
+            } else {
+              return item;
+            }
+          });
+
+          setDataTableItem(updatedDataTableItem);
+          setIsEditItem(false);
+        }}
+        onCancel={() => {
+          setIsEditItem(false);
+          setEditItem(null);
+        }}
+        width={850}
+        cancelText="Cancel"
+      >
+        <div className="w-full mt-6">
+          <div className="w-full flex flex-col gap-4 mt-6">
+            <InputForm
+              title="Edit Item"
+              type="SET_ITEM"
+              payload={editItem}
+              data={[
+                {
+                  key: "id",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "displayname",
+                  input: "number",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "itemid",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "memo",
+                  input: "text",
+                  isAlias: true,
+                },
+                {
+                  key: "quantity1",
+                  input: "number",
+                  isAlias: true,
+                },
+                {
+                  key: "unit1",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "quantity2",
+                  input: "number",
+                  isAlias: true,
+                },
+                {
+                  key: "unit2",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "quantityremaining",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+                {
+                  key: "location",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                },
+              ]}
+              aliases={[]}
+              onChange={(type, payload) => {
+                setEditItem((prev) => ({
+                  ...prev,
+                  quantity1: payload.quantity1,
+                  quantity2: payload.quantity2,
+                  memo: payload.memo,
+                }));
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }
