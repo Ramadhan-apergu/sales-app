@@ -39,7 +39,7 @@ export default function CustomerNew() {
   const [payloadFinancial, setPayloadFinancial] = useState({
     terms: "Net 30",
     creditlimit: 0,
-    resalenumber: 0,
+    resalenumber: "",
   });
 
   const termOptions = [
@@ -147,7 +147,7 @@ export default function CustomerNew() {
         return;
       }
 
-      if (resalenumber.toString().length != 16) {
+      if (resalenumber.length != 16) {
         notify(
           "error",
           "Failed",
@@ -336,7 +336,7 @@ export default function CustomerNew() {
                   },
                   {
                     key: "resalenumber",
-                    input: "number",
+                    input: "input",
                     isAlias: true,
                     rules: [
                       {

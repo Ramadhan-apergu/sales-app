@@ -170,7 +170,7 @@ export default function Enter() {
       companyname: "",
       entity: "",
       trandate: dayjs(new Date()),
-      salesrep: "sales_indoor",
+      salesrep: "",
       otherrefnum: "",
     },
     payloadSummary: {
@@ -892,9 +892,6 @@ export default function Enter() {
       ) {
         throw new Error("Please enter a value greater than 0.");
       }
-
-      console.log(payloadToInsert)
-      return
 
       const response = await SalesOrderFetch.add(payloadToInsert);
 
