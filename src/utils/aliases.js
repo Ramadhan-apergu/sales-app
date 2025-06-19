@@ -60,6 +60,7 @@ export const salesOrderAliases = {
     customer: "Customer",
   },
   primary: {
+    tranid: 'SO #',
     companyname: 'Customer Name',
     entity: "Entity ID",
     trandate: "Date",

@@ -222,7 +222,7 @@ function SalesOrder() {
           <div className="flex gap-2">
             <div className="hidden lg:flex flex-col justify-start items-start gap-1">
               <label className="text-sm font-semibold leading-none">
-                Customer Name
+                Customer ID
               </label>
               <Select
                 showSearch

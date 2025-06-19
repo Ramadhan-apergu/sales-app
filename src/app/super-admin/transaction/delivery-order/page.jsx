@@ -210,7 +210,7 @@ function DeliveryOrder() {
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
-                Customer Name
+                Customer ID
               </label>
               <Select
                 showSearch
