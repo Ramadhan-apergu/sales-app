@@ -141,7 +141,7 @@ export default function Detail() {
         return;
       }
 
-      if (resalenumber.toString().length != 16) {
+      if (resalenumber.length != 16) {
         notify(
           "error",
           "Failed",
@@ -191,8 +191,6 @@ export default function Detail() {
       keys.reduce((obj, k) => {
         if (k == "createddate") {
           obj[k] = data[k] != null ? formatDateToShort(data[k]) : "";
-        } else if (k == "resalenumber") {
-            obj[k] = typeof data[k] == "string" ? Number(data[k]) : data[k]
         } else {
           obj[k] = data[k] != null ? data[k] : "";
         }
@@ -401,7 +399,7 @@ export default function Detail() {
                         },
                         {
                           key: "resalenumber",
-                          input: "number",
+                          input: "input",
                           isAlias: true,
                           rules: [
                             { required: true, message: "NPWP/NIK is required" },
