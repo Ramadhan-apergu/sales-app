@@ -248,9 +248,6 @@ function Enter({ salesOrderId }) {
 
       payloadToInsert = { ...payloadToInsert, fulfillment_items };
 
-      console.log(payloadToInsert)
-      return
-
       const response = await FullfillmentFetch.create(payloadToInsert);
 
       const resData = createResponseHandler(response, notify);
