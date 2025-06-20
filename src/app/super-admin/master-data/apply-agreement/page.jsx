@@ -43,7 +43,6 @@ function Agreement() {
       try {
         setIsloading(true);
 
-        console.log(offset)
         const response = await AgreementFetch.getAgreementApply(offset, limit);
 
         const resData = getResponseHandler(response, notify)
@@ -187,7 +186,6 @@ function Agreement() {
                                 defaultPageSize={limit}
                                 defaultCurrent={page}
                                 onChange={(newPage, newLimit) => {
-                                    console.log(newPage)
                                     router.push(
                                     `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
                                     )

@@ -122,8 +122,6 @@ export default function Detail() {
         const response = await SalesOrderFetch.getById(slug);
         const resData = getResponseHandler(response);
 
-        console.log(resData);
-
         if (resData) {
           setData(resData);
           mappingDataSalesOrder(resData);

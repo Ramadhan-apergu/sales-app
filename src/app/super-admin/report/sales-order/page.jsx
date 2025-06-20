@@ -68,7 +68,6 @@ function SalesOrder() {
 
         const resData = getResponseHandler(response, notify);
 
-        console.log(resData);
         if (resData) {
           setDatas(resData.list);
           setTotalItems(resData.total_items);
@@ -180,7 +179,6 @@ function SalesOrder() {
                     setDateRange(dateString);
                   }}
                   //   onOk={(val) => {
-                  //     console.log(val);
                   //   }}
                 />
               </div>

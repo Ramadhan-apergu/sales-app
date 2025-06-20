@@ -258,7 +258,6 @@ function SelectItem({ onselect }) {
   
 
   function TableCustom({ data, keys, aliases, onDelete }) {
-    console.log(data)
     const columns = [
       ...keys.map((key) => ({
         title: aliases?.[key] || key,
@@ -483,13 +482,11 @@ export default function AgreementEdit() {
                 break;
             case 'primary':
               setPayloadGeneral(payload);
-              console.log(JSON.stringify(payload, null, 2))
               break;
             case 'detail':
               setPayloadDetail(payload);
               break;
             case 'group':
-                console.log(payload)
               setPayloadGroup(payload);
               break;
               case 'detailinit':
@@ -843,7 +840,6 @@ export default function AgreementEdit() {
       }
 
       function handleDeleteDetail(record) {
-        console.log(payloadDetail)
         setPayloadDetail((prev) => prev.filter((item) => item.itemid !== record.itemid));
       }
 
@@ -862,7 +858,6 @@ export default function AgreementEdit() {
           setPayloadGeneral(generalData)
           setPayloadGroup(data.agreement_groups)
         //   setPayloadDetail(data.agreement_lines)
-        //   console.log('masuk')
       }
 
   return (

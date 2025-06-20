@@ -25,7 +25,6 @@ const useStyle = createStyles(({ css, token }) => {
 
 export default function MasterTable({columns = [], dataSource = [], heightTable}) {
   const { styles } = useStyle();
-console.log(heightTable)
   return (
       <Table
         className={styles.customTable}

@@ -107,6 +107,7 @@ export default function EnterPage() {
       entity: "",
       trandate: dayjs(new Date()),
       memo: "",
+      tranid: "",
       salesordernum: "",
       fulfillmentnum: "",
       customer: "",
@@ -176,8 +177,6 @@ export default function EnterPage() {
         const response = await InvoiceFetch.getById(slug);
         const resData = getResponseHandler(response);
 
-        console.log(resData);
-
         if (resData) {
           setData(resData);
           mappingDataInvoice(resData);
@@ -211,6 +210,7 @@ export default function EnterPage() {
         entity: data.entity,
         trandate: dayjs(data.trandate),
         memo: data.memo,
+        tranid: data.tranid,
         salesordernum: data.salesordernum,
         fulfillmentnum: data.fulfillmentnum,
         customer: data.customer,
@@ -289,12 +289,12 @@ export default function EnterPage() {
         ...state.payloadBilling,
         ...state.payloadShipping,
         subtotalbruto: state.payloadSummary.totalamount,
-        total: state.payloadSummary.amount
+        total: state.payloadSummary.amount,
       };
 
-      delete payloadToInsert.customer
-      delete payloadToInsert.totalamount
-      delete payloadToInsert.amount
+      delete payloadToInsert.customer;
+      delete payloadToInsert.totalamount;
+      delete payloadToInsert.amount;
 
       const invoice_items = dataTableItem.map((data) => {
         return {
@@ -342,7 +342,6 @@ export default function EnterPage() {
   function formatRupiah(number) {
     return number.toLocaleString("id-ID") + ",-";
   }
-
 
   return (
     <Layout>
@@ -396,18 +395,18 @@ export default function EnterPage() {
                         isAlias: true,
                         isRead: true,
                       },
-                    //   {
-                    //     key: "salesorderid",
-                    //     input: "input",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
-                    //   {
-                    //     key: "fulfillmentid",
-                    //     input: "input",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
+                      //   {
+                      //     key: "salesorderid",
+                      //     input: "input",
+                      //     isAlias: true,
+                      //     isRead: true,
+                      //   },
+                      //   {
+                      //     key: "fulfillmentid",
+                      //     input: "input",
+                      //     isAlias: true,
+                      //     isRead: true,
+                      //   },
                       {
                         key: "entity",
                         input: "input",
@@ -421,6 +420,12 @@ export default function EnterPage() {
                       },
                       {
                         key: "salesordernum",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "tranid",
                         input: "input",
                         isAlias: true,
                         isRead: true,

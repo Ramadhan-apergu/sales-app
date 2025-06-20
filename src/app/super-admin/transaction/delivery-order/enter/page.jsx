@@ -337,6 +337,7 @@ function Enter({ salesOrderId }) {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                hidden: true,
               },
               {
                 key: "trandate",
@@ -353,6 +354,8 @@ function Enter({ salesOrderId }) {
                 key: "memo",
                 input: "text",
                 isAlias: true,
+                isRead: true,
+                hidden: true
               },
             ]}
             aliases={deliveryOrderAliases.primary}

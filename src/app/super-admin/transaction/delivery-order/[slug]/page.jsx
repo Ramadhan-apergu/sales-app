@@ -360,12 +360,12 @@ export default function Page() {
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "memo",
-                        input: "text",
-                        isAlias: true,
-                        isRead: true,
-                      },
+                    //   {
+                    //     key: "memo",
+                    //     input: "text",
+                    //     isAlias: true,
+                    //     isRead: true,
+                    //   },
                       //   {
                       //     key: "dateso",
                       //     input: "input",

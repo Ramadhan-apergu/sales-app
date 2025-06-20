@@ -56,7 +56,7 @@ export default function Detail() {
   const title = "customer";
 
   const fieldGroups = {
-    general: ["companyname", "category", "customerid"],
+    general: ["companyname", "category", "customerid", "salesrep"],
     contact: ["phone", "altphone", "email"],
     address: ["addr1", "city", "state", "zip"],
     financial: ["creditlimit", "resalenumber", "terms"],
@@ -289,6 +289,11 @@ export default function Detail() {
                             },
                           ],
                         },
+                        {
+                          key: "salesrep",
+                          input: "input",
+                          isAlias: true,
+                        },
                       ]}
                       onChange={handleChangePayload}
                       aliases={customerAliases}
@@ -336,7 +341,9 @@ export default function Detail() {
                           key: "addr1",
                           input: "input",
                           isAlias: true,
-                          rules: [{ required: true, message: "Address is required" }],
+                          rules: [
+                            { required: true, message: "Address is required" },
+                          ],
                         },
                         {
                           key: "city",
