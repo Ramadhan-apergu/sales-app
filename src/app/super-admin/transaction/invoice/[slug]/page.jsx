@@ -176,7 +176,6 @@ export default function EnterPage() {
         const response = await InvoiceFetch.getById(slug);
         const resData = getResponseHandler(response);
 
-        console.log(resData);
 
         if (resData) {
           setData(resData);

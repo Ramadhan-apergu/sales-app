@@ -344,6 +344,8 @@ export default function Page() {
                         key: "memo",
                         input: "text",
                         isAlias: true,
+                        isRead: true,
+                        hidden: true
                       },
                     ]}
                     aliases={deliveryOrderAliases.primary}

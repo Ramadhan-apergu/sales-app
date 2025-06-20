@@ -473,12 +473,10 @@ export default function Enter() {
         credit_memo_items: updateCreditItems,
       };
 
-      console.log(payloadToInsert);
 
       const response = await CreditMemoFetch.update(slug, payloadToInsert);
 
       const resData = createResponseHandler(response, notify);
-      console.log(resData);
 
       if (resData) {
         router.push(`/super-admin/transaction/credit-memo/${resData}`);
@@ -727,7 +725,6 @@ export default function Enter() {
       0
     );
 
-    console.log(total);
 
     let taxtotal = newDataItem.reduce(
       (total, item) => total + (Number(item.taxamount) || 0),

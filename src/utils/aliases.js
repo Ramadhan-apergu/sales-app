@@ -1,6 +1,7 @@
 export const customerAliases = {
   customerid: "Customer ID",
   companyname: "Customer Name",
+  salesrep: 'Sales Rep',
   altphone: "Alt Phone",
   addressee: "Address EE",
   addr1: "Address",
@@ -109,7 +110,7 @@ export const deliveryOrderAliases = {
   primary: {
     tranid: "Ref No",
     customer: "Customer Name",
-    createdfrom: "Created From",
+    createdfrom: "No. SO",
     trandate: "Date",
     shipstatus: "Status",
     memo: "Memo",
@@ -142,8 +143,8 @@ export const invoiceAliases = {
     fulfillmentid: "DO #",
     entity: "Customer ID",
     trandate: "Date",
-    salesordernum: "SO #",
-    fulfillmentnum: "DO #",
+    salesordernum: "No. SO",
+    fulfillmentnum: "No. DO",
     memo: "",
     duedate: "Due Date",
     sales: "Sales Rep",

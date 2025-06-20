@@ -127,7 +127,6 @@ export default function Enter() {
         const resData = getResponseHandler(response);
 
         if (resData) {
-          console.log(resData.list);
           const addLabelCustomer = resData.list.map((customer, i) => {
             return {
               ...customer,
@@ -978,6 +977,7 @@ export default function Enter() {
                           payload: {
                             entity: customer.id,
                             companyname: customer.companyname,
+                            salesrep: customer.salesrep
                           },
                         });
                         dispatch({

@@ -350,7 +350,7 @@ export default function Enter() {
       companyname: "",
       entity: "",
       trandate: dayjs(new Date()),
-      salesrep: "sales_indoor",
+      salesrep: "",
       otherrefnum: "",
     },
     payloadSummary: {
@@ -1182,6 +1182,7 @@ export default function Enter() {
                                     payload: {
                                       entity: customer.id,
                                       companyname: customer.companyname,
+                                      salesrep: customer.salesrep
                                     },
                                   });
                                 }}

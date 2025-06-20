@@ -166,7 +166,6 @@ export default function AgreementApplyDetail() {
           };
         }),
       };
-      console.log(payloadToInsert);
 
       const response = await AgreementFetch.updateApplyAgreement(
         data.customerid,

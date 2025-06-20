@@ -373,7 +373,6 @@ function SalesOrder() {
                         });
                       }}
                       //   onOk={(val) => {
-                      //     console.log(val);
                       //   }}
                     />
                   </div>

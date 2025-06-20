@@ -120,7 +120,6 @@ export default function AgreementApplyDetail() {
     //     const resData = getResponseHandler(response, notify);
 
     //     if (resData) {
-    //       console.log(resData);
     //       setDataCustomer(
     //         resData.list.map((customer) => ({
     //           ...customer,
