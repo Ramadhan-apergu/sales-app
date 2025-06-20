@@ -244,7 +244,6 @@ function List() {
                     setDateRange(dateString);
                   }}
                   //   onOk={(val) => {
-                  //     console.log(val);
                   //   }}
                 />
               </div>

@@ -492,7 +492,6 @@ export default function Enter() {
                 ]}
                 aliases={stockAdjustmentAliases.adjustment}
                 onChange={(type, payload) => {
-                  console.log(payload);
                   setItemTableTemp({
                     ...payload,
                     stockreal: Number(payload.onhand) + Number(payload.qty),

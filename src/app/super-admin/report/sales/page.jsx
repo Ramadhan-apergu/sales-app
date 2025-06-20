@@ -179,7 +179,6 @@ function SalesOrder() {
                     setDateRange(dateString);
                   }}
                   //   onOk={(val) => {
-                  //     console.log(val);
                   //   }}
                 />
               </div>

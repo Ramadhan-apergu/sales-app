@@ -456,7 +456,6 @@ export default function Enter() {
             aliases={paymentAliases.payment}
             onChange={(type, payload) => {
               dispatch({ type, payload });
-              console.log(payload);
 
               const toApply = Number(payload.payment) || 0;
               const applied = Number(state.payloadSummary.applied) || 0;

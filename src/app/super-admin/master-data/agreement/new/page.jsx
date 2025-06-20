@@ -368,7 +368,6 @@ export default function AgreementNew() {
                 break;
             case 'primary':
               setPayloadGeneral(payload);
-              console.log(JSON.stringify(payload, null, 2))
               break;
             case 'detail':
               setPayloadDetail(payload);
@@ -575,8 +574,6 @@ export default function AgreementNew() {
                     discountnominal: payloadGroup?.discountnominal || 0
                 }            
             }
-
-            console.log(payload)
     
             const {customform, agreementcode, agreementname, status} = payload
     
@@ -728,7 +725,6 @@ export default function AgreementNew() {
       }
 
       function handleDeleteDetail(record) {
-        console.log(payloadDetail)
         setPayloadDetail((prev) => prev.filter((item) => item.itemid !== record.itemid));
       }
 

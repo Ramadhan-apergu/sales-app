@@ -21,6 +21,7 @@ export default function CustomerNew() {
   const [payloadGeneral, setPayloadGeneral] = useState({
     companyname: "",
     customerid: "",
+    salesrep: "",
   });
 
   const [payloadContact, setPayloadContact] = useState({
@@ -87,7 +88,7 @@ export default function CustomerNew() {
         state,
         city,
         resalenumber,
-        addr1
+        addr1,
       } = payloadToInsert;
       if (!companyname) {
         notify(
@@ -231,6 +232,11 @@ export default function CustomerNew() {
                         message: `${customerAliases["companyname"]} is required`,
                       },
                     ],
+                  },
+                  {
+                    key: "salesrep",
+                    input: "input",
+                    isAlias: true,
                   },
                 ]}
                 onChange={handleChangePayload}

@@ -65,7 +65,6 @@ export default function Detail() {
         const response = await AgreementFetch.getById(slug);
         const resData = getByIdResponseHandler(response, notify);
         setData(resData);
-        console.log(resData);
 
         if (resData) {
           mapingGroup(resData);
@@ -226,7 +225,6 @@ export default function Detail() {
           );
 
           const result = await Promise.all(promises);
-          console.log(result);
           setAgreementLinesWithItem(result);
         }
       } catch (error) {

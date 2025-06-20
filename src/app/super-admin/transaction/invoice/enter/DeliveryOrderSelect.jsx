@@ -66,7 +66,6 @@ function DeliveryOrder() {
         const resData = getResponseHandler(response, notify);
 
         if (resData) {
-          console.log(resData);
           setDatas(resData.list);
           setTotalItems(resData.total_items);
         }
