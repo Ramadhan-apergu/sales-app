@@ -106,7 +106,6 @@ export default function EnterPage() {
       fulfillmentid: "",
       entity: "",
       trandate: dayjs(new Date()),
-      memo: "",
       tranid: "",
       salesordernum: "",
       fulfillmentnum: "",
@@ -114,6 +113,7 @@ export default function EnterPage() {
     },
     payloadShipping: {
       shippingaddress: "",
+      memo: "",
     },
     payloadBilling: {
       billingaddress: "",
@@ -209,7 +209,6 @@ export default function EnterPage() {
         fulfillmentid: data.fulfillmentid,
         entity: data.entity,
         trandate: dayjs(data.trandate),
-        memo: data.memo,
         tranid: data.tranid,
         salesordernum: data.salesordernum,
         fulfillmentnum: data.fulfillmentnum,
@@ -221,6 +220,7 @@ export default function EnterPage() {
       type: "SET_SHIPPING",
       payload: {
         shippingaddress: data.shippingaddress,
+        memo: data.memo,
       },
     });
 
@@ -437,36 +437,13 @@ export default function EnterPage() {
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "memo",
-                        input: "text",
-                        isAlias: true,
-                      },
                     ]}
                     aliases={invoiceAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
                   />
-                  <div className="w-full flex flex-col gap-8">
-                    <div className="w-full flex flex-col gap-2">
-                      <Divider
-                        style={{
-                          margin: "0",
-                          textTransform: "capitalize",
-                          borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                      >
-                        Item
-                      </Divider>
-                      <TableCustom
-                        data={dataTableItem}
-                        keys={keyTableItem}
-                        aliases={invoiceAliases.item}
-                      />
-                    </div>
-                  </div>
+
                   <InputForm
                     title="shipping"
                     type="SET_SHIPPING"
@@ -476,6 +453,12 @@ export default function EnterPage() {
                         key: "shippingaddress",
                         input: "text",
                         isAlias: true,
+                      },
+                      {
+                        key: "memo",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true
                       },
                     ]}
                     aliases={invoiceAliases.shipping}
@@ -498,6 +481,7 @@ export default function EnterPage() {
                         key: "billingaddress",
                         input: "text",
                         isAlias: true,
+                        hidden: true
                       },
                     ]}
                     aliases={invoiceAliases.billing}
@@ -551,6 +535,26 @@ export default function EnterPage() {
                           </p>
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                                    <div className="w-full flex flex-col gap-8">
+                    <div className="w-full flex flex-col gap-2">
+                      <Divider
+                        style={{
+                          margin: "0",
+                          textTransform: "capitalize",
+                          borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                      >
+                        Item
+                      </Divider>
+                      <TableCustom
+                        data={dataTableItem}
+                        keys={keyTableItem}
+                        aliases={invoiceAliases.item}
+                      />
                     </div>
                   </div>
                 </div>

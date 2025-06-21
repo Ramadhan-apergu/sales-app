@@ -23,6 +23,7 @@ import InputForm from "@/components/superAdmin/InputForm";
 import { formatDateToShort } from "@/utils/formatDate";
 import ItemFetch from "@/modules/salesApi/item";
 import { deliveryOrderAliases } from "@/utils/aliases";
+import DeliveryOrderPrint from "@/components/superAdmin/DeliveryOrderPrint";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -195,7 +196,14 @@ export default function Page() {
   const handleClickAction = ({ key }) => {
     switch (key) {
       case "1":
-        notify("success", "Print", ":P");
+        if (typeof window !== "undefined") {
+          const printJS = require("print-js"); // ⬅️ ini kuncinya
+          printJS({
+            printable: "delivery-order-print",
+            type: "html",
+            targetStyles: ["*"],
+          });
+        }
         break;
       case "2":
         deleteModal();
@@ -360,42 +368,6 @@ export default function Page() {
                         isAlias: true,
                         isRead: true,
                       },
-                    //   {
-                    //     key: "memo",
-                    //     input: "text",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
-                      //   {
-                      //     key: "dateso",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "entity",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "id",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "numso",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
-                      //   {
-                      //     key: "salesorderid",
-                      //     input: "input",
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
                     ]}
                     aliases={deliveryOrderAliases.primary}
                   />
@@ -450,6 +422,9 @@ export default function Page() {
               <LoadingSpin />
             </div>
           )}
+        </div>
+        <div className="hidden">
+          <DeliveryOrderPrint data={data} dataTable={dataTableItem} />
         </div>
       </Layout>
       {contextNotify}

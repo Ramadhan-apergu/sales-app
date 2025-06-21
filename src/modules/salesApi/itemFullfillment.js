@@ -63,4 +63,16 @@ export default class FullfillmentFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+    static async bulkUpdateStatus(payload) {
+    try {
+      const response = await this.axios.put(
+        `/trx/bulk-fulfillment-status`,
+        payload
+      );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }

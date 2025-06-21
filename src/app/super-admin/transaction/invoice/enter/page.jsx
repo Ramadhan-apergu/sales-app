@@ -1,6 +1,12 @@
 "use client";
 
-import React, { Suspense, useEffect, useReducer, useRef, useState } from "react";
+import React, {
+  Suspense,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   Checkbox,
@@ -82,8 +88,7 @@ function Enter({ fulfillmentId }) {
   const [modal, contextHolder] = Modal.useModal();
   const title = "invoice";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-const [isLoading, setIsLoading] = useState(true);
-
+  const [isLoading, setIsLoading] = useState(true);
 
   const [dataFulfillment, setDataFulfillment] = useState({});
   const [dataSalesOrder, setDataSalesOrder] = useState({});
@@ -98,13 +103,13 @@ const [isLoading, setIsLoading] = useState(true);
       fulfillmentid: "",
       entity: "",
       trandate: dayjs(new Date()),
-      memo: "",
       salesordernum: "",
       fulfillmentnum: "",
       customer: "",
     },
     payloadShipping: {
       shippingaddress: "",
+      memo: "",
     },
     payloadBilling: {
       billingaddress: "",
@@ -275,7 +280,7 @@ const [isLoading, setIsLoading] = useState(true);
             fulfillmentid: fulfillmentData.id,
             entity: salesOrderData.entity,
             trandate: dayjs(new Date()),
-            salesordernum: salesOrderData.otherrefnum,
+            salesordernum: salesOrderData.tranid,
             fulfillmentnum: fulfillmentData.tranid,
             customer: customerData.companyname,
           },
@@ -285,6 +290,7 @@ const [isLoading, setIsLoading] = useState(true);
           type: "SET_SHIPPING",
           payload: {
             shippingaddress: customerData.addressee,
+            memo: salesOrderData.notes,
           },
         });
 
@@ -292,16 +298,13 @@ const [isLoading, setIsLoading] = useState(true);
           type: "SET_BILLING",
           payload: {
             term: salesOrderData.term,
-            billingaddress:
-              salesOrderData.shippingaddress != ""
-                ? salesOrderData.shippingaddress
-                : salesOrderData.shippingoption,
+            billingaddress: salesOrderData.shippingaddress,
           },
         });
       } catch (error) {
         notify("error", "Error", error.message || "Failed to fetch data");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     };
 
@@ -473,18 +476,6 @@ const [isLoading, setIsLoading] = useState(true);
                         isAlias: true,
                         isRead: true,
                       },
-                    //   {
-                    //     key: "salesorderid",
-                    //     input: "input",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
-                    //   {
-                    //     key: "fulfillmentid",
-                    //     input: "input",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
                       {
                         key: "entity",
                         input: "input",
@@ -509,42 +500,13 @@ const [isLoading, setIsLoading] = useState(true);
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "memo",
-                        input: "text",
-                        isAlias: true,
-                      },
                     ]}
                     aliases={invoiceAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
                   />
-                  <div className="w-full flex flex-col gap-8">
-                    <div className="w-full flex flex-col gap-2">
-                      <Divider
-                        style={{
-                          margin: "0",
-                          textTransform: "capitalize",
-                          borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                      >
-                        Item
-                      </Divider>
-                      {/* <div className="flex justify-end">
-                                    <Button type="primary" onClick={handleAddItem}>
-                                    Add
-                                    </Button>
-                                </div> */}
-                      <TableCustom
-                        // onDelete={handleDeleteTableItem}
-                        data={dataTableItem}
-                        keys={keyTableItem}
-                        aliases={invoiceAliases.item}
-                      />
-                    </div>
-                  </div>
+
                   <InputForm
                     title="shipping"
                     type="SET_SHIPPING"
@@ -554,6 +516,13 @@ const [isLoading, setIsLoading] = useState(true);
                         key: "shippingaddress",
                         input: "text",
                         isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "memo",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
                       },
                     ]}
                     aliases={invoiceAliases.shipping}
@@ -576,6 +545,7 @@ const [isLoading, setIsLoading] = useState(true);
                         key: "billingaddress",
                         input: "text",
                         isAlias: true,
+                        hidden: true
                       },
                     ]}
                     aliases={invoiceAliases.billing}
@@ -631,6 +601,25 @@ const [isLoading, setIsLoading] = useState(true);
                       </div>
                     </div>
                   </div>
+                  <div className="w-full flex flex-col gap-8">
+                    <div className="w-full flex flex-col gap-2">
+                      <Divider
+                        style={{
+                          margin: "0",
+                          textTransform: "capitalize",
+                          borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                      >
+                        Item
+                      </Divider>
+                      <TableCustom
+                        data={dataTableItem}
+                        keys={keyTableItem}
+                        aliases={invoiceAliases.item}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -665,7 +654,7 @@ function InvoiceOrderContent() {
 export default function InvoiceOrderEnterPage() {
   return (
     <Layout>
-      <Suspense fallback={<LoadingSpinProcessing/>}>
+      <Suspense fallback={<LoadingSpinProcessing />}>
         <InvoiceOrderContent />
       </Suspense>
     </Layout>

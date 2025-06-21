@@ -217,45 +217,5 @@ export default function Detail() {
         </div>
         {contextNotify}
     </Layout>
-    // <Layout pageTitle={`Detail ${title}`}>
-    //             <HeaderContent justify='between'>
-    //                 <Button icon={<UnorderedListOutlined />} variant={'outlined'} onClick={() => {router.push(`/super-admin/master-data/${title}`);}}>
-    //                     {isLargeScreen ? 'List' : ''}
-    //                 </Button>
-    //                 {data && (
-    //                     <div className="flex justify-center items-center gap-2">
-    //                         <Button icon={<EditOutlined />} type={'primary'} onClick={handleEdit}>{isLargeScreen ? 'Edit' : ''}</Button>
-    //                         <Dropdown menu={{ items, onClick: handleClickAction }} placement="bottomRight">
-    //                             <Button icon={!isLargeScreen ? <MoreOutlined/> : null} >{isLargeScreen ? 'Action' : ''}</Button>
-    //                         </Dropdown>
-    //                         {contextHolder}
-    //                     </div>
-    //                 )}
-    //             </HeaderContent>
-    //             <BodyContent gap='12'>
-    //                 {!isLoading ? (
-    //                     <>
-    //                         {data ? (
-    //                             <div className='w-full h-full flex flex-col gap-8'>
-    //                                 <div className='w-full flex flex-col px-4'>
-    //                                     <p className='text-2xl font-semibold'>Item Details</p>
-    //                                     <div className='w-full flex lg:text-lg'>
-    //                                         <p className='w-full'>
-    //                                             {data.displayname + ' / ' + data.itemid}
-    //                                         </p>
-    //                                     </div>
-    //                                 </div>
-                                    
-    //                             </div>
-    //                         ) : (
-    //                             <EmptyCustom/>
-    //                         )}
-    //                     </>
-    //                 ) : (
-    //                     <LoadingSpin/>
-    //                 )}
-    //             </BodyContent>
-    //     {contextNotify}
-    // </Layout>
   );
 }
