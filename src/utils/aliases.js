@@ -108,7 +108,7 @@ export const salesOrderAliases = {
 
 export const deliveryOrderAliases = {
   primary: {
-    tranid: "Ref No",
+    tranid: "No. DO",
     customer: "Customer Name",
     createdfrom: "No. SO",
     trandate: "Date",
@@ -125,9 +125,9 @@ export const deliveryOrderAliases = {
     memo: "Description",
     location: "Location",
     quantityremaining: "Remaining",
-    quantity1: "Quantity 1",
+    quantity1: "Quantity (Kg)",
     unit1: "Units 1",
-    quantity2: "Quantity 2",
+    quantity2: "Quantity (Bal)",
     unit2: "Units 2",
   },
   shipping: {
@@ -148,6 +148,7 @@ export const invoiceAliases = {
     memo: "",
     duedate: "Due Date",
     sales: "Sales Rep",
+    tranid: 'No. INV'
   },
   item: {
     item: "Item",
@@ -156,7 +157,7 @@ export const invoiceAliases = {
     units: "Unit 1",
     quantity2: "Qty 2",
     units2: "Unit 2",
-    rate: "Rate",
+    rate: "Price",
     subtotal: "Total Amount",
     totaldiscount: "Total Discount",
     amount: "Total Amount (After Discount)",
@@ -170,6 +171,7 @@ export const invoiceAliases = {
   },
   shipping: {
     shippingaddress: "Shipping Address",
+    memo: 'Notes'
   },
 };
 

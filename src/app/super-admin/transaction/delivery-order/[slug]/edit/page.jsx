@@ -369,6 +369,7 @@ export default function Page() {
                         key: "notes",
                         input: "text",
                         isAlias: true,
+                        isRead: true,
                       },
                     ]}
                     aliases={deliveryOrderAliases.shipping}

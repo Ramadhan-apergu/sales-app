@@ -211,34 +211,5 @@ export default function CustomerNew() {
     )}
 {contextHolder}
 </>
-    // <>
-    //         <Layout pageTitle={`Add ${title}`}>
-    //             <HeaderContent justify='between'>
-    //                 <Button icon={<LeftOutlined />} onClick={() => router.back()}>
-    //                 {isLargeScreen ? 'Back' : ''}
-    //                 </Button>
-    //                 <Button type={'primary'} icon={<CheckOutlined />} onClick={handleSubmit}>
-    //                     {isLargeScreen ? 'Submit' : ''}
-    //                 </Button>
-    //             </HeaderContent>
-    //             <BodyContent>
-    //                 {!isLoading ? (
-    //                     <div className='w-full h-full flex flex-col gap-8'>
-    //                         <div className='w-full flex flex-col px-4'>
-    //                             <p className='text-2xl font-semibold capitalize'>{title}</p>
-    //                         </div>
-
-    //                     </div>
-    //                 ) : (
-    //                     <LoadingSpin/>
-    //                 )}
-                    
-    //             </BodyContent>
-    //         </Layout>
-    //         {isLoadingSubmit && (
-    //             <LoadingSpinProcessing/>
-    //         )}
-    //     {contextHolder}
-    // </>
   );
 }

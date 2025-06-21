@@ -233,13 +233,13 @@ function DeliveryOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                    popup: {
+                    root: {
+                        minWidth: 250,
+                        whiteSpace: "nowrap",
+                    },
+                    },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}

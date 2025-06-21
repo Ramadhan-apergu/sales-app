@@ -23,6 +23,7 @@ import {
   FileAddOutlined,
   InfoCircleOutlined,
   LeftOutlined,
+  MoreOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 
@@ -46,6 +47,7 @@ import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { formatDateToShort } from "@/utils/formatDate";
 import { invoiceAliases } from "@/utils/aliases";
+import InvoicePrint from "@/components/superAdmin/InvoicePrint";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -105,14 +107,14 @@ export default function EnterPage() {
       entity: "",
       trandate: dayjs(new Date()),
       duedate: dayjs(new Date()),
-      memo: "",
       salesordernum: "",
       fulfillmentnum: "",
       customer: "",
-      sales: ""
+      sales: "",
     },
     payloadShipping: {
       shippingaddress: "",
+      memo: "",
     },
     payloadBilling: {
       billingaddress: "",
@@ -176,7 +178,6 @@ export default function EnterPage() {
         const response = await InvoiceFetch.getById(slug);
         const resData = getResponseHandler(response);
 
-
         if (resData) {
           setData(resData);
           mappingDataInvoice(resData);
@@ -209,12 +210,11 @@ export default function EnterPage() {
         fulfillmentid: data.fulfillmentid,
         entity: data.entity,
         trandate: formatDateToShort(data.trandate),
-        memo: data.memo,
         salesordernum: data.salesordernum,
         fulfillmentnum: data.fulfillmentnum,
         customer: data.customer,
         duedate: formatDateToShort(data.trandate),
-        sales: data.sales
+        sales: data.sales,
       },
     });
 
@@ -222,6 +222,7 @@ export default function EnterPage() {
       type: "SET_SHIPPING",
       payload: {
         shippingaddress: data.shippingaddress,
+        memo: data.memo,
       },
     });
 
@@ -338,22 +339,24 @@ export default function EnterPage() {
     return number.toLocaleString("id-ID") + ",-";
   }
 
-    const items = [
+  const items = [
     {
       key: "1",
       label: "Print",
     },
-    // {
-    //   key: "2",
-    //   label: "Cancel",
-    //   danger: true,
-    // },
   ];
 
-    const handleClickAction = ({ key }) => {
+  const handleClickAction = ({ key }) => {
     switch (key) {
       case "1":
-        notify("success", "Approve Boongan", ":P");
+        if (typeof window !== "undefined") {
+          const printJS = require("print-js"); // ⬅️ ini kuncinya
+          printJS({
+            printable: "invoice-print",
+            type: "html",
+            targetStyles: ["*"],
+          });
+        }
         break;
       case "2":
         deleteModal();
@@ -407,17 +410,15 @@ export default function EnterPage() {
                           textTransform: "capitalize",
                           fontSize: "16px",
                         }}
-                          color={
-                            ["paid in full"].includes(
-                              data.status.toLowerCase()
-                            )
-                              ? "green"
-                              : [
-                                  "partial paid", "open"
-                                ].includes(data.status.toLowerCase())
-                              ? "orange"
-                              : "default"
-                          }
+                        color={
+                          ["paid in full"].includes(data.status.toLowerCase())
+                            ? "green"
+                            : ["partial paid", "open"].includes(
+                                data.status.toLowerCase()
+                              )
+                            ? "orange"
+                            : "default"
+                        }
                       >
                         {data.status}
                       </Tag>
@@ -459,37 +460,37 @@ export default function EnterPage() {
                         isAlias: true,
                         isRead: true,
                       },
-                    //   {
-                    //     key: "salesorderid",
-                    //     input: "input",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
-                    //   {
-                    //     key: "fulfillmentid",
-                    //     input: "input",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
-                    //   {
-                    //     key: "entity",
-                    //     input: "input",
-                    //     isAlias: true,
-                    //     isRead: true,
-                    //   },
+                      //   {
+                      //     key: "salesorderid",
+                      //     input: "input",
+                      //     isAlias: true,
+                      //     isRead: true,
+                      //   },
+                      //   {
+                      //     key: "fulfillmentid",
+                      //     input: "input",
+                      //     isAlias: true,
+                      //     isRead: true,
+                      //   },
+                      //   {
+                      //     key: "entity",
+                      //     input: "input",
+                      //     isAlias: true,
+                      //     isRead: true,
+                      //   },
                       {
                         key: "trandate",
                         input: "input",
                         isAlias: true,
                         isRead: true,
                       },
-                                            {
+                      {
                         key: "duedate",
                         input: "input",
                         isAlias: true,
                         isRead: true,
                       },
-                                            {
+                      {
                         key: "sales",
                         input: "input",
                         isAlias: true,
@@ -508,37 +509,13 @@ export default function EnterPage() {
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "memo",
-                        input: "text",
-                        isAlias: true,
-                        isRead: true,
-                      },
                     ]}
                     aliases={invoiceAliases.primary}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
                   />
-                  <div className="w-full flex flex-col gap-8">
-                    <div className="w-full flex flex-col gap-2">
-                      <Divider
-                        style={{
-                          margin: "0",
-                          textTransform: "capitalize",
-                          borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                      >
-                        Item
-                      </Divider>
-                      <TableCustom
-                        data={dataTableItem}
-                        keys={keyTableItem}
-                        aliases={invoiceAliases.item}
-                      />
-                    </div>
-                  </div>
+
                   <InputForm
                     title="shipping"
                     type="SET_SHIPPING"
@@ -546,6 +523,12 @@ export default function EnterPage() {
                     data={[
                       {
                         key: "shippingaddress",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "memo",
                         input: "text",
                         isAlias: true,
                         isRead: true,
@@ -572,6 +555,7 @@ export default function EnterPage() {
                         input: "text",
                         isAlias: true,
                         isRead: true,
+                        hidden: true,
                       },
                     ]}
                     aliases={invoiceAliases.billing}
@@ -579,6 +563,7 @@ export default function EnterPage() {
                       dispatch({ type, payload });
                     }}
                   />
+
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-2">
                       <Divider
@@ -627,6 +612,26 @@ export default function EnterPage() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="w-full flex flex-col gap-8">
+                    <div className="w-full flex flex-col gap-2">
+                      <Divider
+                        style={{
+                          margin: "0",
+                          textTransform: "capitalize",
+                          borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                      >
+                        Item
+                      </Divider>
+                      <TableCustom
+                        data={dataTableItem}
+                        keys={keyTableItem}
+                        aliases={invoiceAliases.item}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -643,6 +648,9 @@ export default function EnterPage() {
       </div>
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
+      <div className="hidden">
+        <InvoicePrint data={data} dataTable={dataTableItem} />
+      </div>
     </Layout>
   );
 }
