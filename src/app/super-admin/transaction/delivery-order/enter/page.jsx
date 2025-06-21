@@ -190,7 +190,8 @@ function Enter({ salesOrderId }) {
         dispatch({
           type: "SET_SHIPPING",
           payload: {
-            shippingaddress: customerData.addressee
+            shippingaddress: customerData.addressee,
+            notes: salesOrderData.notes
           },
         });
 
@@ -379,6 +380,7 @@ function Enter({ salesOrderId }) {
                 key: "notes",
                 input: "text",
                 isAlias: true,
+                isRead: true
               },
             ]}
             aliases={deliveryOrderAliases.shipping}

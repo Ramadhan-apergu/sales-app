@@ -1,6 +1,13 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { DeliveredProcedureOutlined, EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  DeliveredProcedureOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -12,6 +19,7 @@ import {
   Tag,
   Select,
   DatePicker,
+  Checkbox,
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
@@ -19,7 +27,10 @@ import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
-import { getResponseHandler } from "@/utils/responseHandlers";
+import {
+  createResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
@@ -50,18 +61,14 @@ function DeliveryOrder() {
   const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
+  const [isRefetch, setIsRefetch] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsloading(true);
 
-        const response = await FullfillmentFetch.get(
-          offset,
-          limit,
-          statusFilter,
-          searchName
-        );
+        const response = await FullfillmentFetch.get(0, 10000, "open");
 
         const resData = getResponseHandler(response, notify);
 
@@ -77,42 +84,50 @@ function DeliveryOrder() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter, searchName]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-
-        const response = await CustomerFetch.get(0, 10000, null);
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          const mapingCustomerOption = resData.list.map((data) => {
-            return {
-              ...data,
-              value: data.id,
-              label: data.customerid || data.companyname,
-            };
-          });
-          setDataCustomer(mapingCustomerOption);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  }, [isRefetch]);
 
   const handleEdit = (record) => {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
+  const [idsSelected, setIdsSelected] = useState([]);
+
+  const handleSelect = (id, checked) => {
+    setIdsSelected((prev) =>
+      checked ? [...prev, id] : prev.filter((item) => item !== id)
+    );
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const allIds = datas.map((item) => item.id);
+      setIdsSelected(allIds);
+    } else {
+      setIdsSelected([]);
+    }
+  };
+
   const columns = [
+    {
+      title: (
+        <Checkbox
+          checked={idsSelected.length === datas.length && datas.length > 0}
+          indeterminate={
+            idsSelected.length > 0 && idsSelected.length < datas.length
+          }
+          onChange={(e) => handleSelectAll(e.target.checked)}
+        />
+      ),
+      dataIndex: "checkbox",
+      key: "checkbox",
+      width: 50,
+      render: (_, record) => (
+        <Checkbox
+          checked={idsSelected.includes(record.id)}
+          onChange={(e) => handleSelect(record.id, e.target.checked)}
+        />
+      ),
+    },
     {
       title: "Date",
       dataIndex: "trandate",
@@ -172,85 +187,61 @@ function DeliveryOrder() {
     },
   ];
 
-  const [isStatusUpdate, setIsStatusUpdate] = useState(false);
-  const [idsSelected, setIdsSelected] = useState([]);
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsLoadingSubmit(true);
+    try {
+      if (idsSelected.length === 0) {
+        throw new Error("Please select at least one item first.");
+      }
+
+      const payload = {
+        shipstatus: "Shipped",
+        id: idsSelected,
+      };
+
+      const response = await FullfillmentFetch.bulkUpdateStatus(payload);
+
+      const resData = createResponseHandler(response, notify);
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      setIsLoadingSubmit(false);
+      setIsRefetch(!isRefetch);
+      setIdsSelected([])
+    }
+  };
 
   return (
     <Layout>
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Delivery Order List
+            Delivery Order Bulk Ship
           </p>
-          <div className="flex justify-center items-center gap-2">
-            <Button
-              type=""
-              icon={<DeliveredProcedureOutlined />}
-              onClick={() =>
-                router.push(`/super-admin/transaction/${title}/bulk-ship`)
-              }
-            >
-              {isLargeScreen ? `Bulk Ship` : ""}
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() =>
-                router.push(`/super-admin/transaction/${title}/enter`)
-              }
-            >
-              {isLargeScreen ? `Enter` : ""}
-            </Button>
-          </div>
+          <Button
+            icon={<UnorderedListOutlined />}
+            type="link"
+            onClick={() => {
+              router.push(`/super-admin/transaction/${title}`);
+            }}
+          >
+            {isLargeScreen ? "List" : ""}
+          </Button>
         </div>
-        <div className="w-full flex flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
-          <div className="flex gap-2">
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Customer ID
-              </label>
-              <Select
-                showSearch
-                placeholder="Select a person"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
-                onChange={(value, option) => {
-                  setSearchName(option?.companyname || "");
-                }}
-                allowClear
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Status
-              </label>
-              <Select
-                defaultValue="all"
-                onChange={(e) => {
-                  setStatusFilter(e);
-                }}
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "shipped", label: "Shipped" },
-                ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
-                dropdownAlign={{ points: ["tr", "br"] }}
-              />
+        <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+            <div className="w-full lg:w-1/2 flex gap-1"></div>
+            <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+              <Button
+                type={"primary"}
+                icon={<CheckOutlined />}
+                onClick={handleSubmit}
+                disabled={datas.length == 0 || !datas}
+              >
+                {isLargeScreen ? "Submit" : ""}
+              </Button>
             </div>
           </div>
         </div>
@@ -290,6 +281,7 @@ function DeliveryOrder() {
         )}
       </div>
       {notificationContextHolder}
+      {isLoadingSubmit && <LoadingSpinProcessing />}
     </Layout>
   );
 }
