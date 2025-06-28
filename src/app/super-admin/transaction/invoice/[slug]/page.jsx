@@ -118,7 +118,7 @@ export default function EnterPage() {
     },
     payloadBilling: {
       billingaddress: "",
-      term: "Net 30",
+      term: "",
     },
     payloadSummary: {
       totalamount: 0,
@@ -213,7 +213,7 @@ export default function EnterPage() {
         salesordernum: data.salesordernum,
         fulfillmentnum: data.fulfillmentnum,
         customer: data.customer,
-        duedate: formatDateToShort(data.trandate),
+        duedate: formatDateToShort(data.duedate),
         sales: data.sales,
       },
     });
@@ -230,7 +230,7 @@ export default function EnterPage() {
       type: "SET_BILLING",
       payload: {
         billingaddress: data.billingaddress,
-        term: data.term,
+        term: data.term + " Days",
       },
     });
 
@@ -276,6 +276,7 @@ export default function EnterPage() {
     "totaldiscount",
     "amount",
     "taxrate",
+    "dpp",
     "taxvalue",
     "memo",
   ];
@@ -303,6 +304,7 @@ export default function EnterPage() {
           subtotal: data.subtotal,
           totaldiscount: data.totaldiscount,
           amount: data.amount,
+          dpp: data.dpp,
           taxrate: data.taxrate,
           taxvalue: data.taxvalue,
         };
@@ -413,10 +415,12 @@ export default function EnterPage() {
                         color={
                           ["paid in full"].includes(data.status.toLowerCase())
                             ? "green"
-                            : ["partial paid", "open"].includes(
+                            : ["partially paid"].includes(
                                 data.status.toLowerCase()
                               )
                             ? "orange"
+                            : ["duedate"].includes(data.status.toLowerCase())
+                            ? "red"
                             : "default"
                         }
                       >
@@ -460,6 +464,12 @@ export default function EnterPage() {
                         isAlias: true,
                         isRead: true,
                       },
+                      {
+                        key: "sales",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
                       //   {
                       //     key: "salesorderid",
                       //     input: "input",
@@ -486,12 +496,6 @@ export default function EnterPage() {
                       },
                       {
                         key: "duedate",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "sales",
                         input: "input",
                         isAlias: true,
                         isRead: true,

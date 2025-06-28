@@ -129,13 +129,7 @@ function DeliveryOrder() {
       ),
     },
     {
-      title: "Date",
-      dataIndex: "trandate",
-      key: "trandate",
-      render: (text) => <p>{formatDateToShort(text)}</p>,
-    },
-    {
-      title: "Document Number",
+      title: "No. DO",
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
@@ -144,6 +138,17 @@ function DeliveryOrder() {
           {text || "-"}
         </Link>
       ),
+    },
+    {
+      title: "Date",
+      dataIndex: "trandate",
+      key: "trandate",
+      render: (text) => <p>{formatDateToShort(text)}</p>,
+    },
+    {
+      title: "Sales Rep",
+      dataIndex: "salesrep",
+      key: "salesrep",
     },
     {
       title: "Customer",
@@ -158,7 +163,9 @@ function DeliveryOrder() {
         <Tag
           className="capitalize"
           color={
-            record.shipstatus.toLocaleLowerCase() == "open" ? "green" : "red"
+            record.shipstatus.toLocaleLowerCase() == "shipped"
+              ? "green"
+              : "default"
           }
         >
           {text}
@@ -209,7 +216,7 @@ function DeliveryOrder() {
     } finally {
       setIsLoadingSubmit(false);
       setIsRefetch(!isRefetch);
-      setIdsSelected([])
+      setIdsSelected([]);
     }
   };
 

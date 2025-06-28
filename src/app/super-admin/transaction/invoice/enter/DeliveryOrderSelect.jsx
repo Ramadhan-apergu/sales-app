@@ -1,6 +1,11 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -176,7 +181,11 @@ function DeliveryOrder() {
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
       render: (text, record) => (
-        <Link href={`/super-admin/transaction/${title}/enter?fulfillmentId=${record.id}`}>{text || "-"}</Link>
+        <Link
+          href={`/super-admin/transaction/${title}/enter?fulfillmentId=${record.id}`}
+        >
+          {text || "-"}
+        </Link>
       ),
     },
     {
@@ -191,7 +200,9 @@ function DeliveryOrder() {
       render: (text, record) => (
         <Tag
           color={
-            record.shipstatus.toLocaleLowerCase() == "open" ? "green" : "error"
+            record.shipstatus.toLocaleLowerCase() == "shipped"
+              ? "green"
+              : "default"
           }
         >
           {text}
@@ -233,12 +244,12 @@ function DeliveryOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-                    popup: {
+                  popup: {
                     root: {
-                        minWidth: 250,
-                        whiteSpace: "nowrap",
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
                     },
-                    },
+                  },
                 }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");

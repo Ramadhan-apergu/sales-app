@@ -99,4 +99,13 @@ export default class SalesOrderFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+    static async checkSoVrify(id) {
+    try {
+      const response = await this.axios.post(`/trx/sales-order/verify/${id}`, {});
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }

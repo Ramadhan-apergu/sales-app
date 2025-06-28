@@ -24,6 +24,7 @@ import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import PaymentFetch from "@/modules/salesApi/payment";
+import { formatRupiahAccounting } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -122,7 +123,7 @@ function List() {
       render: (text) => <p>{formatDateToShort(text)}</p>,
     },
     {
-      title: "Document Number",
+      title: "No",
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
@@ -136,6 +137,19 @@ function List() {
       title: "Customer",
       dataIndex: "companyname",
       key: "companyname",
+    },
+    {
+      title: "Payment Method",
+      dataIndex: "paymentoption",
+      key: "paymentoption",
+    },
+    {
+      title: "Total Payment",
+      dataIndex: "payment",
+      key: "payment",
+      render: (text) => (
+        <p>{formatRupiahAccounting(text) || ""}</p>
+      )
     },
     {
       title: "Status",
@@ -218,13 +232,13 @@ function List() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -260,13 +274,13 @@ function List() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}

@@ -116,13 +116,7 @@ function SalesOrder() {
 
   const columns = [
     {
-      title: "Date",
-      dataIndex: "trandate",
-      key: "trandate",
-      render: (text) => <p>{formatDateToShort(text)}</p>,
-    },
-    {
-      title: "Document Number",
+      title: "No. Invoice",
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
@@ -133,9 +127,25 @@ function SalesOrder() {
       ),
     },
     {
+      title: "Date",
+      dataIndex: "trandate",
+      key: "trandate",
+      render: (text) => <p>{formatDateToShort(text)}</p>,
+    },
+    {
       title: "Customer",
       dataIndex: "customer",
       key: "customer",
+    },
+    {
+      title: "Sales Rep",
+      dataIndex: "salesrep",
+      key: "salesrep",
+    },
+        {
+      title: "Total (After Discount)",
+      dataIndex: "amount",
+      key: "amount",
     },
     {
       title: "Status",
@@ -146,8 +156,10 @@ function SalesOrder() {
           color={
             ["paid in full"].includes(record.status.toLowerCase())
               ? "green"
-              : ["partial paid", "open"].includes(record.status.toLowerCase())
+              : ["partially paid"].includes(record.status.toLowerCase())
               ? "orange"
+              : ["duedate"].includes(record.status.toLowerCase())
+              ? "red"
               : "default"
           }
         >
@@ -227,13 +239,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -269,13 +281,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}

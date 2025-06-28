@@ -1,6 +1,11 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { DeliveredProcedureOutlined, EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DeliveredProcedureOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -114,13 +119,7 @@ function DeliveryOrder() {
 
   const columns = [
     {
-      title: "Date",
-      dataIndex: "trandate",
-      key: "trandate",
-      render: (text) => <p>{formatDateToShort(text)}</p>,
-    },
-    {
-      title: "Document Number",
+      title: "No. DO",
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
@@ -129,6 +128,17 @@ function DeliveryOrder() {
           {text || "-"}
         </Link>
       ),
+    },
+    {
+      title: "Date",
+      dataIndex: "trandate",
+      key: "trandate",
+      render: (text) => <p>{formatDateToShort(text)}</p>,
+    },
+    {
+      title: "Sales Rep",
+      dataIndex: "salesrep",
+      key: "salesrep",
     },
     {
       title: "Customer",
@@ -143,7 +153,7 @@ function DeliveryOrder() {
         <Tag
           className="capitalize"
           color={
-            record.shipstatus.toLocaleLowerCase() == "open" ? "green" : "red"
+            record.shipstatus.toLocaleLowerCase() == "shipped" ? "green" : "default"
           }
         >
           {text}
