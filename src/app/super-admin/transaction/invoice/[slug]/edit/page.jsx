@@ -106,6 +106,7 @@ export default function EnterPage() {
       fulfillmentid: "",
       entity: "",
       trandate: dayjs(new Date()),
+      duedate: dayjs(new Date()),
       tranid: "",
       salesordernum: "",
       fulfillmentnum: "",
@@ -117,7 +118,7 @@ export default function EnterPage() {
     },
     payloadBilling: {
       billingaddress: "",
-      term: "Net 30",
+      term: "",
     },
     payloadSummary: {
       totalamount: 0,
@@ -209,6 +210,7 @@ export default function EnterPage() {
         fulfillmentid: data.fulfillmentid,
         entity: data.entity,
         trandate: dayjs(data.trandate),
+        duedate: dayjs(data.duedate),
         tranid: data.tranid,
         salesordernum: data.salesordernum,
         fulfillmentnum: data.fulfillmentnum,
@@ -273,6 +275,7 @@ export default function EnterPage() {
     "subtotal",
     "totaldiscount",
     "amount",
+    "dpp",
     "taxrate",
     "taxvalue",
     "memo",
@@ -307,6 +310,7 @@ export default function EnterPage() {
           subtotal: data.subtotal,
           totaldiscount: data.totaldiscount,
           amount: data.amount,
+          dpp: data.dpp,
           taxrate: data.taxrate,
           taxvalue: data.taxvalue,
         };
@@ -334,9 +338,9 @@ export default function EnterPage() {
   ];
 
   const termOptions = [
-    { label: "Net 30", value: "Net 30" },
-    { label: "Net 90", value: "Net 90" },
-    { label: "Net 120", value: "Net 120" },
+    { label: "7 Days", value: "7" },
+    { label: "14 Days", value: "14" },
+    { label: "30 Days", value: "30" },
   ];
 
   function formatRupiah(number) {
@@ -394,6 +398,7 @@ export default function EnterPage() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       //   {
                       //     key: "salesorderid",
@@ -412,6 +417,15 @@ export default function EnterPage() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
+                        hidden: true,
+                      },
+                      {
+                        key: "tranid",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "trandate",
@@ -419,16 +433,17 @@ export default function EnterPage() {
                         isAlias: true,
                       },
                       {
+                        key: "duedate",
+                        input: "date",
+                        isAlias: true,
+                        disabled: true,
+                      },
+                      {
                         key: "salesordernum",
                         input: "input",
                         isAlias: true,
                         isRead: true,
-                      },
-                      {
-                        key: "tranid",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "fulfillmentnum",
@@ -436,11 +451,23 @@ export default function EnterPage() {
                         options: statusOptions,
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                     ]}
                     aliases={invoiceAliases.primary}
                     onChange={(type, payload) => {
-                      dispatch({ type, payload });
+                      dispatch({
+                        type,
+                        payload: {
+                          ...payload,
+                          duedate: dayjs(payload.trandate).add(
+                            !isNaN(Number(state.payloadBilling.term))
+                              ? Number(state.payloadBilling.term)
+                              : 1,
+                            "day"
+                          ),
+                        },
+                      });
                     }}
                   />
 
@@ -453,12 +480,15 @@ export default function EnterPage() {
                         key: "shippingaddress",
                         input: "text",
                         isAlias: true,
+                        isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "memo",
                         input: "text",
                         isAlias: true,
-                        isRead: true
+                        isRead: true,
+                        cursorDisable: true,
                       },
                     ]}
                     aliases={invoiceAliases.shipping}
@@ -473,15 +503,16 @@ export default function EnterPage() {
                     data={[
                       {
                         key: "term",
-                        input: "select",
-                        options: termOptions,
+                        input: "input",
                         isAlias: true,
+                        isRead: true,
+                        cursorDisable: true
                       },
                       {
                         key: "billingaddress",
                         input: "text",
                         isAlias: true,
-                        hidden: true
+                        hidden: true,
                       },
                     ]}
                     aliases={invoiceAliases.billing}
@@ -538,7 +569,7 @@ export default function EnterPage() {
                     </div>
                   </div>
 
-                                    <div className="w-full flex flex-col gap-8">
+                  <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-2">
                       <Divider
                         style={{

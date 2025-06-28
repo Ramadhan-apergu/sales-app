@@ -1,6 +1,11 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -177,7 +182,9 @@ function SalesOrder() {
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
       render: (text, record) => (
-        <Link href={`/super-admin/transaction/${title}/enter?salesOrderId=${record.id}`}>
+        <Link
+          href={`/super-admin/transaction/${title}/enter?salesOrderId=${record.id}`}
+        >
           {text || "-"}
         </Link>
       ),
@@ -194,7 +201,15 @@ function SalesOrder() {
       render: (text, record) => (
         <Tag
           color={
-            record.status.toLocaleLowerCase() == "open" ? "green" : "error"
+            ["fulfilled", "closed"].includes(record.status.toLowerCase())
+              ? "green"
+              : ["partially fulfilled"].includes(record.status.toLowerCase())
+              ? "orange"
+              : ["credit hold", "canceled"].includes(
+                  record.status.toLowerCase()
+                )
+              ? "red"
+              : "default"
           }
         >
           {text}
@@ -253,13 +268,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -295,13 +310,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(e) => {
                   setSearchName(e);
                 }}

@@ -104,9 +104,9 @@ function Customer() {
 
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'internalid',
-      key: 'internalid',
+      title: 'Customer ID',
+      dataIndex: 'customerid',
+      key: 'customerid',
       fixed: isLargeScreen ? 'left' : ''
     },
     {
@@ -120,14 +120,14 @@ function Customer() {
         </Link>)
     },
     {
-      title: 'Phone',
-      dataIndex: 'phone',
-      key: 'phone',
+      title: 'Sales Rep',
+      dataIndex: 'salesrep',
+      key: 'salesrep',
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
+      title: 'City',
+      dataIndex: 'city',
+      key: 'city',
     },
     {
       title: 'Status',

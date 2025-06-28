@@ -320,24 +320,29 @@ function Enter({ salesOrderId }) {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
+                hidden: true
               },
               {
                 key: "createdfrom",
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
               },
               {
                 key: "customer",
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
               },
               {
                 key: "entity",
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
                 hidden: true,
               },
               {
@@ -356,6 +361,7 @@ function Enter({ salesOrderId }) {
                 input: "text",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
                 hidden: true
               },
             ]}
@@ -374,13 +380,15 @@ function Enter({ salesOrderId }) {
                 key: "shippingaddress",
                 input: "text",
                 isAlias: true,
-                isRead: true
+                isRead: true,
+                cursorDisable: true
               },
               {
                 key: "notes",
                 input: "text",
                 isAlias: true,
-                isRead: true
+                isRead: true,
+                cursorDisable: true
               },
             ]}
             aliases={deliveryOrderAliases.shipping}

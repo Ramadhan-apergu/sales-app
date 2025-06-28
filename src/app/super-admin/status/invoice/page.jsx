@@ -166,11 +166,11 @@ function SalesOrder() {
       dataIndex: "doc_numb",
       key: "doc_numb",
       fixed: isLargeScreen ? "left" : "",
-      render: (text, record) => (
-        <Link href={`/super-admin/status/${title}/${record.delivery_id}`}>
-          {text || "-"}
-        </Link>
-      ),
+    //   render: (text, record) => (
+    //     <Link href={`/super-admin/status/${title}/${record.delivery_id}`}>
+    //       {text || "-"}
+    //     </Link>
+    //   ),
     },
     {
       title: "Customer Name",

@@ -315,18 +315,21 @@ export default function Page() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "createdfrom",
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "customer",
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "trandate",
@@ -339,12 +342,14 @@ export default function Page() {
                         options: statusOptions,
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "memo",
                         input: "text",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                         hidden: true
                       },
                     ]}
@@ -364,12 +369,14 @@ export default function Page() {
                         input: "text",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "notes",
                         input: "text",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                     ]}
                     aliases={deliveryOrderAliases.shipping}

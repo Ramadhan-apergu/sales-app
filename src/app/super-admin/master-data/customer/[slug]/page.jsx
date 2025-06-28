@@ -23,6 +23,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import { formatRupiahAccounting } from "@/utils/formatRupiah";
 
 export default function Detail() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -122,6 +123,8 @@ export default function Detail() {
       keys.reduce((obj, k) => {
         if (k == "createddate") {
           obj[k] = data[k] != null ? formatDateToShort(data[k]) : "";
+        } else if (k == "creditlimit") {
+          obj[k] = data[k] != null ? formatRupiahAccounting(data[k]) : "";
         } else {
           obj[k] = data[k] != null ? data[k] : "";
         }
@@ -268,7 +271,7 @@ export default function Detail() {
                     data={[
                       { key: "addr1", input: "input", isAlias: true },
                       { key: "city", input: "input", isAlias: false },
-                      { key: "state", input: "input", isAlias: false },
+                      { key: "state", input: "input", isAlias: true },
                       { key: "zip", input: "input", isAlias: false },
                     ]}
                     aliases={customerAliases}
