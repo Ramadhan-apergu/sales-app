@@ -292,9 +292,9 @@ export default function Page() {
                           }}
                           className="capitalize"
                           color={
-                            data.shipstatus.toLowerCase() == "open"
+                            data.shipstatus.toLocaleLowerCase() == "shipped"
                               ? "green"
-                              : "red"
+                              : "default"
                           }
                         >
                           {data.shipstatus}

@@ -115,13 +115,7 @@ function SalesOrder() {
 
   const columns = [
     {
-      title: "Date",
-      dataIndex: "trandate",
-      key: "trandate",
-      render: (text) => <p>{formatDateToShort(text)}</p>,
-    },
-    {
-      title: "Document Number",
+      title: "No. SO",
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
@@ -132,9 +126,20 @@ function SalesOrder() {
       ),
     },
     {
+      title: "Date",
+      dataIndex: "trandate",
+      key: "trandate",
+      render: (text) => <p>{formatDateToShort(text)}</p>,
+    },
+    {
       title: "Customer",
       dataIndex: "customer",
       key: "customer",
+    },
+    {
+      title: "No. PO",
+      dataIndex: "otherrefnum",
+      key: "otherrefnum",
     },
     {
       title: "Status",
@@ -143,11 +148,11 @@ function SalesOrder() {
       render: (text, record) => (
         <Tag
           color={
-            ["open", "fulfilled", "closed"].includes(
+            ["fulfilled", "closed"].includes(
               record.status.toLowerCase()
             )
               ? "green"
-              : ["partially fulfilled", "pending approval"].includes(
+              : ["partially fulfilled"].includes(
                   record.status.toLowerCase()
                 )
               ? "orange"

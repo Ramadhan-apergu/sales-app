@@ -221,9 +221,9 @@ export default function Detail() {
   };
 
   const termOptions = [
-    { label: "Net 30", value: "Net 30" },
-    { label: "Net 90", value: "Net 90" },
-    { label: "Net 120", value: "Net 120" },
+    { label: "7 Days", value: "7" },
+    { label: "14 Days", value: "14" },
+    { label: "30 Days", value: "30" },
   ];
 
   return (
@@ -356,7 +356,7 @@ export default function Detail() {
                         {
                           key: "state",
                           input: "input",
-                          isAlias: false,
+                          isAlias: true,
                           rules: [
                             { required: true, message: "State is required" },
                           ],

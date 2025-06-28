@@ -7,6 +7,7 @@ import {
   Collapse,
   Divider,
   Empty,
+  FloatButton,
   Form,
   List,
   Modal,
@@ -180,7 +181,7 @@ export default function Enter() {
       total: 0,
     },
     payloadBilling: {
-      term: "Net 30",
+      term: "7",
       paymentoption: "",
     },
     payloadShipping: {
@@ -249,9 +250,9 @@ export default function Enter() {
   ];
 
   const termOptions = [
-    { label: "Net 30", value: "Net 30" },
-    { label: "Net 90", value: "Net 90" },
-    { label: "Net 120", value: "Net 120" },
+    { label: "7 Days", value: "7" },
+    { label: "14 Days", value: "14" },
+    { label: "30 Days", value: "30" },
   ];
 
   const paymentOptions = [
@@ -265,18 +266,18 @@ export default function Enter() {
     "units",
     "rate",
     "description",
-    "discountname1",
-    "value1",
-    "discountvalue1",
-    "perunit1",
-    "discountname2",
-    "value2",
-    "discountvalue2",
-    "perunit2",
-    "discountname3",
-    "value3",
-    "discountvalue3",
-    "perunit3",
+    // "discountname1",
+    // "value1",
+    // "discountvalue1",
+    // "perunit1",
+    // "discountname2",
+    // "value2",
+    // "discountvalue2",
+    // "perunit2",
+    // "discountname3",
+    // "value3",
+    // "discountvalue3",
+    // "perunit3",
     "subtotal",
     "totalamount",
     "qtyfree",
@@ -832,7 +833,7 @@ export default function Enter() {
         ...state.payloadShipping,
       };
 
-      delete payloadToInsert.companyname
+      delete payloadToInsert.companyname;
 
       if (dataTableItem.length <= 0) {
         throw new Error("Please enter order items");
@@ -906,8 +907,52 @@ export default function Enter() {
     }
   };
 
+  const [customerInfo, setCustomerInfo] = useState({
+    customer: "",
+    message: [],
+  });
+
+  async function checkStatusCustomer(id, name) {
+    try {
+      const response = await SalesOrderFetch.checkSoVrify(id);
+      if (response.status_code != 404) {
+        setCustomerInfo({
+          customer: name,
+          message: response.errors,
+        });
+      } else {
+        setCustomerInfo({
+          customer: "",
+          message: [],
+        });
+      }
+    } catch (error) {
+      notify("error", "Failed", "Failed get customer information");
+    }
+  }
+
+  function showCustomerInfo() {
+    customerInfo.message.forEach((info, i) => {
+      const timeout = i > 0 ? 300 : 0 ;
+      setTimeout(() => {
+        notify("info", "Customer ID : " + customerInfo.customer, info);
+      }, timeout);
+    });
+  }
+
   return (
     <>
+      {customerInfo.message.length > 0 && (
+        <FloatButton
+          onClick={() => {
+            showCustomerInfo();
+          }}
+          style={!isLargeScreen ? {width: '32px', height: '32px'} : {}}
+          shape="circle"
+          badge={{ count: customerInfo.message.length, size: "small" }}
+          icon={<InfoCircleOutlined />}
+        />
+      )}
       <Layout pageTitle="">
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
@@ -969,6 +1014,9 @@ export default function Enter() {
                       value={customerSelected}
                       onChange={(_, customer) => {
                         setCustomerSelected(customer);
+                        if (customer.id) {
+                          checkStatusCustomer(customer.id, customer.customerid);
+                        }
                         setDataTableItem([]);
                         setDiscountItems([]);
                         dispatch({ type: "RESET" });
@@ -977,7 +1025,7 @@ export default function Enter() {
                           payload: {
                             entity: customer.id,
                             companyname: customer.companyname,
-                            salesrep: customer.salesrep
+                            salesrep: customer.salesrep,
                           },
                         });
                         dispatch({
@@ -1006,6 +1054,7 @@ export default function Enter() {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
                 rules: [{ required: true, message: ` is required` }],
                 placeholder: "Auto-filled after selecting a customer",
               },
@@ -1014,8 +1063,10 @@ export default function Enter() {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
                 rules: [{ required: true, message: ` is required` }],
                 placeholder: "Auto-filled after selecting a customer",
+                hidden: true
               },
               {
                 key: "trandate",
@@ -1028,6 +1079,7 @@ export default function Enter() {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
               },
               {
                 key: "otherrefnum",
@@ -1050,6 +1102,7 @@ export default function Enter() {
                 input: "text",
                 isAlias: true,
                 isRead: true,
+                cursorDisable: true,
               },
               {
                 key: "notes",
@@ -1275,12 +1328,12 @@ export default function Enter() {
                     {formatRupiah(state.payloadSummary.discounttotal)}
                   </p>
                 </div>
-                <div className="flex w-full">
+                {/* <div className="flex w-full">
                   <p className="w-1/2">Subtotal (After Discount)</p>
                   <p className="w-1/2 text-end">
                     {formatRupiah(state.payloadSummary.subtotal)} Incl. PPN
                   </p>
-                </div>
+                </div> */}
                 {/* <div className="flex w-full">
                   <p className="w-1/2">Tax Total</p>
                   <p className="w-1/2 text-end">
@@ -1289,7 +1342,7 @@ export default function Enter() {
                 </div> */}
                 <hr className="border-gray-5" />
                 <div className="flex w-full font-semibold">
-                  <p className="w-1/2">Total</p>
+                  <p className="w-1/2">Total Inc PPN</p>
                   <p className="w-1/2 text-end">
                     {formatRupiah(state.payloadSummary.total)}
                   </p>
@@ -1372,6 +1425,7 @@ export default function Enter() {
                   input: "input",
                   isAlias: true,
                   isRead: true,
+                  cursorDisable: true,
                 },
                 {
                   key: "quantity",
@@ -1383,12 +1437,14 @@ export default function Enter() {
                   input: "input",
                   isAlias: true,
                   isRead: true,
+                  cursorDisable: true,
                 },
                 {
                   key: "rate",
                   input: "input",
                   isAlias: true,
                   isRead: true,
+                  cursorDisable: true,
                 },
                 {
                   key: "description",

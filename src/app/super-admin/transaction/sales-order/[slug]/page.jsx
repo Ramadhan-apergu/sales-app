@@ -168,7 +168,7 @@ export default function Detail() {
     dispatch({
       type: "SET_BILLING",
       payload: {
-        term: data.term,
+        term: data.term + " Days",
         paymentoption: data.paymentoption,
       },
     });
@@ -369,18 +369,18 @@ export default function Detail() {
     "units",
     "rate",
     "description",
-    "discountname1",
-    "value1",
-    "discountvalue1",
-    "perunit1",
-    "discountname2",
-    "value2",
-    "discountvalue2",
-    "perunit2",
-    "discountname3",
-    "value3",
-    "discountvalue3",
-    "perunit3",
+    // "discountname1",
+    // "value1",
+    // "discountvalue1",
+    // "perunit1",
+    // "discountname2",
+    // "value2",
+    // "discountvalue2",
+    // "perunit2",
+    // "discountname3",
+    // "value3",
+    // "discountvalue3",
+    // "perunit3",
     "subtotal",
     "totalamount",
     "totaldiscount",
@@ -504,14 +504,13 @@ export default function Detail() {
                             fontSize: "16px",
                           }}
                           color={
-                            ["open", "fulfilled", "closed"].includes(
+                            ["fulfilled", "closed"].includes(
                               data.status.toLowerCase()
                             )
                               ? "green"
-                              : [
-                                  "partially fulfilled",
-                                  "pending approval",
-                                ].includes(data.status.toLowerCase())
+                              : ["partially fulfilled"].includes(
+                                  data.status.toLowerCase()
+                                )
                               ? "orange"
                               : ["credit hold", "canceled"].includes(
                                   data.status.toLowerCase()
@@ -586,6 +585,7 @@ export default function Detail() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        hidden: true,
                       },
                       {
                         key: "trandate",
@@ -692,17 +692,17 @@ export default function Detail() {
                             {formatRupiah(state.payloadSummary.discounttotal)}
                           </p>
                         </div>
-                        <div className="flex w-full">
+                        {/* <div className="flex w-full">
                           <p className="w-1/2">Subtotal (After Discount)</p>
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.subtotal)} Incl.
                             PPN
                           </p>
-                        </div>
+                        </div> */}
 
                         <hr className="border-gray-5" />
                         <div className="flex w-full font-semibold">
-                          <p className="w-1/2">Total</p>
+                          <p className="w-1/2">Total Inc PPN</p>
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.total)}
                           </p>

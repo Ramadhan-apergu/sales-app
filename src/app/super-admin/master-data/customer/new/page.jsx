@@ -38,15 +38,15 @@ export default function CustomerNew() {
   });
 
   const [payloadFinancial, setPayloadFinancial] = useState({
-    terms: "Net 30",
+    terms: "7",
     creditlimit: 0,
     resalenumber: "",
   });
 
   const termOptions = [
-    { label: "Net 30", value: "Net 30" },
-    { label: "Net 90", value: "Net 90" },
-    { label: "Net 120", value: "Net 120" },
+    { label: "7 Days", value: "7" },
+    { label: "14 Days", value: "14" },
+    { label: "30 Days", value: "30" },
   ];
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
@@ -294,7 +294,7 @@ export default function CustomerNew() {
                   {
                     key: "state",
                     input: "input",
-                    isAlias: false,
+                    isAlias: true,
                     rules: [{ required: true, message: "State is required" }],
                   },
                   {

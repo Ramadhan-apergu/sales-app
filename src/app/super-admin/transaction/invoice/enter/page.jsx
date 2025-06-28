@@ -96,6 +96,7 @@ function Enter({ fulfillmentId }) {
   const [dataSalesOrderItemRetrieve, setDataSalesOrderItemRetrieve] = useState(
     {}
   );
+  const [termCustomer, setTermCustomer] = useState(0);
 
   const initialState = {
     payloadPrimary: {
@@ -103,6 +104,7 @@ function Enter({ fulfillmentId }) {
       fulfillmentid: "",
       entity: "",
       trandate: dayjs(new Date()),
+      duedate: dayjs(new Date()).add(termCustomer, "day"),
       salesordernum: "",
       fulfillmentnum: "",
       customer: "",
@@ -194,6 +196,15 @@ function Enter({ fulfillmentId }) {
         setDataFulfillment(fulfillmentData);
         setDataSalesOrder(salesOrderData);
         setDataCustomer(customerData);
+        const terms =
+          customerData?.terms && !isNaN(Number(customerData.terms))
+            ? Number(customerData.terms)
+            : 1;
+        setTermCustomer(terms);
+        dispatch({
+          type: "SET_PRIMARY",
+          payload: { duedate: dayjs(new Date()).add(terms, "day") },
+        });
         setDataSalesOrderItemRetrieve(soItemData);
         setDataTableItem(
           fulfillmentData.fulfillment_items.map((fulfillment) => {
@@ -218,6 +229,7 @@ function Enter({ fulfillmentId }) {
                   ? Math.ceil((amount / (1 + taxrate / 100)) * (taxrate / 100))
                   : 0;
 
+                  const dpp = amount - taxvalue
                 return {
                   item: fulfillment.item,
                   displayname,
@@ -229,6 +241,7 @@ function Enter({ fulfillmentId }) {
                   amount,
                   totaldiscount,
                   subtotal,
+                  dpp,
                   taxrate,
                   taxvalue,
                   memo: fulfillment.memo,
@@ -246,6 +259,7 @@ function Enter({ fulfillmentId }) {
                   amount: 0,
                   totaldiscount: 0,
                   subtotal: 0,
+                  dpp: 0,
                   taxrate: 0,
                   taxvalue: 0,
                   memo: fulfillment.memo,
@@ -265,6 +279,7 @@ function Enter({ fulfillmentId }) {
               amount: 0,
               totaldiscount: 0,
               subtotal: 0,
+              dpp: 0,
               taxrate: 0,
               taxvalue: 0,
               memo: fulfillment.memo,
@@ -280,6 +295,7 @@ function Enter({ fulfillmentId }) {
             fulfillmentid: fulfillmentData.id,
             entity: salesOrderData.entity,
             trandate: dayjs(new Date()),
+            // duedate: dayjs(new Date()).add(termCustomer, "day"),
             salesordernum: salesOrderData.tranid,
             fulfillmentnum: fulfillmentData.tranid,
             customer: customerData.companyname,
@@ -297,7 +313,7 @@ function Enter({ fulfillmentId }) {
         dispatch({
           type: "SET_BILLING",
           payload: {
-            term: salesOrderData.term,
+            term: customerData.terms,
             billingaddress: salesOrderData.shippingaddress,
           },
         });
@@ -327,6 +343,7 @@ function Enter({ fulfillmentId }) {
     "subtotal",
     "totaldiscount",
     "amount",
+    "dpp",
     "taxrate",
     "taxvalue",
     "memo",
@@ -355,6 +372,7 @@ function Enter({ fulfillmentId }) {
           subtotal: data.subtotal,
           totaldiscount: data.totaldiscount,
           amount: data.amount,
+          dpp: data.dpp,
           taxrate: data.taxrate,
           taxvalue: data.taxvalue,
         };
@@ -379,12 +397,6 @@ function Enter({ fulfillmentId }) {
   const statusOptions = [
     { label: "Open", value: "open" },
     { label: "Shipped", value: "shipped" },
-  ];
-
-  const termOptions = [
-    { label: "Net 30", value: "Net 30" },
-    { label: "Net 90", value: "Net 90" },
-    { label: "Net 120", value: "Net 120" },
   ];
 
   const getValueDiscount = (discountValue, value, totalamount) => {
@@ -475,12 +487,22 @@ function Enter({ fulfillmentId }) {
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
+                      },
+                      {
+                        key: "salesordernum",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "entity",
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
+                        hidden: true,
                       },
                       {
                         key: "trandate",
@@ -488,10 +510,11 @@ function Enter({ fulfillmentId }) {
                         isAlias: true,
                       },
                       {
-                        key: "salesordernum",
-                        input: "input",
+                        key: "duedate",
+                        input: "date",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "fulfillmentnum",
@@ -499,11 +522,21 @@ function Enter({ fulfillmentId }) {
                         options: statusOptions,
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                     ]}
                     aliases={invoiceAliases.primary}
                     onChange={(type, payload) => {
-                      dispatch({ type, payload });
+                      dispatch({
+                        type,
+                        payload: {
+                          ...payload,
+                          duedate: dayjs(payload.trandate).add(
+                            termCustomer,
+                            "day"
+                          ),
+                        },
+                      });
                     }}
                   />
 
@@ -517,12 +550,14 @@ function Enter({ fulfillmentId }) {
                         input: "text",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "memo",
                         input: "text",
                         isAlias: true,
                         isRead: true,
+                        cursorDisable: true,
                       },
                     ]}
                     aliases={invoiceAliases.shipping}
@@ -537,15 +572,16 @@ function Enter({ fulfillmentId }) {
                     data={[
                       {
                         key: "term",
-                        input: "select",
-                        options: termOptions,
+                        input: "input",
                         isAlias: true,
+                        isRead: true,
+                        cursorDisable: true,
                       },
                       {
                         key: "billingaddress",
                         input: "text",
                         isAlias: true,
-                        hidden: true
+                        hidden: true,
                       },
                     ]}
                     aliases={invoiceAliases.billing}
