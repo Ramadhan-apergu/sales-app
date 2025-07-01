@@ -33,6 +33,7 @@ import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import ItemFetch from "@/modules/salesApi/item";
 import convertToLocalDate from "@/utils/convertToLocalDate";
 import dayjs from "dayjs";
+import { truncate } from "lodash";
 
 const formatRupiah = (value) => {
     const num = Number(value);
@@ -125,7 +126,7 @@ export default function Enter() {
           const addLabelCustomer = resData.list.map((customer) => {
             return {
               ...customer,
-              label: customer.companyname,
+              label: customer.customerid,
               value: customer.id,
             };
           });
@@ -162,8 +163,9 @@ export default function Enter() {
   const initialState = {
     payloadPrimary: {
       entity: "",
+      custName: "",
       trandate: dayjs(new Date()),
-      salesrep: "sales_outdoor",
+      salesrep: "",
       otherrefnum: "",
     },
     payloadSummary: {
@@ -174,13 +176,12 @@ export default function Enter() {
       total: 0,
     },
     payloadBilling: {
-      term: "Net 30",
+      term: "7 Days",
       paymentoption: "",
     },
     payloadShipping: {
-      shippingoption: "",
       shippingaddress: "",
-      shippingtype: 0,
+      notes: "",
     },
     dataTableItem: [],
   };
@@ -239,9 +240,9 @@ export default function Enter() {
   ];
 
   const termOptions = [
-    { label: "Net 30", value: "Net 30" },
-    { label: "Net 90", value: "Net 90" },
-    { label: "Net 120", value: "Net 120" },
+    { label: "7 Days", value: "7" },
+    { label: "14 Days", value: "14" },
+    { label: "30 Days", value: "30" },
   ];
 
   const paymentOptions = [
@@ -864,12 +865,12 @@ export default function Enter() {
       };
 
       let shippingaddress = state.payloadShipping?.shippingaddress || "";
-      let shippingoption = state.payloadShipping?.shippingoption || "";
+      let notes = state.payloadShipping?.notes || "";
 
       payloadToInsert = {
         ...payloadToInsert,
         shippingaddress,
-        shippingoption,
+        notes,
       };
 
       if (dataTableItem.length <= 0) {
@@ -962,6 +963,11 @@ export default function Enter() {
                   </div>
                 </div>
               </div>
+              <input
+                type="hidden"
+                name="entity"
+                value={state.payloadPrimary.entity}
+              />
               <div className="w-full flex flex-col gap-8">
                 <div className="w-full flex flex-col gap-2">
                   <Divider
@@ -973,7 +979,7 @@ export default function Enter() {
                   <div className="w-full flex flex-col">
                     <Form layout="vertical">
                       <Form.Item
-                        label={<span className="capitalize">Customer</span>}
+                        label={<span className="capitalize">Customer ID</span>}
                         name="customer"
                         style={{ margin: 0 }}
                         className="w-full"
@@ -998,6 +1004,14 @@ export default function Enter() {
                               type: "SET_PRIMARY",
                               payload: { entity: customer.id },
                             });
+                            dispatch({
+                              type: "SET_PRIMARY",
+                              payload: { custName: customer.companyname },
+                            });
+                            dispatch({
+                              type: "SET_PRIMARY",
+                              payload: { salesrep: customer.salesrep },
+                            });
                           }}
                           onSearch={{}}
                           options={dataCustomer}
@@ -1014,13 +1028,14 @@ export default function Enter() {
                 type="SET_PRIMARY"
                 payload={state.payloadPrimary}
                 data={[
-                  { key: "entity", input: "input", isAlias: true, disabled: true, isRead: true, rules: [{ required: true, message: ` is required` }], placeholder: "Auto-filled after selecting a customer" },
+                  { key: "custName", input: "input", isAlias: true, disabled: true, isRead: true, placeholder: "Auto-filled after selecting a customer" },
                   { key: "trandate", input: "date", isAlias: true, rules: [{ required: true, message: ` is required` }] },
-                  { key: "salesrep", input: "input", isAlias: true, isRead: true },
+                  { key: "salesrep", input: "input", isAlias: true, isRead: true, disabled: true },
                   { key: "otherrefnum", input: "input", isAlias: true, placeholder: "Entry No. PO customer" },
                 ]}
                 aliases={{
                   entity: "Customer Entity",
+                  custName: "Customer Name",
                   trandate: "Transaction Date",
                   salesrep: "Sales Rep",
                   otherrefnum: "Customer PO Number"
@@ -1034,35 +1049,23 @@ export default function Enter() {
                 payload={state.payloadShipping}
                 data={[
                   {
-                    key: "shippingtype",
-                    input: "select",
-                    options: shipAddressOptions,
-                    isAlias: true
-                  },
-                  {
-                    key:
-                      state.payloadShipping.shippingtype === 1
-                        ? "shippingaddress"
-                        : "shippingoption",
+                    key: "shippingaddress",
                     input: "text",
                     isAlias: true,
-                    disabled: state.payloadShipping.shippingtype === 1
+                    disabled: true
+                  },
+                  {
+                    key: "notes",
+                    input: "text",
+                    isAlias: true,
+                    disabled: false
                   }
                 ]}
                 aliases={{
-                  shippingtype: "Shipping Type",
                   shippingaddress: "Shipping Address",
-                  shippingoption: "Shipping Option Address",
+                  notes: "Notes"
                 }}
                 onChange={(type, payload) => {
-                  if ("shippingaddress" in payload) {
-                    payload.shippingoption = "";
-                  }
-
-                  if (payload.shippingtype === 1) {
-                    payload.shippingoption = "";
-                  }
-
                   dispatch({ type, payload });
                 }}
               />
@@ -1223,18 +1226,10 @@ export default function Enter() {
                       <p className="w-1/2 text-sm">Discount Item</p>
                       <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.discounttotal)}</p>
                     </div>
-                    <div className="flex w-full">
-                      <p className="w-1/2 text-sm">Subtotal (After Discount)</p>
-                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.subtotal)} Incl. PPN</p>
-                    </div>
-                    <div className="flex w-full">
-                      <p className="w-1/2 text-sm">Tax Total</p>
-                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.taxtotal)}</p>
-                    </div>
                     <hr className="border-gray-5" />
                     <div className="flex w-full font-semibold">
                       <p className="w-1/2 text-sm">Total</p>
-                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.total)}</p>
+                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.total) } Incl. PPN</p>
                     </div>
                   </div>
                 </div>
