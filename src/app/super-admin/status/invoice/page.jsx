@@ -1,6 +1,11 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { DownloadOutlined, EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -45,6 +50,7 @@ function SalesOrder() {
   const startdate = searchParams.get("startdate");
   const enddate = searchParams.get("enddate");
   const doc_numb = searchParams.get("doc_numb");
+  const status = searchParams.get("status");
   const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
@@ -78,6 +84,7 @@ function SalesOrder() {
         const startdate = searchParams.get("startdate");
         const enddate = searchParams.get("enddate");
         const doc_numb = searchParams.get("doc_numb");
+        const status = searchParams.get("status");
         const offset = page - 1;
 
         const response = await InvoiceStatusFetch.get(
@@ -86,7 +93,8 @@ function SalesOrder() {
           customer,
           startdate,
           enddate,
-          doc_numb
+          doc_numb,
+          status
         );
 
         const resData = getResponseHandler(response, notify);
@@ -117,6 +125,7 @@ function SalesOrder() {
     startdate,
     enddate,
     doc_numb,
+    status,
   ]);
 
   useEffect(() => {
@@ -166,16 +175,36 @@ function SalesOrder() {
       dataIndex: "doc_numb",
       key: "doc_numb",
       fixed: isLargeScreen ? "left" : "",
-    //   render: (text, record) => (
-    //     <Link href={`/super-admin/status/${title}/${record.delivery_id}`}>
-    //       {text || "-"}
-    //     </Link>
-    //   ),
+      //   render: (text, record) => (
+      //     <Link href={`/super-admin/status/${title}/${record.delivery_id}`}>
+      //       {text || "-"}
+      //     </Link>
+      //   ),
     },
     {
       title: "Customer Name",
       dataIndex: "customer",
       key: "customer",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (text, record) => (
+        <Tag
+          color={
+            ["paid in full"].includes(text ? text.toLowerCase() : "-")
+              ? "green"
+              : ["partially paid"].includes(text ? text.toLowerCase() : "-")
+              ? "orange"
+              : ["duedate"].includes(text ? text.toLowerCase() : "-")
+              ? "red"
+              : "default"
+          }
+        >
+          {text}
+        </Tag>
+      ),
     },
     {
       title: "Total Amount",
@@ -239,6 +268,7 @@ function SalesOrder() {
                     page,
                     limit,
                     doc_numb: value,
+                    status,
                   });
                 }}
                 value={doc_numb}
@@ -277,6 +307,7 @@ function SalesOrder() {
                       page,
                       limit,
                       doc_numb,
+                      status,
                     });
                   }}
                   allowClear
@@ -302,12 +333,40 @@ function SalesOrder() {
                         page,
                         limit,
                         doc_numb,
+                        status,
                       });
                     }}
                     //   onOk={(val) => {
                     //   }}
                   />
                 </div>
+              </div>
+              <div className="flex flex-col justify-start items-start gap-1">
+                <label className="hidden lg:block text-sm font-semibold leading-none">
+                  Status
+                </label>
+                <Select
+                  value={status}
+                  onChange={(value, option) => {
+                    navigate(`${baseUrl}`, {
+                      customer,
+                      startdate,
+                      enddate,
+                      page,
+                      limit,
+                      doc_numb,
+                      status: value,
+                    });
+                  }}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "open", label: "Open" },
+                    { value: "partially paid", label: "Partially Paid" },
+                    { value: "paid in full", label: "Paid in Full" },
+                  ]}
+                  dropdownStyle={{ minWidth: "150px", whiteSpace: "nowrap" }}
+                  // dropdownAlign={{ points: ["tr", "br"] }}
+                />
               </div>
             </div>
           </div>
@@ -369,6 +428,7 @@ function SalesOrder() {
                     page: newPage,
                     limit: newLimit,
                     doc_numb,
+                    status,
                   });
                 }}
                 size="small"

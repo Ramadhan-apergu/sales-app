@@ -325,7 +325,7 @@ const LayoutTesting = ({ children }) => {
           />
         </div>
 
-        <div className="lg:hidden mr-4 lg:mr-12">
+        <div id="ham-menu" className="lg:hidden mr-4 lg:mr-12">
           <div className="">
             <Button
               icon={<MenuOutlined />}
@@ -397,6 +397,13 @@ const LayoutTesting = ({ children }) => {
           items={menuItems}
         />
       </Drawer>
+      <style jsx>{`
+        @media print {
+          #ham-menu {
+            display: none !important;
+          }
+        }
+      `}</style>
     </Layout>
   );
 };

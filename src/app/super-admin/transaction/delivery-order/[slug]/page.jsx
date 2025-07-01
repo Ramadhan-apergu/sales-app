@@ -104,7 +104,7 @@ export default function Page() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
   const keyTableItem = [
-    "item",
+    "itemprocessfamily",
     "displayname",
     "memo",
     "location",
@@ -176,6 +176,7 @@ export default function Page() {
 
         let updateData = {
           ...doItem,
+          itemprocessfamily: item?.itemprocessfamily || "",
           displayname: item ? item.displayname : "",
           quantity1: doItem.quantity,
           unit1: doItem.units,
@@ -189,6 +190,7 @@ export default function Page() {
         return updateData;
       })
     );
+    console.log(dataFulfillmentWithItem)
 
     setDataTableItem(dataFulfillmentWithItem);
   };
@@ -196,14 +198,7 @@ export default function Page() {
   const handleClickAction = ({ key }) => {
     switch (key) {
       case "1":
-        if (typeof window !== "undefined") {
-          const printJS = require("print-js"); // ⬅️ ini kuncinya
-          printJS({
-            printable: "delivery-order-print",
-            type: "html",
-            targetStyles: ["*"],
-          });
-        }
+        window.print();
         break;
       case "2":
         deleteModal();
@@ -423,11 +418,32 @@ export default function Page() {
             </div>
           )}
         </div>
-        <div className="hidden">
+        <div className="to-print hidden">
           <DeliveryOrderPrint data={data} dataTable={dataTableItem} />
         </div>
       </Layout>
       {contextNotify}
+      <style jsx>{`
+        @media print {
+          * {
+            display: none !important;
+          }
+
+          .ant-dropdown {
+            display: none !important;
+          }
+
+          .to-print {
+            display: block !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            z-index: 99999;
+          }
+        }
+      `}</style>
     </>
   );
 }

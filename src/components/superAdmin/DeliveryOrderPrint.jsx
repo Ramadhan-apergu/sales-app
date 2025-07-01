@@ -1,115 +1,226 @@
+import { formatDateStartDay } from "@/utils/formatDate";
+import { useEffect, useState } from "react";
+
 export default function DeliveryOrderPrint({ data, dataTable }) {
+  const [currentDate, setCurrentDate] = useState("");
+  const [count, setCount] = useState({
+    qty: 0,
+    qty2: 0,
+  });
+
+  useEffect(() => {
+    const date = new Date().toLocaleString("id-ID", {
+      timeZone: "Asia/Jakarta",
+    });
+    setCurrentDate(date);
+    const total = dataTable.reduce(
+      (acc, item) => ({
+        qty: acc.qty + (item.quantity1 || 0),
+        qty2: acc.qty2 + (item.quantity2 || 0),
+      }),
+      { qty: 0, qty2: 0 }
+    );
+    setCount(total);
+  }, [dataTable]);
   return (
-    <div
-      id="delivery-order-print"
-      className="font-sans p-8 max-w-5xl mx-auto bg-white text-black"
-    >
-      <h1 className="text-2xl font-bold text-center mb-10">DELIVERY ORDER</h1>
-
-      <div className="flex justify-between mb-6 text-sm">
-        <div className="w-1/4">
-          <p>
-            <strong>No. DO:</strong> {data?.tranid || "-"}
+    <div id="print-do" className="w-full flex flex-col gap-8">
+      <section className="w-full flex flex-col items-end gap-8">
+        <div className="w-full flex justify-between">
+          <div className="flex flex-col items-start">
+            <h3 className="font-bold text-2xl tracking-wide">
+              CV. Sukses Mandiri
+            </h3>
+            <p>Jl. Raya Medan – Lubuk Pakam Km 22,5 Medan – 20362, Indonesia</p>
+          </div>
+          <h3 className="font-bold text-2xl tracking-wide">SURAT JALAN</h3>
+        </div>
+        <div className="w-full flex justify-between table-padding">
+          <div className="w-1/2">
+            <div className="w-full flex">
+              <p className="w-3/12 break-words whitespace-normal font-semibold">To :</p>
+              <p className="w-8/12 border  break-words whitespace-normal">
+                {data.customer}
+              </p>
+            </div>
+            <div className="w-full flex">
+              <p className="w-3/12 break-words whitespace-normal font-semibold">Address :</p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {data.shippingaddress}
+              </p>
+            </div>
+            <div className="w-full flex">
+              <p className="w-3/12 break-words whitespace-normal font-semibold">Notes :</p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {data.notes}
+              </p>
+            </div>
+            <br />
+            <div className="w-full flex">
+              <p className="w-3/12 break-words whitespace-normal font-semibold">Sales :</p>
+              <p className="w-8/12 border break-words whitespace-normal">
+                {data.sales || ""}
+              </p>
+            </div>
+          </div>
+          <div className="w-1/2">
+            <div className="w-full flex justify-end">
+              <p className="w-2/12 break-words whitespace-normal font-semibold border-l border-y">
+                No. SJ
+              </p>
+              <p className="w-8/12 border  break-words whitespace-normal">
+                {data.tranid || "-"}
+              </p>
+            </div>
+            <div className="w-full flex justify-end">
+              <p className="w-2/12 break-words whitespace-normal font-semibold border-l border-b">
+                Tgl SJ
+              </p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {formatDateStartDay(data.trandate) || "-"}
+              </p>
+            </div>
+            <div className="w-full flex justify-end">
+              <p className="w-2/12 break-words whitespace-normal font-semibold border-l border-b">
+                No. SO
+              </p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {data.numso || "-"}
+              </p>
+            </div>
+            <div className="w-full flex justify-end">
+              <p className="w-2/12 break-words whitespace-normal font-semibold border-l border-b">
+                Tgl SO
+              </p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {formatDateStartDay(data.dateso) || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="w-full">
+        <div className="w-full flex border table-padding font-semibold">
+          <p className="border-r break-words whitespace-normal w-[5%]">No.</p>
+          <p className="border-r break-words whitespace-normal w-[25%]">Kode</p>
+          <p className="border-r break-words whitespace-normal w-[20%]">
+            Nama Barang
           </p>
-          <p>
-            <strong>Status:</strong>{" "}
-            {data?.shipstatus ? data.shipstatus.charAt(0).toUpperCase() + data.shipstatus.slice(1) : "-"}
+          <p className="border-r break-words whitespace-normal w-[10%]">Memo</p>
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Qty
           </p>
-          <p>
-            <strong>Customer:</strong> {data?.customer || "-"}
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Satuan
+          </p>
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Qty Bal
+          </p>
+          <p className=" break-words whitespace-normal w-[10%] text-right">
+            Satuan 2
           </p>
         </div>
-        <div className="w-1/4"/>
-        <div className="w-1/4"/>
-        <div className="w-1/4">
-          <p>
-            <strong>No. SO:</strong> {data?.createdfrom || "-"}
+        {dataTable &&
+          dataTable.length > 0 &&
+          dataTable.map((item, i) => (
+            <div
+              key={i}
+              className="w-full flex border-x border-b table-padding"
+            >
+              <p className="border-r break-words whitespace-normal w-[5%] text-right">
+                {i + 1}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[25%]">
+                {item.itemprocessfamily || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[20%]">
+                {item.displayname || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%]">
+                {item.memo || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.quantity1 || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.unit1 || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.quantity2 || "-"}
+              </p>
+              <p className=" break-words whitespace-normal w-[10%] text-right">
+                {item.unit2 || "-"}
+              </p>
+            </div>
+          ))}
+        <div className="w-full flex table-padding border-r border-white">
+          <p className="break-words whitespace-normal w-[5%] text-right"></p>
+          <p className="break-words whitespace-normal w-[25%]"></p>
+          <p className="break-words whitespace-normal w-[20%]"></p>
+          <p className="break-words whitespace-normal w-[10%]"></p>
+          <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
+            {count.qty}
           </p>
-                    <p>
-            <strong>Date:</strong>{" "}
-            {data?.trandate
-              ? new Date(data.trandate).toLocaleDateString("id-ID", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })
-              : "-"}
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
+            {count.qty2}
           </p>
+          <p className=" break-words whitespace-normal w-[10%] text-right"></p>
         </div>
-      </div>
-
-      <h3 className="text-lg font-semibold mt-10 mb-2">Shipping</h3>
-      <div className="flex justify-between text-sm mb-6">
-        <div className="w-1/2">
-          <p>
-            <strong>Shipping Address:</strong>
-          </p>
-          <p>{data?.shippingaddress || "-"}</p>
+      </section>
+      <section className="w-full flex flex-col items-end gap-4">
+        <div className="w-full flex gap-8">
+          <div className="w-[75%] flex gap-8">
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Dibuat oleh,</p>
+              <hr className="w-full border-b" />
+            </div>
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Disetujui oleh,</p>
+              <hr className="w-full border-b" />
+            </div>
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Dikirim oleh,</p>
+              <hr className="w-full border-b" />
+            </div>
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Diterima oleh,</p>
+              <hr className="w-full border-b" />
+            </div>
+          </div>
+          <div className="w-[25%] border h-20 flex flex-col px-1">
+            <p>Keterangan: JEMPUT</p>
+          </div>
         </div>
-        <div className="w-1/2">
-          <p>
-            <strong>Notes:</strong>
-          </p>
-          <p>{data?.notes?.trim() || "-"}</p>
-        </div>
-      </div>
+        <p>{`[${currentDate}]`}</p>
+      </section>
+      <style jsx>{`
+        .table-padding p {
+          padding: 0 0.5rem;
+        }
 
-      <h3 className="text-lg font-semibold mt-10 mb-2">Item</h3>
-      <table className="w-full border border-collapse text-sm">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border px-2 py-1 text-left">Item</th>
-            <th className="border px-2 py-1 text-left">Display Name</th>
-            <th className="border px-2 py-1 text-left">Description</th>
-            <th className="border px-2 py-1 text-left">Location</th>
-            <th className="border px-2 py-1 text-right">Remaining</th>
-            <th className="border px-2 py-1 text-right">Qty (Kg)</th>
-            <th className="border px-2 py-1 text-left">Unit 1</th>
-            <th className="border px-2 py-1 text-right">Qty (Bal)</th>
-            <th className="border px-2 py-1 text-left">Unit 2</th>
-          </tr>
-        </thead>
-        <tbody>
-          {dataTable?.length > 0 ? (
-            dataTable.map((item) => (
-              <tr key={item.item}>
-                <td className="border px-2 py-1">{item.item || "-"}</td>
-                <td className="border px-2 py-1">{item?.displayname || "-"}</td>
-                <td className="border px-2 py-1">{item.memo || "-"}</td>
-                <td className="border px-2 py-1">{item.location || "-"}</td>
-                <td className="border px-2 py-1 text-right">
-                  {item.quantityremaining ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.quantity ?? 0}
-                </td>
-                <td className="border px-2 py-1">{item.unit1 || "-"}</td>
-                <td className="border px-2 py-1 text-right">
-                  {item.quantity2 ?? 0}
-                </td>
-                <td className="border px-2 py-1">{item.unit2 || "-"}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={9} className="border px-2 py-2 text-center">
-                No items available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+        @media print {
+          #print-do {
+            font-size: 1rem; /* Default */
+          }
 
-      <p className="mt-10 text-xs text-gray-500">
-        Generated on:{" "}
-        {data?.createddate
-          ? new Date(data.createddate).toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })
-          : "-"}
-      </p>
+          /* A4: approx width ~ 595px to 842px */
+          @page {
+            size: A4;
+          }
+
+          @media print and (max-width: 595px) {
+            #print-do {
+              font-size: 0.75rem; /* text-xs */
+            }
+          }
+
+          @media print and (min-width: 595px) and (max-width: 842px) {
+            #print-do {
+              font-size: 0.875rem; /* text-sm */
+            }
+          }
+        }
+      `}</style>
     </div>
   );
 }

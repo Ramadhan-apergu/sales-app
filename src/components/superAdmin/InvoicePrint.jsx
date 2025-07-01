@@ -1,261 +1,232 @@
+import { formatDateStartDay } from "@/utils/formatDate";
+import { useEffect, useState } from "react";
+
 export default function InvoicePrint({ data, dataTable }) {
+  const [currentDate, setCurrentDate] = useState("");
+  const [count, setCount] = useState({
+    amount: 0,
+    quantity: 0,
+  });
+
+  useEffect(() => {
+    const date = new Date().toLocaleString("id-ID", {
+      timeZone: "Asia/Jakarta",
+    });
+    setCurrentDate(date);
+    const total = dataTable.reduce(
+      (acc, item) => ({
+        amount: acc.amount + (item.amount || 0),
+        quantity: acc.quantity + (item.quantity || 0),
+      }),
+      { amount: 0, quantity: 0 }
+    );
+    setCount(total);
+  }, [dataTable]);
   return (
-    <div
-      id="invoice-print"
-      className="font-sans p-8 max-w-5xl mx-auto bg-white text-black"
-    >
-      <h1 className="text-2xl font-bold text-center mb-10">INVOICE</h1>
-
-      <div className="flex justify-between mb-6 text-sm">
-        <div className="w-1/4">
-          <p>
-            <strong>No. Invoice:</strong> {data?.tranid || "-"}
+    <div id="print-invoice" className="w-full flex flex-col gap-8">
+      <section className="w-full flex flex-col items-end gap-8">
+        <div className="w-full flex justify-between">
+          <div className="flex flex-col items-start">
+            <h3 className="font-bold text-2xl tracking-wide">
+              CV. Sukses Mandiri
+            </h3>
+            <p>Jl. Raya Medan – Lubuk Pakam Km 22,5 Medan – 20362, Indonesia</p>
+          </div>
+          <h3 className="font-bold text-2xl tracking-wide">FAKTUR JUAL</h3>
+        </div>
+        <div className="w-full flex justify-between table-padding">
+          <div className="w-1/2">
+            <div className="w-full flex">
+              <p className="w-3/12 font-semibold break-words whitespace-normal">TO :</p>
+              <p className="w-8/12 border  break-words whitespace-normal">
+                {data?.customer || "-"}
+              </p>
+            </div>
+            <div className="w-full flex">
+              <p className="w-3/12 font-semibold break-words whitespace-normal">Alamat :</p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {data?.billingaddress || "-"}
+              </p>
+            </div>
+            <div className="w-full flex">
+              <p className="w-3/12 font-semibold break-words whitespace-normal">Note :</p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {data?.memo || "-"}
+              </p>
+            </div>
+            <br />
+            <div className="w-full flex">
+              <p className="w-3/12 font-semibold break-words whitespace-normal">Sales :</p>
+              <p className="w-8/12 border  break-words whitespace-normal">
+                {data?.sales || "-"}
+              </p>
+            </div>
+            <div className="w-full flex">
+              <p className="w-3/12 font-semibold break-words whitespace-normal">Termin :</p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {data?.termin || "-"}
+              </p>
+            </div>
+          </div>
+          <div className="w-1/2">
+            <div className="w-full flex justify-end">
+              <p className="w-3/12 font-semibold break-words whitespace-normal border-l border-y">
+                No. Faktur
+              </p>
+              <p className="w-7/12 border  break-words whitespace-normal">
+                {data?.tranid || "-"}
+              </p>
+            </div>
+            <div className="w-full flex justify-end">
+              <p className="w-3/12 font-semibold break-words whitespace-normal border-l border-b">
+                Tgl Faktur
+              </p>
+              <p className="w-7/12 border-x border-b break-words whitespace-normal">
+                {formatDateStartDay(data?.trandate) || "-"}
+              </p>
+            </div>
+            <div className="w-full flex justify-end">
+              <p className="w-3/12 font-semibold break-words whitespace-normal border-l border-b">
+                No. SO
+              </p>
+              <p className="w-7/12 border-x border-b break-words whitespace-normal">
+                {data?.so_numb || "-"}
+              </p>
+            </div>
+            <div className="w-full flex justify-end">
+              <p className="w-3/12 font-semibold break-words whitespace-normal border-l border-b">
+                Tgl SO
+              </p>
+              <p className="w-7/12 border-x border-b break-words whitespace-normal">
+                {formatDateStartDay(data?.so_trandate) || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="w-full">
+        <div className="w-full flex border table-padding font-semibold">
+          <p className="border-r break-words whitespace-normal w-[5%]">No.</p>
+          <p className="border-r break-words whitespace-normal w-[20%]">Kode</p>
+          <p className="border-r break-words whitespace-normal w-[20%]">
+            Nama Barang
           </p>
-          <p>
-            <strong>Status:</strong>{" "}
-            {data?.status
-              ? data.status.charAt(0).toUpperCase() + data.status.slice(1)
-              : "-"}
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">Qty</p>
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Satuan
           </p>
-          <p>
-            <strong>Customer:</strong> {data?.customer || "-"}
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Harga
           </p>
-          <p>
-            <strong>Date:</strong>{" "}
-            {data?.trandate
-              ? new Date(data.trandate).toLocaleDateString("id-ID", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })
-              : "-"}
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Diskon
+          </p>
+          <p className=" break-words whitespace-normal w-[15%] text-right">
+            Jumlah
           </p>
         </div>
-        <div className="w-1/4" />
-        <div className="w-1/4" />
-        <div className="w-1/4">
-          <p>
-            <strong>No. SO:</strong> {data?.so_numb || "-"}
-          </p>
-          <p>
-            <strong>Sales:</strong> {data?.sales || "-"}
-          </p>
-        </div>
-      </div>
-
-      <h3 className="text-lg font-semibold mt-10 mb-2">Shipping</h3>
-      <div className="flex justify-between text-sm mb-6">
-        <div className="w-1/2">
-          <p>
-            <strong>Shipping Address:</strong>
-          </p>
-          <p>{data?.shippingaddress || "-"}</p>
-        </div>
-        <div className="w-1/2">
-          <p>
-            <strong>Notes:</strong>
-          </p>
-          <p>{data?.memo?.trim() || "-"}</p>
-        </div>
-      </div>
-
-      <h3 className="text-lg font-semibold mt-10 mb-2">Billing</h3>
-      <div className="flex justify-between text-sm mb-6">
-        <div className="w-1/2">
-          <p>
-            <strong>Term:</strong>
-          </p>
-          <p>{data?.term || "-"}</p>
-        </div>
-      </div>
-
-      <h3 className="text-lg font-semibold mt-10 mb-2">Item</h3>
-      {/* <table className="w-full border border-collapse text-sm flex flex-col">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border px-2 py-1 text-right">Display Name</th>
-            <th className="border px-2 py-1 text-right">Item</th>
-            <th className="border px-2 py-1 text-right">Qty 1</th>
-            <th className="border px-2 py-1 text-right">Unit 1</th>
-            <th className="border px-2 py-1 text-right">Qty 2</th>
-            <th className="border px-2 py-1 text-right">Unit 2</th>
-            <th className="border px-2 py-1 text-right">Rate</th>
-            <th className="border px-2 py-1 text-right">Total Amount</th>
-            <th className="border px-2 py-1 text-right">Total Discount</th>
-            <th className="border px-2 py-1 text-right">
-              Total Amount (After Discount)
-            </th>
-            <th className="border px-2 py-1 text-right">Tax Rate</th>
-            <th className="border px-2 py-1 text-right">Tax Value</th>
-            <th className="border px-2 py-1 text-right">Memo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {dataTable?.length > 0 ? (
-            dataTable.map((item) => (
-              <tr key={item.id}>
-                <td className="border px-2 py-1 text-right">
-                  {item.displayname || "-"}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.item || "-"}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.quantity ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.units || "-"}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.quantity2 ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.units2 || "-"}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.rate?.toLocaleString("id-ID") ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.subtotal?.toLocaleString("id-ID") ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.totaldiscount?.toLocaleString("id-ID") ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.amount?.toLocaleString(
-                    "id-ID"
-                  ) ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.taxrate ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.taxvalue?.toLocaleString("id-ID") ?? 0}
-                </td>
-                <td className="border px-2 py-1 text-right">
-                  {item.memo || "-"}
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={13} className="border px-2 py-2 text-center">
-                No items available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table> */}
-
-      <div className="overflow-auto">
-        {/* Header */}
-        <div className="grid grid-cols-13 bg-gray-100 text-sm font-semibold border-t border-x">
-          {[
-            "Display Name",
-            "Item",
-            "Qty 1",
-            "Unit 1",
-            "Qty 2",
-            "Unit 2",
-            "Rate",
-            "Total Amount",
-            "Total Discount",
-            "Total After Discount",
-            "Tax Rate",
-            "Tax Value",
-            "Memo",
-          ].map((header, idx) => (
+        {dataTable &&
+          dataTable.length > 0 &&
+          dataTable.map((item, i) => (
             <div
-              key={idx}
-              className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden"
+              key={i}
+              className="w-full flex border-x border-b table-padding"
             >
-              {header}
+              <p className="border-r break-words whitespace-normal w-[5%] text-right">
+                {i + 1}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[20%]">
+                {item.itemprocessfamily || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[20%]">
+                {item.displayname || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.quantity || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.units || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.rate || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.totaldiscount || "-"}
+              </p>
+              <p className=" break-words whitespace-normal w-[15%] text-right">
+                {item.amount || "-"}
+              </p>
             </div>
           ))}
+        <div className="w-full flex border-r table-padding">
+          <p className="break-words whitespace-normal w-[5%] text-right"></p>
+          <p className="break-words whitespace-normal w-[20%]"></p>
+          <p className="border-r break-words whitespace-normal w-[20%]"></p>
+          <p className="border-r border-b break-words whitespace-normal w-[10%] text-right">
+            {count.quantity}
+          </p>
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">Total</p>
+          <p className="break-words border-b whitespace-normal w-[15%] text-right">
+            {count.amount}
+          </p>
         </div>
-
-        {/* Data Rows */}
-        {dataTable?.length > 0 ? (
-          dataTable.map((item) => (
-            <div
-              key={item.id}
-              className="grid grid-cols-13 text-sm border-x border-b"
-            >
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.displayname || "-"}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.item || "-"}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.quantity ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.units || "-"}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.quantity2 ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.units2 || "-"}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.rate?.toLocaleString("id-ID") ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.subtotal?.toLocaleString("id-ID") ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.totaldiscount?.toLocaleString("id-ID") ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.amount?.toLocaleString("id-ID") ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.taxrate ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.taxvalue?.toLocaleString("id-ID") ?? 0}
-              </div>
-              <div className="border px-2 py-1 text-right whitespace-normal break-words overflow-hidden">
-                {item.memo || "-"}
-              </div>
+      </section>
+      <section className="w-full flex flex-col items-end gap-4">
+        <div className="w-full flex gap-8">
+          <div className="w-[75%] flex gap-8">
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Dibuat oleh,</p>
+              <hr className="w-full border-b" />
             </div>
-          ))
-        ) : (
-          <div className="border px-2 py-2 text-center text-sm">
-            No items available
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Disetujui oleh,</p>
+              <hr className="w-full border-b" />
+            </div>
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Dikirim oleh,</p>
+              <hr className="w-full border-b" />
+            </div>
+            <div className="w-1/4 h-20 flex flex-col justify-between items-center">
+              <p>Diterima oleh,</p>
+              <hr className="w-full border-b" />
+            </div>
           </div>
-        )}
-      </div>
+          <div className="w-[25%] border h-20 flex flex-col px-1">
+            <p>Keterangan: JEMPUT</p>
+          </div>
+        </div>
+        <p>{`[${currentDate}]`}</p>
+      </section>
+      <style jsx>{`
+        .table-padding p {
+          padding: 0 0.5rem;
+        }
 
-      <h3 className="text-lg font-semibold mt-10 mb-2">Summary</h3>
-      <div className="mt-10 text-sm max-w-sm ml-auto space-y-1">
-        <div className="flex justify-between">
-          <span>Subtotal</span>
-          <span>{(data?.subtotal ?? 0).toLocaleString("id-ID")}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Discount</span>
-          <span>{(data?.discounttotal ?? 0).toLocaleString("id-ID")}</span>
-        </div>
-        <hr />
-        <div className="flex justify-between font-semibold">
-          <span>Total</span>
-          <span>{(data?.totalamount ?? 0).toLocaleString("id-ID")}</span>
-        </div>
-      </div>
+        @media print {
+          #print-invoice {
+            font-size: 1rem; /* Default */
+          }
 
-      <p className="mt-10 text-xs text-gray-500">
-        Generated on:{" "}
-        {data?.createddate
-          ? new Date(data.createddate).toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })
-          : "-"}
-      </p>
+          /* A4: approx width ~ 595px to 842px */
+          @page {
+            size: A4;
+          }
+
+          @media print and (max-width: 595px) {
+            #print-invoice {
+              font-size: 0.75rem; /* text-xs */
+            }
+          }
+
+          @media print and (min-width: 595px) and (max-width: 842px) {
+            #print-invoice {
+              font-size: 0.875rem; /* text-sm */
+            }
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -351,14 +351,7 @@ export default function EnterPage() {
   const handleClickAction = ({ key }) => {
     switch (key) {
       case "1":
-        if (typeof window !== "undefined") {
-          const printJS = require("print-js"); // ⬅️ ini kuncinya
-          printJS({
-            printable: "invoice-print",
-            type: "html",
-            targetStyles: ["*"],
-          });
-        }
+        window.print()
         break;
       case "2":
         deleteModal();
@@ -652,9 +645,30 @@ export default function EnterPage() {
       </div>
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
-      <div className="hidden">
+      <div className="to-print-invoice hidden">
         <InvoicePrint data={data} dataTable={dataTableItem} />
       </div>
+      <style jsx>{`
+        @media print {
+          * {
+            display: none !important;
+          }
+
+          .ant-dropdown {
+            display: none !important;
+          }
+
+          .to-print-invoice {
+            display: block !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            z-index: 99999;
+          }
+        }
+      `}</style>
     </Layout>
   );
 }
