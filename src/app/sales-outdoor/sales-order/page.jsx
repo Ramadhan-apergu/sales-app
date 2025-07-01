@@ -257,7 +257,8 @@ export default function SalesOrder() {
                             customerName: order.customer,
                             date: order.trandate,
                             status: order.status,
-                            total: formatRupiah(order.total)
+                            total: formatRupiah(order.total),
+                            po: order.otherrefnum
                         }}
                     />
                 </Link>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { HiOutlineTicket } from "react-icons/hi2";
+import { HiOutlineTicket, HiMiniTicket } from "react-icons/hi2";
 import { HiCalendarDateRange } from "react-icons/hi2";
 import { HiCheckCircle, HiClock, HiXCircle } from "react-icons/hi";
 
@@ -71,9 +71,15 @@ export default function CardList({ data }) {
     return (
         <div className="px-4 pb-4">
             <div className="w-full h-32 rounded-xl bg-white px-4 py-3 flex flex-col gap-2 shadow">
-                <div className="flex gap-2 items-center">
-                    <HiOutlineTicket className="text-blue-6"/>
-                    <p className="text-sm font-semibold">{data?.id || '-'}</p>
+                <div className="flex justify-between items-center w-full">
+                    <div className="flex gap-2">
+                        <HiOutlineTicket className="text-blue-6"/>
+                        <p className="text-sm font-semibold">{data?.id || '-'}</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <p className="text-sm font-semibold">{data?.po || '-'}</p>
+                        <HiMiniTicket className="text-blue-6"/>
+                    </div>
                 </div>
                 <div className="h-full flex flex-col justify-between">
                     <div className="bg-gray-3 p-2 rounded border border-gray-5 flex justify-center px-2">

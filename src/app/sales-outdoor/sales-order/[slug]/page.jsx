@@ -167,7 +167,7 @@ export default function SalesOrderDetail() {
                     <h3 className="font-semibold text-gray-700 mb-2 text-center text-2xl">Sales Order Details</h3>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span>{order.id} / {order.customer}</span>
+                        <span>{order.tranid} / {order.customer}</span>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         order.status === 'Fulfilled' 
@@ -192,11 +192,11 @@ export default function SalesOrderDetail() {
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Customer:</span>
-                        <span className="text-right">{order.customer}</span>
+                        <span className="text-gray-500">Customer ID:</span>
+                        <span className="text-right">{order.customer_id}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Customer Entity:</span>
+                        <span className="text-gray-500">Customer Name:</span>
                         <span className="text-right">{order.entity}</span>
                       </div>
                       <div className="flex justify-between">
@@ -227,12 +227,12 @@ export default function SalesOrderDetail() {
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Shipping Option:</span>
-                        <span className="text-right">{order.shippingoption}</span>
-                      </div>
-                      <div className="flex justify-between">
                         <span className="text-gray-500">Shipping Address:</span>
                         <span className="text-right">{order.shippingaddress}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Notes:</span>
+                        <span className="text-right">{order.notes}</span>
                       </div>
                     </div>
                   </div>
@@ -251,7 +251,11 @@ export default function SalesOrderDetail() {
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Term:</span>
-                        <span className="text-right">{order.term}</span>
+                        <span className="text-right">
+                          {order.term.toLowerCase().startsWith('net')
+                            ? order.term
+                            : `${order.term} Days`}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Payment Option:</span>
@@ -298,24 +302,12 @@ export default function SalesOrderDetail() {
                       {formatRupiah(order.discounttotal)}
                     </p>
                   </div>
-                  <div className="flex w-full">
-                    <p className="w-1/2 text-sm">Subtotal (After Discount)</p>
-                    <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(order.subtotal)} Incl.
-                      PPN
-                    </p>
-                  </div>
-                  <div className="flex w-full">
-                    <p className="w-1/2 text-sm">Tax Total</p>
-                    <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(order.taxtotal)}
-                    </p>
-                  </div>
                   <hr className="border-gray-5" />
                   <div className="flex w-full font-semibold">
                     <p className="w-1/2 text-sm">Total</p>
                     <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(order.total)}
+                      {formatRupiah(order.total)} Incl.
+                      PPN
                     </p>
                   </div>
                 </div>
