@@ -153,7 +153,7 @@ function SalesOrder() {
             return {
               ...data,
               value: data.id,
-              label: data.companyname,
+              label: data.customerid,
             };
           });
           setDataCustomer(mapingCustomerOption);
@@ -322,7 +322,7 @@ function SalesOrder() {
                   <Select
                     showSearch
                     value={customer || undefined}
-                    placeholder="Select a person"
+                    placeholder="Customer ID"
                     filterOption={(input, option) =>
                       (option?.label ?? "")
                         .toLowerCase()

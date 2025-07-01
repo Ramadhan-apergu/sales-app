@@ -122,6 +122,7 @@ export const deliveryOrderAliases = {
     id: "ID",
     itemid: "Item ID",
     item: "Item",
+    itemprocessfamily: "Item",
     displayname: "Display Name",
     memo: "Description",
     location: "Location",
