@@ -61,7 +61,7 @@ export default function InputForm({
             isRead = false,
             placeholder = undefined,
             hidden = false,
-            cursorDisable = false
+            cursorDisable = false,
           }) => {
             const label = isAlias ? aliases[key] || key : key;
 
@@ -108,7 +108,9 @@ export default function InputForm({
                     disabled={disabled}
                     autoSize={{ minRows: 3, maxRows: 6 }}
                     placeholder={placeholder}
-                    style={{ cursor: cursorDisable ? "not-allowed" : "default" }}
+                    style={{
+                      cursor: cursorDisable ? "not-allowed" : "default",
+                    }}
                   />
                 );
                 break;
@@ -120,7 +122,9 @@ export default function InputForm({
                     readOnly={isReadOnly || isRead}
                     disabled={disabled}
                     placeholder={placeholder}
-                    style={{ cursor: cursorDisable ? "not-allowed" : "default" }}
+                    style={{
+                      cursor: cursorDisable ? "not-allowed" : "default",
+                    }}
                   />
                 );
                 break;
@@ -129,6 +133,7 @@ export default function InputForm({
             return (
               <Form.Item
                 key={key}
+                // initialValue={input === "select" ? payload[key] : undefined}
                 label={<span className="capitalize">{label}</span>}
                 name={key}
                 rules={rules}

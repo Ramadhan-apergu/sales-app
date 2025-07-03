@@ -299,17 +299,13 @@ function List() {
                 }}
                 options={[
                   { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "fulfilled", label: "Fulfilled" },
-                  {
-                    value: "partially fulfilled",
-                    label: "Partially Fulfilled",
-                  },
-                  { value: "credit hold", label: "Credit Hold" },
-                  { value: "closed", label: "Closed" },
-                  { value: "pending approval", label: "Pending Approval" },
+                  { value: "payment received", label: "Payment Received" },
+                  { value: "partially paid", label: "Partially Paid" },
+                  { value: "unpaid", label: "Unpaid" },
+                  { value: "overpaid ", label: "Overpaid " },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                style={{minWidth: '200px', whiteSpace: 'nowrap'}}
+                // dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
