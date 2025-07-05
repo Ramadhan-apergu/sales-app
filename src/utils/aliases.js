@@ -307,3 +307,21 @@ export const salesReportAliases = {
   harga: "Price",
   jumlah: "Total",
 };
+
+export const userAliases = {
+    username: "Username",
+    name: "Name",
+    email: "Email",
+    address: "Address",
+    roleid: "Role Name",
+    password: "Password"
+}
+
+export const userAliasesEdit = {
+    username: "Username",
+    name: "Name",
+    email: "Email",
+    address: "Address",
+    roleid: "Role Name",
+    password: "New Password"
+}

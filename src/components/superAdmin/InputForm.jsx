@@ -1,7 +1,16 @@
 "use client";
 
-import { DatePicker, Divider, Form, Input, InputNumber, Select } from "antd";
-import { useEffect } from "react";
+import {
+  Button,
+  DatePicker,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+} from "antd";
+import { useEffect, useState } from "react";
+import { EyeOutlined } from "@ant-design/icons";
 
 export default function InputForm({
   type,
@@ -15,6 +24,7 @@ export default function InputForm({
   isSingleCol = false,
 }) {
   const [form] = Form.useForm();
+  const [visibleStates, setVisibleStates] = useState([]);
 
   // Set initial form values when payload changes
   useEffect(() => {
@@ -50,19 +60,23 @@ export default function InputForm({
         onValuesChange={handleValuesChange}
       >
         {data.map(
-          ({
-            key,
-            input,
-            options = [],
-            isAlias = false,
-            props = {},
-            rules = [],
-            disabled = false,
-            isRead = false,
-            placeholder = undefined,
-            hidden = false,
-            cursorDisable = false,
-          }) => {
+          (
+            {
+              key,
+              input,
+              options = [],
+              isAlias = false,
+              props = {},
+              rules = [],
+              disabled = false,
+              isRead = false,
+              placeholder = undefined,
+              hidden = false,
+              cursorDisable = false,
+              accounting = false,
+            },
+            i
+          ) => {
             const label = isAlias ? aliases[key] || key : key;
 
             let inputComponent;
@@ -75,6 +89,20 @@ export default function InputForm({
                     readOnly={isReadOnly}
                     disabled={disabled}
                     placeholder={placeholder}
+                    formatter={(value) => {
+                      if (accounting) {
+                        return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                      } else {
+                        return value;
+                      }
+                    }}
+                    parser={(value) => {
+                      if (accounting) {
+                        return value.replace(/\$\s?|(,*)/g, "");
+                      } else {
+                        return value;
+                      }
+                    }}
                   />
                 );
                 break;
@@ -114,7 +142,54 @@ export default function InputForm({
                   />
                 );
                 break;
-              case "input":
+              case "password":
+                inputComponent = (
+                  <div className="flex flex-1 items-center">
+                    <Input
+                      id={`${type}${i}`}
+                      type={visibleStates[i] ? "text" : "password"}
+                      {...props}
+                      readOnly={isReadOnly || isRead}
+                      disabled={disabled}
+                      placeholder={placeholder}
+                      style={{
+                        cursor: cursorDisable ? "not-allowed" : "default",
+                      }}
+                    />
+                    <Button
+                      type="link"
+                      icon={
+                        <EyeOutlined
+                          style={{
+                            color: visibleStates[i] ? "#1677ff" : "#bfbfbf", // antd primary vs grey
+                          }}
+                        />
+                      }
+                      onClick={() => {
+                        const elPassword = document.getElementById(
+                          `${type}${i}`
+                        );
+                        if (
+                          elPassword &&
+                          elPassword instanceof HTMLInputElement
+                        ) {
+                          elPassword.type =
+                            elPassword.type === "password"
+                              ? "text"
+                              : "password";
+                        }
+
+                        // Update state untuk icon
+                        setVisibleStates((prev) => {
+                          const newStates = [...prev];
+                          newStates[i] = !newStates[i];
+                          return newStates;
+                        });
+                      }}
+                    />
+                  </div>
+                );
+                break;
               default:
                 inputComponent = (
                   <Input
