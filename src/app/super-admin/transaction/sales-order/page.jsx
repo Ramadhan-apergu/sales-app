@@ -1,6 +1,11 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  UnlockOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -19,7 +24,7 @@ import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
-import { getResponseHandler } from "@/utils/responseHandlers";
+import { getResponseHandler, updateResponseHandler } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
@@ -49,6 +54,8 @@ function SalesOrder() {
   const title = "sales-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
+
+  const [toggleRefetch, setToggleRefetch] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,6 +120,38 @@ function SalesOrder() {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
+    const openCreditModal = (record) => {
+    modal.confirm({
+      title: `Open Credit ${title} "${record.tranid}"?`,
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      cancelText: "Cancel",
+      onOk: () => {
+        updateHandleStatus(record.id, 'Open');
+      },
+    });
+  };
+
+  const updateHandleStatus = async (id, status) => {
+    try {
+      setIsloading(true);
+
+      const response = await SalesOrderFetch.updateStatus(id, {
+        status,
+      });
+
+      const resData = updateResponseHandler(response, notify);
+
+      if (resData) {
+        setToggleRefetch(!toggleRefetch);
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    } finally {
+      setIsloading(false);
+    }
+  };
+
   const columns = [
     {
       title: "No. SO",
@@ -148,13 +187,9 @@ function SalesOrder() {
       render: (text, record) => (
         <Tag
           color={
-            ["fulfilled", "closed"].includes(
-              record.status.toLowerCase()
-            )
+            ["fulfilled", "closed"].includes(record.status.toLowerCase())
               ? "green"
-              : ["partially fulfilled"].includes(
-                  record.status.toLowerCase()
-                )
+              : ["partially fulfilled"].includes(record.status.toLowerCase())
               ? "orange"
               : ["credit hold", "canceled"].includes(
                   record.status.toLowerCase()
@@ -171,11 +206,14 @@ function SalesOrder() {
       title: "Actions",
       key: "actions",
       fixed: "right",
-      align: "right",
+      align: "center",
       width: isLargeScreen ? 87 : 30,
       render: (_, record) => (
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex flex-col justify-center items-center gap-2">
           <Button
+            disabled={["credit hold", "fulfilled"].includes(
+              record.status.toLowerCase()
+            )}
             type={"link"}
             size="small"
             icon={<EditOutlined />}
@@ -183,6 +221,17 @@ function SalesOrder() {
           >
             {isLargeScreen ? "Edit" : ""}
           </Button>
+          {record.status && record.status.toLowerCase() == "credit hold" && (
+            <Button
+              type={"link"}
+              color="green"
+              size="small"
+              icon={<UnlockOutlined />}
+              onClick={() => openCreditModal(record)}
+            >
+              {isLargeScreen ? "Open Credit" : ""}
+            </Button>
+          )}
           {contextHolder}
         </div>
       ),

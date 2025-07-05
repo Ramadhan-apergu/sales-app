@@ -1123,6 +1123,7 @@ export default function Enter() {
                     </div>
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
+                      disabled={['credit hold', 'fulfilled'].includes(data.status.toLowerCase())}
                         type={"primary"}
                         icon={<SaveOutlined />}
                         onClick={handleSubmit}
