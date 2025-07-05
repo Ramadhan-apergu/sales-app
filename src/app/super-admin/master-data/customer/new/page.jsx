@@ -328,6 +328,7 @@ export default function CustomerNew() {
                     key: "creditlimit",
                     input: "number",
                     isAlias: true,
+                    accounting: true,
                     rules: [
                       {
                         required: true,

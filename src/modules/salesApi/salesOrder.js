@@ -89,6 +89,15 @@ export default class SalesOrderFetch extends ProcessFetch {
     }
   }
 
+  static async updateStatus(id, payload) {
+    try {
+      const response = await this.axios.put(`/trx/sales-order/status/${id}`, payload);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
   static async approveSoPending(id, action) {
     try {
       const response = await this.axios.put(`/trx/so-update/approval/${id}`, {
@@ -100,9 +109,12 @@ export default class SalesOrderFetch extends ProcessFetch {
     }
   }
 
-    static async checkSoVrify(id) {
+  static async checkSoVrify(id) {
     try {
-      const response = await this.axios.post(`/trx/sales-order/verify/${id}`, {});
+      const response = await this.axios.post(
+        `/trx/sales-order/verify/${id}`,
+        {}
+      );
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

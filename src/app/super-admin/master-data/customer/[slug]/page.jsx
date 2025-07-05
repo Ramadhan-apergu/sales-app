@@ -282,7 +282,7 @@ export default function Detail() {
                     payload={financial}
                     data={[
                       { key: "creditlimit", input: "input", isAlias: true },
-                      { key: "currency", input: "input", isAlias: false },
+                      { key: "currency", input: "input", isAlias: false, hidden: true },
                       { key: "resalenumber", input: "input", isAlias: true },
                       { key: "terms", input: "input", isAlias: true },
                     ]}

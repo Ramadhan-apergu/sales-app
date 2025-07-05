@@ -26,6 +26,8 @@ import {
   DatabaseOutlined,
   DownloadOutlined,
   LogoutOutlined,
+  TeamOutlined,
+  UnlockOutlined,
 } from "@ant-design/icons";
 import { PiSpeedometer, PiSwap } from "react-icons/pi";
 import { HiOutlineFolder, HiOutlinePrinter } from "react-icons/hi";
@@ -43,6 +45,7 @@ const headerItems = [
   { key: `${prefix}/master-data`, label: "Master Data" },
   { key: `${prefix}/inventory`, label: "Inventory" },
   { key: `${prefix}/report`, label: "Report" },
+  { key: `${prefix}/access-control`, label: "Access Control" },
 ];
 
 const siderMenuPerPage = {
@@ -120,6 +123,13 @@ const siderMenuPerPage = {
       key: "/report/sales",
       label: "Sales",
       icon: <BarChartOutlined />,
+    },
+  ],
+    "/access-control": [
+    {
+      key: "/access-control/user",
+      label: "User",
+      icon: <TeamOutlined />,
     },
   ],
 };
