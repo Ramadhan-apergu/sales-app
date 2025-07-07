@@ -78,13 +78,13 @@ export default function Page() {
     setYearData({
       kg: data.total_so_tahunan_kg,
       amount: data.total_so_tahunan_amount,
+      kg_avg: data.total_so_avg_kg,
+      amount_avg: data.total_so_avg_amount,
     });
 
     setMonthData({
       kg: data.total_so_bulanan_kg,
-      kg_avg: data.total_so_avg_kg,
-      amount: data.total_so_tahunan_amount,
-      amount_avg: data.total_so_avg_amount,
+      amount: data.total_so_bulanan_amount,
     });
 
     setGrafikData({
@@ -136,7 +136,7 @@ export default function Page() {
             </div>
 
             {/* Cards Grid */}
-            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Card 1 */}
               <div className="w-full h-40 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
                 <div>
@@ -155,6 +155,25 @@ export default function Page() {
               </div>
 
               {/* Card 2 */}
+              <div className="w-full h-40 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
+                <div>
+                  <p className="text-sm font-medium text-blue-6">
+                    Sales Order Average
+                  </p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-blue-8">
+                    {yearData &&
+                    yearData.kg_avg !== undefined &&
+                    yearData.kg_avg !== null
+                      ? yearData.kg_avg
+                      : "-"}
+                  </p>
+                  <p className="text-sm text-blue-5">Kg</p>
+                </div>
+              </div>
+
+              {/* Card 3 */}
               <div className="w-full h-40 bg-gradient-to-tr from-green-1 to-white border border-green-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
                 <div>
                   <p className="text-sm font-medium text-green-6">Penjualan</p>
@@ -165,6 +184,25 @@ export default function Page() {
                     yearData.amount !== undefined &&
                     yearData.amount !== null
                       ? formatRupiahAccounting(yearData.amount)
+                      : "-"}
+                  </p>
+                  <p className="text-sm text-green-5">Amount</p>
+                </div>
+              </div>
+
+              {/* Card 4 */}
+              <div className="w-full h-40 bg-gradient-to-tr from-green-1 to-white border border-green-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
+                <div>
+                  <p className="text-sm font-medium text-green-6">
+                    Penjualan Average
+                  </p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-green-8">
+                    {yearData &&
+                    yearData.amount_avg !== undefined &&
+                    yearData.amount_avg !== null
+                      ? formatRupiahAccounting(yearData.amount_avg)
                       : "-"}
                   </p>
                   <p className="text-sm text-green-5">Amount</p>
@@ -207,7 +245,7 @@ export default function Page() {
             </div>
 
             {/* Cards Grid */}
-            <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Card 1 */}
               <div className="w-full h-40 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
                 <div>
@@ -225,25 +263,6 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Card 2 */}
-              <div className="w-full h-40 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
-                <div>
-                  <p className="text-sm font-medium text-blue-6">
-                    Sales Order Average
-                  </p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-blue-8">
-                    {monthData &&
-                    monthData.kg_avg !== undefined &&
-                    monthData.kg_avg !== null
-                      ? monthData.kg_avg
-                      : "-"}
-                  </p>
-                  <p className="text-sm text-blue-5">Kg</p>
-                </div>
-              </div>
-
               {/* Card 3 */}
               <div className="w-full h-40 bg-gradient-to-tr from-green-1 to-white border border-green-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
                 <div>
@@ -255,25 +274,6 @@ export default function Page() {
                     monthData.amount !== undefined &&
                     monthData.amount !== null
                       ? formatRupiahAccounting(monthData.amount)
-                      : "-"}
-                  </p>
-                  <p className="text-sm text-green-5">Amount</p>
-                </div>
-              </div>
-
-              {/* Card 4 */}
-              <div className="w-full h-40 bg-gradient-to-tr from-green-1 to-white border border-green-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
-                <div>
-                  <p className="text-sm font-medium text-green-6">
-                    Penjualan Average
-                  </p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-green-8">
-                    {monthData &&
-                    monthData.amount_avg !== undefined &&
-                    monthData.amount_avg !== null
-                      ? formatRupiahAccounting(monthData.amount_avg)
                       : "-"}
                   </p>
                   <p className="text-sm text-green-5">Amount</p>
