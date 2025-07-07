@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Layout from '@/components/salesOutdoor/Layout';
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
 import SalesOrderFetch from '@/modules/salesApi/salesOrder';
-import { Button, Table, Spin, Empty, Divider, } from 'antd';
+import { Button, Table, Spin, Empty, Divider, Tooltip } from 'antd';
 
 const formatRupiah = (value) => {
     const num = Number(value);
@@ -27,7 +27,6 @@ export default function SalesOrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // daftar key untuk kolom tabel
   const keyTableItem = [
     "displayname",
     "quantity",
@@ -57,60 +56,88 @@ export default function SalesOrderDetail() {
     "backordered",
   ];
 
-  // generate kolom tabel berdasarkan keyTableItem
-  const itemColumns = keyTableItem.map((key) => ({
-    title: (key === 'displayname' ? 'Item Name' : key)
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase()),
-    dataIndex: key,
-    key,
-    align: [
-      'quantity',
-      'rate',
-      'value1',
-      'discountvalue1',
-      'perunit1',
-      'value2',
-      'discountvalue2',
-      'perunit2',
-      'value3',
-      'discountvalue3',
-      'perunit3',
-      'subtotal',
-      'totalamount',
-      'totaldiscount',
-      'qtyfree',
-      'taxrate',
-      'taxvalue',
-      'backordered'
-    ].includes(key) ? 'right' : 'left',
-    onHeaderCell: () => ({
-      className: 'text-sm text-center', 
-      style: { textAlign: 'center' } 
-    }),
-    onCell: () => ({
-      className: 'text-xs'
-    }),
-    render: (text) => {
-    const shouldFormat = [
-      'rate',
-      'value1',
-      'discountvalue1',
-      'value2',
-      'discountvalue2',
-      'value3',
-      'discountvalue3',
-      'subtotal',
-      'totalamount',
-      'totaldiscount',
-      'taxvalue'
-    ].includes(key);
+  const itemColumns = keyTableItem.map((key) => {
+    const isDisplayName = key === 'displayname';
     
-    return shouldFormat ? formatRupiah(text) : text;
-  }
-  }));
+    const column = {
+      title: (isDisplayName ? 'Item Name' : key)
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase()),
+      dataIndex: key,
+      key,
+      align: [
+        'quantity',
+        'rate',
+        'value1',
+        'discountvalue1',
+        'perunit1',
+        'value2',
+        'discountvalue2',
+        'perunit2',
+        'value3',
+        'discountvalue3',
+        'perunit3',
+        'subtotal',
+        'totalamount',
+        'totaldiscount',
+        'qtyfree',
+        'taxrate',
+        'taxvalue',
+        'backordered'
+      ].includes(key) ? 'right' : 'left',
+      onHeaderCell: () => ({
+        className: 'text-sm text-center', 
+        style: { textAlign: 'center' } 
+      }),
+      onCell: () => ({
+        className: 'text-xs'
+      }),
+      render: (text) => {
+        if (isDisplayName) {
+          return (
+            <Tooltip title={text}>
+              <div className="truncate" style={{ 
+                maxWidth: '120px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {text}
+              </div>
+            </Tooltip>
+          );
+        }
+        
+        const shouldFormat = [
+          'rate',
+          'value1',
+          'discountvalue1',
+          'value2',
+          'discountvalue2',
+          'value3',
+          'discountvalue3',
+          'subtotal',
+          'totalamount',
+          'totaldiscount',
+          'taxvalue'
+        ].includes(key);
+        
+        return shouldFormat ? formatRupiah(text) : text;
+      }
+    };
 
-  // Fetch detail order
+    // Hanya terapkan properti fixed dan width untuk kolom displayname
+    if (isDisplayName) {
+      column.fixed = 'left';
+      column.width = 120;
+      column.ellipsis = {
+        showTitle: false // Nonaktifkan tooltip bawaan Antd
+      };
+    }
+
+    return column;
+  });
+
   useEffect(() => {
     const fetchOrder = async () => {
       if (!params.slug) return;
@@ -133,7 +160,6 @@ export default function SalesOrderDetail() {
     fetchOrder();
   }, [params.slug]);
 
-  // Fungsi untuk tombol kembali
   const handleBack = () => {
     window.history.back();
   };
@@ -197,7 +223,7 @@ export default function SalesOrderDetail() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Customer Name:</span>
-                        <span className="text-right">{order.entity}</span>
+                        <span className="text-right">{order.customer}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Transaction Date:</span>
@@ -267,15 +293,15 @@ export default function SalesOrderDetail() {
 
                 <div>
                   <Divider
-                        style={{
-                        marginBottom: "8px",
-                        textTransform: "capitalize",
-                        borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                    >
-                        Item
-                    </Divider>
+                    style={{
+                      marginBottom: "8px",
+                      textTransform: "capitalize",
+                      borderColor: "#1677ff",
+                    }}
+                    orientation="left"
+                  >
+                    Item
+                  </Divider>
                   <div className="overflow-x-auto">
                     <Table
                       columns={itemColumns}
@@ -285,6 +311,8 @@ export default function SalesOrderDetail() {
                       bordered
                       size="small"
                       scroll={{ x: 'max-content' }}
+                      tableLayout="auto" // Gunakan auto layout
+                      className="sticky-table-container" // Tambahkan class untuk styling
                     />
                   </div>
                 </div>
@@ -323,6 +351,18 @@ export default function SalesOrderDetail() {
           </div>
         </div>
       </div>
+      
+      {/* Tambahkan styling khusus untuk sticky header */}
+      <style jsx global>{`
+        .sticky-table-container .ant-table-thead > tr > th[colspan]:not([colspan="1"]) {
+          position: sticky;
+          top: 0;
+          z-index: 2;
+        }
+        .sticky-table-container .ant-table-cell-fix-left {
+          z-index: 3 !important;
+        }
+      `}</style>
     </Layout>
   );
 }
