@@ -609,7 +609,7 @@ export default function Enter() {
     setIsModalItemOpen(true);
   }
 
-  async function getDiscount(cust_id, item_id, trandate, qty, item_categories) {
+  async function getDiscount(cust_id, item_id, trandate, qty) {
     try {
       let initData = {
         id: itemSelected,
@@ -856,7 +856,7 @@ export default function Enter() {
   };
 
   const handleSubmit = async () => {
-    setIsLoadingSubmit(true);
+    setIsLoadingSubmit(true); // Disable button immediately
     try {
       let payloadToInsert = {
         ...state.payloadPrimary,
@@ -939,7 +939,6 @@ export default function Enter() {
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
-    } finally {
       setIsLoadingSubmit(false);
     }
   };
@@ -957,7 +956,7 @@ export default function Enter() {
                 <div className="w-full flex flex-col justify-between items-start">
                   <div className="w-full flex gap-1"></div>
                   <div className="w-full flex justify-end items-center gap-2">
-                    <Button type="primary" icon={<CheckOutlined />} onClick={handleSubmit}>
+                    <Button type="primary" icon={<CheckOutlined />} onClick={handleSubmit} disabled={isLoadingSubmit}>
                       Submit
                     </Button>
                   </div>
@@ -1013,7 +1012,6 @@ export default function Enter() {
                               payload: { salesrep: customer.salesrep },
                             });
                           }}
-                          onSearch={{}}
                           options={dataCustomer}
                           style={{ width: "100%" }}
                         />
