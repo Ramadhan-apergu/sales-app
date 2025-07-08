@@ -174,7 +174,6 @@ export default function Details() {
     "amount",
   ];
 
-
   function formatRupiah(number) {
     return number.toLocaleString("id-ID") + ",-";
   }
@@ -214,7 +213,10 @@ export default function Details() {
 
     dispatch({
       type: "SET_ITEMS",
-      payload: data.payment_applies.map((item) => ({...item, applydate: formatDateToShort(item.applydate)})),
+      payload: data.payment_applies.map((item) => ({
+        ...item,
+        applydate: formatDateToShort(item.applydate),
+      })),
     });
   }
 
@@ -294,7 +296,19 @@ export default function Details() {
                             textTransform: "capitalize",
                             fontSize: "16px",
                           }}
-                          color={'default'}
+                          color={
+                            ["payment received", "deposited"].includes(
+                              data?.status.toLowerCase()
+                            )
+                              ? "green"
+                              : ["undeposited"].includes(
+                                  data?.status.toLowerCase()
+                                )
+                              ? "orange"
+                              : [""].includes(data?.status.toLowerCase())
+                              ? "red"
+                              : "default"
+                          }
                         >
                           {data.status}
                         </Tag>

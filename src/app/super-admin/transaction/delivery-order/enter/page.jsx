@@ -170,7 +170,7 @@ function Enter({ salesOrderId }) {
             quantity2:
               item.units.toLowerCase() == "bal"
                 ? item.quantity * 1
-                : item.quantity / 2500,
+                : item.quantity / 25,
             unit2: "bal",
             location: "General Warehouse",
             lineid: crypto.randomUUID(),
@@ -191,10 +191,9 @@ function Enter({ salesOrderId }) {
           type: "SET_SHIPPING",
           payload: {
             shippingaddress: customerData.addressee,
-            notes: salesOrderData.notes
+            notes: salesOrderData.notes,
           },
         });
-
       } catch (error) {
         notify("error", "Error", error.message || "Failed to fetch data");
       }
@@ -209,15 +208,12 @@ function Enter({ salesOrderId }) {
   ];
 
   const keyTableItem = [
-    "id",
-    "displayname",
     "itemid",
+    "displayname",
     "location",
     "memo",
     "quantity1",
-    "unit1",
     "quantity2",
-    "unit2",
     "quantityremaining",
   ];
 
@@ -321,7 +317,7 @@ function Enter({ salesOrderId }) {
                 isAlias: true,
                 isRead: true,
                 cursorDisable: true,
-                hidden: true
+                hidden: true,
               },
               {
                 key: "createdfrom",
@@ -362,7 +358,7 @@ function Enter({ salesOrderId }) {
                 isAlias: true,
                 isRead: true,
                 cursorDisable: true,
-                hidden: true
+                hidden: true,
               },
             ]}
             aliases={deliveryOrderAliases.primary}
@@ -381,14 +377,14 @@ function Enter({ salesOrderId }) {
                 input: "text",
                 isAlias: true,
                 isRead: true,
-                cursorDisable: true
+                cursorDisable: true,
               },
               {
                 key: "notes",
                 input: "text",
                 isAlias: true,
                 isRead: true,
-                cursorDisable: true
+                cursorDisable: true,
               },
             ]}
             aliases={deliveryOrderAliases.shipping}

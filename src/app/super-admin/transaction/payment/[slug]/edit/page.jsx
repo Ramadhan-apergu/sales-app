@@ -210,7 +210,8 @@ export default function Details() {
 
   const paymentOptions = [
     { label: "Cash", value: "cash" },
-    { label: "Credit", value: "credit" },
+    { label: "Bank Transfer", value: "transfer" },
+    { label: "Giro", value: "giro" },
   ];
 
   const keyTableItem = [
@@ -454,7 +455,6 @@ export default function Details() {
               {data && data.id ? (
                 <>
                   <div className="w-full flex flex-col gap-4">
-
                     <div className="w-full flex flex-col lg:flex-row justify-between items-start">
                       <div className="w-full lg:w-1/2 flex gap-1">
                         <Button
@@ -493,7 +493,9 @@ export default function Details() {
                           initialValues={{ customer: customerSelected?.id }}
                         >
                           <Form.Item
-                            label={<span className="capitalize">Customer Name</span>}
+                            label={
+                              <span className="capitalize">Customer Name</span>
+                            }
                             name="customer"
                             style={{ margin: 0 }}
                             className="w-full"
