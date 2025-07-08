@@ -86,7 +86,7 @@ export default function InputForm({
                   <InputNumber
                     {...props}
                     style={{ width: "100%" }}
-                    readOnly={isReadOnly}
+                    readOnly={isReadOnly || isRead}
                     disabled={disabled}
                     placeholder={placeholder}
                     formatter={(value) => {

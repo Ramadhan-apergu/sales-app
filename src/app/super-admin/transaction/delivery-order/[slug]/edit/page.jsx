@@ -116,15 +116,13 @@ export default function Page() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
   const keyTableItem = [
-    "item",
+
     "displayname",
-    "memo",
     "location",
-    "quantityremaining",
+    "memo",
     "quantity1",
-    "unit1",
     "quantity2",
-    "unit2",
+    "quantityremaining",
   ];
 
   useEffect(() => {

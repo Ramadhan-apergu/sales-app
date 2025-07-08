@@ -933,7 +933,7 @@ export default function Enter() {
 
   function showCustomerInfo() {
     customerInfo.message.forEach((info, i) => {
-      const timeout = i > 0 ? 300 : 0 ;
+      const timeout = i > 0 ? 300 : 0;
       setTimeout(() => {
         notify("info", "Customer ID : " + customerInfo.customer, info);
       }, timeout);
@@ -947,7 +947,7 @@ export default function Enter() {
           onClick={() => {
             showCustomerInfo();
           }}
-          style={!isLargeScreen ? {width: '32px', height: '32px'} : {}}
+          style={!isLargeScreen ? { width: "32px", height: "32px" } : {}}
           shape="circle"
           badge={{ count: customerInfo.message.length, size: "small" }}
           icon={<InfoCircleOutlined />}
@@ -1034,6 +1034,12 @@ export default function Enter() {
                             shippingaddress: customer.addressee,
                           },
                         });
+                        dispatch({
+                          type: "SET_BILLING",
+                          payload: {
+                            term: customer.terms,
+                          },
+                        });
                       }}
                       //   onSearch={{}}
                       options={dataCustomer}
@@ -1066,7 +1072,7 @@ export default function Enter() {
                 cursorDisable: true,
                 rules: [{ required: true, message: ` is required` }],
                 placeholder: "Auto-filled after selecting a customer",
-                hidden: true
+                hidden: true,
               },
               {
                 key: "trandate",
@@ -1441,10 +1447,12 @@ export default function Enter() {
                 },
                 {
                   key: "rate",
-                  input: "input",
+                  input: "number",
                   isAlias: true,
                   isRead: true,
                   cursorDisable: true,
+                  accounting: true,
+                  isReadOnly: true,
                 },
                 {
                   key: "description",
@@ -1476,6 +1484,7 @@ export default function Enter() {
                   input: "number",
                   isAlias: true,
                   disabled: !stateItemTable.tax.taxable,
+                  accounting: true,
                 },
               ]}
               aliases={salesOrderAliases.item}

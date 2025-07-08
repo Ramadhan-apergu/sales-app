@@ -85,17 +85,17 @@ function Item() {
 
 
   const columns = [
-    {
-      title: 'Internal ID',
-      dataIndex: 'id',
-      key: 'id',
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-    },
+    // {
+    //   title: 'Internal ID',
+    //   dataIndex: 'id',
+    //   key: 'id',
+    //   onHeaderCell: () => ({
+    //     style: { minWidth: 200 },
+    //   }),
+    //   onCell: () => ({
+    //     style: { minWidth: 200 },
+    //   }),
+    // },
     {
       title: 'Item Name/Number',
       dataIndex: 'itemid',
