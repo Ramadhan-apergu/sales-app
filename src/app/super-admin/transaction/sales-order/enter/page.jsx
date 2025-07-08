@@ -1432,6 +1432,7 @@ export default function Enter() {
                   isAlias: true,
                   isRead: true,
                   cursorDisable: true,
+                  hidden: true
                 },
                 {
                   key: "quantity",

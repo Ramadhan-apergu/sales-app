@@ -49,14 +49,48 @@ import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { formatDateToShort } from "@/utils/formatDate";
 import { invoiceAliases } from "@/utils/aliases";
 
+const formatRupiah = (value) => {
+  const num = Number(value);
+  if (isNaN(num)) return "Rp 0,-";
+  const numberCurrency = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num);
+
+  return numberCurrency + ",-";
+};
+
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (
+        [
+          "rate",
+          "subtotal",
+          "totaldiscount",
+          "amount",
+          "dpp",
+          "taxvalue",
+        ].includes(key)
+      ) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text, record) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
     // {
     //   title: "Action",
     //   key: "action",
@@ -266,7 +300,8 @@ export default function EnterPage() {
 
   const keyTableItem = [
     "displayname",
-    "item",
+    "memo",
+    "location",
     "quantity",
     "units",
     "quantity2",
@@ -275,10 +310,9 @@ export default function EnterPage() {
     "subtotal",
     "totaldiscount",
     "amount",
-    "dpp",
     "taxrate",
+    "dpp",
     "taxvalue",
-    "memo",
   ];
 
   const [dataTableItem, setDataTableItem] = useState([]);
@@ -311,6 +345,7 @@ export default function EnterPage() {
           totaldiscount: data.totaldiscount,
           amount: data.amount,
           dpp: data.dpp,
+          location: data?.location || "",
           taxrate: data.taxrate,
           taxvalue: data.taxvalue,
         };
@@ -506,7 +541,7 @@ export default function EnterPage() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
-                        cursorDisable: true
+                        cursorDisable: true,
                       },
                       {
                         key: "billingaddress",
