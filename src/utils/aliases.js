@@ -166,7 +166,8 @@ export const invoiceAliases = {
     taxrate: "Tax Rate",
     taxvalue: "PPN",
     memo: "Memo",
-    dpp: "DPP"
+    dpp: "DPP",
+    location: "Location"
   },
   billing: {
     term: "Term",
