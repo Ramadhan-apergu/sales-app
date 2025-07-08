@@ -33,6 +33,7 @@ import dayjs from "dayjs";
 import Search from "antd/es/input/Search";
 import DeliveryStatusFetch from "@/modules/salesApi/report/deliveryStatus";
 import InvoiceStatusFetch from "@/modules/salesApi/report/invoiceStatus";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -210,11 +211,13 @@ function SalesOrder() {
       title: "Total Amount",
       dataIndex: "total_amount",
       key: "total_amount",
+      render: (text) => <p>{formatRupiah(text)}</p>,
     },
     {
       title: "Amount due",
       dataIndex: "amountdue",
       key: "amountdue",
+      render: (text) => <p>{formatRupiah(text)}</p>,
     },
     {
       title: "Sales Rep",

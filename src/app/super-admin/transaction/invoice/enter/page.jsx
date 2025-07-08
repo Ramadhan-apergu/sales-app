@@ -49,14 +49,48 @@ import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { invoiceAliases } from "@/utils/aliases";
 
+const formatRupiah = (value) => {
+  const num = Number(value);
+  if (isNaN(num)) return "Rp 0,-";
+  const numberCurrency = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num);
+
+  return numberCurrency + ",-";
+};
+
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (
+        [
+          "rate",
+          "subtotal",
+          "totaldiscount",
+          "amount",
+          "dpp",
+          "taxvalue",
+        ].includes(key)
+      ) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text, record) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
     // {
     //   title: "Action",
     //   key: "action",
@@ -216,6 +250,7 @@ function Enter({ fulfillmentId }) {
               (item) => item.id === fulfillment.item
             );
             const displayname = itemSo?.displayname || "";
+            const location = fulfillment?.location || "";
 
             if (findItemSo) {
               if (fulfillment.memo !== "free item") {
@@ -229,14 +264,14 @@ function Enter({ fulfillmentId }) {
                   ? Math.ceil((amount / (1 + taxrate / 100)) * (taxrate / 100))
                   : 0;
 
-                  const dpp = amount - taxvalue
+                const dpp = amount - taxvalue;
                 return {
                   item: fulfillment.item,
                   displayname,
                   quantity,
                   units: fulfillment.units,
-                  quantity2: 0,
-                  units2: "",
+                  quantity2: quantity / 25,
+                  units2: "bal",
                   rate,
                   amount,
                   totaldiscount,
@@ -246,6 +281,7 @@ function Enter({ fulfillmentId }) {
                   taxvalue,
                   memo: fulfillment.memo,
                   lineid: crypto.randomUUID(),
+                  location,
                 };
               } else {
                 return {
@@ -253,8 +289,8 @@ function Enter({ fulfillmentId }) {
                   displayname,
                   quantity: fulfillment.quantity,
                   units: fulfillment.units,
-                  quantity2: 0,
-                  units2: "",
+                  quantity2: quantity / 25,
+                  units2: "bbal",
                   rate: 0,
                   amount: 0,
                   totaldiscount: 0,
@@ -264,6 +300,7 @@ function Enter({ fulfillmentId }) {
                   taxvalue: 0,
                   memo: fulfillment.memo,
                   lineid: crypto.randomUUID(),
+                  location,
                 };
               }
             }
@@ -273,8 +310,8 @@ function Enter({ fulfillmentId }) {
               displayname,
               quantity: fulfillment.quantity,
               units: fulfillment.units,
-              quantity2: 0,
-              units2: "",
+              quantity2: quantity / 25,
+              units2: "bal",
               rate: 0,
               amount: 0,
               totaldiscount: 0,
@@ -284,6 +321,7 @@ function Enter({ fulfillmentId }) {
               taxvalue: 0,
               memo: fulfillment.memo,
               lineid: crypto.randomUUID(),
+              location,
             };
           })
         );
@@ -334,7 +372,8 @@ function Enter({ fulfillmentId }) {
 
   const keyTableItem = [
     "displayname",
-    "item",
+    "memo",
+    "location",
     "quantity",
     "units",
     "quantity2",
@@ -343,10 +382,9 @@ function Enter({ fulfillmentId }) {
     "subtotal",
     "totaldiscount",
     "amount",
-    "dpp",
     "taxrate",
+    "dpp",
     "taxvalue",
-    "memo",
   ];
 
   const [dataTableItem, setDataTableItem] = useState([]);
