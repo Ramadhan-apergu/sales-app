@@ -180,7 +180,8 @@ export default function Enter() {
 
   const paymentOptions = [
     { label: "Cash", value: "cash" },
-    { label: "Credit", value: "credit" },
+    { label: "Bank Transfer", value: "transfer" },
+    { label: "Giro", value: "giro" },
   ];
 
   const keyTableItem = [

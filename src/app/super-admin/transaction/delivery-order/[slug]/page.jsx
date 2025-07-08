@@ -106,13 +106,20 @@ export default function Page() {
   const keyTableItem = [
     "itemprocessfamily",
     "displayname",
-    "memo",
     "location",
-    "quantityremaining",
+    "memo",
     "quantity1",
-    "unit1",
     "quantity2",
-    "unit2",
+    "quantityremaining",
+    // "itemprocessfamily",
+    // "displayname",
+    // "memo",
+    // "location",
+    // "quantityremaining",
+    // "quantity1",
+    // "unit1",
+    // "quantity2",
+    // "unit2",
   ];
 
   useEffect(() => {

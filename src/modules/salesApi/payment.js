@@ -7,11 +7,12 @@ export default class PaymentFetch extends ProcessFetch {
     status = "",
     customer = "",
     startdate = "",
-    enddate = ""
+    enddate = "",
+    paymentoption = ""
   ) {
     try {
       const response = await this.axios.get("/trx/payment", {
-        params: { offset, limit, status, customer, startdate, enddate },
+        params: { offset, limit, status, customer, startdate, enddate, paymentoption },
       });
       return new this().processResponse(response);
     } catch (error) {

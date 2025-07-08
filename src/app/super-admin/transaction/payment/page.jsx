@@ -45,6 +45,7 @@ function List() {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
@@ -63,7 +64,8 @@ function List() {
           statusFilter,
           searchName,
           dateRange[0],
-          dateRange[1]
+          dateRange[1],
+          paymentFilter == "all" ? "" : paymentFilter
         );
 
         const resData = getResponseHandler(response, notify);
@@ -80,7 +82,7 @@ function List() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter, searchName, dateRange]);
+  }, [page, limit, pathname, statusFilter, searchName, dateRange, paymentFilter]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +98,7 @@ function List() {
             return {
               ...data,
               value: data.id,
-              label: data.companyname,
+              label: data.customerid,
             };
           });
           setDataCustomer(mapingCustomerOption);
@@ -142,14 +144,13 @@ function List() {
       title: "Payment Method",
       dataIndex: "paymentoption",
       key: "paymentoption",
+      render: (text) => <p className="capitalize">{text}</p>,
     },
     {
       title: "Total Payment",
       dataIndex: "payment",
       key: "payment",
-      render: (text) => (
-        <p>{formatRupiahAccounting(text) || ""}</p>
-      )
+      render: (text) => <p>{formatRupiahAccounting(text) || ""}</p>,
     },
     {
       title: "Status",
@@ -158,17 +159,13 @@ function List() {
       render: (text, record) => (
         <Tag
           color={
-            ["open", "fulfilled", "closed"].includes(
+            ["payment received", "deposited"].includes(
               record.status.toLowerCase()
             )
               ? "green"
-              : ["partially fulfilled", "pending approval"].includes(
-                  record.status.toLowerCase()
-                )
+              : ["undeposited"].includes(record.status.toLowerCase())
               ? "orange"
-              : ["credit hold", "canceled"].includes(
-                  record.status.toLowerCase()
-                )
+              : [""].includes(record.status.toLowerCase())
               ? "red"
               : "default"
           }
@@ -220,7 +217,7 @@ function List() {
           <div className="flex gap-2">
             <div className="hidden lg:flex flex-col justify-start items-start gap-1">
               <label className="text-sm font-semibold leading-none">
-                Customer Name
+                Customer ID
               </label>
               <Select
                 showSearch
@@ -262,7 +259,7 @@ function List() {
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-col lg:flex-row items-end">
             <div className="flex lg:hidden flex-col justify-start items-start gap-1">
               <Select
                 showSearch
@@ -302,9 +299,31 @@ function List() {
                   { value: "payment received", label: "Payment Received" },
                   { value: "partially paid", label: "Partially Paid" },
                   { value: "unpaid", label: "Unpaid" },
+                  { value: "deposited", label: "Deposited" },
+                  { value: "undeposited", label: "Undeposited" },
                   { value: "overpaid ", label: "Overpaid " },
                 ]}
-                style={{minWidth: '200px', whiteSpace: 'nowrap'}}
+                style={{ minWidth: "200px", whiteSpace: "nowrap" }}
+                // dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                dropdownAlign={{ points: ["tr", "br"] }}
+              />
+            </div>
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className="hidden lg:block text-sm font-semibold leading-none">
+                Payment
+              </label>
+              <Select
+                defaultValue="all"
+                onChange={(e) => {
+                  setPaymentFilter(e);
+                }}
+                options={[
+                  { value: "all", label: "All" },
+                  { value: "cash", label: "Cash" },
+                  { value: "transfer", label: "Bank Transfer" },
+                  { value: "giro", label: "Giro" },
+                ]}
+                style={{ minWidth: "150px", whiteSpace: "nowrap" }}
                 // dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
