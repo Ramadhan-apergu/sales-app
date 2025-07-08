@@ -18,7 +18,7 @@ export async function middleware(request) {
   const role_token = request.cookies.get('u_ctx')?.value
   const role = request.cookies.get('role')?.value
 
-  // Jika ke root atau belum login, redirect ke login
+  // Jika tidak ada token sama sekali, redirect ke login
   if (
     !access_token ||
     !role ||
@@ -27,11 +27,12 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
+  // Redirect root ke dashboard berdasarkan role
   if (pathname === '/') {
     return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url))
   }
 
-  // Cek apakah path termasuk protected route
+  // Cek rute yang dilindungi
   const matchedPrefix = PROTECTED_ROUTES.find(route => pathname.startsWith(route))
   if (matchedPrefix) {
     const userGroup =
@@ -42,8 +43,16 @@ export async function middleware(request) {
     const hashInput = `${userGroup}${process.env.HASH_SALT}`
     const expectedHash = await sha1(hashInput)
 
+    // Jika role token tidak cocok dengan hash yang diharapkan,
+    // berarti ada masalah integritas sesi atau akses tidak sah.
+    // Arahkan ke halaman login dan bersihkan cookies.
     if (role_token !== expectedHash) {
-      return NextResponse.rewrite(new URL('/404', request.url))
+      const response = NextResponse.redirect(new URL('/auth/login', request.url));
+      // Hapus cookies dari middleware untuk memastikan status bersih
+      response.cookies.delete('x_atkn');
+      response.cookies.delete('u_ctx');
+      response.cookies.delete('role');
+      return response;
     }
   }
 
