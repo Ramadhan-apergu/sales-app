@@ -1,6 +1,11 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CheckSquareOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
@@ -82,7 +87,15 @@ function List() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter, searchName, dateRange, paymentFilter]);
+  }, [
+    page,
+    limit,
+    pathname,
+    statusFilter,
+    searchName,
+    dateRange,
+    paymentFilter,
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -203,15 +216,26 @@ function List() {
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
             Payment List
           </p>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() =>
-              router.push(`/super-admin/transaction/${title}/enter`)
-            }
-          >
-            {isLargeScreen ? `Enter` : ""}
-          </Button>
+          <div className="flex justify-center items-center gap-4">
+            <Button
+              type=""
+              icon={<CheckSquareOutlined />}
+              onClick={() =>
+                router.push(`/super-admin/transaction/${title}/bulk-update`)
+              }
+            >
+              {isLargeScreen ? `Bulk Update` : ""}
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() =>
+                router.push(`/super-admin/transaction/${title}/enter`)
+              }
+            >
+              {isLargeScreen ? `Enter` : ""}
+            </Button>
+          </div>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
