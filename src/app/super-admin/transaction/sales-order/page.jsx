@@ -24,7 +24,10 @@ import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
-import { getResponseHandler, updateResponseHandler } from "@/utils/responseHandlers";
+import {
+  getResponseHandler,
+  updateResponseHandler,
+} from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
@@ -120,14 +123,14 @@ function SalesOrder() {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
-    const openCreditModal = (record) => {
+  const openCreditModal = (record) => {
     modal.confirm({
       title: `Open Credit ${title} "${record.tranid}"?`,
       content: "This action cannot be undone.",
       okText: "Yes",
       cancelText: "Cancel",
       onOk: () => {
-        updateHandleStatus(record.id, 'Open');
+        updateHandleStatus(record.id, "Open");
       },
     });
   };
@@ -224,7 +227,7 @@ function SalesOrder() {
           {record.status && record.status.toLowerCase() == "credit hold" && (
             <Button
               type={"link"}
-              color="green"
+              style={{ color: "#52c41a" }}
               size="small"
               icon={<UnlockOutlined />}
               onClick={() => openCreditModal(record)}

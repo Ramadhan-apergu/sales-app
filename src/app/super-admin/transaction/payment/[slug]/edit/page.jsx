@@ -215,7 +215,7 @@ export default function Details() {
   ];
 
   const keyTableItem = [
-    "invoiceid",
+    // "invoiceid",
     "refnum",
     "applydate",
     "total",
@@ -438,7 +438,7 @@ export default function Details() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              Payment Enter
+              Edit Payment
             </p>
             <Button
               icon={<UnorderedListOutlined />}

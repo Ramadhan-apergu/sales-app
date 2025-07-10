@@ -1,8 +1,8 @@
 export const customerAliases = {
   customerid: "Customer ID",
   companyname: "Customer Name",
-  state: 'Province',
-  salesrep: 'Sales Rep',
+  state: "Province",
+  salesrep: "Sales Rep",
   altphone: "Alt Phone",
   addressee: "Address EE",
   addr1: "Address",
@@ -62,8 +62,8 @@ export const salesOrderAliases = {
     customer: "Customer",
   },
   primary: {
-    tranid: 'No. SO',
-    companyname: 'Customer Name',
+    tranid: "No. SO",
+    companyname: "Customer Name",
     entity: "Entity ID",
     trandate: "Date",
     salesrep: "Sales Rep",
@@ -150,7 +150,7 @@ export const invoiceAliases = {
     memo: "",
     duedate: "Due Date",
     sales: "Sales Rep",
-    tranid: 'No. INV'
+    tranid: "No. INV",
   },
   item: {
     item: "Item",
@@ -167,7 +167,7 @@ export const invoiceAliases = {
     taxvalue: "PPN",
     memo: "Memo",
     dpp: "DPP",
-    location: "Location"
+    location: "Location",
   },
   billing: {
     term: "Term",
@@ -175,7 +175,7 @@ export const invoiceAliases = {
   },
   shipping: {
     shippingaddress: "Shipping Address",
-    memo: 'Notes'
+    memo: "Notes",
   },
 };
 
@@ -221,7 +221,7 @@ export const paymentAliases = {
     paymentoption: "Payment Option",
     payment: "Payment",
     invoiceid: "Invoice ID",
-    refnum: "Ref No",
+    refnum: "Invoice ID",
     applydate: "Date",
     total: "Total",
     due: "Amount Due",
@@ -310,19 +310,19 @@ export const salesReportAliases = {
 };
 
 export const userAliases = {
-    username: "Username",
-    name: "Name",
-    email: "Email",
-    address: "Address",
-    roleid: "Role Name",
-    password: "Password"
-}
+  username: "Username",
+  name: "Name",
+  email: "Email",
+  address: "Address",
+  roleid: "Role Name",
+  password: "Password",
+};
 
 export const userAliasesEdit = {
-    username: "Username",
-    name: "Name",
-    email: "Email",
-    address: "Address",
-    roleid: "Role Name",
-    password: "New Password"
-}
+  username: "Username",
+  name: "Name",
+  email: "Email",
+  address: "Address",
+  roleid: "Role Name",
+  password: "New Password",
+};

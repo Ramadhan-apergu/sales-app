@@ -5,6 +5,7 @@ import {
   EditOutlined,
   FilterOutlined,
   PlusOutlined,
+  TruckOutlined,
 } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -24,7 +25,10 @@ import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
-import { getResponseHandler } from "@/utils/responseHandlers";
+import {
+  getResponseHandler,
+  updateResponseHandler,
+} from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
@@ -52,6 +56,7 @@ function DeliveryOrder() {
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
+  const [toggleRefetch, setToggleRefetch] = useState(false);
   const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -82,7 +87,7 @@ function DeliveryOrder() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter, searchName]);
+  }, [page, limit, pathname, statusFilter, searchName, toggleRefetch]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,7 +158,9 @@ function DeliveryOrder() {
         <Tag
           className="capitalize"
           color={
-            record.shipstatus.toLocaleLowerCase() == "shipped" ? "green" : "default"
+            record.shipstatus.toLocaleLowerCase() == "shipped"
+              ? "green"
+              : "default"
           }
         >
           {text}
@@ -167,7 +174,7 @@ function DeliveryOrder() {
       align: "right",
       width: isLargeScreen ? 87 : 30,
       render: (_, record) => (
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex flex-col justify-center items-center gap-2">
           <Button
             type={"link"}
             size="small"
@@ -176,11 +183,55 @@ function DeliveryOrder() {
           >
             {isLargeScreen ? "Edit" : ""}
           </Button>
+          {record.shipstatus && record.shipstatus.toLowerCase() == "open" && (
+            <Button
+              type={"link"}
+              style={{ color: "#52c41a" }}
+              size="small"
+              icon={<TruckOutlined />}
+              onClick={() => shipOrderModal(record)}
+            >
+              {isLargeScreen ? "Ship Order" : ""}
+            </Button>
+          )}
           {contextHolder}
         </div>
       ),
     },
   ];
+
+  const shipOrderModal = (record) => {
+    modal.confirm({
+      title: `Open Credit ${title} "${record.tranid}"?`,
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      cancelText: "Cancel",
+      onOk: () => {
+        updateHandleStatus(record.id, "Shipped");
+      },
+    });
+  };
+
+  const updateHandleStatus = async (id, status) => {
+    try {
+      setIsloading(true);
+
+      const response = await FullfillmentFetch.bulkUpdateStatus({
+        shipstatus: status,
+        id: [id],
+      });
+
+      const resData = updateResponseHandler(response, notify);
+
+      if (resData) {
+        setToggleRefetch(!toggleRefetch);
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    } finally {
+      setIsloading(false);
+    }
+  };
 
   const [isStatusUpdate, setIsStatusUpdate] = useState(false);
   const [idsSelected, setIdsSelected] = useState([]);
@@ -193,7 +244,7 @@ function DeliveryOrder() {
             Delivery Order List
           </p>
           <div className="flex justify-center items-center gap-2">
-            <Button
+            {/* <Button
               type=""
               icon={<DeliveredProcedureOutlined />}
               onClick={() =>
@@ -201,7 +252,7 @@ function DeliveryOrder() {
               }
             >
               {isLargeScreen ? `Bulk Ship` : ""}
-            </Button>
+            </Button> */}
             <Button
               type="primary"
               icon={<PlusOutlined />}
