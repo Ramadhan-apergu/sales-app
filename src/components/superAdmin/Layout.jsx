@@ -101,7 +101,7 @@ const siderMenuPerPage = {
       label: "Stock Adjustment",
       icon: <DatabaseOutlined />,
     },
-        {
+    {
       key: "/inventory/stock-item",
       label: "Stock Item",
       icon: <StockOutlined />,
@@ -130,8 +130,13 @@ const siderMenuPerPage = {
       label: "Sales",
       icon: <BarChartOutlined />,
     },
+    {
+      key: "/report/production",
+      label: "Production",
+      icon: <BarChartOutlined />,
+    },
   ],
-    "/access-control": [
+  "/access-control": [
     {
       key: "/access-control/user",
       label: "User",
