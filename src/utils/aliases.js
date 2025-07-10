@@ -309,6 +309,16 @@ export const salesReportAliases = {
   jumlah: "Total",
 };
 
+export const productReportAliases = {
+  displayname: "Nama Barang",
+  itemid: "Kode Barang",
+  qty_belum: "Qty Belum",
+  qty_sisa: "Qty Sisa",
+  qty_stok: "Qty Stok",
+  unit: "Satuan",
+  no: 'No'
+};
+
 export const userAliases = {
   username: "Username",
   name: "Name",
