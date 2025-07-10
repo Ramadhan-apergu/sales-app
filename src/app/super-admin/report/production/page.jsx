@@ -12,7 +12,6 @@ import {
   Tag,
   Select,
   DatePicker,
-  Input,
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
@@ -21,30 +20,36 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import UserManageFetch from "@/modules/salesApi/userManagement";
-import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
+import SalesOrderFetch from "@/modules/salesApi/salesOrder";
+import { formatDateToShort } from "@/utils/formatDate";
+import CustomerFetch from "@/modules/salesApi/customer";
+import ReportSo from "@/modules/salesApi/report/salesAndSo";
+import { productReportAliases, salesReportAliases } from "@/utils/aliases";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 
-function StockItem() {
+function SalesOrder() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
+  const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
   const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
+  const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
-  const [searchItem, setSearchItem] = useState("");
-  const [searchItemTemp, setSearchItemTemp] = useState("");
-  const title = "user";
+  const [searchName, setSearchName] = useState("");
+  const [dateRange, setDateRange] = useState(["", ""]);
+  const [tableKeys, setTableKeys] = useState([]);
+  const title = "sales-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -53,17 +58,27 @@ function StockItem() {
       try {
         setIsloading(true);
 
-        const response = await StockAdjustmentFetch.getStockStatus(
+        const response = await ReportSo.getProduct(
           offset,
           limit,
-          searchItem
+          dateRange[0],
+          dateRange[1]
         );
 
-        const resData = getResponseHandler(response, notify);
+        let resData = getResponseHandler(response, notify);
 
         if (resData) {
-          setDatas(resData.list);
-          setTotalItems(resData.total_items);
+          resData = resData.map((item, i) => ({
+            no: i + 1,
+            ...item,
+          }));
+          setDatas(resData);
+          setTotalItems(resData.length);
+          setTableKeys(
+            Array.isArray(resData) && resData.length > 0
+              ? Object.keys(resData[0])
+              : []
+          );
         }
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
@@ -73,95 +88,45 @@ function StockItem() {
     };
 
     fetchData();
-  }, [page, limit, pathname, searchItem]);
+  }, [page, limit, pathname, dateRange]);
 
-  const columns = [
-    {
-      title: "Item Name/Number",
-      dataIndex: "itemid",
-      key: "itemid",
-      fixed: isLargeScreen ? "left" : "",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-    },
-    {
-      title: "Display Name/Code",
-      dataIndex: "displayname",
-      key: "displayname",
-      onHeaderCell: () => ({
-        style: { minWidth: 180 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 180 },
-      }),
-    },
-    {
-      title: "Item Process Family",
-      dataIndex: "itemprocessfamily",
-      key: "itemprocessfamily",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-    },
-    {
-      title: "Stock",
-      dataIndex: "stock",
-      key: "stock",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>{typeof text == 'number' ? text.toLocaleString('en') : parseFloat(text).toLocaleString('en')}</p>
-      )
-    },
-  ];
+  const handleEdit = (record) => {
+    router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
+  };
+
+  const aliases = productReportAliases;
+
+  const columns = tableKeys
+    .filter((key) => !["id"].includes(key))
+    .map((key) => ({
+      title: aliases?.[key] || key,
+      dataIndex: key,
+      key: key,
+    }));
+
   return (
     <Layout>
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Stock Item List
+            Production Report
           </p>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
-          <div className="flex gap-2 flex-col md:flex-row">
+          <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden md:block text-sm font-semibold leading-none">
-                Item Name/Number
+              <label className="hidden lg:block text-sm font-semibold leading-none">
+                Date
               </label>
-              <Input
-                placeholder="Search User"
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 150,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
-                value={searchItemTemp}
-                onChange={(e) => {
-                  if (e.target.value.length == 0) {
-                    setSearchItem("");
-                  }
-                  setSearchItemTemp(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setSearchItem(searchItemTemp);
-                  }
-                }}
-              />
+              <div className="flex justify-center items-start gap-2">
+                <RangePicker
+                  showTime={false}
+                  format="YYYY-MM-DD"
+                  onChange={(value, dateString) => {
+                    setDateRange(dateString);
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -186,7 +151,7 @@ function StockItem() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/access-control/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"
@@ -205,10 +170,10 @@ function StockItem() {
   );
 }
 
-export default function StockItemPage() {
+export default function SalesOrderPage() {
   return (
     <Suspense fallback={<LoadingSpinProcessing />}>
-      <StockItem />
+      <SalesOrder />
     </Suspense>
   );
 }

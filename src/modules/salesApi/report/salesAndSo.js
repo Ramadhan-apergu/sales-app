@@ -34,4 +34,20 @@ export default class ReportSo extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+      static async getProduct(
+    offset = 0,
+    limit = 10,
+    startdate = "",
+    enddate = ""
+  ) {
+    try {
+      const response = await this.axios.get("/report/produksi", {
+        params: { offset, limit, startdate, enddate },
+      });
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }
