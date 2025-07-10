@@ -506,7 +506,6 @@ export default function AgreementEdit() {
   };
   const keys = [
     [
-      "id",
       "itemid",
       "displayname",
       "price",
@@ -519,7 +518,6 @@ export default function AgreementEdit() {
       "perunit",
     ],
     [
-      "id",
       "itemid",
       "displayname",
       "price",
@@ -532,7 +530,6 @@ export default function AgreementEdit() {
       "perunit",
     ],
     [
-      "id",
       "itemid",
       "displayname",
       "price",
@@ -546,7 +543,6 @@ export default function AgreementEdit() {
       "perunit",
     ],
     [
-      "id",
       "itemid",
       "displayname",
       "price",

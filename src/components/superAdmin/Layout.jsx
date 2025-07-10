@@ -28,6 +28,7 @@ import {
   LogoutOutlined,
   TeamOutlined,
   UnlockOutlined,
+  StockOutlined,
 } from "@ant-design/icons";
 import { PiSpeedometer, PiSwap } from "react-icons/pi";
 import { HiOutlineFolder, HiOutlinePrinter } from "react-icons/hi";
@@ -99,6 +100,11 @@ const siderMenuPerPage = {
       key: "/inventory/adjustment",
       label: "Stock Adjustment",
       icon: <DatabaseOutlined />,
+    },
+        {
+      key: "/inventory/stock-item",
+      label: "Stock Item",
+      icon: <StockOutlined />,
     },
   ],
   "/status": [

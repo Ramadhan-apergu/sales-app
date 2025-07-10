@@ -45,15 +45,28 @@ import PaymentFetch from "@/modules/salesApi/payment";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { paymentAliases } from "@/utils/aliases";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({ data, keys, aliases, onChange }) {
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right",
-    })),
+    ...keys.map((key) => {
+      if (["total", "due", "amount"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text, record) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
   ];
 
   return (
@@ -166,17 +179,13 @@ export default function Details() {
   ];
 
   const keyTableItem = [
-    "invoiceid",
+    // "invoiceid",
     "refnum",
     "applydate",
     "total",
     "due",
     "amount",
   ];
-
-  function formatRupiah(number) {
-    return number.toLocaleString("id-ID") + ",-";
-  }
 
   function mappingDataPayload(data) {
     dispatch({
@@ -376,6 +385,7 @@ export default function Details() {
                         input: "number",
                         isAlias: true,
                         isRead: true,
+                        accounting: true
                       },
                     ]}
                     aliases={paymentAliases.payment}

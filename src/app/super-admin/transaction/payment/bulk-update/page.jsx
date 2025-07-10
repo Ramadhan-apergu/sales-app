@@ -32,6 +32,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import {
   createResponseHandler,
   getResponseHandler,
+  updateResponseHandler,
 } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
@@ -58,8 +59,8 @@ function DeliveryOrder() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilterFrom, setStatusFilterFrom] = useState("undeposited");
-  const [statusFilterTo, setStatusFilterTo] = useState("deposited");
+  const [statusFilterFrom, setStatusFilterFrom] = useState("Undeposited");
+  const [statusFilterTo, setStatusFilterTo] = useState("Deposited");
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
@@ -217,15 +218,15 @@ function DeliveryOrder() {
       if (idsSelected.length === 0) {
         throw new Error("Please select at least one item first.");
       }
-    //   modal.confirm({
-    //     title: `Are you sure you want to update statuses in bulk?`,
-    //     content: "This action cannot be undone.",
-    //     okText: "Yes",
-    //     cancelText: "Cancel",
-    //     onOk: () => {
-    //       updateHandleStatus();
-    //     },
-    //   });
+      modal.confirm({
+        title: `Are you sure you want to update statuses in bulk?`,
+        content: "This action cannot be undone.",
+        okText: "Yes",
+        cancelText: "Cancel",
+        onOk: () => {
+          updateHandleStatus();
+        },
+      });
     } catch (error) {
       notify("error", "Failed", error.message);
     }
@@ -241,7 +242,8 @@ function DeliveryOrder() {
 
       const response = await PaymentFetch.bulkUpdateStatus(payload);
 
-      const resData = updateHandleStatus(response, notify);
+      const resData = updateResponseHandler(response, notify);
+      console.log(resData)
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
@@ -296,12 +298,11 @@ function DeliveryOrder() {
                 onChange={(e) => {
                   setStatusFilterFrom(e);
                   setStatusFilterTo(
-                    e == "undeposited" ? "deposited" : "undeposited"
+                    e == "Undeposited" ? "Deposited" : "Undeposited"
                   );
                 }}
                 options={[
-                  { value: "deposited", label: "Deposited" },
-                  { value: "undeposited", label: "Undeposited" },
+                  { value: "Undeposited", label: "Undeposited" },
                 ]}
                 style={{ minWidth: "200px", whiteSpace: "nowrap" }}
                 // dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
@@ -319,12 +320,11 @@ function DeliveryOrder() {
                   onChange={(e) => {
                     setStatusFilterTo(e);
                     setStatusFilterFrom(
-                      e == "undeposited" ? "deposited" : "undeposited"
+                      e == "Undeposited" ? "Deposited" : "Undeposited"
                     );
                   }}
                   options={[
-                    { value: "deposited", label: "Deposited" },
-                    { value: "undeposited", label: "Undeposited" },
+                    { value: "Deposited", label: "Deposited" },
                   ]}
                   style={{ minWidth: "200px", whiteSpace: "nowrap" }}
                   // dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}

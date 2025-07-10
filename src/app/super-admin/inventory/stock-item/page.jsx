@@ -26,7 +26,7 @@ import UserManageFetch from "@/modules/salesApi/userManagement";
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 
-function UserRoles() {
+function StockItem() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -294,10 +294,10 @@ function UserRoles() {
   );
 }
 
-export default function UserRolesPage() {
+export default function StockItemPage() {
   return (
     <Suspense fallback={<LoadingSpinProcessing />}>
-      <UserRoles />
+      <StockItem />
     </Suspense>
   );
 }
