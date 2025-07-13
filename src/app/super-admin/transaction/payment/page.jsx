@@ -132,13 +132,7 @@ function List() {
 
   const columns = [
     {
-      title: "Date",
-      dataIndex: "trandate",
-      key: "trandate",
-      render: (text) => <p>{formatDateToShort(text)}</p>,
-    },
-    {
-      title: "No",
+      title: "No. Payment",
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
@@ -147,6 +141,12 @@ function List() {
           {text || "-"}
         </Link>
       ),
+    },
+    {
+      title: "Date",
+      dataIndex: "trandate",
+      key: "trandate",
+      render: (text) => <p>{formatDateToShort(text)}</p>,
     },
     {
       title: "Customer",

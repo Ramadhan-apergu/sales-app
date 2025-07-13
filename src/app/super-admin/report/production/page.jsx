@@ -76,7 +76,9 @@ function SalesOrder() {
           setTotalItems(resData.length);
           setTableKeys(
             Array.isArray(resData) && resData.length > 0
-              ? Object.keys(resData[0])
+              ? Object.keys(resData[0]).filter(
+                item => !["item", "so_number"].includes(item.toLowerCase())
+              )
               : []
           );
         }

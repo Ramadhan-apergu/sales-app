@@ -43,6 +43,7 @@ import PaymentFetch from "@/modules/salesApi/payment";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { paymentAliases } from "@/utils/aliases";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({ data, keys, aliases, onChange }) {
   const columns = [
@@ -61,12 +62,32 @@ function TableCustom({ data, keys, aliases, onChange }) {
         />
       ),
     },
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right",
-    })),
+    ...keys.map((key) => {
+      if (key == "applydate") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{formatDateToShort(text)}</p>,
+        };
+      } else if (["total", "due", "amount"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
   ];
 
   return (
@@ -127,7 +148,7 @@ export default function Details() {
           const addLabelCustomer = resData.list.map((customer) => {
             return {
               ...customer,
-              label: customer.companyname,
+              label: customer.customerid,
               value: customer.id,
             };
           });
@@ -494,7 +515,7 @@ export default function Details() {
                         >
                           <Form.Item
                             label={
-                              <span className="capitalize">Customer Name</span>
+                              <span className="capitalize">Customer ID</span>
                             }
                             name="customer"
                             style={{ margin: 0 }}
@@ -543,6 +564,7 @@ export default function Details() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        hidden: true,
                       },
                       {
                         key: "trandate",
