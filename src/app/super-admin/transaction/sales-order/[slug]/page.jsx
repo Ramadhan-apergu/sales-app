@@ -50,13 +50,13 @@ import { salesOrderAliases } from "@/utils/aliases";
 
 function formatRupiah(number) {
   if (typeof number !== "number" || isNaN(number)) {
-    return "Rp0,-";
+    return "Rp 0,-";
   }
 
   try {
-    return "Rp" + number.toLocaleString("id-ID") + ",-";
+    return "Rp " + number.toLocaleString("id-ID") + ",-";
   } catch (e) {
-    return "Rp0,-";
+    return "Rp 0,-";
   }
 }
 

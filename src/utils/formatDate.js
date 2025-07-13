@@ -25,6 +25,12 @@ export function formatDateToShort(dateString) {
   return `${day} ${month} ${year}`;
 }
 
+export function formatDateWithSepMinus(dateStr) {
+  const [day, month, year] = dateStr.split("-");
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${day} ${monthNames[parseInt(month, 10) - 1]} ${year}`;
+}
+
 export function formatDateStartDay(isoString) {
   try {
     const date = new Date(isoString);
@@ -39,3 +45,4 @@ export function formatDateStartDay(isoString) {
     return ""
   }
 }
+

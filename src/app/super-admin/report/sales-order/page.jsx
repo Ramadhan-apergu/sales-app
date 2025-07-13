@@ -1,9 +1,7 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
@@ -15,16 +13,15 @@ import {
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
-import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import { formatDateToShort } from "@/utils/formatDate";
+import { formatDateToShort, formatDateWithSepMinus } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { soReportAliases } from "@/utils/aliases";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -33,7 +30,6 @@ function SalesOrder() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const isLargeScreen = useBreakpoint("lg");
   const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
@@ -73,7 +69,9 @@ function SalesOrder() {
           setTotalItems(resData.total_items);
           setTableKeys(
             Array.isArray(resData.list) && resData.list.length > 0
-              ? Object.keys(resData.list[0])
+              ? Object.keys(resData.list[0]).filter(
+                  (item) => item.toLowerCase() != "id"
+                )
               : []
           );
         }
@@ -123,11 +121,46 @@ function SalesOrder() {
   const aliases = soReportAliases;
 
   const columns = [
-    ...tableKeys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-    })),
+    ...tableKeys.map((key) => {
+      if (key == "trandate") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          render: (text) => <p>{formatDateWithSepMinus(text)}</p>,
+        };
+      } else if (["harga_satuan", "diskon_satuan", "jumlah"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else if (["tgl_kirim"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          render: (text) => (
+            <>
+              {text ? (
+                <div className="flex flex-col">
+                  {text.split(",").map((tgl) => formatDateWithSepMinus(tgl)).join(",")}
+                </div>
+              ) : (
+                <>{text}</> // dibungkus fragment, atau bisa <span>{text}</span>
+              )}
+            </>
+          ),
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+        };
+      }
+    }),
   ];
 
   return (
@@ -154,13 +187,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -196,13 +229,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
