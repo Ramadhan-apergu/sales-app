@@ -27,6 +27,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import AgreementFetch from "@/modules/salesApi/agreement";
 import ItemFetch from "@/modules/salesApi/item";
+import UserManageFetch from "@/modules/salesApi/userManagement";
 
 function TableCustom({ data, keys, aliases }) {
   const columns = keys.map((key) => ({
@@ -260,9 +261,10 @@ export default function Detail() {
     }
   }
 
-  function mapingGroup(data) {
-    const pick = (keys) =>
-      keys.reduce((obj, k) => {
+  async function mapingGroup(data) {
+    const pick = async (keys) => {
+      const obj = {};
+      for (const k of keys) {
         if (["createddate", "effectivedate", "enddate"].includes(k)) {
           obj[k] = data[k] != null ? formatDateToShort(data[k]) : data[k];
         } else if (["customform"].includes(k)) {
@@ -270,15 +272,22 @@ export default function Detail() {
             data[k] != null
               ? formOptions[parseInt(data[k] - 1)].label
               : data[k];
+        } else if (k === "createdby") {
+          obj[k] = data[k] != null ? await getUserById(data[k]) : data[k];
         } else {
           obj[k] = data[k] != null ? data[k] : "";
         }
-        return obj;
-      }, {});
+      }
+      return obj;
+    };
 
-    setGeneral(pick(fieldGroups.general));
-    setAgreementGroups(pick(fieldGroups.agreement_groups));
-    setAgreementLines(pick(fieldGroups.agreement_lines));
+    const general = await pick(fieldGroups.general);
+    const agreementGroups = await pick(fieldGroups.agreement_groups);
+    const agreementLines = await pick(fieldGroups.agreement_lines);
+
+    setGeneral(general);
+    setAgreementGroups(agreementGroups);
+    setAgreementLines(agreementLines);
   }
 
   const formOptions = [
@@ -288,6 +297,19 @@ export default function Detail() {
     { label: "Free Item", value: "4" },
     { label: "Discount Group", value: "5" },
   ];
+
+  async function getUserById(id) {
+    try {
+      const response = await UserManageFetch.getById(id);
+      if (response.status_code == 200 && response.data) {
+        return response?.data.name || "";
+      } else {
+        return null;
+      }
+    } catch (error) {
+      notify("error", "Failed", "Fetch data item");
+    }
+  }
 
   const keys = [
     [
@@ -428,14 +450,19 @@ export default function Detail() {
                     type="Primary"
                     payload={general}
                     data={[
-                      { key: "id", input: "input", isAlias: true },
+                      {
+                        key: "id",
+                        input: "input",
+                        isAlias: true,
+                        hidden: true,
+                      },
                       { key: "customform", input: "input", isAlias: true },
                       { key: "agreementcode", input: "input", isAlias: true },
                       { key: "agreementname", input: "input", isAlias: true },
                       { key: "effectivedate", input: "input", isAlias: false },
                       { key: "enddate", input: "input", isAlias: true },
                       { key: "status", input: "input", isAlias: true },
-                      { key: "description", input: "input", isAlias: true },
+                      { key: "description", input: "text", isAlias: true },
                       { key: "createdby", input: "input", isAlias: true },
                       { key: "createddate", input: "input", isAlias: true },
                     ]}

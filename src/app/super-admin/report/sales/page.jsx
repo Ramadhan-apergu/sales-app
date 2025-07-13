@@ -21,10 +21,11 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import { formatDateToShort } from "@/utils/formatDate";
+import { formatDateToShort, formatDateWithSepMinus } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { salesReportAliases } from "@/utils/aliases";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -73,7 +74,7 @@ function SalesOrder() {
           setTotalItems(resData.total_items);
           setTableKeys(
             Array.isArray(resData.list) && resData.list.length > 0
-              ? Object.keys(resData.list[0])
+              ? Object.keys(resData.list[0]).filter((item) => item != "id")
               : []
           );
         }
@@ -123,11 +124,29 @@ function SalesOrder() {
   const aliases = salesReportAliases;
 
   const columns = [
-    ...tableKeys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-    })),
+    ...tableKeys.map((key) => {
+      if (key == "trandate") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          render: (text) => <p>{formatDateWithSepMinus(text)}</p>,
+        };
+      } else if (["harga", "jumlah"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+        };
+      }
+    }),
   ];
 
   return (
@@ -154,13 +173,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -196,13 +215,13 @@ function SalesOrder() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
