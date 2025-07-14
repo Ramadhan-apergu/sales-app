@@ -184,27 +184,27 @@ export default function InvoiceDetail() {
                       Primary
                     </Divider>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Customer:</span>
                         <span className="text-right">{invoice.customer}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Sales Rep:</span>
                         <span className="text-right">{invoice.sales}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Date:</span>
                         <span className="text-right">{formatDateToShort(invoice.trandate)}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Due Date:</span>
                         <span className="text-right">{formatDateToShort(invoice.duedate)}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">No. SO:</span>
                         <span className="text-right">{invoice.so_numb}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">No. DO:</span>
                         <span className="text-right">{invoice.tranid}</span>
                       </div>
@@ -222,11 +222,11 @@ export default function InvoiceDetail() {
                       Shipping
                     </Divider>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Shipping Address:</span>
                         <span className="text-right">{invoice.shippingaddress}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Notes:</span>
                         <span className="text-right">{invoice.memo}</span>
                       </div>
@@ -244,11 +244,11 @@ export default function InvoiceDetail() {
                       Billing
                     </Divider>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Billing Address:</span>
                         <span className="text-right">{invoice.billingaddress}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Term:</span>
                         <span className="text-right">{invoice.term} Days</span>
                       </div>
@@ -273,20 +273,20 @@ export default function InvoiceDetail() {
                   />
                 </div>
                 <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
-                  <div className="flex w-full">
+                  <div className="flex w-full border rounded-lg p-2 border-gray-300">
                     <p className="w-1/2 text-sm">Subtotal</p>
                     <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(invoice.totalamount)}
                     </p>
                   </div>
-                  <div className="flex w-full">
+                  <div className="flex w-full border rounded-lg p-2 border-gray-300">
                     <p className="w-1/2 text-sm">Discount Item</p>
                     <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(invoice.discounttotal)}
                     </p>
                   </div>
-                  <hr className="border-gray-5" />
-                  <div className="flex w-full font-semibold">
+                  <hr className="" />
+                  <div className="flex w-full font-semibold border rounded-lg p-2 border-gray-300">
                     <p className="w-1/2 text-sm">Total</p>
                     <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(invoice.amount)}
