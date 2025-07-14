@@ -60,6 +60,13 @@ export default function Invoice() {
             const newOffset = actualOffset + actualLimit;
             setPagination({ offset: newOffset, limit: actualLimit });
             setHasMore(newOffset < totalCount);
+
+            const items = [];
+            items.push({title: 'Open', value: response.data.total_open});
+            items.push({title: 'Paid in Full', value: response.data.total_paidfull});
+            items.push({title: 'Partially Paid', value: response.data.total_partiallypaid});
+
+            setOverviewItems(items);
         } else {
             setError(response.message || 'Failed to load invoices');
             setHasMore(false);
@@ -71,31 +78,6 @@ export default function Invoice() {
         setLoading(false);
         }
     }, [pagination, searchText, loading, hasMore]);
-
-    useEffect(() => {
-        const statuses = [
-        { key: 'open',   label: 'Open' },
-        { key: 'partially_paid', label: 'Partially Paid' },
-        { key: 'paid_in_full', label: 'Paid In Full' },
-        ];
-        async function fetchOverview() {
-        try {
-            const results = await Promise.all(
-            statuses.map(s =>
-                InvoiceFetch.get(0, 1, s.key, '')
-            )
-            );
-            const items = results.map((res, idx) => ({
-            title: statuses[idx].label,
-            value: res.data?.total_items || 0,
-            }));
-            setOverviewItems(items);
-        } catch (e) {
-            console.error('Error fetching overview counts', e);
-        }
-        }
-        fetchOverview();
-    }, []);
 
     const handleSearchEnter = () => {
         setPagination({ offset: 0, limit: 10 });
@@ -155,10 +137,12 @@ export default function Invoice() {
                 placeholder="Pilih status"
                 style={{ width: '100%' }}
                 allowClear
+                options={[
+                    { value: 'open',          label: 'Open' },
+                    { value: 'partiallypaid', label: 'Partially Paid' },
+                    { value: 'paidfull',      label: 'Paid In Full' },
+                ]}
             >
-                {["open", "partially paid", "paid in full"]
-                .map(s => <Option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</Option>)
-                }
             </Select>
             </div>
 
