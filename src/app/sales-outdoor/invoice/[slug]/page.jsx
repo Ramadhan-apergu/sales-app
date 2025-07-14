@@ -1,374 +1,95 @@
-// app/sales-outdoor/sales-order/[slug]/page.js
-'use client';
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import Layout from '@/components/salesOutdoor/Layout';
-import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
+"use client";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import Layout from "@/components/salesOutdoor/Layout";
+import FixedHeaderBar from "@/components/salesOutdoor/FixedHeaderBar";
 import InvoiceFetch from "@/modules/salesApi/invoice";
-import { Button, Table, Spin, Empty, Divider } from 'antd';
-import { PrinterOutlined } from '@ant-design/icons';
+import { Button, Table, Spin, Empty, Divider } from "antd";
+import { PrinterOutlined } from "@ant-design/icons";
+import { formatDateToShort } from "@/utils/formatDate";
+import { invoiceAliases } from "@/utils/aliases";
+import InvoicePrint from "@/components/salesOutdoor/InvoicePrint";
+
+function TableCustom({ data, keys, aliases, onDelete }) {
+  const columns = [
+    ...keys.map((key) => {
+      if (
+        [
+          "rate",
+          "subtotal",
+          "totaldiscount",
+          "amount",
+          "dpp",
+          "taxvalue",
+        ].includes(key)
+      ) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text, record) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
+  ];
+
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      rowKey="lineid"
+      bordered
+      pagination={false}
+      scroll={{ x: "max-content" }}
+    />
+  );
+}
+
+const formatRupiah = (value) => {
+  const num = Number(value);
+  if (isNaN(num)) return "Rp 0,-";
+  const numberCurrency = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num);
+
+  return numberCurrency + ",-";
+};
 
 export default function InvoiceDetail() {
   const params = useParams();
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dataTableItem, setDataTableItem] = useState([]);
 
-  // Format Rupiah (untuk UI saja)
-  function formatRupiah(number) {
-    return number?.toLocaleString("id-ID").replace(/,00$/, "") + ",00";
-  }
+  const keyTableItem = [
+    "displayname",
+    "memo",
+    "location",
+    "quantity",
+    "units",
+    "quantity2",
+    "units2",
+    "rate",
+    "subtotal",
+    "totaldiscount",
+    "amount",
+    "taxrate",
+    "dpp",
+    "taxvalue",
+  ];
 
-  // Format Tanggal ke DD-MM-YYYY
-  function formatDate(dateString) {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "";
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
-
-  // Format Angka: 5,020,000.00
-  function formatNumberWithCommas(number) {
-    const num = parseFloat(number) || 0;
-    return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
-
-  // Fungsi Print
-  const handlePrint = (inv) => {
-    if (!inv || !Array.isArray(inv.invoice_items)) {
-      console.error("invoice_items tidak tersedia atau bukan array");
-      return;
-    }
-
-    // Hitung total qty1 dan qty2
-    const totalQty1 = inv.invoice_items
-      .reduce((sum, item) => sum + parseFloat(item.quantity || 0), 0)
-      .toFixed(2);
-
-    const totalQty2 = inv.invoice_items
-      .reduce((sum, item) => sum + parseFloat(item.quantity2 || 0), 0)
-      .toFixed(2);
-
-    // Hitung total subtotal, diskon, total
-    const subtotal = formatNumberWithCommas(inv.subtotal || 0);
-    const discount = formatNumberWithCommas(inv.discounttotal || 0);
-    const taxtotal = formatNumberWithCommas(inv.taxtotal || 0);
-    const total = formatNumberWithCommas(inv.amount || 0);
-
-    // Looping untuk Surat Jalan
-    const suratJalanRows = inv.invoice_items
-      .map((item, index) => `
-        <tr>
-          <td>${index + 1}.</td>
-          <td>${item.item}</td>
-          <td>${item.displayname}</td>
-          <td style="text-align:right;">${formatNumberWithCommas(item.quantity)}</td>
-          <td>${item.units}</td>
-          <td style="text-align:right;">${formatNumberWithCommas(item.quantity2)}</td>
-          <td>${item.units2}</td>
-          <td>${item.memo || ""}</td>
-        </tr>
-      `).join("");
-
-    const totalRowSJ = `
-      <tr>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="text-align:right;">${formatNumberWithCommas(totalQty1)}</td>
-        <td style="border: 0px;"></td>
-        <td style="text-align:right;">${formatNumberWithCommas(totalQty2)}</td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-      </tr>
-    `;
-
-    // Looping untuk Faktur Jual
-    const fakturJualRows = inv.invoice_items
-      .map((item, index) => {
-        const harga = formatNumberWithCommas(item.rate || 0);
-        const diskon = formatNumberWithCommas(item.totaldiscount || 0);
-        const jumlah = formatNumberWithCommas(item.amount || 0);
-
-        return `
-          <tr>
-            <td>${index + 1}.</td>
-            <td>${item.item}</td>
-            <td>${item.displayname}</td>
-            <td style="text-align:right;">${formatNumberWithCommas(item.quantity)}</td>
-            <td>${item.units}</td>
-            <td style="text-align:right;">${formatNumberWithCommas(item.quantity2)}</td>
-            <td>${item.units2}</td>
-            <td style="text-align:right;">${harga}</td>
-            <td style="text-align:right;">${diskon}</td>
-            <td>${item.memo || ""}</td>
-            <td style="text-align:right;">${jumlah}</td>
-          </tr>
-        `;
-      }).join("");
-
-    // Template HTML
-    const printContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Surat Jalan & Faktur Jual</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      background: #777;
-      font-family: Arial, sans-serif;
-    }
-    .page {
-      background: white;
-      width: 793px;
-      height: 1122px;
-      margin: 10px auto;
-      padding: 40px;
-      box-sizing: border-box;
-      position: relative;
-    }
-    .header {
-      text-align: right;
-      margin-bottom: 6px;
-    }
-    .header h1 {
-      font-size: 24px;
-    }
-    .flex-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start; 
-      margin-bottom: 16px;
-    }
-    .info-table {
-      border: 1px solid #000;
-      border-collapse: collapse;
-      font-size: 12px;
-      table-layout: auto; 
-      min-width: 200px;
-    }
-    .info-table td {
-      border: 1px solid #000;
-      padding: 8px;
-    }
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 16px;
-      font-size: 12px;
-    }
-    .table th, .table td {
-      border: 1px solid #000;
-      padding: 4px;
-      vertical-align: center;
-    }
-    .table th {
-      background: #f0f0f0;
-      font-weight: bold;
-    }
-    .keterangan {
-      border: 1px solid #000;
-      padding: 6px;
-      font-size: 12px;
-      width: 25%;
-    }
-    .signature-container {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
-      font-size: 12px;
-    }
-    .signature-box {
-      width: 15%;
-      text-align: center;
-    }
-    .signature-line {
-      border-top: 1px solid #000;
-      margin-top: 70px;
-      width: 100%;
-    }
-    .page-break {
-      page-break-before: always;
-    }
-  </style>
-</head>
-<body>
-  <!-- SURAT JALAN -->
-  <div class="page">
-    <div class="header"><h1>SURAT JALAN</h1></div>
-    <div class="flex-container">
-      <div>
-        <table class="info-table" style="margin-bottom: 10px;">
-          <tr><td rowspan="2" style="white-space: nowrap; vertical-align: top;"><strong>To</strong></td><td>${inv?.customer}</td></tr>
-          <tr><td>${inv?.billingaddress}</td></tr>
-        </table>
-        <table class="info-table">
-          <tr><td style="width: 10%;"><strong>Sales</strong></td><td>${inv?.sales}</td></tr>
-        </table>
-      </div>
-      <table class="info-table">
-        <tr><td><strong>No. SJ</strong></td><td>${inv?.tranid}</td></tr>
-        <tr><td><strong>Tgl SJ</strong></td><td>${formatDate(inv?.trandate)}</td></tr>
-        <tr><td><strong>No. SO</strong></td><td>${inv?.so_numb}</td></tr>
-        <tr><td><strong>Tgl SO</strong></td><td>${formatDate(inv?.so_trandate)}</td></tr>
-      </table>
-    </div>
-    <table class="table">
-      <tr>
-        <th width="4%">No</th>
-        <th width="15%">Kode</th>
-        <th width="34%">Nama Barang</th>
-        <th width="10%">Qty1</th>
-        <th width="5%">Satuan1</th>
-        <th width="10%">Qty2</th>
-        <th width="5%">Satuan2</th>
-        <th width="16%">Memo</th>
-      </tr>
-      ${suratJalanRows}
-      ${totalRowSJ}
-    </table>
-    <div class="signature-container">
-      <div class="signature-box">
-        Dibuat oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="signature-box">
-        Disetujui oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="signature-box">
-        Dikirim oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="signature-box">
-        Diterima oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="keterangan">
-        Keterangan:<br>
-        ${inv?.memo || ''}
-      </div>
-    </div>
-    <div style="display: flex; justify-content: flex-end; font-size:12px; margin-top:10px;">
-      [${formatDate(new Date())}]
-    </div>
-  </div>
-
-  <!-- FAKTUR JUAL -->
-  <div class="page page-break">
-    <div class="header"><h1>FAKTUR JUAL</h1></div>
-    <div class="flex-container">
-      <div>
-        <table class="info-table" style="margin-bottom: 10px;">
-          <tr><td rowspan="2" style="white-space: nowrap; vertical-align: top;"><strong>To</strong></td><td>${inv?.customer}</td></tr>
-          <tr><td>${inv?.billingaddress}</td></tr>
-        </table>
-        <table class="info-table">
-          <tr><td style="width: 10%;"><strong>Sales</strong></td><td>${inv?.sales}</td></tr>
-          <tr><td style="width: 10%;"><strong>Termin</strong></td><td>${inv?.term || "-"}</td></tr>
-        </table>
-      </div>
-      <table class="info-table">
-        <tr><td><strong>No. Faktur</strong></td><td>${inv?.tranid}</td></tr>
-        <tr><td><strong>Tgl Faktur</strong></td><td>${formatDate(inv?.trandate)}</td></tr>
-        <tr><td><strong>No. SO</strong></td><td>${inv?.so_numb}</td></tr>
-        <tr><td><strong>Tgl SO</strong></td><td>${formatDate(inv?.so_trandate)}</td></tr>
-      </table>
-    </div>
-    <table class="table">
-      <tr>
-        <th width="3%">No</th>
-        <th width="11%">Kode</th>
-        <th width="19%">Nama Barang</th>
-        <th width="7%">Qty1</th>
-        <th width="4%">Satuan1</th>
-        <th width="7%">Qty2</th>
-        <th width="4%">Satuan2</th>
-        <th width="12%">Harga</th>
-        <th width="9%">Diskon</th>
-        <th width="12%">Memo</th>
-        <th width="12%">Jumlah</th>
-      </tr>
-      ${fakturJualRows}
-      <tr>
-        <td colspan="3">Total</td>
-        <td style="text-align:right;">${formatNumberWithCommas(totalQty1)}</td>
-        <td>KG</td>
-        <td style="text-align:right;">${formatNumberWithCommas(totalQty2)}</td>
-        <td>BAL</td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td>Jumlah</td>
-        <td style="text-align:right;">${subtotal}</td>
-      </tr>
-      <tr>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td>Diskon</td>
-        <td style="text-align:right;">${discount}</td>
-      </tr>
-      <tr>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td style="border: 0px;"></td>
-        <td>Total</td>
-        <td style="text-align:right;">${total}</td>
-      </tr>
-    </table>
-    <div class="signature-container">
-      <div class="signature-box">
-        Dibuat oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="signature-box">
-        Disetujui oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="signature-box">
-        Dikirim oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="signature-box">
-        Diterima oleh,<br>
-        <div class="signature-line"></div>
-      </div>
-      <div class="keterangan">
-        Keterangan:<br>
-        ${inv?.memo || ''}
-      </div>
-    </div>
-    <div style="display: flex; justify-content: flex-end; font-size:12px; margin-top:10px;">
-      [${formatDate(new Date())}]
-    </div>
-  </div>
-</body>
-</html>
-    `;
-
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(printContent);
-  };
-
-  // Fetch Data
   useEffect(() => {
     const fetchInvoice = async () => {
       if (!params.slug) return;
@@ -377,6 +98,15 @@ export default function InvoiceDetail() {
         const response = await InvoiceFetch.getById(params.slug);
         if (response.status_code === 200) {
           setInvoice(response.data);
+          let updatedInvoiceItems = await Promise.all(
+            response.data.invoice_items.map(async (invoiceItem) => {
+              return {
+                ...invoiceItem,
+                lineid: crypto.randomUUID(),
+              };
+            })
+          );
+          setDataTableItem(updatedInvoiceItems);
         } else {
           setError(response.message || 'Gagal memuat detail invoice');
         }
@@ -389,7 +119,10 @@ export default function InvoiceDetail() {
     fetchInvoice();
   }, [params.slug]);
 
-  // Tombol Kembali
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handleBack = () => window.history.back();
 
   return (
@@ -418,7 +151,7 @@ export default function InvoiceDetail() {
                     </Button>
                   </div>
                   <div>
-                    <Button onClick={() => handlePrint(invoice)} icon={<PrinterOutlined />}>
+                    <Button onClick={() => handlePrint()} icon={<PrinterOutlined />}>
                       Printout
                     </Button>
                   </div>
@@ -456,32 +189,24 @@ export default function InvoiceDetail() {
                         <span className="text-right">{invoice.customer}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">SO Id:</span>
-                        <span className="text-right">{invoice.salesorderid}</span>
+                        <span className="text-gray-500">Sales Rep:</span>
+                        <span className="text-right">{invoice.sales}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Fulfillment Id:</span>
-                        <span className="text-right">{invoice.fulfillmentid}</span>
+                        <span className="text-gray-500">Date:</span>
+                        <span className="text-right">{formatDateToShort(invoice.trandate)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Entity:</span>
-                        <span className="text-right">{invoice.entity}</span>
+                        <span className="text-gray-500">Due Date:</span>
+                        <span className="text-right">{formatDateToShort(invoice.duedate)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Trandate:</span>
-                        <span className="text-right">{new Date(invoice.trandate).toLocaleDateString('id-ID')}</span>
+                        <span className="text-gray-500">No. SO:</span>
+                        <span className="text-right">{invoice.so_numb}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Salesordernum:</span>
-                        <span className="text-right">{invoice.salesordernum}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Fulfillmentnum:</span>
-                        <span className="text-right">{invoice.fulfillmentnum}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Memo:</span>
-                        <span className="text-right">{invoice.memo}</span>
+                        <span className="text-gray-500">No. DO:</span>
+                        <span className="text-right">{invoice.tranid}</span>
                       </div>
                     </div>
                   </div>
@@ -501,6 +226,10 @@ export default function InvoiceDetail() {
                         <span className="text-gray-500">Shipping Address:</span>
                         <span className="text-right">{invoice.shippingaddress}</span>
                       </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Notes:</span>
+                        <span className="text-right">{invoice.memo}</span>
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -516,12 +245,12 @@ export default function InvoiceDetail() {
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Term:</span>
-                        <span className="text-right">{invoice.term}</span>
-                      </div>
-                      <div className="flex justify-between">
                         <span className="text-gray-500">Billing Address:</span>
                         <span className="text-right">{invoice.billingaddress}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Term:</span>
+                        <span className="text-right">{invoice.term} Days</span>
                       </div>
                     </div>
                   </div>
@@ -537,31 +266,11 @@ export default function InvoiceDetail() {
                   >
                     Item
                   </Divider>
-                  <div className="overflow-x-auto">
-                    <Table
-                      columns={[
-                        { title: 'Display Name', dataIndex: 'displayname', key: 'displayname' },
-                        { title: 'Item', dataIndex: 'item', key: 'item' },
-                        { title: 'Quantity', dataIndex: 'quantity', key: 'quantity', align: 'right' },
-                        { title: 'Units', dataIndex: 'units', key: 'units' },
-                        { title: 'Quantity2', dataIndex: 'quantity2', key: 'quantity2', align: 'right' },
-                        { title: 'Units2', dataIndex: 'units2', key: 'units2' },
-                        { title: 'Rate', dataIndex: 'rate', key: 'rate', align: 'right' },
-                        { title: 'Subtotal', dataIndex: 'subtotal', key: 'subtotal', align: 'right' },
-                        { title: 'Discount', dataIndex: 'totaldiscount', key: 'totaldiscount', align: 'right' },
-                        { title: 'Amount', dataIndex: 'amount', key: 'amount', align: 'right' },
-                        { title: 'Tax Rate', dataIndex: 'taxrate', key: 'taxrate', align: 'right' },
-                        { title: 'Tax Value', dataIndex: 'taxvalue', key: 'taxvalue', align: 'right' },
-                        { title: 'Memo', dataIndex: 'memo', key: 'memo' },
-                      ]}
-                      dataSource={invoice.invoice_items}
-                      pagination={false}
-                      rowKey="id"
-                      bordered
-                      size="small"
-                      scroll={{ x: 'max-content' }}
-                    />
-                  </div>
+                  <TableCustom
+                    data={dataTableItem}
+                    keys={keyTableItem}
+                    aliases={invoiceAliases.item}
+                  />
                 </div>
                 <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
                   <div className="flex w-full">
@@ -574,18 +283,6 @@ export default function InvoiceDetail() {
                     <p className="w-1/2 text-sm">Discount Item</p>
                     <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(invoice.discounttotal)}
-                    </p>
-                  </div>
-                  <div className="flex w-full">
-                    <p className="w-1/2 text-sm">Subtotal (After Discount)</p>
-                    <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(invoice.subtotal)} Incl. PPN
-                    </p>
-                  </div>
-                  <div className="flex w-full">
-                    <p className="w-1/2 text-sm">Tax Total</p>
-                    <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(invoice.taxtotal)}
                     </p>
                   </div>
                   <hr className="border-gray-5" />
@@ -607,6 +304,30 @@ export default function InvoiceDetail() {
           </div>
         </div>
       </div>
+      <div className="to-print-invoice hidden print:block">
+        <InvoicePrint data={invoice} dataTable={dataTableItem} />
+      </div>
+      <style jsx>{`
+        @media print {
+          * {
+            display: none !important;
+          }
+
+          .ant-dropdown {
+            display: none !important;
+          }
+
+          .to-print-invoice {
+            display: block !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            z-index: 99999;
+          }
+        }
+      `}</style>
     </Layout>
   );
 }

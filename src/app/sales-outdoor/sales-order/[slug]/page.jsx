@@ -161,7 +161,7 @@ export default function SalesOrderDetail() {
   }, [params.slug]);
 
   const handleBack = () => {
-    window.history.back();
+    window.location.href = `/sales-outdoor/sales-order`;
   };
 
   return (
