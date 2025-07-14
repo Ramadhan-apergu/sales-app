@@ -60,6 +60,12 @@ export default function DeliveryOrder() {
             const newOffset = actualOffset + actualLimit;
             setPagination({ offset: newOffset, limit: actualLimit });
             setHasMore(newOffset < totalCount);
+
+            const items = [];
+            items.push({title: 'Open', value: response.data.total_open});
+            items.push({title: 'Shipped', value: response.data.total_shipped});
+
+            setOverviewItems(items);
         } else {
             setError(response.message || 'Failed to load deliveries');
             setHasMore(false);
@@ -71,31 +77,6 @@ export default function DeliveryOrder() {
         setLoading(false);
         }
     }, [pagination, searchText, loading, hasMore]);
-
-    useEffect(() => {
-        const statuses = [
-        { key: 'open',   label: 'Open' },
-        { key: 'partially_paid', label: 'Partially Shipped' },
-        { key: 'paid_in_full', label: 'Shipped' },
-        ];
-        async function fetchOverview() {
-        try {
-            const results = await Promise.all(
-            statuses.map(s =>
-                DeliveryOrderFetch.get(0, 1, s.key, '')
-            )
-            );
-            const items = results.map((res, idx) => ({
-            title: statuses[idx].label,
-            value: res.data?.total_items || 0,
-            }));
-            setOverviewItems(items);
-        } catch (e) {
-            console.error('Error fetching overview counts', e);
-        }
-        }
-        fetchOverview();
-    }, []);
 
     const handleSearchEnter = () => {
         setPagination({ offset: 0, limit: 10 });
@@ -156,7 +137,7 @@ export default function DeliveryOrder() {
                 style={{ width: '100%' }}
                 allowClear
             >
-                {["open", "partially shipped", "shipped"]
+                {["open", "shipped"]
                 .map(s => <Option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</Option>)
                 }
             </Select>

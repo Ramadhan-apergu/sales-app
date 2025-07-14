@@ -67,7 +67,7 @@ function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
         }),
       };
 
-      if (['rate', 'subtotal', 'totalamount', 'value1', 'value2', 'value3'].includes(key)) {
+      if (['rate', 'subtotal', 'totalamount', 'value1', 'value2', 'value3', 'taxvalue'].includes(key)) {
         column.render = (value) => formatRupiah(value);
       }
 
@@ -108,6 +108,7 @@ export default function Enter() {
   const [modal, contextHolder] = Modal.useModal();
   const title = "sales order";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [isModalOkLoading, setIsModalOkLoading] = useState(false);
 
   const [dataCustomer, setDataCustomer] = useState([]);
   const [customerSelected, setCustomerSelected] = useState({});
@@ -440,117 +441,117 @@ export default function Enter() {
   function handleModalItemCancel() {
     dispatchItemTable({ type: "RESET" });
     setItemSelected(null);
-    setEditItem(null); // Reset editItem saat modal ditutup
+    setEditItem(null);
     setIsModalItemOpen(false);
+    setIsModalOkLoading(false); // Reset status tombol OK
   }
 
   async function handleModalItemOk() {
+    // Validasi awal — jika gagal, tombol tetap aktif
     if (!stateItemTable.item.item) {
       notify("error", "Error", "Select item first");
       return;
     }
-
     if (stateItemTable.item.quantity <= 0) {
       notify("error", "Error", "Please enter a quantity greater than 0.");
       return;
     }
-
     if (stateItemTable.tax.taxable && stateItemTable.tax.taxrate <= 0) {
       notify("error", "Error", "Please enter a tax rate greater than 0.");
       return;
     }
 
-    const subtotal = stateItemTable.item.quantity * stateItemTable.item.rate;
-    const totalamount = subtotal;
-    const taxrate = stateItemTable.tax.taxable
-      ? Number(stateItemTable.tax.taxrate)
-      : 0;
-    const taxvalue = stateItemTable.tax.taxable
-      ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
-      : 0;
+    // Set tombol OK menjadi loading setelah validasi berhasil
+    setIsModalOkLoading(true);
 
-    dispatchItemTable({
-      type: "SET_SUMMARY",
-      payload: { subtotal, totalamount },
-    });
+    try {
+      // Hitung subtotal dan pajak
+      const subtotal = stateItemTable.item.quantity * stateItemTable.item.rate;
+      const taxrate = stateItemTable.tax.taxable
+        ? Number(stateItemTable.tax.taxrate)
+        : 0;
+      const taxvalue = stateItemTable.tax.taxable
+        ? Math.ceil((subtotal) * (taxrate / 100))
+        : 0;
 
-    dispatchItemTable({
-      type: "SET_TAX",
-      payload: { taxvalue, taxrate },
-    });
+      // Update state item dan pajak
+      dispatchItemTable({
+        type: "SET_SUMMARY",
+        payload: { subtotal, totalamount: subtotal + taxvalue },
+      });
+      dispatchItemTable({
+        type: "SET_TAX",
+        payload: { taxvalue, taxrate },
+      });
 
-    const mergePayloadItemTable = {
-      ...stateItemTable.item,
-      ...stateItemTable.discount1,
-      ...stateItemTable.discount2,
-      ...stateItemTable.discount3,
-      subtotal,
-      totalamount,
-      qtyfree: stateItemTable.summary.qtyfree,
-      unitfree: stateItemTable.summary.unitfree,
-      totaldiscount: stateItemTable.summary.totaldiscount,
-      taxable: stateItemTable.tax.taxable,
-      taxrate,
-      taxvalue,
-    };
-
-    if (editItem) {
-      // Edit item yang ada
-      const currentDiscountItem = discountItems.find(
-        (di) => di.id === stateItemTable.item.item
-      );
-      const previousSelected = currentDiscountItem.discount
-        .filter((d) => d.isChecked)
-        .map((d) => d.id);
-
-      const discountItem = await getDiscount(
-        state.payloadPrimary.entity,
-        stateItemTable.item.item,
-        convertToLocalDate(state.payloadPrimary.trandate),
-        stateItemTable.item.quantity,
-        stateItemTable.item.itemprocessfamily
-      );
-
-      const updatedDiscountItem = {
-        ...discountItem,
-        discount: discountItem.discount.map((d) => ({
-          ...d,
-          isChecked: previousSelected.includes(d.id),
-        })),
+      const mergePayloadItemTable = {
+        ...stateItemTable.item,
+        ...stateItemTable.discount1,
+        ...stateItemTable.discount2,
+        ...stateItemTable.discount3,
+        subtotal,
+        totalamount: subtotal,
+        qtyfree: stateItemTable.summary.qtyfree,
+        unitfree: stateItemTable.summary.unitfree,
+        totaldiscount: stateItemTable.summary.totaldiscount,
+        taxable: stateItemTable.tax.taxable,
+        taxrate,
+        taxvalue,
       };
 
-      setDiscountItems((prev) =>
-        prev.map((di) =>
-          di.id === stateItemTable.item.item ? updatedDiscountItem : di
-        )
-      );
-
-      setDataTableItem((prev) =>
-        prev.map((item) =>
-          item.lineid === editItem
-            ? { ...mergePayloadItemTable, lineid: editItem }
-            : item
-        )
-      );
-    } else {
-      // Tambah item baru
-      const discountItem = await getDiscount(
-        state.payloadPrimary.entity,
-        stateItemTable.item.item,
-        convertToLocalDate(state.payloadPrimary.trandate),
-        stateItemTable.item.quantity,
-        stateItemTable.item.itemprocessfamily
-      );
-
-      setDiscountItems((prev) => [...prev, discountItem]);
-
-      setDataTableItem((prev) => [
-        ...prev,
-        { ...mergePayloadItemTable, lineid: crypto.randomUUID() },
-      ]);
+      // Tambah atau edit item
+      if (editItem) {
+        const currentDiscountItem = discountItems.find(
+          (di) => di.id === stateItemTable.item.item
+        );
+        const previousSelected = currentDiscountItem.discount
+          .filter((d) => d.isChecked)
+          .map((d) => d.id);
+        const discountItem = await getDiscount(
+          state.payloadPrimary.entity,
+          stateItemTable.item.item,
+          convertToLocalDate(state.payloadPrimary.trandate),
+          stateItemTable.item.quantity,
+          stateItemTable.item.itemprocessfamily
+        );
+        const updatedDiscountItem = {
+          ...discountItem,
+          discount: discountItem.discount.map((d) => ({
+            ...d,
+            isChecked: previousSelected.includes(d.id),
+          })),
+        };
+        setDiscountItems((prev) =>
+          prev.map((di) =>
+            di.id === stateItemTable.item.item ? updatedDiscountItem : di
+          )
+        );
+        setDataTableItem((prev) =>
+          prev.map((item) =>
+            item.lineid === editItem
+              ? { ...mergePayloadItemTable, lineid: editItem }
+              : item
+          )
+        );
+      } else {
+        const discountItem = await getDiscount(
+          state.payloadPrimary.entity,
+          stateItemTable.item.item,
+          convertToLocalDate(state.payloadPrimary.trandate),
+          stateItemTable.item.quantity,
+          stateItemTable.item.itemprocessfamily
+        );
+        setDiscountItems((prev) => [...prev, discountItem]);
+        setDataTableItem((prev) => [
+          ...prev,
+          { ...mergePayloadItemTable, lineid: crypto.randomUUID() },
+        ]);
+      }
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      handleModalItemCancel(); // Tutup modal dan reset state
     }
-
-    handleModalItemCancel();
   }
 
   function handleEditTableItem(record) {
@@ -795,18 +796,12 @@ export default function Enter() {
 
       const totaldiscount = discount1 + discount2 + discount3;
 
-      data.subtotal = data.totalamount - totaldiscount;
+      data.subtotal = data.totalamount - totaldiscount + data.taxvalue;
       data.totaldiscount = totaldiscount;
 
       if (["kg", "bal"].includes(data.perunit2?.toLowerCase?.())) {
         data.qtyfree = data.value2;
         data.unitfree = data.perunit2;
-      }
-
-      if (data.taxable) {
-        data.taxvalue = Math.ceil(
-          (data.subtotal / (1 + data.taxrate / 100)) * (data.taxrate / 100)
-        );
       }
 
       return data;
@@ -1010,6 +1005,10 @@ export default function Enter() {
                             dispatch({
                               type: "SET_PRIMARY",
                               payload: { salesrep: customer.salesrep },
+                            });
+                            dispatch({
+                              type: "SET_BILLING",
+                              payload: { term: customer.terms },
                             });
                           }}
                           options={dataCustomer}
@@ -1245,6 +1244,7 @@ export default function Enter() {
         width={850}
         cancelText="Cancel"
         title={editItem ? "Edit Item" : "Add Item"}
+        okButtonProps={{ disabled: isModalOkLoading }}
       >
         <div className="w-full mt-6">
           <div className="w-full flex flex-col gap-4 mt-6">
@@ -1302,7 +1302,7 @@ export default function Enter() {
               type="SET_ITEM"
               payload={stateItemTable.item}
               data={[
-                { key: "item", input: "input", isAlias: true, isRead: true },
+                { key: "item", input: "input", isAlias: true, isRead: true, hidden: true},
                 { key: "quantity", input: "number", isAlias: true },
                 { key: "units", input: "input", isAlias: true, disabled: true, isRead: true },
                 { key: "rate", input: "input", isAlias: true, disabled: true, isRead: true },
