@@ -1,29 +1,107 @@
-// app/sales-outdoor/sales-order/[slug]/page.js
 'use client';
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Layout from '@/components/salesOutdoor/Layout';
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
-import DeliveryOrderFetch from '@/modules/salesApi/deliveryOrder';
-import { Button, Spin, Empty, Divider, } from 'antd';
+import FullfillmentFetch from '@/modules/salesApi/itemFullfillment';
+import ItemFetch from '@/modules/salesApi/item';
+import { Button, Table, Spin, Empty, Divider, Tooltip } from 'antd';
+import { formatDateToShort } from '@/utils/formatDate';
 
 export default function DeliveryOrderDetail() {
   const params = useParams();
   const [delivery, setDelivery] = useState(null);
+  const [deliveryItems, setDeliveryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch detail delivery
+  const keyTableItem = [
+    "item",
+    "display name",
+    "location",
+    "description",
+    "quantity (kg)",
+    "quantity (bal)",
+    "remaining",
+  ];
+
+  const itemColumns = keyTableItem.map((key) => {
+    const isDisplayName = key === 'displayname';
+    
+    const column = {
+      title: key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase()),
+      dataIndex: key,
+      key,
+      align: [
+        'quantity1',
+        'quantity2',
+        'quantityremaining'
+      ].includes(key) ? 'right' : 'left',
+      onHeaderCell: () => ({
+        className: 'text-sm text-center', 
+        style: { textAlign: 'center' } 
+      }),
+      onCell: () => ({
+        className: 'text-xs'
+      }),
+      render: (text) => {
+        if (isDisplayName) {
+          return (
+            <Tooltip title={text}>
+              <div className="truncate" style={{ 
+                maxWidth: '120px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {text}
+              </div>
+            </Tooltip>
+          );
+        }
+        return text;
+      }
+    };
+
+    if (isDisplayName) {
+      column.ellipsis = {
+        showTitle: false
+      };
+    }
+
+    return column;
+  });
+
   useEffect(() => {
     const fetchDelivery = async () => {
       if (!params.slug) return;
 
       setLoading(true);
       try {
-        const response = await DeliveryOrderFetch.getById(params.slug);
+        const response = await FullfillmentFetch.getById(params.slug);
         if (response.status_code === 200) {
-          setDelivery(response.data);
+          const resData = response.data;
+          setDelivery(resData);
+
+          const dataFulfillmentWithItem = await Promise.all(
+            resData.fulfillment_items.map(async (doItem) => {
+              const item = await ItemFetch.getById(doItem.item);
+              return {
+                ...doItem,
+                itemprocessfamily: item?.itemprocessfamily || "",
+                displayname: item ? item.displayname : "",
+                quantity1: doItem.quantity,
+                unit1: doItem.units,
+                quantity2: doItem.quantity2,
+                unit2: doItem.units2,
+              };
+            })
+          );
+          setDeliveryItems(dataFulfillmentWithItem);
+
         } else {
           setError(response.message || 'Gagal memuat detail delivery order');
         }
@@ -37,7 +115,6 @@ export default function DeliveryOrderDetail() {
     fetchDelivery();
   }, [params.slug]);
 
-  // Fungsi untuk tombol kembali
   const handleBack = () => {
     window.history.back();
   };
@@ -71,14 +148,14 @@ export default function DeliveryOrderDetail() {
                     <h3 className="font-semibold text-gray-700 mb-2 text-center text-2xl">Delivery Order Details</h3>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span>{delivery.delivery_id} / {delivery.customer}</span>
+                        <span>{delivery.tranid} / {delivery.customer}</span>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        delivery.delivery_status === 'Fulfilled' 
+                        delivery.shipstatus === 'Shipped' 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {delivery.delivery_status}
+                        {delivery.shipstatus}
                       </span>
                     </div>
                   </div>
@@ -95,59 +172,75 @@ export default function DeliveryOrderDetail() {
                         Primary
                     </Divider>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Tranid:</span>
-                        <span className="text-right">{delivery.delivery_numb}</span>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">No. Do:</span>
+                        <span className="text-right">{delivery.tranid}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Trandate:</span>
-                        <span className="text-right">{new Date(delivery.delivery_date).toLocaleDateString('id-ID')}</span>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">No. SO:</span>
+                        <span className="text-right">{delivery.createdfrom}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Customer:</span>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">Customer Name:</span>
                         <span className="text-right">{delivery.customer}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Delivery Status:</span>
-                        <span className="text-right">{delivery.delivery_status}</span>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">Date:</span>
+                        <span className="text-right">{formatDateToShort(delivery.trandate)}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Display Name:</span>
-                        <span className="text-right">{delivery.displayname}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Itemid:</span>
-                        <span className="text-right">{delivery.itemid}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Qty:</span>
-                        <span className="text-right">{delivery.qty_delivery}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Qty SO:</span>
-                        <span className="text-right">{delivery.qty_so}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">SO Number:</span>
-                        <span className="text-right">{delivery.so_numb}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">SO Date:</span>
-                        <span className="text-right">{new Date(delivery.so_date).toLocaleDateString('id-ID')}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">SO Status:</span>
-                        <span className="text-right">{delivery.so_status}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Unit Delivery:</span>
-                        <span className="text-right">{delivery.unit_delivery}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Unit SO:</span>
-                        <span className="text-right">{delivery.unit_so}</span>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">Status:</span>
+                        <span className="text-right">{delivery.shipstatus}</span>
                       </div>
                     </div>
+                  </div>
+
+                  <div>
+                    <Divider
+                        style={{
+                        marginBottom: "8px",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                    >
+                        Shipping
+                    </Divider>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">Shipping Address:</span>
+                        <span className="text-right">{delivery.shippingaddress}</span>
+                      </div>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">Notes:</span>
+                        <span className="text-right">{delivery.notes}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Divider
+                    style={{
+                      marginBottom: "8px",
+                      textTransform: "capitalize",
+                      borderColor: "#1677ff",
+                    }}
+                    orientation="left"
+                  >
+                    Item
+                  </Divider>
+                  <div className="overflow-x-auto">
+                    <Table
+                      columns={itemColumns}
+                      dataSource={deliveryItems}
+                      pagination={false}
+                      rowKey="id"
+                      bordered
+                      size="small"
+                      scroll={{ x: 'max-content' }}
+                      tableLayout="auto"
+                    />
                   </div>
                 </div>
               </div>
