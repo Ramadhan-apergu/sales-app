@@ -161,7 +161,7 @@ export default function SalesOrderDetail() {
   }, [params.slug]);
 
   const handleBack = () => {
-    window.history.back();
+    window.location.href = `/sales-outdoor/sales-order`;
   };
 
   return (
@@ -217,23 +217,23 @@ export default function SalesOrderDetail() {
                         Primary
                     </Divider>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Customer ID:</span>
                         <span className="text-right">{order.customerid}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Customer Name:</span>
                         <span className="text-right">{order.customer}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Transaction Date:</span>
                         <span className="text-right">{new Date(order.trandate).toLocaleDateString('id-ID')}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Sales Rep:</span>
                         <span className="text-right">{order.salesrep}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Customer PO Number:</span>
                         <span className="text-right">{order.otherrefnum}</span>
                       </div>
@@ -252,11 +252,11 @@ export default function SalesOrderDetail() {
                         Shipping
                     </Divider>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Shipping Address:</span>
                         <span className="text-right">{order.shippingaddress}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Notes:</span>
                         <span className="text-right">{order.notes}</span>
                       </div>
@@ -275,7 +275,7 @@ export default function SalesOrderDetail() {
                         Billing
                     </Divider>
                     <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Term:</span>
                         <span className="text-right">
                           {order.term.toLowerCase().startsWith('net')
@@ -283,7 +283,7 @@ export default function SalesOrderDetail() {
                             : `${order.term} Days`}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Payment Option:</span>
                         <span className="text-right">{order.paymentoption}</span>
                       </div>
@@ -318,20 +318,20 @@ export default function SalesOrderDetail() {
                 </div>
 
                 <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
-                  <div className="flex w-full">
+                  <div className="flex w-full  border rounded-lg p-2 border-gray-300">
                     <p className="w-1/2 text-sm">Subtotal</p>
                     <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.subtotalbruto)}
                     </p>
                   </div>
-                  <div className="flex w-full">
+                  <div className="flex w-full border rounded-lg p-2 border-gray-300">
                     <p className="w-1/2 text-sm">Discount Item</p>
                     <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.discounttotal)}
                     </p>
                   </div>
-                  <hr className="border-gray-5" />
-                  <div className="flex w-full font-semibold">
+                  <hr className="" />
+                  <div className="flex w-full font-semibold border rounded-lg p-2 border-gray-300">
                     <p className="w-1/2 text-sm">Total</p>
                     <p className="w-1/2 text-end text-sm text-right">
                       {formatRupiah(order.total)} Incl.
