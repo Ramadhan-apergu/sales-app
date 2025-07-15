@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useReducer, useRef, useState } from "react";
-import { Button, Table } from "antd";
+import { Button, Table, Tag } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
@@ -14,7 +14,10 @@ import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { createResponseHandler } from "@/utils/responseHandlers";
+import {
+  createResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 import { Upload } from "antd";
 import * as XLSX from "xlsx";
@@ -23,18 +26,30 @@ function TableCustom({ data, aliases }) {
   if (!data?.length) return null;
 
   const keys = Object.keys(data[0] || {});
-  const columns = keys.map((key) => ({
-    // title: key,
-    dataIndex: key,
-    key,
-    title: aliases?.[key] || key,
-  }));
+  const columns = keys.map((key) =>
+    key == "is_valid"
+      ? {
+          dataIndex: key,
+          key,
+          title: aliases?.[key] || key,
+          render: (text) => (
+            <Tag color={text ? "green" : "red"}>
+              {text ? "Valid" : "Invalid"}
+            </Tag>
+          ),
+        }
+      : {
+          dataIndex: key,
+          key,
+          title: aliases?.[key] || key,
+        }
+  );
 
   return (
     <Table
       columns={columns}
       dataSource={data}
-      rowKey={(record, idx) => idx}
+      rowKey={"no"}
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
@@ -75,7 +90,7 @@ export default function Enter() {
 
       const reader = new FileReader();
 
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
@@ -88,7 +103,29 @@ export default function Enter() {
             return;
           }
 
-          setParsedData(json);
+          const itemids = json.map((item) => {
+            return item["Item Name/Number"];
+          });
+
+          let checkData = await checkItem(itemids);
+          let updateJson = [];
+
+          if (checkData) {
+            const checkMap = new Map(
+              checkData.map((item) => [item.itemid, item])
+            );
+
+            updateJson = json.map((item, i) => {
+              const findCheckItem = checkMap.get(item["Item Name/Number"]);
+              return {
+                no: i + 1,
+                ...item,
+                is_valid: findCheckItem ? findCheckItem.is_valid : false,
+              };
+            });
+          }
+
+          setParsedData(updateJson);
           setUploadedFile(file);
         } catch (err) {
           notify("error", "Parse Error", "Failed to read Excel file.");
@@ -105,6 +142,18 @@ export default function Enter() {
     },
   };
 
+  const checkItem = async (items) => {
+    try {
+      const response = await StockAdjustmentFetch.validasiItem({
+        itemid: items,
+      });
+      const resData = await getResponseHandler(response, notify);
+      return resData;
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    }
+  };
+
   const handleDeleteFile = () => {
     setUploadedFile(null);
     setParsedData([]);
@@ -113,6 +162,11 @@ export default function Enter() {
   const handleSubmit = async () => {
     if (!uploadedFile) {
       notify("error", "No File", "Please upload a file first.");
+      return;
+    }
+
+    if (parsedData.filter((item) => item.is_valid == false).length > 0) {
+      notify("error", "Invalid", "There are invalid items.");
       return;
     }
 
@@ -186,7 +240,12 @@ export default function Enter() {
               </div>
             )}
 
-            {parsedData.length > 0 && <TableCustom data={parsedData} />}
+            {parsedData.length > 0 && (
+              <TableCustom
+                data={parsedData}
+                aliases={{ is_valid: "Validated", no: "No" }}
+              />
+            )}
           </div>
         </div>
       </Layout>
