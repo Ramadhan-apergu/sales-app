@@ -33,18 +33,6 @@ export default function SalesOrderDetail() {
     "units",
     "rate",
     "description",
-    "discountname1",
-    "value1",
-    "discountvalue1",
-    "perunit1",
-    "discountname2",
-    "value2",
-    "discountvalue2",
-    "perunit2",
-    "discountname3",
-    "value3",
-    "discountvalue3",
-    "perunit3",
     "subtotal",
     "totalamount",
     "totaldiscount",
@@ -56,27 +44,34 @@ export default function SalesOrderDetail() {
     "backordered",
   ];
 
-  const itemColumns = keyTableItem.map((key) => {
+  const keTableName = [
+    "Item",
+    "Qty",
+    "Unit",
+    "Rate",
+    "Description",
+    "Total Amount (After Discount)",
+    "Total Amount",
+    "Total Discount",
+    "Free Qty",
+    "Unit Free",
+    "Taxable",
+    "Tax Rate",
+    "Tax Value",
+    "Back Ordered"
+  ]
+
+  const itemColumns = keyTableItem.map((key, index) => {
+    const title = keTableName[index]; 
     const isDisplayName = key === 'displayname';
     
     const column = {
-      title: (isDisplayName ? 'Item Name' : key)
-        .replace(/([A-Z])/g, ' $1')
-        .replace(/^./, str => str.toUpperCase()),
+      title: title, 
       dataIndex: key,
       key,
       align: [
         'quantity',
         'rate',
-        'value1',
-        'discountvalue1',
-        'perunit1',
-        'value2',
-        'discountvalue2',
-        'perunit2',
-        'value3',
-        'discountvalue3',
-        'perunit3',
         'subtotal',
         'totalamount',
         'totaldiscount',
@@ -126,12 +121,11 @@ export default function SalesOrderDetail() {
       }
     };
 
-    // Hanya terapkan properti fixed dan width untuk kolom displayname
     if (isDisplayName) {
       column.fixed = 'left';
       column.width = 120;
       column.ellipsis = {
-        showTitle: false // Nonaktifkan tooltip bawaan Antd
+        showTitle: false
       };
     }
 
