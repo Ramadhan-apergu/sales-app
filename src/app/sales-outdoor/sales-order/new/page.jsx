@@ -49,26 +49,108 @@ const formatRupiah = (value) => {
 };
 
 function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
-  const textKeys = ['displayname', 'units', 'description', 'discountname1', 'discountvalue1', 'perunit1', 'discountname2', 'discountvalue2', 'perunit2', 'discountname3', 'discountvalue3', 'perunit3', 'unitfree'];
+  const keyTableItem = [
+    "displayname",
+    "quantity",
+    "units",
+    "rate",
+    "description",
+    "subtotal",
+    "totalamount",
+    "totaldiscount",
+    "qtyfree",
+    "unitfree",
+    "taxable",
+    "taxrate",
+    "taxvalue",
+    "backordered",
+  ];
 
-  const columns = [
-    ...keys.map((key) => {
-      let column = {
-        title:
-          key === 'displayname'
-            ? 'Item Name'
-            : aliases?.[key] || key,
+  const keTableName = [
+    "Item",
+    "Qty",
+    "Unit",
+    "Rate",
+    "Description",
+    "Total Amount (After Discount)",
+    "Total Amount",
+    "Total Discount",
+    "Free Qty",
+    "Unit Free",
+    "Taxable",
+    "Tax Rate",
+    "Tax Value",
+    "Back Ordered"
+  ]
+
+  const columns = 
+  [
+      ...keyTableItem.map((key, index) => {
+      const title = keTableName[index]; 
+      const isDisplayName = key === 'displayname';
+      
+      const column = {
+        title: title, 
         dataIndex: key,
-        key: key,
-        align: textKeys.includes(key) ? 'left' : 'right',
+        key,
+        align: [
+          'quantity',
+          'rate',
+          'subtotal',
+          'totalamount',
+          'totaldiscount',
+          'qtyfree',
+          'taxrate',
+          'taxvalue',
+          'backordered'
+        ].includes(key) ? 'right' : 'left',
         onHeaderCell: () => ({
-          className: 'text-sm text-center',
-          style: { textAlign: 'center' }  
+          className: 'text-sm text-center', 
+          style: { textAlign: 'center' } 
         }),
+        onCell: () => ({
+          className: 'text-xs'
+        }),
+        render: (text) => {
+          if (isDisplayName) {
+            return (
+              <Tooltip title={text}>
+                <div className="truncate" style={{ 
+                  maxWidth: '120px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {text}
+                </div>
+              </Tooltip>
+            );
+          }
+          
+          const shouldFormat = [
+            'rate',
+            'value1',
+            'discountvalue1',
+            'value2',
+            'discountvalue2',
+            'value3',
+            'discountvalue3',
+            'subtotal',
+            'totalamount',
+            'totaldiscount',
+            'taxvalue'
+          ].includes(key);
+          
+          return shouldFormat ? formatRupiah(text) : text;
+        }
       };
 
-      if (['rate', 'subtotal', 'totalamount', 'value1', 'value2', 'value3', 'taxvalue'].includes(key)) {
-        column.render = (value) => formatRupiah(value);
+      if (isDisplayName) {
+        column.fixed = 'left';
+        column.width = 120;
+        column.ellipsis = {
+          showTitle: false
+        };
       }
 
       return column;
@@ -87,8 +169,8 @@ function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
           </Button>
         </>
       ),
-    },
-  ];
+    }
+  ]
 
   return (
     <Table
@@ -467,17 +549,18 @@ export default function Enter() {
     try {
       // Hitung subtotal dan pajak
       const subtotal = stateItemTable.item.quantity * stateItemTable.item.rate;
+      const totalamount = subtotal;
       const taxrate = stateItemTable.tax.taxable
         ? Number(stateItemTable.tax.taxrate)
         : 0;
       const taxvalue = stateItemTable.tax.taxable
-        ? Math.ceil((subtotal) * (taxrate / 100))
+        ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
         : 0;
 
       // Update state item dan pajak
       dispatchItemTable({
         type: "SET_SUMMARY",
-        payload: { subtotal, totalamount: subtotal + taxvalue },
+        payload: { subtotal, totalamount },
       });
       dispatchItemTable({
         type: "SET_TAX",
@@ -796,12 +879,18 @@ export default function Enter() {
 
       const totaldiscount = discount1 + discount2 + discount3;
 
-      data.subtotal = data.totalamount - totaldiscount + data.taxvalue;
+      data.subtotal = data.totalamount - totaldiscount;
       data.totaldiscount = totaldiscount;
 
       if (["kg", "bal"].includes(data.perunit2?.toLowerCase?.())) {
         data.qtyfree = data.value2;
         data.unitfree = data.perunit2;
+      }
+
+      if (data.taxable) {
+        data.taxvalue = Math.ceil(
+          (data.subtotal / (1 + data.taxrate / 100)) * (data.taxrate / 100)
+        );
       }
 
       return data;

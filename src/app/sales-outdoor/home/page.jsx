@@ -18,7 +18,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import dayjs from "dayjs";
-import { formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah, formatCurrencyViralIndo } from "@/utils/formatRupiah";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import useNotification from "@/hooks/useNotification";
 
@@ -143,7 +143,7 @@ export default function Dashboard() {
                                         {yearData &&
                                         yearData.amount_avg !== undefined &&
                                         yearData.amount_avg !== null
-                                            ? formatRupiahAccounting(yearData.amount_avg)
+                                            ? formatRupiah(yearData.amount_avg)
                                             : "-"}
                                     </p>
                                     <p className="text-sm text-green-5">Amount</p>
@@ -162,7 +162,7 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="w-full grid grid-cols-1 gap-6">
                             <div className="w-full h-80 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-2">
                                 <div>
                                     <p className="text-sm font-medium text-blue-6">Sales Order (Kg)</p>
@@ -180,8 +180,8 @@ export default function Dashboard() {
                                         barCategoryGap="20%"
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="trandate" tickFormatter={(value) => dayjs(value, "MM-YYYY").format("MMM")}/>
-                                        <YAxis tickFormatter={(value) => value} width={1} />
+                                        <XAxis dataKey="trandate" tickFormatter={(value) => dayjs(value, "MM-YYYY").format("MMM")} tick={{ fontSize: 12 }}/>
+                                        <YAxis tickFormatter={(value) => value} width={16} tick={{ fontSize: 12 }}/>
                                         <Tooltip itemStyle={{ textTransform: "capitalize" }} />
                                         <Bar
                                             dataKey="qty"
@@ -210,8 +210,8 @@ export default function Dashboard() {
                                         barCategoryGap="20%"
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="trandate" tickFormatter={(value) => dayjs(value, "MM-YYYY").format("MMM")}/>
-                                        <YAxis tickFormatter={(value) => formatRupiahAccounting(value)} width={1} />
+                                        <XAxis dataKey="trandate" tickFormatter={(value) => dayjs(value, "MM-YYYY").format("MMM")} tick={{ fontSize: 12 }}/>
+                                        <YAxis tickFormatter={(value) => formatCurrencyViralIndo(value)} width={16} tick={{ fontSize: 12 }}/>
                                         <Tooltip itemStyle={{ textTransform: "capitalize" }} />
                                         <Bar
                                             dataKey="amount"

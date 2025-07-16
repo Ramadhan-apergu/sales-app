@@ -288,9 +288,11 @@ export default function SalesOrder() {
                         <div className="p-4 text-center text-gray-500">Tidak ada lagi data untuk dimuat</div>
                     )}
 
-                    <Link href="/sales-outdoor/sales-order/new">
+                    <div className="fixed bottom-[12%] right-1/2 transform translate-x-1/2 max-w-md w-full flex justify-end pr-6 z-50">
+                        <Link href="/sales-outdoor/sales-order/new">
                         <FloatingButton />
-                    </Link>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </Layout>
