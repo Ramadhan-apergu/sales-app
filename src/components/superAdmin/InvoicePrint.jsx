@@ -64,7 +64,7 @@ export default function InvoicePrint({ data, dataTable }) {
             <div className="w-full flex">
               <p className="w-3/12 font-semibold break-words whitespace-normal">Termin :</p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
-                {data?.termin || "-"}
+                {data?.term + ' Hari'|| "- Hari"}
               </p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function InvoicePrint({ data, dataTable }) {
                 {i + 1}
               </p>
               <p className="border-r break-words whitespace-normal w-[20%]">
-                {item.itemprocessfamily || "-"}
+                {item.itemid || "-"}
               </p>
               <p className="border-r break-words whitespace-normal w-[20%]">
                 {item.displayname || "-"}

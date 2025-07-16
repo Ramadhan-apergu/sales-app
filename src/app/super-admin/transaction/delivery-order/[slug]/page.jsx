@@ -104,7 +104,7 @@ export default function Page() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
   const keyTableItem = [
-    "itemprocessfamily",
+    "itemid",
     "displayname",
     "location",
     "memo",
@@ -188,6 +188,7 @@ export default function Page() {
           quantity1: doItem.quantity,
           unit1: doItem.units,
           unit2: doItem.units2,
+          itemid: item.itemid
         };
 
         delete updateData.quantity;

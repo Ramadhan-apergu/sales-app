@@ -42,13 +42,13 @@ import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 
 function formatRupiah(number) {
   if (typeof number !== "number" || isNaN(number)) {
-    return "Rp0,-";
+    return "Rp 0,-";
   }
 
   try {
-    return "Rp" + number.toLocaleString("id-ID") + ",-";
+    return "Rp " + number.toLocaleString("id-ID") + ",-";
   } catch (e) {
-    return "Rp0,-";
+    return "Rp 0,-";
   }
 }
 
@@ -57,14 +57,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
     ...keys.map((key) => {
       if (
         [
-          "rate",
-          "value1",
-          "value2",
-          "value3",
-          "subtotal",
-          "totalamount",
-          "taxvalue",
-          "totaldiscount",
+            "price"
         ].includes(key)
       ) {
         return {
@@ -174,7 +167,7 @@ export default function Enter() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const keyTableItem = [
-    "itemid",
+    "itemcode",
     "displayname",
     "onhand",
     "stockreal",
@@ -185,6 +178,7 @@ export default function Enter() {
 
   const [itemTableTemp, setItemTableTemp] = useState({
     itemid: "",
+    itemcode: "",
     displayname: "",
     onhand: 0,
     stockreal: 0,
@@ -198,6 +192,7 @@ export default function Enter() {
   function handleModalItemCancel() {
     setItemTableTemp({
       itemid: "",
+      itemcode: "",
       displayname: "",
       onhand: 0,
       stockreal: 0,
@@ -237,57 +232,58 @@ export default function Enter() {
     handleModalItemCancel();
   }
 
-    function handleDeleteTableItem(record) {
-        dispatch({
-            type: 'SET_STOCK',
-            payload: state.stock_opname_det.filter((item) => item.itemid !== record.itemid)
-        })
+  function handleDeleteTableItem(record) {
+    dispatch({
+      type: "SET_STOCK",
+      payload: state.stock_opname_det.filter(
+        (item) => item.itemid !== record.itemid
+      ),
+    });
   }
 
-  
-    const handleSubmit = async () => {
-      setIsLoadingSubmit(true);
-      try {
-        let payloadToInsert = {
-          ...state.payloadPrimary,
-        };
-  
-        if (state.stock_opname_det.length <= 0) {
-          throw new Error("Please enter item adjustment");
-        }
-  
-        const stock_opname_det = state.stock_opname_det.map((data) => {
-            let updateData = data
-            delete updateData.displayname
-            return updateData
-        });
-  
-        payloadToInsert = { ...payloadToInsert, stock_opname_det };
-  
-        if (!payloadToInsert.trandate) {
-          throw new Error("Date is required");
-        }
-  
-        if (
-          !payloadToInsert.stock_opname_det ||
-          payloadToInsert.stock_opname_det.length == 0
-        ) {
-          throw new Error("Please enter a item adjustment");
-        }
-  
-        const response = await StockAdjustmentFetch.add(payloadToInsert);
-  
-        const resData = createResponseHandler(response, notify);
-  
-        if (resData) {
-          router.push(`/super-admin/inventory/${title}`);
-        }
-      } catch (error) {
-        notify("error", "Error", error.message || "Internal server error");
-      } finally {
-        setIsLoadingSubmit(false);
+  const handleSubmit = async () => {
+    setIsLoadingSubmit(true);
+    try {
+      let payloadToInsert = {
+        ...state.payloadPrimary,
+      };
+
+      if (state.stock_opname_det.length <= 0) {
+        throw new Error("Please enter item adjustment");
       }
-    };
+
+      const stock_opname_det = state.stock_opname_det.map((data) => {
+        let updateData = data;
+        delete updateData.displayname;
+        return updateData;
+      });
+
+      payloadToInsert = { ...payloadToInsert, stock_opname_det };
+
+      if (!payloadToInsert.trandate) {
+        throw new Error("Date is required");
+      }
+
+      if (
+        !payloadToInsert.stock_opname_det ||
+        payloadToInsert.stock_opname_det.length == 0
+      ) {
+        throw new Error("Please enter a item adjustment");
+      }
+
+      const response = await StockAdjustmentFetch.add(payloadToInsert);
+
+      const resData = createResponseHandler(response, notify);
+
+      if (resData) {
+        router.push(`/super-admin/inventory/${title}`);
+      }
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      setIsLoadingSubmit(false);
+    }
+  };
 
   return (
     <>
@@ -314,7 +310,7 @@ export default function Enter() {
                 <Button
                   type={"primary"}
                   icon={<CheckOutlined />}
-                    onClick={handleSubmit}
+                  onClick={handleSubmit}
                 >
                   {isLargeScreen ? "Submit" : ""}
                 </Button>
@@ -415,6 +411,7 @@ export default function Enter() {
                         setItemSelected(null);
                         setItemTableTemp({
                           itemid: "",
+                          itemcode: "",
                           displayname: "",
                           onhand: 0,
                           stockreal: 0,
@@ -430,6 +427,7 @@ export default function Enter() {
                       setItemTableTemp((prev) => ({
                         ...prev,
                         itemid: item.id,
+                        itemcode: item.itemid,
                         displayname: item.displayname,
                         onhand: item.stock,
                         stockreal: item.stock,
@@ -450,6 +448,13 @@ export default function Enter() {
                 data={[
                   {
                     key: "itemid",
+                    input: "input",
+                    isAlias: true,
+                    isRead: true,
+                    hidden: true,
+                  },
+                  {
+                    key: "itemcode",
                     input: "input",
                     isAlias: true,
                     isRead: true,
@@ -485,9 +490,10 @@ export default function Enter() {
                   },
                   {
                     key: "price",
-                    input: "input",
+                    input: "number",
                     isAlias: true,
                     isRead: true,
+                    accounting: true
                   },
                 ]}
                 aliases={stockAdjustmentAliases.adjustment}
