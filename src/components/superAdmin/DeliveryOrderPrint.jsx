@@ -99,24 +99,18 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         </div>
       </section>
       <section className="w-full">
-        <div className="w-full flex border table-padding font-semibold">
-          <p className="border-r break-words whitespace-normal w-[5%]">No.</p>
+        <div className="w-full flex border table-padding font-semibold border-red-6">
+          <p className="border-r break-words whitespace-normal w-[5%]">No</p>
           <p className="border-r break-words whitespace-normal w-[25%]">Kode</p>
           <p className="border-r break-words whitespace-normal w-[20%]">
             Nama Barang
           </p>
-          <p className="border-r break-words whitespace-normal w-[10%]">Memo</p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
-            Qty
+          <p className="border-r break-words whitespace-normal w-[20%]">Memo</p>
+          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+            Qty (Kq)
           </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
-            Satuan
-          </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
-            Qty Bal
-          </p>
-          <p className=" break-words whitespace-normal w-[10%] text-right">
-            Satuan 2
+          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+            Qty (Bal)
           </p>
         </div>
         {dataTable &&
@@ -130,25 +124,19 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
                 {i + 1}
               </p>
               <p className="border-r break-words whitespace-normal w-[25%]">
-                {item.itemprocessfamily || "-"}
+                {item.itemid || "-"}
               </p>
               <p className="border-r break-words whitespace-normal w-[20%]">
                 {item.displayname || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%]">
+              <p className="border-r break-words whitespace-normal w-[20%]">
                 {item.memo || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+              <p className="border-r break-words whitespace-normal w-[15%] text-right">
                 {item.quantity1 || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
-                {item.unit1 || "-"}
-              </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+              <p className="border-r break-words whitespace-normal w-[15%] text-right">
                 {item.quantity2 || "-"}
-              </p>
-              <p className=" break-words whitespace-normal w-[10%] text-right">
-                {item.unit2 || "-"}
               </p>
             </div>
           ))}
@@ -156,15 +144,13 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           <p className="break-words whitespace-normal w-[5%] text-right"></p>
           <p className="break-words whitespace-normal w-[25%]"></p>
           <p className="break-words whitespace-normal w-[20%]"></p>
-          <p className="break-words whitespace-normal w-[10%]"></p>
-          <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
+          <p className="break-words whitespace-normal w-[20%]"></p>
+          <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty}
           </p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
+          <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty2}
           </p>
-          <p className=" break-words whitespace-normal w-[10%] text-right"></p>
         </div>
       </section>
       <section className="w-full flex flex-col items-end gap-4">

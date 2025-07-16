@@ -120,7 +120,7 @@ export const deliveryOrderAliases = {
   },
   item: {
     id: "ID",
-    itemid: "Item ID",
+    itemid: "Item",
     item: "Item",
     itemprocessfamily: "Item",
     displayname: "Display Name",

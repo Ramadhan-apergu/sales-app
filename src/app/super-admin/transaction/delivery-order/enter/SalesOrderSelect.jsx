@@ -171,13 +171,7 @@ function SalesOrder() {
 
   const columns = [
     {
-      title: "Date",
-      dataIndex: "trandate",
-      key: "trandate",
-      render: (text) => <p>{formatDateToShort(text)}</p>,
-    },
-    {
-      title: "Document Number",
+      title: "No. SO",
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
@@ -188,6 +182,12 @@ function SalesOrder() {
           {text || "-"}
         </Link>
       ),
+    },
+    {
+      title: "Date",
+      dataIndex: "trandate",
+      key: "trandate",
+      render: (text) => <p>{formatDateToShort(text)}</p>,
     },
     {
       title: "Customer",

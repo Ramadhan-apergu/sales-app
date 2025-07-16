@@ -282,10 +282,12 @@ export default function EnterPage() {
     let updatedInvoiceItems = await Promise.all(
       data.invoice_items.map(async (invoiceItem) => {
         const item = await getItem(invoiceItem.item);
+        
         return {
           ...invoiceItem,
           displayname: item ? item.displayname : "",
           lineid: crypto.randomUUID(),
+          itemid: item.itemid
         };
       })
     );
