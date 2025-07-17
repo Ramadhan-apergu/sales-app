@@ -12,12 +12,14 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
   getByIdResponseHandler,
+  getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import UserManageFetch from "@/modules/salesApi/userManagement";
 
 export default function Detail() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -29,6 +31,7 @@ export default function Detail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
+  const [salesData, setSalesData] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -51,12 +54,40 @@ export default function Detail() {
       }
     }
     fetchData();
+
+    async function fetchDataSales() {
+      try {
+        const response = await UserManageFetch.getSales();
+
+        const resData = getResponseHandler(response, notify);
+
+        let optionSales = [];
+
+        if (resData) {
+          const optionSalesAdd = resData.list.map((data) => {
+            return {
+              value: data.id,
+              label: data.name,
+            };
+          });
+
+          optionSales.push(...optionSalesAdd);
+        }
+
+        setSalesData(optionSales);
+      } catch (error) {
+        console.log(error);
+        notify("error", "Error", "Failed get sales data");
+      }
+    }
+
+    fetchDataSales();
   }, []);
 
   const title = "customer";
 
   const fieldGroups = {
-    general: ["companyname", "category", "customerid", "salesrep"],
+    general: ["companyname", "category", "customerid", "salesid"],
     contact: ["phone", "altphone", "email"],
     address: ["addr1", "city", "state", "zip"],
     financial: ["creditlimit", "resalenumber", "terms"],
@@ -65,7 +96,7 @@ export default function Detail() {
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
     try {
-      const payloadToInsert = {
+      let payloadToInsert = {
         ...general,
         ...contact,
         ...address,
@@ -290,8 +321,9 @@ export default function Detail() {
                           ],
                         },
                         {
-                          key: "salesrep",
-                          input: "input",
+                          key: "salesid",
+                          input: "select",
+                          options: salesData,
                           isAlias: true,
                         },
                       ]}
