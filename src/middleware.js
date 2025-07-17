@@ -29,7 +29,7 @@ export async function middleware(request) {
 
   // Redirect root ke dashboard berdasarkan role
   if (pathname === '/') {
-    return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url))
+    return NextResponse.redirect(new URL(`/${role}/home`, request.url))
   }
 
   // Cek rute yang dilindungi

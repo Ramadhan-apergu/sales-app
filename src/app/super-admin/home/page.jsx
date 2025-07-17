@@ -40,10 +40,7 @@ export default function Page() {
     endCurrentDate,
   ]);
 
-  const [filterMonthGrafik, setFilterMonthGrafik] = useState([
-    startCurrentDate,
-    endCurrentDate,
-  ]);
+  const [filterYearGrafik, setFilterYearGrafik] = useState(currentYear);
 
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -54,10 +51,9 @@ export default function Page() {
         setIsLoading(true);
         const response = await DashboardFetch.get(
           filterYear,
-          filterMonth[0],
-          filterMonth[1],
-          filterMonthGrafik[0],
-          filterMonthGrafik[1]
+          dayjs(filterMonth[0]).format("YYYY-MM-DD"),
+          dayjs(filterMonth[1]).format("YYYY-MM-DD"),
+          filterYearGrafik
         );
         const resData = getResponseHandler(response, notify);
         if (resData) {
@@ -72,7 +68,7 @@ export default function Page() {
     }
 
     fetchDataDashboard();
-  }, [filterYear, filterMonth, filterMonthGrafik]);
+  }, [filterYear, filterMonth, filterYearGrafik]);
 
   function mappingData(data) {
     setYearData({
@@ -88,9 +84,34 @@ export default function Page() {
     });
 
     setGrafikData({
-      kg: data.monthly_penjualan_kg,
-      amount: data.monthly_penjualan_amount,
+      kg: data.monthly_penjualan_kg.map((data) => ({
+        ...data,
+        trandate: getMonth(data.trandate),
+      })),
+      amount: data.monthly_penjualan_amount.map((data) => ({
+        ...data,
+        trandate: getMonth(data.trandate),
+      })),
     });
+  }
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  function getMonth(trandate) {
+    return monthNames[parseInt(trandate.split("-")[0]) - 1];
   }
 
   return (
@@ -101,9 +122,9 @@ export default function Page() {
             <p className="w-full lg:w-auto text-2xl font-bold text-blue-6">
               Dashboard
             </p>
-            <div className="w-full lg:w-1/2">
+            {/* <div className="w-full lg:w-1/2">
               <SearchStatus />
-            </div>
+            </div> */}
           </div>
           <section className="w-full flex flex-col bg-white rounded-xl p-6 shadow-md gap-6">
             {/* Header */}
@@ -286,20 +307,17 @@ export default function Page() {
             <div className="w-full flex justify-between items-center">
               <div>
                 <p className="lg:text-xl font-semibold text-gray-800">
-                  Grafik 1 Bulan
+                  Grafik 1 Tahun
                 </p>
-                <p className="text-sm text-gray-500">1 Jan - 31 Des</p>
+                <p className="text-sm text-gray-500">{filterYearGrafik}</p>
               </div>
               <div className="flex gap-2">
-                <RangePicker
-                  format={"DD-MM-YYYY"}
-                  className="max-w-full"
-                  value={[
-                    dayjs(filterMonthGrafik[0]),
-                    dayjs(filterMonthGrafik[1]),
-                  ]}
-                  onChange={(dates) => {
-                    setFilterMonthGrafik(dates);
+                <DatePicker
+                  picker="year"
+                  className="w-32"
+                  value={dayjs().year(filterYearGrafik)}
+                  onChange={(yearVal, yearValStr) => {
+                    setFilterYearGrafik(yearValStr);
                   }}
                   allowClear={false}
                 />
@@ -307,7 +325,7 @@ export default function Page() {
                   <Button
                     icon={<ReloadOutlined />}
                     onClick={() => {
-                      setFilterMonthGrafik([startCurrentDate, endCurrentDate]);
+                      setFilterYearGrafik(currentYear);
                     }}
                   />
                 </Tooltipantd>
@@ -335,7 +353,16 @@ export default function Page() {
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="trandate" />
-                    <YAxis />
+                    <YAxis
+                      tickFormatter={(value) => {
+                        if (value >= 1_000_000) return `${value / 1_000_000}M`;
+                        if (value >= 1_000) return `${value / 1_000}K`;
+                        return value;
+                      }}
+                      scale={"sqrt"}
+                      type="number"
+                      domain={["dataMin", "dataMax"]}
+                    />
                     <Tooltip itemStyle={{ textTransform: "capitalize" }} />
                     <Bar
                       dataKey="qty"
@@ -366,7 +393,16 @@ export default function Page() {
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="trandate" />
-                    <YAxis />
+                    <YAxis
+                      tickFormatter={(value) => {
+                        if (value >= 1_000_000) return `${value / 1_000_000}M`;
+                        if (value >= 1_000) return `${value / 1_000}K`;
+                        return value;
+                      }}
+                      scale={"sqrt"}
+                      type="number"
+                      domain={["dataMin", "dataMax"]}
+                    />
                     <Tooltip itemStyle={{ textTransform: "capitalize" }} />
                     <Bar
                       dataKey="amount"
