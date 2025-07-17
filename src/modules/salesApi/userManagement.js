@@ -1,13 +1,7 @@
 import ProcessFetch from "./processFetch";
 
 export default class UserManageFetch extends ProcessFetch {
-  static async get(
-    offset = 0,
-    limit = 10,
-    status = "",
-    role = "",
-    name = "",
-  ) {
+  static async get(offset = 0, limit = 10, status = "", role = "", name = "") {
     try {
       const response = await this.axios.get("/m/users", {
         params: { offset, limit, status, name, role },
@@ -21,6 +15,15 @@ export default class UserManageFetch extends ProcessFetch {
   static async getById(id) {
     try {
       const response = await this.axios.get(`/m/users/${id}`);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
+  static async getSales() {
+    try {
+      const response = await this.axios.get(`/m/sales`);
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

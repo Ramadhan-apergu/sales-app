@@ -2,6 +2,7 @@ export const customerAliases = {
   customerid: "Customer ID",
   companyname: "Customer Name",
   state: "Province",
+  salesid: "Sales Rep",
   salesrep: "Sales Rep",
   altphone: "Alt Phone",
   addressee: "Address EE",

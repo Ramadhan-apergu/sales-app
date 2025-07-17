@@ -834,6 +834,7 @@ export default function Enter() {
       };
 
       delete payloadToInsert.companyname;
+      delete payloadToInsert.salesrep;
 
       if (dataTableItem.length <= 0) {
         throw new Error("Please enter order items");
