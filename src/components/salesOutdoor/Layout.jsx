@@ -7,7 +7,8 @@ export default function Layout({children}) {
                 <div className="basis-[90%] overflow-auto bg-gray-3" style={{scrollbarWidth: 'none'}}>
                     {children}
                 </div>
-                <div className="basis-[10%]">
+                {/* Add no-print class to the tab bar container */}
+                <div className="basis-[10%] no-print">
                     <TabBar/>
                 </div>
             </div>

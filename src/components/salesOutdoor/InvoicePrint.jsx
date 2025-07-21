@@ -1,6 +1,19 @@
 import { formatDateStartDay } from "@/utils/formatDate";
 import { useEffect, useState } from "react";
 
+const formatRupiah = (value) => {
+  const num = Number(value);
+  if (isNaN(num)) return "Rp 0,-";
+  const numberCurrency = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num);
+
+  return numberCurrency + ",-";
+};
+
 export default function InvoicePrint({ data, dataTable }) {
   const [currentDate, setCurrentDate] = useState("");
   const [count, setCount] = useState({
@@ -64,7 +77,7 @@ export default function InvoicePrint({ data, dataTable }) {
             <div className="w-full flex">
               <p className="w-3/12 font-semibold break-words whitespace-normal">Termin :</p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
-                {data?.termin || "-"}
+                {data?.term + ' Hari'|| "- Hari"}
               </p>
             </div>
           </div>
@@ -106,22 +119,22 @@ export default function InvoicePrint({ data, dataTable }) {
       </section>
       <section className="w-full">
         <div className="w-full flex border table-padding font-semibold">
-          <p className="border-r break-words whitespace-normal w-[5%]">No.</p>
-          <p className="border-r break-words whitespace-normal w-[20%]">Kode</p>
-          <p className="border-r break-words whitespace-normal w-[20%]">
+          <p className="border-r break-words whitespace-normal w-[6%]">No.</p>
+          <p className="border-r break-words whitespace-normal w-[15%]">Kode</p>
+          <p className="border-r break-words whitespace-normal w-[15%]">
             Nama Barang
           </p>
           <p className="border-r break-words whitespace-normal w-[10%] text-right">Qty</p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+          <p className="border-r break-words whitespace-normal w-[9%] text-right">
             Satuan
           </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+          <p className="border-r break-words whitespace-normal w-[14%] text-right">
             Harga
           </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+          <p className="border-r break-words whitespace-normal w-[14%] text-right">
             Diskon
           </p>
-          <p className=" break-words whitespace-normal w-[15%] text-right">
+          <p className=" break-words whitespace-normal w-[17%] text-right">
             Jumlah
           </p>
         </div>
@@ -132,44 +145,44 @@ export default function InvoicePrint({ data, dataTable }) {
               key={i}
               className="w-full flex border-x border-b table-padding"
             >
-              <p className="border-r break-words whitespace-normal w-[5%] text-right">
+              <p className="border-r break-words whitespace-normal w-[6%] text-right">
                 {i + 1}
               </p>
-              <p className="border-r break-words whitespace-normal w-[20%]">
-                {item.itemprocessfamily || "-"}
+              <p className="border-r break-words whitespace-normal w-[15%]">
+                {item.itemcode || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[20%]">
+              <p className="border-r break-words whitespace-normal w-[15%]">
                 {item.displayname || "-"}
               </p>
               <p className="border-r break-words whitespace-normal w-[10%] text-right">
                 {item.quantity || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+              <p className="border-r break-words whitespace-normal w-[9%] text-right">
                 {item.units || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
-                {item.rate || "-"}
+              <p className="border-r break-words whitespace-normal w-[14%] text-right">
+                {item.rate ? formatRupiah(item.rate) : "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
-                {item.totaldiscount || "-"}
+              <p className="border-r break-words whitespace-normal w-[14%] text-right">
+                {item.totaldiscount ? formatRupiah(item.totaldiscount) : "-"}
               </p>
-              <p className=" break-words whitespace-normal w-[15%] text-right">
-                {item.amount || "-"}
+              <p className=" break-words whitespace-normal w-[17%] text-right">
+                {item.amount ? formatRupiah(item.amount) : "-"}
               </p>
             </div>
           ))}
         <div className="w-full flex border-r table-padding">
-          <p className="break-words whitespace-normal w-[5%] text-right"></p>
-          <p className="break-words whitespace-normal w-[20%]"></p>
-          <p className="border-r break-words whitespace-normal w-[20%]"></p>
+          <p className="break-words whitespace-normal w-[6%] text-right"></p>
+          <p className="break-words whitespace-normal w-[15%]"></p>
+          <p className="border-r break-words whitespace-normal w-[15%]"></p>
           <p className="border-r border-b break-words whitespace-normal w-[10%] text-right">
             {count.quantity}
           </p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">Total</p>
-          <p className="break-words border-b whitespace-normal w-[15%] text-right">
-            {count.amount}
+          <p className="break-words whitespace-normal w-[9%] text-right"></p>
+          <p className="break-words whitespace-normal w-[14%] text-right"></p>
+          <p className="border-r break-words whitespace-normal w-[14%] text-right">Total</p>
+          <p className="break-words border-b whitespace-normal w-[17%] text-right">
+            {count.amount ? formatRupiah(count.amount) : "-"}
           </p>
         </div>
       </section>

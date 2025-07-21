@@ -78,9 +78,7 @@ export default function InvoiceDetail() {
     "memo",
     "location",
     "quantity",
-    "units",
     "quantity2",
-    "units2",
     "rate",
     "subtotal",
     "totaldiscount",
@@ -89,6 +87,17 @@ export default function InvoiceDetail() {
     "dpp",
     "taxvalue",
   ];
+
+  const getTableData = () => {
+    return dataTableItem.map(item => ({
+      ...item,
+      // Tambahkan field baru khusus untuk tampilan tabel
+      quantity: `${item.quantity} ${item.units || ''}`,
+      quantity2: item.quantity2 
+        ? `${item.quantity2} ${item.units2 || ''}` 
+        : null,
+    }));
+  };
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -128,7 +137,10 @@ export default function InvoiceDetail() {
   return (
     <Layout>
       <div className="w-full h-full overflow-y-auto overflow-x-hidden relative">
-        <FixedHeaderBar bgColor="bg-blue-6" />
+        {/* Wrap FixedHeaderBar with a div to apply no-print class */}
+        <div className="no-print">
+          <FixedHeaderBar bgColor="bg-blue-6" />
+        </div>
         <div className="w-full relative p-4 mt-10">
           <div className="max-w-3xl mx-auto">
             {loading && !invoice && (
@@ -138,13 +150,13 @@ export default function InvoiceDetail() {
             )}
             {error && (
               <div className="p-4 bg-red-50 rounded-lg">
-                <Button onClick={handleBack} className="mb-4">← Kembali</Button>
+                <Button onClick={handleBack} className="mb-4 no-print">← Kembali</Button> {/* Added no-print */}
                 <div className="text-red-600">{error}</div>
               </div>
             )}
             {invoice && (
               <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
-                <div className="flex justify-between mb-2">
+                <div className="flex justify-between mb-2 no-print"> {/* Add no-print to buttons */}
                   <div>
                     <Button onClick={handleBack}>
                       ← Kembali
@@ -267,7 +279,7 @@ export default function InvoiceDetail() {
                     Item
                   </Divider>
                   <TableCustom
-                    data={dataTableItem}
+                    data={getTableData()}
                     keys={keyTableItem}
                     aliases={invoiceAliases.item}
                   />
@@ -297,7 +309,7 @@ export default function InvoiceDetail() {
             )}
             {!loading && !invoice && (
               <div className="p-4">
-                <Button onClick={handleBack} className="mb-4">← Kembali</Button>
+                <Button onClick={handleBack} className="mb-4 no-print">← Kembali</Button> {/* Added no-print */}
                 <Empty description="Data invoice tidak ditemukan" />
               </div>
             )}
@@ -309,7 +321,9 @@ export default function InvoiceDetail() {
       </div>
       <style jsx>{`
         @media print {
-          * {
+          /* Hide the main content of the page, as we only want to print InvoicePrint */
+          /* This targets the div that contains the invoice details for screen display */
+          .w-full.relative.p-4.mt-10 {
             display: none !important;
           }
 
@@ -326,6 +340,8 @@ export default function InvoiceDetail() {
             background: white;
             z-index: 99999;
           }
+
+          /* Removed the problematic * { display: none !important; } from here */
         }
       `}</style>
     </Layout>
