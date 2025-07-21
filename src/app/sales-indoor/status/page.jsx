@@ -10,7 +10,7 @@ export default function Page() {
 
   useEffect(() => {
     // Redirect setelah komponen mount
-    router.replace('/sales-indoor/inventory/adjustment');
+    router.replace('/sales-indoor/status/delivery');
   }, [router]);
 
   return (

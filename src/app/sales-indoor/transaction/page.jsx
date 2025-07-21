@@ -10,14 +10,12 @@ export default function Page() {
 
   useEffect(() => {
     // Redirect setelah komponen mount
-    router.replace('/sales-indoor/inventory/adjustment');
+    router.replace('/sales-indoor/transaction/sales-order');
   }, [router]);
 
   return (
     <Layout>
-        <div className='min-h-96 flex justify-between items-center'>
-            <LoadingSpin />
-        </div>
+      <LoadingSpin />
     </Layout>
   );
 }
