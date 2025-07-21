@@ -176,3 +176,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
 }
+
+/* New print styles to hide elements not needed for print */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
