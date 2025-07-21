@@ -8,6 +8,29 @@ import FullfillmentFetch from '@/modules/salesApi/itemFullfillment';
 import ItemFetch from '@/modules/salesApi/item';
 import { Button, Table, Spin, Empty, Divider, Tooltip } from 'antd';
 import { formatDateToShort } from '@/utils/formatDate';
+import { deliveryOrderAliases } from "@/utils/aliases";
+
+function TableCustom({ data, keys, aliases, onDelete }) {
+  const columns = [
+    ...keys.map((key) => ({
+      title: aliases?.[key] || key,
+      dataIndex: key,
+      key: key,
+      align: "right", // semua kolom di-align ke kanan
+    })),
+  ];
+
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      rowKey="id"
+      bordered
+      pagination={false}
+      scroll={{ x: "max-content" }}
+    />
+  );
+}
 
 export default function DeliveryOrderDetail() {
   const params = useParams();
@@ -17,13 +40,13 @@ export default function DeliveryOrderDetail() {
   const [error, setError] = useState(null);
 
   const keyTableItem = [
-    "item",
-    "display name",
+    "itemid",
+    "displayname",
     "location",
-    "description",
-    "quantity (kg)",
-    "quantity (bal)",
-    "remaining",
+    "memo",
+    "quantity1",
+    "quantity2",
+    "quantityremaining",
   ];
 
   const itemColumns = keyTableItem.map((key) => {
@@ -91,15 +114,23 @@ export default function DeliveryOrderDetail() {
               const item = await ItemFetch.getById(doItem.item);
               return {
                 ...doItem,
-                itemprocessfamily: item?.itemprocessfamily || "",
-                displayname: item ? item.displayname : "",
+                ...doItem,
+                itemprocessfamily: item?.data?.itemprocessfamily || "",
+                displayname: item.data?.displayname || "",
                 quantity1: doItem.quantity,
                 unit1: doItem.units,
-                quantity2: doItem.quantity2,
                 unit2: doItem.units2,
+                itemid: item?.data?.itemid || ""
               };
             })
           );
+
+          delete dataFulfillmentWithItem.quantity;
+          delete dataFulfillmentWithItem.units;
+          delete dataFulfillmentWithItem.units2;
+
+          console.log("dataFulfillmentWithItem", dataFulfillmentWithItem);
+          
           setDeliveryItems(dataFulfillmentWithItem);
 
         } else {
@@ -231,15 +262,10 @@ export default function DeliveryOrderDetail() {
                     Item
                   </Divider>
                   <div className="overflow-x-auto">
-                    <Table
-                      columns={itemColumns}
-                      dataSource={deliveryItems}
-                      pagination={false}
-                      rowKey="id"
-                      bordered
-                      size="small"
-                      scroll={{ x: 'max-content' }}
-                      tableLayout="auto"
+                    <TableCustom
+                      data={deliveryItems}
+                      keys={keyTableItem}
+                      aliases={deliveryOrderAliases.item}
                     />
                   </div>
                 </div>
