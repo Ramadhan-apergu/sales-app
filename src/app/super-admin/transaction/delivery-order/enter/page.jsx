@@ -467,6 +467,7 @@ function Enter({ salesOrderId }) {
                   input: "input",
                   isAlias: true,
                   disabled: true,
+                  hidden: true
                 },
                 {
                   key: "displayname",
@@ -520,7 +521,7 @@ function Enter({ salesOrderId }) {
                   disabled: true,
                 },
               ]}
-              aliases={[]}
+              aliases={deliveryOrderAliases.item}
               onChange={(type, payload) => {
                 setEditItem((prev) => ({
                   ...prev,
