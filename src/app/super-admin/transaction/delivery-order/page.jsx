@@ -220,12 +220,17 @@ function DeliveryOrder() {
         shipstatus: status,
         id: [id],
       });
+      console.log(response)
 
-      const resData = updateResponseHandler(response, notify);
-
-      if (resData) {
+      if (response.status_code == 200) {
+        notify('success', 'successfully updated the status ship')
         setToggleRefetch(!toggleRefetch);
+      } else {
+        response.errors.forEach((error) => {
+            notify('error', 'Failed', error)
+        })
       }
+
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");
     } finally {

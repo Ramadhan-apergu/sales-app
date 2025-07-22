@@ -24,7 +24,7 @@ import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import InvoiceFetch from "@/modules/salesApi/invoice";
-import { formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -148,7 +148,7 @@ function SalesOrder() {
       dataIndex: "amount",
       key: "amount",
       render: (text) => (
-        <p>{formatRupiahAccounting(text)}</p>
+        <p>{formatRupiah(text)}</p>
       ),
       align: 'right'
     },
