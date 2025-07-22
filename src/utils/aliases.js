@@ -156,9 +156,9 @@ export const invoiceAliases = {
   item: {
     item: "Item",
     displayname: "Display Name",
-    quantity: "Qty 1",
+    quantity: "Qty (Kg)",
     units: "Unit 1",
-    quantity2: "Qty 2",
+    quantity2: "Qty 2 (Bal)",
     units2: "Unit 2",
     rate: "Price",
     subtotal: "Total Amount",
@@ -252,7 +252,7 @@ export const creditMemoAliases = {
   },
   apply: {
     invoiceid: "Invoice ID",
-    refnum: "Ref No",
+    refnum: "Invoice ID",
     trandate: "Date",
     due: "Amount Due",
     amount: "Total Amount",

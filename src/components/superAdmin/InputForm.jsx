@@ -122,7 +122,7 @@ export default function InputForm({
                   <DatePicker
                     {...props}
                     style={{ width: "100%" }}
-                    format={props?.format || "YYYY-MM-DD"}
+                    format={props?.format || "DD-MM-YYYY"}
                     disabled={isReadOnly || disabled || isRead}
                     placeholder={placeholder}
                   />

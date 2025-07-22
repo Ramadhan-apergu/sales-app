@@ -1,4 +1,5 @@
 import { formatDateStartDay } from "@/utils/formatDate";
+import { formatRupiah } from "@/utils/formatRupiah";
 import { useEffect, useState } from "react";
 
 export default function InvoicePrint({ data, dataTable }) {
@@ -106,16 +107,13 @@ export default function InvoicePrint({ data, dataTable }) {
       </section>
       <section className="w-full">
         <div className="w-full flex border table-padding font-semibold">
-          <p className="border-r break-words whitespace-normal w-[5%]">No.</p>
+          <p className="border-r break-words whitespace-normal w-[10%]">No</p>
           <p className="border-r break-words whitespace-normal w-[20%]">Kode</p>
           <p className="border-r break-words whitespace-normal w-[20%]">
             Nama Barang
           </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">Qty</p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
-            Satuan
-          </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">Qty (Kg)</p>
+          <p className="border-r break-words whitespace-normal w-[15%] text-right">
             Harga
           </p>
           <p className="border-r break-words whitespace-normal w-[10%] text-right">
@@ -132,7 +130,7 @@ export default function InvoicePrint({ data, dataTable }) {
               key={i}
               className="w-full flex border-x border-b table-padding"
             >
-              <p className="border-r break-words whitespace-normal w-[5%] text-right">
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
                 {i + 1}
               </p>
               <p className="border-r break-words whitespace-normal w-[20%]">
@@ -144,32 +142,28 @@ export default function InvoicePrint({ data, dataTable }) {
               <p className="border-r break-words whitespace-normal w-[10%] text-right">
                 {item.quantity || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
-                {item.units || "-"}
+              <p className="border-r break-words whitespace-normal w-[15%] text-right">
+                {formatRupiah(item.rate) || "-"}
               </p>
               <p className="border-r break-words whitespace-normal w-[10%] text-right">
-                {item.rate || "-"}
-              </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
-                {item.totaldiscount || "-"}
+                {formatRupiah(item.totaldiscount) || "-"}
               </p>
               <p className=" break-words whitespace-normal w-[15%] text-right">
-                {item.amount || "-"}
+                {formatRupiah(item.amount) || "-"}
               </p>
             </div>
           ))}
         <div className="w-full flex border-r table-padding">
-          <p className="break-words whitespace-normal w-[5%] text-right"></p>
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
           <p className="break-words whitespace-normal w-[20%]"></p>
           <p className="border-r break-words whitespace-normal w-[20%]"></p>
           <p className="border-r border-b break-words whitespace-normal w-[10%] text-right">
             {count.quantity}
           </p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="break-words whitespace-normal w-[15%] text-right"></p>
           <p className="border-r break-words whitespace-normal w-[10%] text-right">Total</p>
           <p className="break-words border-b whitespace-normal w-[15%] text-right">
-            {count.amount}
+            {formatRupiah(count.amount)}
           </p>
         </div>
       </section>
@@ -216,13 +210,13 @@ export default function InvoicePrint({ data, dataTable }) {
 
           @media print and (max-width: 595px) {
             #print-invoice {
-              font-size: 0.75rem; /* text-xs */
+              font-size: 0.65rem; /* text-xs */
             }
           }
 
           @media print and (min-width: 595px) and (max-width: 842px) {
             #print-invoice {
-              font-size: 0.875rem; /* text-sm */
+              font-size: 0.775rem; /* text-sm */
             }
           }
         }

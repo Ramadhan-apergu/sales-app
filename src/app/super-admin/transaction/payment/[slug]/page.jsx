@@ -326,6 +326,7 @@ export default function Details() {
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
                         icon={<EditOutlined />}
+                        disabled={data?.paymentoption.toLowerCase() == 'giro' && data.status.toLowerCase() == 'deposited'}
                         type={"primary"}
                         onClick={() => {
                           router.push(

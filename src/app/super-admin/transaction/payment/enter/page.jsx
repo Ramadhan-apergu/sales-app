@@ -39,6 +39,8 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import { paymentAliases } from "@/utils/aliases";
+import { formatDateToShort } from "@/utils/formatDate";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({ data, keys, aliases, onChange }) {
   const columns = [
@@ -57,12 +59,32 @@ function TableCustom({ data, keys, aliases, onChange }) {
         />
       ),
     },
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right",
-    })),
+    ...keys.map((key) => {
+      if (["applydate"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{formatDateToShort(text)}</p>,
+        };
+      } else if (["total", "due", "amount"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
   ];
 
   return (
@@ -101,7 +123,7 @@ export default function Enter() {
           const addLabelCustomer = resData.list.map((customer) => {
             return {
               ...customer,
-              label: customer.companyname,
+              label: customer.customerid,
               value: customer.id,
             };
           });
@@ -185,7 +207,7 @@ export default function Enter() {
   ];
 
   const keyTableItem = [
-    "invoiceid",
+    // "invoiceid",
     "refnum",
     "applydate",
     "total",
@@ -194,10 +216,6 @@ export default function Enter() {
   ];
 
   const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
-  function formatRupiah(number) {
-    return number.toLocaleString("id-ID") + ",-";
-  }
 
   const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
 
@@ -376,7 +394,7 @@ export default function Enter() {
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                 <Form layout="vertical">
                   <Form.Item
-                    label={<span className="capitalize">Customer Name</span>}
+                    label={<span className="capitalize">Customer ID</span>}
                     name="customer"
                     style={{ margin: 0 }}
                     className="w-full"
@@ -420,6 +438,7 @@ export default function Enter() {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                hidden: true,
               },
               {
                 key: "trandate",
