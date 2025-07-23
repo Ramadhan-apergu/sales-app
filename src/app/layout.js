@@ -2,7 +2,6 @@ import '@ant-design/v5-patch-for-react-19';
 
 import { Inter } from "next/font/google";
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-// import 'antd/dist/reset.css';
 import { ConfigProvider } from 'antd';
 
 import "./globals.css";
@@ -15,6 +14,8 @@ const inter = Inter({
 export const metadata = {
   title: "Sales App",
   description: "Sales App Karya Group by Apergu",
+  manifest: "/manifest.json", // Link to your web app manifest
+  themeColor: "#9E7FFF", // Define the theme color for the PWA
 };
 
 export default function RootLayout({ children }) {
