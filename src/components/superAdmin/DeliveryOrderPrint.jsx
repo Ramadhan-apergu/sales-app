@@ -99,7 +99,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         </div>
       </section>
       <section className="w-full">
-        <div className="w-full flex border table-padding font-semibold border-red-6">
+        <div className="w-full flex border table-padding font-semibold">
           <p className="border-r break-words whitespace-normal w-[5%]">No</p>
           <p className="border-r break-words whitespace-normal w-[25%]">Kode</p>
           <p className="border-r break-words whitespace-normal w-[20%]">

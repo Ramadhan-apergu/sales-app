@@ -382,10 +382,10 @@ const LayoutTesting = ({ children }) => {
           >
             <Sider
               width={200}
-              style={{
-                background: colorBgContainer,
-                display: isLargeScreen ? "block" : "none",
-              }}
+              className={`layout-sider ${
+                isLargeScreen ? "block-sider" : "hidden-sider"
+              }`}
+              style={{background: colorBgContainer}}
             >
               <Menu
                 onClick={handleNavSider}
@@ -418,9 +418,20 @@ const LayoutTesting = ({ children }) => {
           items={menuItems}
         />
       </Drawer>
-      <style jsx>{`
+      <style jsx global>{`
+        .block-sider {
+          display: block;
+        }
+        .hidden-sider {
+          display: none;
+        }
+
         @media print {
           #ham-menu {
+            display: none !important;
+          }
+
+          .layout-sider {
             display: none !important;
           }
         }
