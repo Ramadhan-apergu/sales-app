@@ -141,7 +141,7 @@ export default function InvoiceDetail() {
         <div className="no-print">
           <FixedHeaderBar bgColor="bg-blue-6" />
         </div>
-        <div className="w-full relative p-4 mt-10">
+        <div className="w-full relative p-4">
           <div className="max-w-3xl mx-auto">
             {loading && !invoice && (
               <div className="flex justify-center items-center p-8">

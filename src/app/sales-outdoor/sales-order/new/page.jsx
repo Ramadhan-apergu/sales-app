@@ -1031,7 +1031,7 @@ export default function Enter() {
     <>
       <Layout>
         <FixedHeaderBar bgColor="bg-blue-6" />
-        <div className="w-full relative p-4 mt-10">
+        <div className="w-full relative p-4">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
               <Button onClick={handleBack} className="mb-2">← Kembali</Button>
