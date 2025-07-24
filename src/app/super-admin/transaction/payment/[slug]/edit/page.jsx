@@ -121,6 +121,7 @@ export default function Details() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
+    dayjs.locale("id");
     async function fetchPayment() {
       try {
         const response = await PaymentFetch.getById(slug);
@@ -179,6 +180,8 @@ export default function Details() {
     payloadPayment: {
       paymentoption: "cash",
       payment: 0,
+      depositedate: "",
+      bankaccount: "",
     },
     payloadPaymentApplies: [],
     dataTableItem: [],
@@ -235,6 +238,11 @@ export default function Details() {
     { label: "Giro", value: "giro" },
   ];
 
+  const bankOptions = [
+    { label: "Bank BCA", value: "Bank BCA" },
+    { label: "Bank CIMB Niaga", value: "Bank CIMB Niaga" },
+  ];
+
   const keyTableItem = [
     // "invoiceid",
     "refnum",
@@ -277,6 +285,10 @@ export default function Details() {
       payload: {
         paymentoption: data.paymentoption,
         payment: data.payment,
+        depositedate: data.depositedate
+          ? dayjs(data.depositedate)
+          : data.depositedate,
+        bankaccount: data.bankaccount,
       },
     });
 
@@ -323,6 +335,7 @@ export default function Details() {
 
   async function fetchInvoiceCustmerInit(data) {
     try {
+      const invoiceApplied = data.payment_applies.map((item) => item.invoiceid);
       const response = await PaymentFetch.getInvoiceCustomer(
         data.customer || ""
       );
@@ -330,7 +343,7 @@ export default function Details() {
 
       setDataInvoiceCustomer(resData);
 
-      const mappedItems =
+      let mappedItems =
         resData?.map((item) => ({
           ischecked: false,
           invoiceid: item.id,
@@ -340,6 +353,10 @@ export default function Details() {
           due: item.amount,
           amount: item.amountdue,
         })) || [];
+
+      mappedItems = mappedItems.filter(
+        (item) => !invoiceApplied.includes(item.invoiceid)
+      );
 
       dispatch({
         type: "SET_ITEMS",
@@ -407,6 +424,14 @@ export default function Details() {
         ...state.payloadSummary,
         ...state.payloadPayment,
       };
+
+      if (!payloadToInsert.depositedate) {
+        payloadToInsert = { ...payloadToInsert, depositedate: "" };
+      }
+
+      if (!payloadToInsert.bankaccount) {
+        payloadToInsert = { ...payloadToInsert, bankaccount: "" };
+      }
 
       if (!payloadToInsert.customer) {
         throw new Error("Customer is required!");
@@ -597,6 +622,20 @@ export default function Details() {
                         key: "payment",
                         input: "number",
                         isAlias: true,
+                      },
+                      {
+                        key: "depositedate",
+                        input: "date",
+                        isAlias: true,
+                        hidden: state.payloadPayment.paymentoption != "giro",
+                      },
+                      {
+                        key: "bankaccount",
+                        input: "select",
+                        options: bankOptions,
+                        isAlias: true,
+                        hidden:
+                          state.payloadPayment.paymentoption != "transfer",
                       },
                     ]}
                     aliases={paymentAliases.payment}
