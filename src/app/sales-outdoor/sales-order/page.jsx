@@ -219,7 +219,7 @@ export default function SalesOrder() {
                 />
 
                 <div className="w-full relative">
-                    <div className="w-full py-4 flex justify-center items-center gap-2 sticky top-11 px-4 bg-gray-3">
+                    <div className="w-full py-4 flex justify-center items-center gap-2 px-4 bg-gray-3">
                         {/* Replaced Input with Select for customer search */}
                         <Select
                             showSearch
