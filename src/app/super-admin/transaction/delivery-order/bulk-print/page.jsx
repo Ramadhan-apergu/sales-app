@@ -4,6 +4,7 @@ import {
   DeliveredProcedureOutlined,
   EditOutlined,
   FilterOutlined,
+  LoadingOutlined,
   PlusOutlined,
   PrinterOutlined,
   TruckOutlined,
@@ -19,6 +20,7 @@ import {
   Tag,
   Select,
   DatePicker,
+  Checkbox,
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
@@ -27,6 +29,7 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import {
+  getByIdResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
@@ -34,6 +37,8 @@ import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
+import DeliveryOrderPrintBulk from "@/components/superAdmin/DeliveryOrderPrintBulk";
+import ItemFetch from "@/modules/salesApi/item";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -50,6 +55,7 @@ function DeliveryOrder() {
   const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
+  const [doDetailDatas, setDoDetailDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
@@ -123,7 +129,31 @@ function DeliveryOrder() {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
   };
 
+  const [isStatusUpdate, setIsStatusUpdate] = useState(false);
+  const [idsSelected, setIdsSelected] = useState([]);
+  const [isLoadingItemFetch, setIsLoadingFetchItem] = useState(false)
+
   const columns = [
+    {
+      title: (
+        <Checkbox
+          checked={idsSelected.length === datas.length && datas.length > 0}
+          indeterminate={
+            idsSelected.length > 0 && idsSelected.length < datas.length
+          }
+          onChange={(e) => handleSelectAll(e.target.checked)}
+        />
+      ),
+      dataIndex: "checkbox",
+      key: "checkbox",
+      width: 50,
+      render: (_, record) => (
+        <Checkbox
+          checked={idsSelected.includes(record.id)}
+          onChange={(e) => handleSelect(record.id, e.target.checked)}
+        />
+      ),
+    },
     {
       title: "No. DO",
       dataIndex: "tranid",
@@ -168,37 +198,37 @@ function DeliveryOrder() {
         </Tag>
       ),
     },
-    {
-      title: "Actions",
-      key: "actions",
-      fixed: "right",
-      align: "right",
-      width: isLargeScreen ? 87 : 30,
-      render: (_, record) => (
-        <div className="flex flex-col justify-center items-center gap-2">
-          <Button
-            type={"link"}
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            {isLargeScreen ? "Edit" : ""}
-          </Button>
-          {record.shipstatus && record.shipstatus.toLowerCase() == "open" && (
-            <Button
-              type={"link"}
-              style={{ color: "#52c41a" }}
-              size="small"
-              icon={<TruckOutlined />}
-              onClick={() => shipOrderModal(record)}
-            >
-              {isLargeScreen ? "Ship Order" : ""}
-            </Button>
-          )}
-          {contextHolder}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Actions",
+    //   key: "actions",
+    //   fixed: "right",
+    //   align: "right",
+    //   width: isLargeScreen ? 87 : 30,
+    //   render: (_, record) => (
+    //     <div className="flex flex-col justify-center items-center gap-2">
+    //       <Button
+    //         type={"link"}
+    //         size="small"
+    //         icon={<EditOutlined />}
+    //         onClick={() => handleEdit(record)}
+    //       >
+    //         {isLargeScreen ? "Edit" : ""}
+    //       </Button>
+    //       {record.shipstatus && record.shipstatus.toLowerCase() == "open" && (
+    //         <Button
+    //           type={"link"}
+    //           style={{ color: "#52c41a" }}
+    //           size="small"
+    //           icon={<TruckOutlined />}
+    //           onClick={() => shipOrderModal(record)}
+    //         >
+    //           {isLargeScreen ? "Ship Order" : ""}
+    //         </Button>
+    //       )}
+    //       {contextHolder}
+    //     </div>
+    //   ),
+    // },
   ];
 
   const shipOrderModal = (record) => {
@@ -221,17 +251,15 @@ function DeliveryOrder() {
         shipstatus: status,
         id: [id],
       });
-      console.log(response)
 
       if (response.status_code == 200) {
-        notify('success', 'successfully updated the status ship')
+        notify("success", "successfully updated the status ship");
         setToggleRefetch(!toggleRefetch);
       } else {
         response.errors.forEach((error) => {
-            notify('error', 'Failed', error)
-        })
+          notify("error", "Failed", error);
+        });
       }
-
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");
     } finally {
@@ -239,34 +267,102 @@ function DeliveryOrder() {
     }
   };
 
-  const [isStatusUpdate, setIsStatusUpdate] = useState(false);
-  const [idsSelected, setIdsSelected] = useState([]);
+  const handleSelect = async (id, checked) => {
+    setIsLoadingFetchItem(true);
+    if (checked) {
+      setIdsSelected((prev) => [...prev, id]);
+
+      const response = await FullfillmentFetch.getById(id);
+      let resData = getByIdResponseHandler(response);
+
+      if (resData) {
+        const promisesItem = resData.fulfillment_items.map(
+          async (itemFullfil) => {
+            const responseItem = await ItemFetch.getById(itemFullfil.item);
+            let resDataItem = getByIdResponseHandler(responseItem);
+
+            return {
+              ...itemFullfil,
+              itemid: resDataItem.itemid,
+              displayname: resDataItem.displayname,
+            };
+          }
+        );
+
+        const fulfillmentItems = await Promise.all(promisesItem);
+        resData = { ...resData, fulfillment_items: fulfillmentItems };
+
+        setDoDetailDatas((prev) => [...prev, resData]);
+      }
+    } else {
+      setIdsSelected((prev) => prev.filter((item) => item !== id));
+      setDoDetailDatas((prev) => prev.filter((item) => item.id !== id));
+    }
+    setIsLoadingFetchItem(false);
+  };
+
+  const handleSelectAll = async (checked) => {
+    setIsLoadingFetchItem(true);
+    if (checked) {
+      const allIds = datas.map((item) => item.id);
+      setIdsSelected(allIds);
+
+      const promises = allIds.map(async (id) => {
+        const response = await FullfillmentFetch.getById(id);
+        let resData = getByIdResponseHandler(response);
+
+        if (resData) {
+          const promisesItem = resData.fulfillment_items.map(
+            async (itemFullfil) => {
+              const responseItem = await ItemFetch.getById(itemFullfil.item);
+              let resDataItem = getByIdResponseHandler(responseItem);
+
+              return {
+                ...itemFullfil,
+                itemid: resDataItem.itemid,
+                displayname: resDataItem.displayname,
+              };
+            }
+          );
+
+          const fulfillmentItems = await Promise.all(promisesItem);
+          return { ...resData, fulfillment_items: fulfillmentItems };
+        }
+        setIsLoadingFetchItem(false);
+      });
+
+      const datasAll = await Promise.all(promises);
+      setDoDetailDatas(datasAll);
+    } else {
+      setIdsSelected([]);
+      setDoDetailDatas([]);
+    }
+  };
+
+  async function handlePrint() {
+    if (doDetailDatas.length === 0) {
+      notify("error", "Failed", "No data selected!");
+      return;
+    } else {
+      window.print();
+    }
+  }
 
   return (
     <Layout>
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Delivery Order List
+            Bulk Print Delivery Order
           </p>
           <div className="flex justify-center items-center gap-2">
             <Button
-              type=""
-              icon={<PrinterOutlined />}
-              onClick={() =>
-                router.push(`/super-admin/transaction/${title}/bulk-print`)
-              }
-            >
-              {isLargeScreen ? `Bulk Print` : ""}
-            </Button>
-            <Button
+              disabled={doDetailDatas.length == 0 || isLoadingItemFetch}
               type="primary"
-              icon={<PlusOutlined />}
-              onClick={() =>
-                router.push(`/super-admin/transaction/${title}/enter`)
-              }
+              icon={isLoadingItemFetch ? <LoadingOutlined/> : <PrinterOutlined />}
+              onClick={() => handlePrint()}
             >
-              {isLargeScreen ? `Enter` : ""}
+              {isLargeScreen ? `Print` : ""}
             </Button>
           </div>
         </div>
@@ -356,7 +452,31 @@ function DeliveryOrder() {
           </div>
         )}
       </div>
+      <div className="to-print hidden">
+        <DeliveryOrderPrintBulk datas={doDetailDatas} />
+      </div>
       {notificationContextHolder}
+      <style jsx>{`
+        @media print {
+          * {
+            display: none !important;
+          }
+
+          .ant-dropdown {
+            display: none !important;
+          }
+
+          .ant-layout-sider {
+            display: none !important;
+          }
+
+          .to-print {
+            display: block !important;
+            width: 100%;
+            background: white;
+          }
+        }
+      `}</style>
     </Layout>
   );
 }
