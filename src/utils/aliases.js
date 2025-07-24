@@ -219,7 +219,7 @@ export const paymentAliases = {
     memo: "Memo",
   },
   payment: {
-    paymentoption: "Payment Option",
+    paymentoption: "Payment Method",
     payment: "Payment",
     invoiceid: "Invoice ID",
     refnum: "Invoice ID",
@@ -227,6 +227,8 @@ export const paymentAliases = {
     total: "Total",
     due: "Amount Due",
     amount: "Payment",
+    depositedate: "Deposite Date",
+    bankaccount: "Bank Account",
   },
 };
 
@@ -317,7 +319,7 @@ export const productReportAliases = {
   qty_sisa: "Qty Sisa",
   qty_stok: "Qty Stok",
   unit: "Satuan",
-  no: 'No'
+  no: "No",
 };
 
 export const userAliases = {
