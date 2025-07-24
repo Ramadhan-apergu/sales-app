@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useReducer, useRef, useState } from "react";
-import { Button, Table, Tag } from "antd";
+import { Button, Flex, Table, Tag } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
@@ -26,24 +26,40 @@ function TableCustom({ data, aliases }) {
   if (!data?.length) return null;
 
   const keys = Object.keys(data[0] || {});
-  const columns = keys.map((key) =>
-    key == "is_valid"
-      ? {
-          dataIndex: key,
-          key,
-          title: aliases?.[key] || key,
-          render: (text) => (
-            <Tag color={text ? "green" : "red"}>
-              {text ? "Valid" : "Invalid"}
-            </Tag>
-          ),
-        }
-      : {
-          dataIndex: key,
-          key,
-          title: aliases?.[key] || key,
-        }
+
+  // Ambil keys TANPA is_valid
+  const filteredKeys = keys.filter(
+    (key) => key !== "is_valid" && key !== "messages"
   );
+
+  // Kolom data normal
+  const columns = filteredKeys.map((key) => ({
+    dataIndex: key,
+    key,
+    title: aliases?.[key] || key,
+  }));
+
+  // Tambahkan kolom Validated di akhir
+  columns.push({
+    dataIndex: "messages",
+    key: "validated",
+    title: "Validated",
+    render: (_, record) => {
+      if (record.is_valid) {
+        return <Tag color="green">Validated</Tag>;
+      } else {
+        return (
+          <Flex gap="small" wrap="wrap">
+            {record.messages?.map((msg, idx) => (
+              <Tag key={idx} color="red">
+                {msg}
+              </Tag>
+            ))}
+          </Flex>
+        );
+      }
+    },
+  });
 
   return (
     <Table
@@ -117,17 +133,44 @@ export default function Enter() {
 
             updateJson = json.map((item, i) => {
               const findCheckItem = checkMap.get(item["Item Name/Number"]);
+              console.log(findCheckItem);
               return {
                 no: i + 1,
                 ...item,
-                is_valid: findCheckItem ? findCheckItem.is_valid : false,
+                is_valid: findCheckItem.is_valid,
+                messages: findCheckItem.is_valid ? [] : ["Invalid Item"],
               };
             });
+
+            console.log(updateJson);
+
+            const countMap = {};
+
+            updateJson.forEach((item) => {
+              const name = item["Item Name/Number"];
+              countMap[name] = (countMap[name] || 0) + 1;
+            });
+
+            // 2. Update is_valid jika duplikat
+            updateJson = updateJson.map((item) => {
+              const name = item["Item Name/Number"];
+              if (countMap[name] > 1) {
+                return {
+                  ...item,
+                  is_valid: false,
+                  messages: [...item.messages, "Duplicate Item"],
+                };
+              }
+              return item;
+            });
+
+            console.log(updateJson);
           }
 
           setParsedData(updateJson);
           setUploadedFile(file);
         } catch (err) {
+          console.log(err);
           notify("error", "Parse Error", "Failed to read Excel file.");
         }
       };

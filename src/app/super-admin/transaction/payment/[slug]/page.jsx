@@ -123,6 +123,8 @@ export default function Details() {
     payloadPayment: {
       paymentoption: "cash",
       payment: 0,
+      depositedate: 0,
+      bankaccount: "",
     },
     payloadPaymentApplies: [],
     dataTableItem: [],
@@ -175,7 +177,8 @@ export default function Details() {
 
   const paymentOptions = [
     { label: "Cash", value: "cash" },
-    { label: "Credit", value: "credit" },
+    { label: "Bank Transfer", value: "transfer" },
+    { label: "Giro", value: "giro" },
   ];
 
   const keyTableItem = [
@@ -212,6 +215,8 @@ export default function Details() {
       payload: {
         paymentoption: data.paymentoption,
         payment: data.payment,
+        depositedate: formatDateToShort(data.depositedate),
+        bankaccount: data.bankaccount,
       },
     });
 
@@ -326,7 +331,10 @@ export default function Details() {
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
                         icon={<EditOutlined />}
-                        disabled={data?.paymentoption.toLowerCase() == 'giro' && data.status.toLowerCase() == 'deposited'}
+                        disabled={
+                          data?.paymentoption.toLowerCase() == "giro" &&
+                          data.status.toLowerCase() == "deposited"
+                        }
                         type={"primary"}
                         onClick={() => {
                           router.push(
@@ -386,7 +394,21 @@ export default function Details() {
                         input: "number",
                         isAlias: true,
                         isRead: true,
-                        accounting: true
+                        accounting: true,
+                      },
+                      {
+                        key: "depositedate",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        hidden: state.payloadPayment.paymentoption != "giro",
+                      },
+                      {
+                        key: "bankaccount",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        hidden: state.payloadPayment.paymentoption != "transfer",
                       },
                     ]}
                     aliases={paymentAliases.payment}

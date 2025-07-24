@@ -150,6 +150,8 @@ export default function Enter() {
     payloadPayment: {
       paymentoption: "cash",
       payment: 0,
+      depositedate: "",
+      bankaccount: "Bank BCA",
     },
     payloadPaymentApplies: [],
     dataTableItem: [],
@@ -204,6 +206,11 @@ export default function Enter() {
     { label: "Cash", value: "cash" },
     { label: "Bank Transfer", value: "transfer" },
     { label: "Giro", value: "giro" },
+  ];
+
+  const bankOptions = [
+    { label: "Bank BCA", value: "Bank BCA" },
+    { label: "Bank CIMB Niaga", value: "Bank CIMB Niaga" },
   ];
 
   const keyTableItem = [
@@ -301,6 +308,14 @@ export default function Enter() {
         ...state.payloadSummary,
         ...state.payloadPayment,
       };
+
+      if (!payloadToInsert.depositedate) {
+        payloadToInsert = { ...payloadToInsert, depositedate: "" };
+      }
+
+      if (!payloadToInsert.bankaccount) {
+        payloadToInsert = { ...payloadToInsert, bankaccount: "" };
+      }
 
       if (!payloadToInsert.customer) {
         throw new Error("Customer is required!");
@@ -471,6 +486,19 @@ export default function Enter() {
                 key: "payment",
                 input: "number",
                 isAlias: true,
+              },
+              {
+                key: "depositedate",
+                input: "date",
+                isAlias: true,
+                hidden: state.payloadPayment.paymentoption != "giro",
+              },
+              {
+                key: "bankaccount",
+                input: "select",
+                options: bankOptions,
+                isAlias: true,
+                hidden: state.payloadPayment.paymentoption != "transfer",
               },
             ]}
             aliases={paymentAliases.payment}
