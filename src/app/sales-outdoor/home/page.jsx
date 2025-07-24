@@ -81,7 +81,7 @@ export default function Dashboard() {
     return (
         <Layout>
             <FixedHeaderBar/>
-            <div className="flex flex-col gap-4 bg-gray-3 pb-4 pt-11">
+            <div className="flex flex-col gap-4 bg-gray-3 pb-4">
                 <ProfilBar data={{
                     name: profile.data?.name || '',
                     role: profile.data?.role_name || '',

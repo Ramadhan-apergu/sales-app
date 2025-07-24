@@ -34,7 +34,7 @@ export default function Header({ title, description, overview = {} }) {
     const { title: overviewTitle = '', description: overviewDescription = '', items = [] } = overview;
   
     return (
-      <div className="h-56 relative bg-gray-3 mt-11">
+      <div className="h-56 relative bg-gray-3">
         <div className="h-40 bg-blue-6 rounded-b-4xl flex items-start justify-between px-4 pt-2">
           <div className="w-full flex flex-col text-white px-4">
             <p className="text-2xl font-semibold tracking-wide">{title || ''}</p>

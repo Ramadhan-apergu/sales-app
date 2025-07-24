@@ -163,7 +163,7 @@ export default function SalesOrderDetail() {
       <div className="w-full h-full overflow-y-auto overflow-x-hidden relative">
         <FixedHeaderBar bgColor="bg-blue-6" />
 
-        <div className="w-full relative p-4 mt-10">
+        <div className="w-full relative p-4">
           <div className="max-w-3xl mx-auto">
             {loading && !order && (
               <div className="flex justify-center items-center p-8">

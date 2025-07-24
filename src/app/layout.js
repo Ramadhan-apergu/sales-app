@@ -15,6 +15,20 @@ const inter = Inter({
 export const metadata = {
   title: "Sales App",
   description: "Sales App Karya Group by Apergu",
+  // Tambahkan metadata PWA di sini
+  manifest: "/manifest.json",
+  themeColor: "#9E7FFF",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Sales App",
+    startupImage: [
+      "/icons/icon-192x192.png",
+    ],
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({ children }) {
