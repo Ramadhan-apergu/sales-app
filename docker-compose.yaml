@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  karya-group:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: karya-group-fe
+    container_name: karya-group-fe
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
