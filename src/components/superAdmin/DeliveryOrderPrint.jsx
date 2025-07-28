@@ -37,28 +37,36 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         <div className="w-full flex justify-between table-padding">
           <div className="w-1/2">
             <div className="w-full flex">
-              <p className="w-3/12 break-words whitespace-normal font-semibold">To :</p>
+              <p className="w-3/12 break-words whitespace-normal font-semibold">
+                To :
+              </p>
               <p className="w-8/12 border  break-words whitespace-normal">
                 {data.customer}
               </p>
             </div>
             <div className="w-full flex">
-              <p className="w-3/12 break-words whitespace-normal font-semibold">Address :</p>
+              <p className="w-3/12 break-words whitespace-normal font-semibold">
+                Address :
+              </p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
                 {data.shippingaddress}
               </p>
             </div>
             <div className="w-full flex">
-              <p className="w-3/12 break-words whitespace-normal font-semibold">Notes :</p>
+              <p className="w-3/12 break-words whitespace-normal font-semibold">
+                Notes :
+              </p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
                 {data.notes}
               </p>
             </div>
             <br />
             <div className="w-full flex">
-              <p className="w-3/12 break-words whitespace-normal font-semibold">Sales :</p>
+              <p className="w-3/12 break-words whitespace-normal font-semibold">
+                Sales :
+              </p>
               <p className="w-8/12 border break-words whitespace-normal">
-                {data.sales || ""}
+                {data.salesrep || ""}
               </p>
             </div>
           </div>
@@ -107,9 +115,9 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           </p>
           <p className="border-r break-words whitespace-normal w-[20%]">Memo</p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
-            Qty (Kq)
+            Qty (Kg)
           </p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+          <p className="break-words whitespace-normal w-[15%] text-right">
             Qty (Bal)
           </p>
         </div>
@@ -135,7 +143,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
               <p className="border-r break-words whitespace-normal w-[15%] text-right">
                 {item.quantity1 || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[15%] text-right">
+              <p className="break-words whitespace-normal w-[15%] text-right">
                 {item.quantity2 || "-"}
               </p>
             </div>
@@ -145,7 +153,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           <p className="break-words whitespace-normal w-[25%]"></p>
           <p className="break-words whitespace-normal w-[20%]"></p>
           <p className="break-words whitespace-normal w-[20%]"></p>
-          <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
+          <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty}
           </p>
           <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
@@ -186,7 +194,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
 
         @media print {
           #print-do {
-            font-size: 1rem; /* Default */
+            font-size: 0.9rem; /* Default */
           }
 
           /* A4: approx width ~ 595px to 842px */
@@ -196,13 +204,13 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
 
           @media print and (max-width: 595px) {
             #print-do {
-              font-size: 0.75rem; /* text-xs */
+              font-size: 0.65rem; /* text-xs */
             }
           }
 
           @media print and (min-width: 595px) and (max-width: 842px) {
             #print-do {
-              font-size: 0.875rem; /* text-sm */
+              font-size: 0.775rem; /* text-sm */
             }
           }
         }

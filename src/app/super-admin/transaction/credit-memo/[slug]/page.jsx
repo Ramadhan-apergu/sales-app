@@ -45,6 +45,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { creditMemoAliases } from "@/utils/aliases";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({
   data,
@@ -79,6 +80,16 @@ function TableCustom({
           key: key,
           align: "right",
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
+      } else if (
+        ["due", "amount", "payment", "rate", "amount", "taxrate1"].includes(key)
+      ) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{formatRupiah(text)}</p>,
         };
       } else {
         return {
@@ -183,9 +194,9 @@ export default function Enter() {
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
-    run()
+    run();
   }, []);
 
   const initialState = {
@@ -326,14 +337,14 @@ export default function Enter() {
           return {
             ...memoApply,
             refnum: dataInv.fulfillmentnum || "",
-            trandate: formatDateToShort(dataInv.trandate)
+            trandate: formatDateToShort(dataInv.trandate),
           };
         } catch (error) {
           console.error("Gagal fetch invoice ID:", memoApply.invoiceid, error);
           return {
             ...memoApply,
             refnum: "",
-            trandate: formatDateToShort(dataInv.trandate)
+            trandate: formatDateToShort(dataInv.trandate),
           };
         }
       })
@@ -379,17 +390,13 @@ export default function Enter() {
   }
 
   const keyTableItem = [
-    "invoiceid",
+    // "invoiceid",
     "refnum",
     "trandate",
     "due",
     "amount",
     "payment",
   ];
-
-  function formatRupiah(number) {
-    return number.toLocaleString("id-ID") + ",-";
-  }
 
   return (
     <>
@@ -464,7 +471,7 @@ export default function Enter() {
                       },
                     ]}
                     aliases={{
-                        companyname: 'Customer Name'
+                      companyname: "Customer Name",
                     }}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
@@ -483,6 +490,7 @@ export default function Enter() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
+                        hidden: true,
                       },
                       {
                         key: "trandate",
@@ -512,15 +520,17 @@ export default function Enter() {
                     data={[
                       {
                         key: "unapplied",
-                        input: "input",
+                        input: "number",
                         isAlias: true,
                         isRead: true,
+                        accounting: true,
                       },
                       {
                         key: "applied",
-                        input: "input",
+                        input: "number",
                         isAlias: true,
                         isRead: true,
+                        accounting: true,
                       },
                     ]}
                     aliases={creditMemoAliases.item}
@@ -532,16 +542,16 @@ export default function Enter() {
                   <TableCustom
                     data={state.credit_memo_items}
                     keys={[
-                      "item",
+                      //   "item",
                       "displayname",
                       "quantity",
-                      "units",
+                      //   "units",
                       "itemdescription",
                       "rate",
-                      "taxable",
+                      //   "taxable",
                       "amount",
                       "taxrate1",
-                      "taxamount",
+                      //   "taxamount",
                     ]}
                     aliases={creditMemoAliases.item}
                     checkbox={false}
