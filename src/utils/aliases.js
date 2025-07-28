@@ -118,6 +118,7 @@ export const deliveryOrderAliases = {
     memo: "Memo",
     salesorderid: "Sales Order ID",
     entity: "Customer ID",
+    salesrep: "Sales Rep",
   },
   item: {
     id: "ID",
