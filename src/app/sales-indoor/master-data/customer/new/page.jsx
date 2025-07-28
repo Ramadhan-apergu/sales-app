@@ -2,14 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "antd";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { customerAliases } from "@/utils/aliases";
 import InputForm from "@/components/superAdmin/InputForm";
-import { createResponseHandler, getResponseHandler } from "@/utils/responseHandlers";
+import {
+  createResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import UserManageFetch from "@/modules/salesApi/userManagement";
@@ -22,7 +25,7 @@ export default function CustomerNew() {
   const [payloadGeneral, setPayloadGeneral] = useState({
     companyname: "",
     customerid: "",
-    salesid: ""
+    salesid: "",
   });
 
   const [payloadContact, setPayloadContact] = useState({
@@ -49,35 +52,37 @@ export default function CustomerNew() {
     { label: "14 Days", value: "14" },
     { label: "30 Days", value: "30" },
   ];
-  
-  const [salesData, setSalesData] = useState([])
+
+  const [salesData, setSalesData] = useState([]);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchDataSales() {
-        try {
-            const response = await UserManageFetch.getSales()
+      try {
+        const response = await UserManageFetch.getSales();
 
-            const resData = getResponseHandler(response, notify)
+        const resData = getResponseHandler(response, notify);
 
-            if(resData) {
-                setSalesData(resData.list.map((data) => {
-                    return {
-                        value: data.id,
-                        label: data.name
-                    }
-                }))
-            }
-        } catch (error) {
-            console.log(error)
-            notify('error', 'Error', 'Failed get sales data')
+        if (resData) {
+          setSalesData(
+            resData.list.map((data) => {
+              return {
+                value: data.id,
+                label: data.name,
+              };
+            })
+          );
         }
+      } catch (error) {
+        console.log(error);
+        notify("error", "Error", "Failed get sales data");
+      }
     }
 
-    fetchDataSales()
-  })
+    fetchDataSales();
+  }, []);
 
   const handleChangePayload = (type, payload) => {
     switch (type) {
@@ -198,7 +203,7 @@ export default function CustomerNew() {
       const resData = createResponseHandler(response, notify);
 
       if (resData) {
-        router.push(`/super-admin/master-data/customer/${resData}`);
+        router.push(`/sales-indoor/master-data/customer/${resData}`);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
