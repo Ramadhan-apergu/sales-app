@@ -6,11 +6,12 @@ export default class ReportSo extends ProcessFetch {
     limit = 10,
     customer = "",
     startdate = "",
-    enddate = ""
+    enddate = "",
+    status = ""
   ) {
     try {
       const response = await this.axios.get("/report/sales-order", {
-        params: { offset, limit, customer, startdate, enddate },
+        params: { offset, limit, customer, startdate, enddate, status },
       });
       return new this().processResponse(response);
     } catch (error) {

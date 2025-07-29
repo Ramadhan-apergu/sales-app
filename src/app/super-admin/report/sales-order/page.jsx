@@ -22,6 +22,8 @@ import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { soReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { PiExport } from "react-icons/pi";
+import { exportJSONToExcel } from "@/utils/export";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -40,7 +42,7 @@ function SalesOrder() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState([]);
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
@@ -53,13 +55,15 @@ function SalesOrder() {
     const fetchData = async () => {
       try {
         setIsloading(true);
+        console.log(statusFilter);
 
         const response = await ReportSo.getSo(
           offset,
           limit,
           searchName,
           dateRange[0],
-          dateRange[1]
+          dateRange[1],
+          statusFilter.length == 0 ? "" : statusFilter.join(",")
         );
 
         const resData = getResponseHandler(response, notify);
@@ -83,7 +87,7 @@ function SalesOrder() {
     };
 
     fetchData();
-  }, [page, limit, pathname, searchName, dateRange]);
+  }, [page, limit, pathname, searchName, dateRange, statusFilter]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,10 +149,13 @@ function SalesOrder() {
             <>
               {text ? (
                 <div className="flex flex-col">
-                  {text.split(",").map((tgl) => formatDateWithSepMinus(tgl)).join(",")}
+                  {text
+                    .split(",")
+                    .map((tgl) => formatDateWithSepMinus(tgl))
+                    .join(",")}
                 </div>
               ) : (
-                <>{text}</> // dibungkus fragment, atau bisa <span>{text}</span>
+                <>{text}</>
               )}
             </>
           ),
@@ -163,6 +170,10 @@ function SalesOrder() {
     }),
   ];
 
+  async function handleExport() {
+    exportJSONToExcel(datas, soReportAliases, 'so-report.xlsx')
+  }
+
   return (
     <Layout>
       <div className="w-full flex flex-col gap-4">
@@ -170,6 +181,9 @@ function SalesOrder() {
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
             Sales Order Report
           </p>
+          <Button onClick={handleExport} disabled={!datas || datas.length == 0} icon={<PiExport/>}>
+            Export
+          </Button>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
@@ -217,7 +231,7 @@ function SalesOrder() {
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-end">
             <div className="flex lg:hidden flex-col justify-start items-start gap-1">
               <Select
                 showSearch
@@ -243,28 +257,33 @@ function SalesOrder() {
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
-            {/* <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className=" text-sm font-semibold leading-none">
                 Status
               </label>
               <Select
-                defaultValue="all"
-                onChange={(e) => {
-                  setStatusFilter(e);
-                }}
+                maxTagCount={1}
+                mode="multiple"
+                allowClear
+                style={{ maxWidth: "200px" }} // lebar input
+                dropdownAlign={{ points: ["tr", "br"] }}
+                dropdownStyle={{ minWidth: "150px" }} // lebar dropdown
+                placeholder="Select status"
+                value={statusFilter}
+                onChange={setStatusFilter}
                 options={[
-                  { value: "all", label: "All" },
                   { value: "open", label: "Open" },
                   { value: "fulfilled", label: "Fulfilled" },
-                  { value: "partially fulfilled", label: "Partially Fulfilled" },
+                  {
+                    value: "partially fulfilled",
+                    label: "Partially Fulfilled",
+                  },
                   { value: "credit hold", label: "Credit Hold" },
                   { value: "closed", label: "Closed" },
                   { value: "pending approval", label: "Pending Approval" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
-                dropdownAlign={{ points: ["tr", "br"] }}
               />
-            </div> */}
+            </div>
           </div>
         </div>
         {!isLoading ? (
