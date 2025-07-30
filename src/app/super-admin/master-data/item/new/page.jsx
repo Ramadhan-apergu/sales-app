@@ -188,6 +188,7 @@ export default function CustomerNew() {
                             key: 'price',
                             input: 'number',
                             isAlias: false,
+                            accounting: true,
                             rules: [
                                 { required: true, message: `Price is required` },
                             ],
@@ -196,6 +197,7 @@ export default function CustomerNew() {
                             key: 'discount',
                             input: 'number',
                             isAlias: false,
+                            accounting: true,
                             rules: [], // Optional, tidak ada validasi required
                             },
                         ]}

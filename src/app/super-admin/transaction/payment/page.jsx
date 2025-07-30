@@ -201,7 +201,7 @@ function List() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-            disabled={record?.paymentoption.toLowerCase() == 'giro' && record.status.toLowerCase() == 'deposited'}
+            disabled={(record?.paymentoption.toLowerCase() == 'giro' && record.status.toLowerCase() == 'deposited') || record.status.toLowerCase() == 'payment received'}
           >
             {isLargeScreen ? "Edit" : ""}
           </Button>
