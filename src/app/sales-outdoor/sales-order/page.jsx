@@ -173,7 +173,7 @@ export default function SalesOrder() {
                         style={{ width: '100%' }}
                         allowClear
                     >
-                        {["open","fulfilled","hold"]
+                        {["open","fulfilled","credit hold"]
                         .map(s => <Option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</Option>)
                         }
                     </Select>
@@ -219,7 +219,7 @@ export default function SalesOrder() {
                 />
 
                 <div className="w-full relative">
-                    <div className="w-full py-4 flex justify-center items-center gap-2 sticky top-11 px-4 bg-gray-3">
+                    <div className="w-full py-4 flex justify-center items-center gap-2 px-4 bg-gray-3">
                         {/* Replaced Input with Select for customer search */}
                         <Select
                             showSearch
@@ -273,7 +273,8 @@ export default function SalesOrder() {
                                         date: order.trandate,
                                         status: order.status,
                                         total: formatRupiah(order.total),
-                                        po: order.otherrefnum
+                                        po: order.otherrefnum,
+                                        statusapprove: order.statusapprove
                                     }}
                                 />
                             </Link>

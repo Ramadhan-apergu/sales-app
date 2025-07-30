@@ -44,7 +44,7 @@ export default function CardList({ data }) {
     });
 
     useEffect(() => {
-        const status = data?.status;
+        const status = data?.statusapprove;
         if (status === 'pending') {
             setStatusClass({
                 text: 'text-orange-5',
@@ -62,8 +62,8 @@ export default function CardList({ data }) {
             });
         } else {
             setStatusClass({
-                text: 'text-gray-5',
-                bg: 'bg-gray-3',
+                text: 'text-black-5',
+                bg: 'bg-black-3',
             });
         }
     }, [data?.status]);
@@ -94,8 +94,10 @@ export default function CardList({ data }) {
                     </div>
                     <div className="flex justify-between">
                         <div className="flex items-center gap-1">
-                            <Icon title={data?.status || ''}/>
-                            <p className={`capitalize text-xs ${statusClass.text}`}>{data?.status || '-'}</p>
+                            <p className={`capitalize text-xs`}>{data?.status || '-'}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <p className={`capitalize text-xs`}>{data?.statusapprove || '-'}</p>
                         </div>
                         <div className="flex gap-1 items-center justify-start">
                             <HiCalendarDateRange className="text-sm text-gray-12/70"/>
