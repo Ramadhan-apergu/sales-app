@@ -183,7 +183,7 @@ export default function DeliveryOrder() {
             />
 
             <div className="w-full relative">
-            <div className="w-full py-4 flex justify-center items-center gap-2 sticky top-11 px-4 bg-gray-3">
+            <div className="w-full py-4 flex justify-center items-center gap-2 px-4 bg-gray-3">
                 <Input
                 placeholder="Search customer"
                 value={searchText}
