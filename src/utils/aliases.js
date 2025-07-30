@@ -216,7 +216,8 @@ export const paymentAliases = {
   },
   primary: {
     customer: "Customer ID",
-    trandate: "Date",
+    companyname: "Company Name",
+    trandate: "Payment Date",
     memo: "Memo",
   },
   payment: {
@@ -224,7 +225,7 @@ export const paymentAliases = {
     payment: "Payment",
     invoiceid: "Invoice ID",
     refnum: "Invoice ID",
-    applydate: "Date",
+    applydate: "Invoice Date",
     total: "Total",
     due: "Amount Due",
     amount: "Payment",
@@ -270,12 +271,14 @@ export const stockAdjustmentAliases = {
   },
   adjustment: {
     itemid: "Item ID",
+    itemcode: "Item Code",
     displayname: "Display Name",
     onhand: "Onhand",
     stockreal: "Stock Real",
     qty: "Qty",
     units: "Unit",
     price: "Price",
+    onhand: "On Hand"
   },
 };
 

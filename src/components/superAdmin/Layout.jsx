@@ -369,12 +369,12 @@ const LayoutTesting = ({ children }) => {
       </Header>
 
       <div className="flex-1 px-4 lg:px-12 pb-4 pt-4 lg:pt-0 lg:pb-12">
-        <div className="hidden lg:block">
+        {/* <div className="hidden lg:block">
           <Breadcrumb style={{ margin: "16px 0" }} items={breadcrumbItems} />
-        </div>
+        </div> */}
         {pageSegment !== "home" ? (
           <Layout
-            className="py-4 lg:py-6"
+            className="py-4 lg:py-6 mt-9"
             style={{
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
