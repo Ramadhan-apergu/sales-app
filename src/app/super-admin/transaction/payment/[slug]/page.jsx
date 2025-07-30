@@ -55,7 +55,7 @@ function TableCustom({ data, keys, aliases, onChange }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
           render: (text, record) => <p>{formatRupiah(text)}</p>,
         };
       } else {
@@ -63,7 +63,7 @@ function TableCustom({ data, keys, aliases, onChange }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
         };
       }
     }),
@@ -332,8 +332,8 @@ export default function Details() {
                       <Button
                         icon={<EditOutlined />}
                         disabled={
-                          data?.paymentoption.toLowerCase() == "giro" &&
-                          data.status.toLowerCase() == "deposited"
+                          (data?.paymentoption.toLowerCase() == "giro" &&
+                          data.status.toLowerCase() == "deposited") || data.status.toLowerCase() == "payment received"
                         }
                         type={"primary"}
                         onClick={() => {

@@ -320,6 +320,7 @@ export default function Page() {
                       </Button>
 
                       <Button
+                        disabled={data?.shipstatus?.toLowerCase() == "shipped"}
                         icon={<EditOutlined />}
                         type={"primary"}
                         onClick={handleEdit}
