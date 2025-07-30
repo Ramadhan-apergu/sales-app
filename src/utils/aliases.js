@@ -280,7 +280,6 @@ export const stockAdjustmentAliases = {
 };
 
 export const soReportAliases = {
-  id: "ID",
   so_numb: "SO No",
   trandate: "Date",
   kode_customer: "Customer Code",
@@ -296,6 +295,9 @@ export const soReportAliases = {
   harga_satuan: "Price @",
   diskon_satuan: "Discount @",
   jumlah: "Total",
+  status_so: "Status SO",
+  customerid: "Customer ID",
+  created_by: "Created By",
 };
 
 export const salesReportAliases = {
