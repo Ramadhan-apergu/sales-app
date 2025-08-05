@@ -1,169 +1,53 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  FloatButton,
-  Form,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tooltip,
-} from "antd";
+import InputForm from "@/components/superAdmin/InputForm";
 import Layout from "@/components/superAdmin/Layout";
-import {
-  CheckOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
-
-import useNotification from "@/hooks/useNotification";
-import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import useNotification from "@/hooks/useNotification";
 import CustomerFetch from "@/modules/salesApi/customer";
+import ItemFetch from "@/modules/salesApi/item";
+import SalesOrderFetch from "@/modules/salesApi/salesOrder";
+import { salesOrderAliases } from "@/utils/aliases";
+import convertToLocalDate from "@/utils/convertToLocalDate";
+import { formatRupiah } from "@/utils/formatRupiah";
 import {
   createResponseHandler,
   getResponseHandler,
 } from "@/utils/responseHandlers";
-import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+
+import {
+  CheckOutlined,
+  InfoCircleOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
+import { Button, Divider, FloatButton, Form, Modal, Select, Table } from "antd";
 import dayjs from "dayjs";
-import { salesOrderAliases } from "@/utils/aliases";
-
-function formatRupiah(number) {
-  if (typeof number !== "number" || isNaN(number)) {
-    return "Rp 0,-";
-  }
-
-  try {
-    return "Rp " + number.toLocaleString("id-ID") + ",-";
-  } catch (e) {
-    return "Rp 0,-";
-  }
-}
-
-function TableCustom({ data, keys, aliases, onDelete }) {
-  const columns = [
-    ...keys.map((key) => {
-      if (
-        [
-          "rate",
-          "value1",
-          "value2",
-          "value3",
-          "subtotal",
-          "totalamount",
-          "taxvalue",
-          "totaldiscount",
-        ].includes(key)
-      ) {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "right", // semua kolom di-align ke kanan
-          render: (text) => <p>{formatRupiah(text)}</p>,
-        };
-      } else {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "right", // semua kolom di-align ke kanan
-        };
-      }
-    }),
-    {
-      title: "Action",
-      key: "action",
-      align: "right", // kolom action juga ke kanan
-      render: (_, record) => (
-        <Button type="link" onClick={() => onDelete(record)}>
-          Delete
-        </Button>
-      ),
-    },
-  ];
-
-  return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      rowKey="lineid"
-      bordered
-      pagination={false}
-      scroll={{ x: "max-content" }}
-    />
-  );
-}
+import { useRouter } from "next/navigation";
+import { useEffect, useReducer, useState } from "react";
 
 export default function Enter() {
-  const { notify, contextHolder: contextNotify } = useNotification();
+  const title = "sales-order";
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const [modal, contextHolder] = Modal.useModal();
-  const title = "sales-order";
-  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const { notify, contextHolder: contextNotify } = useNotification();
 
   const [dataCustomer, setDataCustomer] = useState([]);
-  const [customerSelected, setCustomerSelected] = useState({});
-
   const [dataItem, setDataItem] = useState([]);
-  const [itemSelected, setItemSelected] = useState(null);
 
-  useEffect(() => {
-    async function fetchCustomer() {
-      try {
-        const response = await CustomerFetch.get(0, 10000, "active");
-        const resData = getResponseHandler(response);
-
-        if (resData) {
-          const addLabelCustomer = resData.list.map((customer, i) => {
-            return {
-              ...customer,
-              label: customer.customerid || customer.companyname,
-              value: customer.id,
-            };
-          });
-          setDataCustomer(addLabelCustomer);
-        }
-      } catch (error) {
-        notify("error", "Error", "Failed get data customer");
-      }
-    }
-    fetchCustomer();
-
-    async function fetchItem() {
-      try {
-        const response = await ItemFetch.get(0, 10000);
-        const resData = getResponseHandler(response);
-
-        if (resData) {
-          const addLabelItem = resData.list.map((item) => {
-            return {
-              ...item,
-              label: item.displayname,
-              value: item.id,
-            };
-          });
-          setDataItem(addLabelItem);
-        }
-      } catch (error) {
-        notify("error", "Error", "Failed get data item");
-      }
-    }
-    fetchItem();
-  }, []);
+  const [customerSelected, setCustomerSelected] = useState({});
+  const [customerInfo, setCustomerInfo] = useState({
+    customer: "",
+    message: [],
+  });
+  const [itemSelected, setItemSelected] = useState({});
+  const [summary, setSummary] = useState({
+    subtotalbruto: 0,
+    discounttotal: 0,
+    total: 0,
+    subtotal: 0,
+    taxtotal: 0,
+  });
 
   const initialState = {
     payloadPrimary: {
@@ -173,22 +57,14 @@ export default function Enter() {
       salesrep: "",
       otherrefnum: "",
     },
-    payloadSummary: {
-      subtotalbruto: 0,
-      discounttotal: 0,
-      subtotal: 0,
-      taxtotal: 0,
-      total: 0,
-    },
     payloadBilling: {
       term: "7",
-      paymentoption: "",
+      paymentoption: "cash",
     },
     payloadShipping: {
       notes: "",
       shippingaddress: "",
     },
-    dataTableItem: [],
   };
 
   function reducer(state, action) {
@@ -198,14 +74,6 @@ export default function Enter() {
           ...state,
           payloadPrimary: {
             ...state.payloadPrimary,
-            ...action.payload,
-          },
-        };
-      case "SET_SUMMARY":
-        return {
-          ...state,
-          payloadSummary: {
-            ...state.payloadSummary,
             ...action.payload,
           },
         };
@@ -225,11 +93,6 @@ export default function Enter() {
             ...action.payload,
           },
         };
-      case "SET_ITEMS":
-        return {
-          ...state,
-          dataTableItem: action.payload,
-        };
       case "RESET":
         return initialState;
       default:
@@ -239,15 +102,113 @@ export default function Enter() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const shipAddressOptions = [
-    { label: "Custom", value: 0 },
-    { label: "Default Address", value: 1 },
-  ];
+  async function fetchCustomer() {
+    try {
+      const response = await CustomerFetch.get(0, 10000, "active");
+      const resData = getResponseHandler(response);
+      return resData;
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  const shipAddressOption = [
-    { label: "Custom", value: "custom" },
-    { label: "Default Address", value: "default address" },
-  ];
+  async function fetchItem() {
+    try {
+      const response = await ItemFetch.get(0, 10000);
+      const resData = getResponseHandler(response);
+      return resData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async function fetchInit() {
+    try {
+      const getCustomer = await fetchCustomer();
+      if (getCustomer) {
+        const updateLabelCustomer = getCustomer.list.map((item) => ({
+          ...item,
+          label: item.customerid,
+          value: item.id,
+        }));
+        setDataCustomer(updateLabelCustomer);
+      }
+
+      const getItem = await fetchItem();
+      if (getItem) {
+        const updateLabelItem = getItem.list.map((item) => ({
+          ...item,
+          label: item.itemid,
+          value: item.id,
+        }));
+        setDataItem(updateLabelItem);
+      }
+    } catch (error) {
+      console.error(error);
+      notify("error", "Failed get data");
+    }
+  }
+
+  useEffect(() => {
+    fetchInit();
+  }, []);
+
+  function handleCustomerChange(customer) {
+    setCustomerSelected(customer);
+    if (customer.id) {
+      checkStatusCustomer(customer.id, customer.customerid);
+    }
+
+    dispatch({
+      type: "SET_PRIMARY",
+      payload: {
+        entity: customer.id,
+        companyname: customer.companyname,
+        salesrep: customer.salesrep,
+      },
+    });
+    dispatch({
+      type: "SET_SHIPPING",
+      payload: {
+        shippingaddress: customer.addressee,
+      },
+    });
+    dispatch({
+      type: "SET_BILLING",
+      payload: {
+        term: customer.terms,
+      },
+    });
+    updateDataItemTable(null, null, customer.id);
+  }
+
+  async function checkStatusCustomer(id, name) {
+    try {
+      const response = await SalesOrderFetch.checkSoVrify(id);
+      if (response.status_code != 404) {
+        setCustomerInfo({
+          customer: name,
+          message: response.errors,
+        });
+      } else {
+        setCustomerInfo({
+          customer: "",
+          message: [],
+        });
+      }
+    } catch (error) {
+      notify("error", "Failed", "Failed get customer information");
+    }
+  }
+
+  function showCustomerInfo() {
+    customerInfo.message.forEach((info, i) => {
+      const timeout = i > 0 ? 300 : 0;
+      setTimeout(() => {
+        notify("info", "Customer ID : " + customerInfo.customer, info);
+      }, timeout);
+    });
+  }
 
   const termOptions = [
     { label: "7 Days", value: "7" },
@@ -266,29 +227,12 @@ export default function Enter() {
     "units",
     "rate",
     "description",
-    // "discountname1",
-    // "value1",
-    // "discountvalue1",
-    // "perunit1",
-    // "discountname2",
-    // "value2",
-    // "discountvalue2",
-    // "perunit2",
-    // "discountname3",
-    // "value3",
-    // "discountvalue3",
-    // "perunit3",
-    "subtotal",
-    "totalamount",
-    "qtyfree",
-    "unitfree",
     "taxable",
     "taxrate",
-    "taxvalue",
+    "totalamount",
     "totaldiscount",
+    "subtotal",
   ];
-
-  const [dataTableItem, setDataTableItem] = useState([]);
 
   const initialStateItemTable = {
     item: {
@@ -297,44 +241,19 @@ export default function Enter() {
       units: "",
       description: "",
       rate: 0,
-      discount: 0,
       displayname: "",
       itemprocessfamily: "",
-      stock: 0,
       itemid: "",
-    },
-    discount1: {
-      discount1: "",
-      discountname1: "",
-      value1: 0,
-      discountvalue1: "",
-      perunit1: "",
-    },
-    discount2: {
-      discount2: "",
-      discountname2: "",
-      value2: 0,
-      discountvalue2: "",
-      perunit2: "",
-    },
-    discount3: {
-      discount3: "",
-      discountname3: "",
-      value3: 0,
-      discountvalue3: "",
-      perunit3: "",
-    },
-    summary: {
-      subtotal: 0,
-      totalamount: 0,
-      qtyfree: 0,
-      unitfree: "",
-      totaldiscount: 0,
+      agreementcode: "",
     },
     tax: {
       taxable: false,
       taxrate: 0,
-      taxvalue: 0,
+    },
+    summary: {
+      totaldiscount: 0,
+      totalamount: 0,
+      subtotal: 0,
     },
   };
 
@@ -345,30 +264,6 @@ export default function Enter() {
           ...state,
           item: {
             ...state.item,
-            ...action.payload,
-          },
-        };
-      case "SET_DISCOUNT1":
-        return {
-          ...state,
-          discount1: {
-            ...state.discount1,
-            ...action.payload,
-          },
-        };
-      case "SET_DISCOUNT2":
-        return {
-          ...state,
-          discount2: {
-            ...state.discount2,
-            ...action.payload,
-          },
-        };
-      case "SET_DISCOUNT3":
-        return {
-          ...state,
-          discount3: {
-            ...state.discount3,
             ...action.payload,
           },
         };
@@ -401,8 +296,7 @@ export default function Enter() {
   );
 
   const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
-  const [discountItems, setDiscountItems] = useState([]);
+  const [dataDiscount, setDataDiscount] = useState(null);
 
   function handleAddItem() {
     if (!state.payloadPrimary.entity || state.payloadPrimary.entity == "") {
@@ -438,11 +332,9 @@ export default function Enter() {
     setIsModalItemOpen(true);
   }
 
-  function handleModalItemCancel() {
-    dispatchItemTable({ type: "RESET" });
-    setItemSelected(null);
-    setIsModalItemOpen(false);
-  }
+  const [dataTableItem, setDataTableItem] = useState([]);
+  const [dataItemFree, setDataItemFree] = useState([]);
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   async function handleModalItemOk() {
     if (!stateItemTable.item.item) {
@@ -460,416 +352,186 @@ export default function Enter() {
       return;
     }
 
-    const discountItem = await getDiscount(
-      state.payloadPrimary.entity,
-      stateItemTable.item.item,
-      convertToLocalDate(state.payloadPrimary.trandate),
-      stateItemTable.item.quantity,
-      stateItemTable.item.itemprocessfamily
-    );
+    const dataItemNew = {
+      ...stateItemTable.item,
+      ...stateItemTable.summary,
+      ...stateItemTable.tax,
+    };
+    const updateItemTable = [...dataTableItem, dataItemNew];
 
-    setDiscountItems((prev) => [...prev, discountItem]);
+    const updateDiscountItem = await getDiscountItem(updateItemTable);
 
-    handleAddItemToTable();
+    setDataTableItem(updateDiscountItem);
 
     handleModalItemCancel();
   }
 
-  function handleAddItemToTable() {
-    const subtotal = stateItemTable.item.quantity * stateItemTable.item.rate;
-    const totalamount = subtotal;
-    const taxrate = stateItemTable.tax.taxable
-      ? Number(stateItemTable.tax.taxrate)
-      : 0;
-
-    const taxvalue = stateItemTable.tax.taxable
-      ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
-      : 0;
-
-    dispatchItemTable({
-      type: "SET_SUMMARY",
-      payload: {
-        subtotal,
-        totalamount,
-      },
-    });
-
-    dispatchItemTable({
-      type: "SET_TAX",
-      payload: {
-        taxvalue,
-        taxrate,
-      },
-    });
-
-    const mergePayloadItemTable = {
-      lineid: crypto.randomUUID(),
-
-      ...stateItemTable.item,
-
-      ...stateItemTable.discount1,
-
-      ...stateItemTable.discount2,
-
-      ...stateItemTable.discount3,
-
-      subtotal,
-      totalamount,
-      qtyfree: stateItemTable.summary.qtyfree,
-      unitfree: stateItemTable.summary.unitfree,
-      totaldiscount: stateItemTable.summary.totaldiscount,
-
-      taxable: stateItemTable.tax.taxable,
-      taxrate,
-      taxvalue,
-    };
-
-    setDataTableItem((prev) => [...prev, mergePayloadItemTable]);
+  function handleModalItemCancel() {
+    dispatchItemTable({ type: "RESET" });
+    setItemSelected(null);
+    setIsModalItemOpen(false);
   }
 
-  async function getDiscount(cust_id, item_id, trandate, qty, item_categories) {
+  async function updateDataItemTable(
+    updatedData = null,
+    payment_type = null,
+    cust_id = null
+  ) {
     try {
-      let initData = {
-        id: itemSelected,
-        displayname: stateItemTable.item.displayname,
-        discount: [],
+      const updateDiscountItem = await getDiscountItem(
+        updatedData ? updatedData : dataTableItem,
+        payment_type,
+        cust_id
+      );
+
+      if (dataTableItem != updateDataItemTable) {
+        setDataTableItem(updateDiscountItem);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function getDiscountItem(itemTable, payment_type_params, customer_id) {
+    try {
+      if (itemTable.length == 0) {
+        setDataDiscount(null);
+        setDataItemFree([]);
+        return [];
+      }
+      const payload = {
+        cust_id: customer_id ? customer_id : customerSelected.id,
+        trandate: convertToLocalDate(state.payloadPrimary.trandate),
+        payment_type: payment_type_params
+          ? payment_type_params
+          : state.payloadBilling.paymentoption,
+        sales_order_items: itemTable.map((item) => ({
+          item_id: item.item,
+          itemprocessfamily: item.itemprocessfamily,
+          qty: item.quantity,
+        })),
       };
 
-      if (stateItemTable.item.discount && stateItemTable.item.discount > 0) {
-        initData.discount.push({
-          id: "itemdiscount",
-          type: "Discount Item",
-          discounttype: "nominal",
-          discount: "Discount Price",
-          value: stateItemTable.item.discount,
-          discountvalue: "rp",
-          perunit: "",
-          paymenttype: "",
-          isChecked: false,
-        });
+      const response = await SalesOrderFetch.getCalDiscount(payload);
+      const resData = getResponseHandler(response);
+
+      setDataDiscount(resData);
+
+      if (resData.diskon_group && resData.diskon_group.length > 0) {
+        const discountFreeItem = resData.diskon_group.map((discount) => ({
+          item: "",
+          qtyfree: discount.qtyfree,
+          unitfree: discount?.unitfree || "kg",
+        }));
+
+        setDataItemFree(discountFreeItem);
+      } else {
+        setDataItemFree([]);
       }
 
-      const resAgreement = await SalesOrderFetch.getSoAgreement(
-        item_id,
-        cust_id,
-        qty,
-        trandate
-      );
+      const discountItems = resData?.sales_order_items ?? [];
 
-      const dataAgreement = getResponseHandler(resAgreement);
-      if (dataAgreement && dataAgreement.length > 0) {
-        const discountAgreement = dataAgreement.map((agreement) => {
-          return {
-            id: agreement.agreementid,
-            type:
-              agreement.paymenttype != ""
-                ? "Discount Payment"
-                : "Discount Agreement",
-            discounttype: agreement.discounttype,
-            discount: agreement.agreementname,
-            value: agreement.discountvalue,
-            discountvalue:
-              agreement.discounttype == "nominal"
-                ? "rp"
-                : agreement.discounttype == "percent"
-                ? "%"
-                : "",
-            perunit: agreement.perunit,
-            paymenttype: agreement?.paymenttype || "",
-            isChecked: false,
-          };
-        });
-        initData.discount.push(...discountAgreement);
-      }
+      const updateItemTable = itemTable.map((item) => {
+        const findItemDiscount = discountItems.find(
+          (discount) => discount.item_id === item.item
+        );
 
-      // const resAgreementGroup = await SalesOrderFetch.getSoAgreementGroup(
-      //   item_categories,
-      //   cust_id,
-      //   qty,
-      //   trandate
-      // );
+        const totalamount = item.quantity * item.rate;
+        const totaldiscount = findItemDiscount?.total_diskon || 0;
+        const subtotal = totalamount - totaldiscount;
 
-      // const dataAgreementGroup = getResponseHandler(resAgreementGroup);
-
-      // if (
-      //   dataAgreementGroup &&
-      //   dataAgreementGroup[itemSelected.itemprocessfamily]
-      // ) {
-      //   const discountAgreementGroup =
-      //     dataAgreementGroup[itemSelected.itemprocessfamily];
-
-      //   initData.discount.push({
-      //     id: discountAgreementGroup.agreementid,
-      //     type: "Discount Agreement",
-      //     discounttype:
-      //       discountAgreementGroup.unitfree == "" ? "nominal" : "freeitem",
-      //     discount: discountAgreementGroup.agreementname,
-      //     value: discountAgreementGroup.discountvalue,
-      //     discountvalue: discountAgreementGroup?.unitfree == "" ? "rp" : "",
-      //     perunit: discountAgreementGroup.unitfree,
-      //     paymenttype: "",
-      //     isChecked: false,
-      //   });
-      // }
-      return initData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data discount");
-      return null;
-    }
-  }
-
-  function handleDiscountSelected(isChecked, discount, itemid) {
-    let updatedItem = dataTableItem.find((item) => item.item === itemid);
-
-    if (updatedItem) {
-      // Jika dicentang (Checked)
-      if (isChecked) {
-        if (discount.type === "Discount Item") {
-          if (!updatedItem.discount1) {
-            updatedItem = {
-              ...updatedItem,
-              discountname1: discount.discount,
-              discount1: discount.id,
-              discountvalue1: discount.discountvalue,
-              perunit1: discount.perunit,
-              value1: discount.value,
-            };
-          } else return;
-        } else if (discount.type === "Discount Agreement") {
-          if (!updatedItem.discount2) {
-            updatedItem = {
-              ...updatedItem,
-              discountname2: discount.discount,
-              discount2: discount.id,
-              discountvalue2: discount.discountvalue,
-              perunit2: discount.perunit,
-              value2: discount.value,
-            };
-          } else return;
-        } else if (discount.type === "Discount Payment") {
-          if (!updatedItem.discount3) {
-            updatedItem = {
-              ...updatedItem,
-              discountname3: discount.discount,
-              discount3: discount.id,
-              discountvalue3: discount.discountvalue,
-              perunit3: discount.perunit,
-              value3: discount.value,
-            };
-          } else return;
-        }
-      }
-
-      // Jika tidak dicentang (Unchecked)
-      else {
-        if (
-          discount.type === "Discount Item" &&
-          updatedItem.discount1 === discount.id
-        ) {
-          updatedItem = {
-            ...updatedItem,
-            discountname1: "",
-            discount1: "",
-            discountvalue1: "",
-            perunit1: "",
-            value1: 0,
-          };
-        } else if (
-          discount.type === "Discount Agreement" &&
-          updatedItem.discount2 === discount.id
-        ) {
-          updatedItem = {
-            ...updatedItem,
-            discountname2: "",
-            discount2: "",
-            discountvalue2: "",
-            perunit2: "",
-            value2: 0,
-          };
-        } else if (
-          discount.type === "Discount Payment" &&
-          updatedItem.discount3 === discount.id
-        ) {
-          updatedItem = {
-            ...updatedItem,
-            discountname3: "",
-            discount3: "",
-            discountvalue3: "",
-            perunit3: "",
-            value3: 0,
-          };
-        } else return;
-      }
-
-      // Update item ke table
-      const updatedDataTableItem = dataTableItem.map((item) =>
-        item.item === itemid ? updatedItem : item
-      );
-      setDataTableItem(updatedDataTableItem);
-
-      // Update status isChecked di discountItems
-      const updatedDiscountItems = discountItems.map((item) => {
-        if (item.id === itemid) {
-          return {
-            ...item,
-            discount: item.discount.map((dis) => {
-              if (dis.id === discount.id) {
-                return {
-                  ...dis,
-                  isChecked,
-                };
-              }
-              return dis;
-            }),
-          };
-        }
-        return item;
+        return {
+          ...item,
+          agreementcode: findItemDiscount?.agreementcode || "",
+          totaldiscount,
+          totalamount,
+          subtotal,
+        };
       });
-      setDiscountItems(updatedDiscountItems);
+
+      return updateItemTable;
+    } catch (error) {
+      console.error("Error getting discount:", error);
+      throw error;
     }
   }
-
-  const getValueDiscount = (discountValue, value, totalamount) => {
-    switch (discountValue) {
-      case "rp":
-        return value;
-      case "%":
-        return (totalamount * value) / 100;
-      default:
-        return 0;
-    }
-  };
 
   useEffect(() => {
-    let updatedDataTableItem = dataTableItem.map((dataItem) => {
-      let data = { ...dataItem };
-
-      data.totalamount = data.quantity * data.rate;
-
-      const discount1 = getValueDiscount(
-        data.discountvalue1,
-        data.value1,
-        data.totalamount
-      );
-      const discount2 = getValueDiscount(
-        data.discountvalue2,
-        data.value2,
-        data.totalamount
-      );
-      const discount3 = getValueDiscount(
-        data.discountvalue3,
-        data.value3,
-        data.totalamount
-      );
-
-      const totaldiscount = discount1 + discount2 + discount3;
-
-      data.subtotal = data.totalamount - totaldiscount;
-      data.totaldiscount = totaldiscount;
-
-      if (["kg", "bal"].includes(data.perunit2?.toLowerCase?.())) {
-        data.qtyfree = data.value2;
-        data.unitfree = data.perunit2;
-      }
-
-      if (data.taxable) {
-        data.taxvalue = Math.ceil(
-          (data.subtotal / (1 + data.taxrate / 100)) * (data.taxrate / 100)
-        );
-      }
-
-      return data;
-    });
-
-    // Cek apakah ada perubahan signifikan sebelum update
-    const isChanged =
-      JSON.stringify(updatedDataTableItem) !== JSON.stringify(dataTableItem);
-    if (isChanged) {
-      setDataTableItem(updatedDataTableItem);
+    if (!dataTableItem || dataTableItem.length === 0) {
+      setSummary({
+        subtotalbruto: 0,
+        subtotal: 0,
+        discounttotal: 0,
+        total: 0,
+        taxtotal: 0,
+      });
+      return;
     }
 
-    // Hitung summary
-    const subtotalbruto = updatedDataTableItem.reduce(
-      (acc, curr) => acc + curr.totalamount,
-      0
-    );
-    const subtotal = updatedDataTableItem.reduce(
-      (acc, curr) => acc + curr.subtotal,
-      0
-    );
-    const discounttotal = updatedDataTableItem.reduce(
-      (acc, curr) => acc + curr.totaldiscount,
-      0
+    const { totalDiscount, totalAmount, subTotal } = dataTableItem.reduce(
+      (acc, item) => {
+        acc.totalDiscount += item.totaldiscount || 0;
+        acc.totalAmount += item.totalamount || 0;
+        acc.subTotal += item.subtotal || 0;
+        return acc;
+      },
+      {
+        totalDiscount: 0,
+        totalAmount: 0,
+        subTotal: 0,
+      }
     );
 
-    const setSummary = {
-      subtotalbruto,
-      discounttotal,
-      subtotal,
+    setSummary({
+      subtotalbruto: totalAmount,
+      subtotal: subTotal,
+      discounttotal: totalDiscount,
+      total: subTotal,
       taxtotal: 0,
-      total: subtotal,
-    };
-
-    dispatch({ type: "SET_SUMMARY", payload: setSummary });
+    });
   }, [dataTableItem]);
 
   function handleDeleteTableItem(record) {
-    setDataTableItem((prev) =>
-      prev.filter((item) => item.lineid !== record.lineid)
+    const updateData = dataTableItem.filter(
+      (item) => item.item !== record.item
     );
+    setDataTableItem(updateData);
 
-    setDiscountItems((prev) =>
-      prev.filter((discount) => discount.id !== record.item)
-    );
+    updateDataItemTable(updateData);
   }
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
     try {
+      if (dataTableItem.length <= 0) {
+        throw new Error("Please enter order items");
+      }
+
+      dataItemFree.forEach((item) => {
+        if (!item.item) {
+            throw new Error("Please enter free item")
+        }
+      })
+
       let payloadToInsert = {
         ...state.payloadPrimary,
-        ...state.payloadSummary,
         ...state.payloadBilling,
         ...state.payloadShipping,
+        ...summary,
+        sales_order_items: dataTableItem.map((item) => {
+          delete item.itemprocessfamily;
+          delete item.displayname;
+          delete item.itemid;
+
+          return item
+        }),
+        sales_order_item_free: dataItemFree,
       };
 
       delete payloadToInsert.companyname;
       delete payloadToInsert.salesrep;
 
-      if (dataTableItem.length <= 0) {
-        throw new Error("Please enter order items");
-      }
-
-      const sales_order_items = dataTableItem.map((data) => {
-        return {
-          item: data.item,
-          quantity: data.quantity,
-          units: data.units,
-          description: data.description,
-          rate: data.rate,
-          discount1: "",
-          value1: data.value1,
-          discountvalue1: data.discountvalue1,
-          perunit1: data.perunit1,
-          discount2: data.discount2,
-          value2: data.value2,
-          discountvalue2: data.discountvalue2 == "rp" ? 0 : 1,
-          perunit2: data.perunit2,
-          discount3: data.discount3,
-          value3: data.value3,
-          discountvalue3: data.discountvalue3 == "rp" ? 0 : 1,
-          perunit3: data.perunit3,
-          subtotal: data.subtotal,
-          totalamount: data.totalamount,
-          qtyfree: data.qtyfree,
-          unitfree: data.unitfree == "kg" ? 0 : 1,
-          taxable: data.taxable,
-          taxrate: data.taxrate,
-          totaldiscount: data.totaldiscount,
-        };
-      });
-
-      payloadToInsert = { ...payloadToInsert, sales_order_items };
+      console.log(payloadToInsert)
 
       if (!payloadToInsert.entity) {
         throw new Error("Customer is required");
@@ -908,54 +570,12 @@ export default function Enter() {
     }
   };
 
-  const [customerInfo, setCustomerInfo] = useState({
-    customer: "",
-    message: [],
-  });
-
-  async function checkStatusCustomer(id, name) {
-    try {
-      const response = await SalesOrderFetch.checkSoVrify(id);
-      if (response.status_code != 404) {
-        setCustomerInfo({
-          customer: name,
-          message: response.errors,
-        });
-      } else {
-        setCustomerInfo({
-          customer: "",
-          message: [],
-        });
-      }
-    } catch (error) {
-      notify("error", "Failed", "Failed get customer information");
-    }
-  }
-
-  function showCustomerInfo() {
-    customerInfo.message.forEach((info, i) => {
-      const timeout = i > 0 ? 300 : 0;
-      setTimeout(() => {
-        notify("info", "Customer ID : " + customerInfo.customer, info);
-      }, timeout);
-    });
-  }
-
   return (
     <>
-      {customerInfo.message.length > 0 && (
-        <FloatButton
-          onClick={() => {
-            showCustomerInfo();
-          }}
-          style={!isLargeScreen ? { width: "32px", height: "32px" } : {}}
-          shape="circle"
-          badge={{ count: customerInfo.message.length, size: "small" }}
-          icon={<InfoCircleOutlined />}
-        />
-      )}
-      <Layout pageTitle="">
+      <Layout>
+        {contextNotify}
         <div className="w-full flex flex-col gap-4">
+          {/* {headline} */}
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
               Sales Order Enter
@@ -970,6 +590,8 @@ export default function Enter() {
               {isLargeScreen ? "List" : ""}
             </Button>
           </div>
+
+          {/* {nav action button} */}
           <div className="w-full flex flex-col gap-4">
             <div className="w-full flex flex-col lg:flex-row justify-between items-start">
               <div className="w-full lg:w-1/2 flex gap-1"></div>
@@ -984,6 +606,8 @@ export default function Enter() {
               </div>
             </div>
           </div>
+
+          {/* {customer} */}
           <div className="w-full flex flex-col gap-8">
             <div className="w-full flex flex-col gap-2">
               <Divider
@@ -1012,37 +636,10 @@ export default function Enter() {
                       showSearch
                       placeholder="Select a customer"
                       optionFilterProp="label"
-                      value={customerSelected}
+                      value={customerSelected?.value || undefined}
                       onChange={(_, customer) => {
-                        setCustomerSelected(customer);
-                        if (customer.id) {
-                          checkStatusCustomer(customer.id, customer.customerid);
-                        }
-                        setDataTableItem([]);
-                        setDiscountItems([]);
-                        dispatch({ type: "RESET" });
-                        dispatch({
-                          type: "SET_PRIMARY",
-                          payload: {
-                            entity: customer.id,
-                            companyname: customer.companyname,
-                            salesrep: customer.salesrep,
-                          },
-                        });
-                        dispatch({
-                          type: "SET_SHIPPING",
-                          payload: {
-                            shippingaddress: customer.addressee,
-                          },
-                        });
-                        dispatch({
-                          type: "SET_BILLING",
-                          payload: {
-                            term: customer.terms,
-                          },
-                        });
+                        handleCustomerChange(customer);
                       }}
-                      //   onSearch={{}}
                       options={dataCustomer}
                       style={{ width: "100%" }}
                     />
@@ -1051,6 +648,8 @@ export default function Enter() {
               </div>
             </div>
           </div>
+
+          {/* {primary} */}
           <InputForm
             title="primary"
             type="SET_PRIMARY"
@@ -1099,6 +698,8 @@ export default function Enter() {
               dispatch({ type, payload });
             }}
           />
+
+          {/* {shipping} */}
           <InputForm
             title="shipping"
             type="SET_SHIPPING"
@@ -1122,6 +723,8 @@ export default function Enter() {
               dispatch({ type, payload });
             }}
           />
+
+          {/* {billing} */}
           <InputForm
             title="billing"
             type="SET_BILLING"
@@ -1144,8 +747,13 @@ export default function Enter() {
             aliases={salesOrderAliases.billing}
             onChange={(type, payload) => {
               dispatch({ type, payload });
+
+              if (dataTableItem.length > 0) {
+                updateDataItemTable(null, payload.paymentoption);
+              }
             }}
           />
+
           <div className="w-full flex flex-col gap-8">
             <div className="w-full flex flex-col gap-2">
               <Divider
@@ -1171,145 +779,74 @@ export default function Enter() {
               />
             </div>
           </div>
-          {discountItems && discountItems.length > 0 && (
+
+          {/* {item free} */}
+          {dataItemFree && dataItemFree.length > 0 && (
             <div className="w-full flex flex-col gap-8">
-              <Collapse
-                accordion
-                items={discountItems.map((discountItem) => ({
-                  key: discountItem.id,
-                  label: discountItem.displayname,
-                  children: (
-                    <div className="w-full flex lg:pr-2 flex-col">
-                      <List
-                        size="small"
-                        itemLayout="horizontal"
-                        dataSource={discountItem.discount || []}
-                        header="Discount 1"
-                        renderItem={(item, index) => (
-                          <>
-                            {item.type == "Discount Item" && (
-                              <List.Item>
-                                <Checkbox
-                                  checked={item.isChecked}
-                                  style={{ marginRight: "16px" }}
-                                  onChange={(e) => {
-                                    handleDiscountSelected(
-                                      e.target.checked,
-                                      item,
-                                      discountItem.id
-                                    );
-                                  }}
-                                />
-                                <List.Item.Meta
-                                  title={<p>{item.discount}</p>}
-                                  description={`Type: ${
-                                    item.discounttype
-                                  }, Value: ${
-                                    item.discounttype == "nominal"
-                                      ? "Rp. " + item.value
-                                      : item.discounttype == "percent"
-                                      ? item.value + "%"
-                                      : item.value
-                                  }`}
-                                />
-                              </List.Item>
-                            )}
-                          </>
-                        )}
-                      />
-                      <List
-                        size="small"
-                        itemLayout="horizontal"
-                        dataSource={discountItem.discount || []}
-                        header="Discount 2"
-                        renderItem={(item, index) => (
-                          <>
-                            {item.type == "Discount Agreement" && (
-                              <List.Item>
-                                <Checkbox
-                                  checked={item.isChecked}
-                                  onChange={(e) => {
-                                    handleDiscountSelected(
-                                      e.target.checked,
-                                      item,
-                                      discountItem.id
-                                    );
-                                  }}
-                                  defaultChecked={false}
-                                  style={{ marginRight: "16px" }}
-                                />
-                                <List.Item.Meta
-                                  title={<p>{item.discount}</p>}
-                                  description={`Type: ${
-                                    item.discounttype
-                                  }, Value: ${
-                                    item.discounttype == "nominal"
-                                      ? "Rp. " + item.value
-                                      : item.discounttype == "percent"
-                                      ? item.value + "%"
-                                      : item.value
-                                  }`}
-                                />
-                              </List.Item>
-                            )}
-                          </>
-                        )}
-                      />
-                      <List
-                        size="small"
-                        itemLayout="horizontal"
-                        dataSource={discountItem.discount || []}
-                        header={
-                          <div className="flex justify-start items-center gap-2">
-                            <p>Discount 3</p>
-                            <Tooltip title="Discount is only available when using an eligible payment method.">
-                              <InfoCircleOutlined className="text-sm" />
-                            </Tooltip>
-                          </div>
-                        }
-                        renderItem={(item, index) => (
-                          <>
-                            {item.type == "Discount Payment" && (
-                              <List.Item>
-                                <Checkbox
-                                  checked={item.isChecked}
-                                  disabled={
-                                    item.paymenttype !=
-                                    state.payloadBilling.paymentoption
-                                  }
-                                  onChange={(e) => {
-                                    handleDiscountSelected(
-                                      e.target.checked,
-                                      item,
-                                      discountItem.id
-                                    );
-                                  }}
-                                  defaultChecked={false}
-                                  style={{ marginRight: "16px" }}
-                                />
-                                <List.Item.Meta
-                                  title={<p>{item.discount}</p>}
-                                  description={`Type: ${
-                                    item.discounttype
-                                  }, Value: ${
-                                    item.discounttype == "nominal"
-                                      ? "Rp. " + item.value
-                                      : item.discounttype == "percent"
-                                      ? item.value + "%"
-                                      : item.value
-                                  }, Payment: ${item.paymenttype}`}
-                                />
-                              </List.Item>
-                            )}
-                          </>
-                        )}
-                      />
+              <div className="w-full flex flex-col gap-2">
+                <Divider
+                  style={{
+                    margin: 0,
+                    textTransform: "capitalize",
+                    borderColor: "#1677ff",
+                  }}
+                  orientation="left"
+                >
+                  Item Free
+                </Divider>
+
+                <div className="w-full flex lg:pr-2 flex-col">
+                  <Form layout="vertical">
+                    <div className="w-full flex gap-4 flex-wrap">
+                      {dataItemFree.map((item, i) => (
+                        <Form.Item
+                          key={i}
+                          label={
+                            <span className="capitalize">
+                              Free {item.qtyfree}
+                            </span>
+                          }
+                          name={`freeitem${i}`}
+                          style={{ margin: 0, width: "50%" }}
+                          className="w-full"
+                          labelCol={{ style: { padding: 0 } }}
+                          rules={[
+                            { required: true, message: `Item is required` },
+                          ]}
+                        >
+                          <Select
+                            showSearch
+                            placeholder="Select item free"
+                            optionFilterProp="label"
+                            value={item?.item || undefined}
+                            onChange={(value) => {
+                              setDataItemFree((prev) =>
+                                prev.map((it, idx) =>
+                                  idx === i ? { ...it, item: value } : it
+                                )
+                              );
+                            }}
+                            // options={dataItem}
+                            options={dataItem.filter((data) => {
+                              const diskonGroup =
+                                dataDiscount?.diskon_group || [];
+                              const currentGroup = diskonGroup[i] || {};
+                              return (
+                                currentGroup.itemprocessfamily ===
+                                data.itemprocessfamily
+                              );
+                            })}
+                            style={{ width: "100%" }}
+                          />
+                        </Form.Item>
+                      ))}
                     </div>
-                  ),
-                }))}
-              />
+                  </Form>
+                </div>
+              </div>
             </div>
           )}
+
           <div className="w-full flex flex-col gap-8">
             <div className="w-full flex flex-col gap-2">
               <Divider
@@ -1326,32 +863,20 @@ export default function Enter() {
                 <div className="flex w-full">
                   <p className="w-1/2">Subtotal</p>
                   <p className="w-1/2 text-end">
-                    {formatRupiah(state.payloadSummary.subtotalbruto)}
+                    {formatRupiah(summary.subtotalbruto)}
                   </p>
                 </div>
                 <div className="flex w-full">
                   <p className="w-1/2">Discount Item</p>
                   <p className="w-1/2 text-end">
-                    {formatRupiah(state.payloadSummary.discounttotal)}
+                    {formatRupiah(summary.discounttotal)}
                   </p>
                 </div>
-                {/* <div className="flex w-full">
-                  <p className="w-1/2">Subtotal (After Discount)</p>
-                  <p className="w-1/2 text-end">
-                    {formatRupiah(state.payloadSummary.subtotal)} Incl. PPN
-                  </p>
-                </div> */}
-                {/* <div className="flex w-full">
-                  <p className="w-1/2">Tax Total</p>
-                  <p className="w-1/2 text-end">
-                    {formatRupiah(state.payloadSummary.taxtotal)}
-                  </p>
-                </div> */}
                 <hr className="border-gray-5" />
                 <div className="flex w-full font-semibold">
                   <p className="w-1/2">Total Inc PPN</p>
                   <p className="w-1/2 text-end">
-                    {formatRupiah(state.payloadSummary.total)}
+                    {formatRupiah(summary.total)}
                   </p>
                 </div>
               </div>
@@ -1359,8 +884,18 @@ export default function Enter() {
           </div>
         </div>
       </Layout>
+      {customerInfo.message.length > 0 && (
+        <FloatButton
+          onClick={() => {
+            showCustomerInfo();
+          }}
+          style={!isLargeScreen ? { width: "32px", height: "32px" } : {}}
+          shape="circle"
+          badge={{ count: customerInfo.message.length, size: "small" }}
+          icon={<InfoCircleOutlined />}
+        />
+      )}
       {isLoadingSubmit && <LoadingSpinProcessing />}
-      {contextNotify}
       <Modal
         open={isModalItemOpen}
         onOk={handleModalItemOk}
@@ -1385,7 +920,7 @@ export default function Enter() {
                 <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                   <p>Display Name</p>
                   <Select
-                    value={itemSelected}
+                    value={itemSelected?.value || undefined}
                     showSearch
                     placeholder="Select an item"
                     optionFilterProp="label"
@@ -1399,7 +934,7 @@ export default function Enter() {
                         return;
                       }
 
-                      setItemSelected(item.value);
+                      setItemSelected(item);
 
                       dispatchItemTable({
                         type: "SET_ITEM",
@@ -1407,16 +942,19 @@ export default function Enter() {
                           item: item.id,
                           units: item.unitstype,
                           rate: item.price,
-                          discount: item.discount,
                           displayname: item.displayname,
                           itemprocessfamily: item.itemprocessfamily,
-                          stock: item.stock,
                           itemid: item.itemid,
                         },
                       });
                     }}
                     onSearch={{}}
-                    options={dataItem}
+                    options={dataItem.filter(
+                      (data) =>
+                        !dataTableItem
+                          .map((item) => item.item)
+                          .includes(data.value)
+                    )}
                     style={{ width: "100%" }}
                   />
                 </div>
@@ -1433,7 +971,7 @@ export default function Enter() {
                   isAlias: true,
                   isRead: true,
                   cursorDisable: true,
-                  hidden: true
+                  hidden: true,
                 },
                 {
                   key: "quantity",
@@ -1498,5 +1036,76 @@ export default function Enter() {
         </div>
       </Modal>
     </>
+  );
+}
+
+function TableCustom({ data, keys, aliases, onDelete }) {
+  const columns = [
+    ...keys.map((key) => {
+      if (
+        [
+          "rate",
+          "value1",
+          "value2",
+          "value3",
+          "subtotal",
+          "totalamount",
+          "taxvalue",
+          "totaldiscount",
+        ].includes(key)
+      ) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right", // semua kolom di-align ke kanan
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right", // semua kolom di-align ke kanan
+        };
+      }
+    }),
+    {
+      title: "Action",
+      key: "action",
+      align: "right", // kolom action juga ke kanan
+      render: (_, record) => (
+        <Button type="link" onClick={() => onDelete(record)}>
+          Delete
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      rowKey="item"
+      bordered
+      pagination={false}
+      scroll={{ x: "max-content" }}
+    />
+  );
+}
+
+function DebugState({ state }) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+  return (
+    <pre className="text-xs">
+      {typeof window !== "undefined" ? JSON.stringify(state, null, 2) : null}
+    </pre>
   );
 }

@@ -27,14 +27,15 @@ function Agreement() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1);
+  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
-  const { notify, contextHolder: notificationContextHolder  } = useNotification();
+  const { notify, contextHolder: notificationContextHolder } =
+    useNotification();
 
   const title = "agreement";
 
@@ -45,15 +46,14 @@ function Agreement() {
 
         const response = await AgreementFetch.get(offset, limit, statusFilter);
 
-        const resData = getResponseHandler(response, notify)
+        const resData = getResponseHandler(response, notify);
 
         if (resData) {
-            setDatas(resData.list)
-            setTotalItems(resData.total_items)
+          setDatas(resData.list);
+          setTotalItems(resData.total_items);
         }
-
       } catch (error) {
-        notify('error', 'Error', error?.message || "Internal Server error");
+        notify("error", "Error", error?.message || "Internal Server error");
       } finally {
         setIsloading(false);
       }
@@ -82,6 +82,14 @@ function Agreement() {
     router.push(`/super-admin/master-data/${title}/${record.id}/edit`);
   };
 
+  const formOptions = [
+    { label: "Discount Percentage (%)", value: "1" },
+    { label: "Special Price (Rp)", value: "2" },
+    { label: "Payment Method", value: "3" },
+    { label: "Free Item", value: "4" },
+    { label: "Free Item", value: "5" },
+  ];
+
   const columns = [
     {
       title: "Agreement Code",
@@ -101,7 +109,7 @@ function Agreement() {
       fixed: "left",
       render: (text, record) => (
         <Link href={`/super-admin/master-data/${title}/${record.id}`}>
-          {text || '-'} 
+          {text || "-"}
         </Link>
       ),
       onHeaderCell: () => ({
@@ -112,22 +120,34 @@ function Agreement() {
       }),
     },
     {
-      title: "Category",
-      dataIndex: "category",
-      key: "category",
+      title: "Type",
+      dataIndex: "customform",
+      key: "customform",
       onHeaderCell: () => ({
         style: { minWidth: 100 },
       }),
       onCell: () => ({
         style: { minWidth: 100 },
       }),
+      render: (text) => formOptions.find(form => form.value == text).label,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
       render: (text) => (
-        <Tag className="capitalize" color={text.toLowerCase() === "active" ? "green" : text.toLowerCase() === "pending approval" ? "orange" : "red"}>{text}</Tag>
+        <Tag
+          className="capitalize"
+          color={
+            text.toLowerCase() === "active"
+              ? "green"
+              : text.toLowerCase() === "pending approval"
+              ? "orange"
+              : "red"
+          }
+        >
+          {text}
+        </Tag>
       ),
       onHeaderCell: () => ({
         style: { minWidth: 100 },
@@ -172,7 +192,9 @@ function Agreement() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-          >{isLargeScreen ? 'Edit' : ''}</Button>
+          >
+            {isLargeScreen ? "Edit" : ""}
+          </Button>
           {contextHolder}
         </div>
       ),
@@ -187,82 +209,92 @@ function Agreement() {
 
   return (
     <Layout pageTitle={title}>
-            <div className='w-full flex flex-col gap-4'>
-                <div className='w-full flex justify-between items-center'>
-                    <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Agreement List</p>
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
-                    >
-                        {isLargeScreen ? `New` : ""}
-                    </Button>
-                </div>
-                    <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
-                        <div className='flex gap-2'>
-                        </div>
-                        <div className='flex gap-2'>
-                            <div className='flex flex-col justify-start items-start gap-1'>
-                                <label className='hidden lg:block text-sm font-semibold leading-none'>Status</label>
-                                <Dropdown
-                                    menu={{ items: dropdownItems, onClick: handleStatusChange, style: { textAlign: "right" } }}
-                                    placement="bottomRight"
-                                >
-                                    <Button icon={<FilterOutlined />} style={{ textTransform: "capitalize" }}>
-                                        {isLargeScreen ? (statusFilter == "all" ? "all status" : statusFilter) : ""}
-                                    </Button>
-                                </Dropdown>
-                            </div>  
-                        </div>
-                    </div>
-                {!isLoading ? (
-                    <>
-                        <div>
-                            <Table
-                                rowKey={(record) => record.id}
-                                size="small"
-                                pagination={false}
-                                columns={columns}
-                                dataSource={datas}
-                                scroll={{x: 'max-content'}}
-                                bordered
-                                tableLayout="auto"
-                            />
-                        </div>
-                        <div>
-                            <Pagination
-                                total={totalItems}
-                                defaultPageSize={limit}
-                                defaultCurrent={page}
-                                onChange={(newPage, newLimit) => {
-                                    router.push(
-                                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
-                                    )
-                                }}
-                                size='small'
-                                align={'end'}
-                            />
-                        </div>
-                    </>
-                ) : (
-                    <div className="w-full h-96">                    
-                        <LoadingSpin/>
-                    </div>
-                )}
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex justify-between items-center">
+          <p className="text-xl lg:text-2xl font-semibold text-blue-6">
+            Agreement List
+          </p>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
+          >
+            {isLargeScreen ? `New` : ""}
+          </Button>
+        </div>
+        <div className="w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
+          <div className="flex gap-2"></div>
+          <div className="flex gap-2">
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className="hidden lg:block text-sm font-semibold leading-none">
+                Status
+              </label>
+              <Dropdown
+                menu={{
+                  items: dropdownItems,
+                  onClick: handleStatusChange,
+                  style: { textAlign: "right" },
+                }}
+                placement="bottomRight"
+              >
+                <Button
+                  icon={<FilterOutlined />}
+                  style={{ textTransform: "capitalize" }}
+                >
+                  {isLargeScreen
+                    ? statusFilter == "all"
+                      ? "all status"
+                      : statusFilter
+                    : ""}
+                </Button>
+              </Dropdown>
             </div>
-        {notificationContextHolder}
+          </div>
+        </div>
+        {!isLoading ? (
+          <>
+            <div>
+              <Table
+                rowKey={(record) => record.id}
+                size="small"
+                pagination={false}
+                columns={columns}
+                dataSource={datas}
+                scroll={{ x: "max-content" }}
+                bordered
+                tableLayout="auto"
+              />
+            </div>
+            <div>
+              <Pagination
+                total={totalItems}
+                defaultPageSize={limit}
+                defaultCurrent={page}
+                onChange={(newPage, newLimit) => {
+                  router.push(
+                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
+                  );
+                }}
+                size="small"
+                align={"end"}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-96">
+            <LoadingSpin />
+          </div>
+        )}
+      </div>
+      {notificationContextHolder}
     </Layout>
   );
 }
 
 export default function AgreementPage() {
-    return (
-      <Suspense
-        fallback={
-          <LoadingSpinProcessing/>
-        }
-      >
-        <Agreement/>
-      </Suspense>
-    );
-  }
+  return (
+    <Suspense fallback={<LoadingSpinProcessing />}>
+      <Agreement />
+    </Suspense>
+  );
+}
