@@ -312,6 +312,7 @@ export default function Edit() {
                           isAlias: false,
                           accounting: true,
                           rules: [],
+                          hidden: true
                         },
                       ]}
                       aliases={itemAliases}

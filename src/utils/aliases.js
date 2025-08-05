@@ -34,7 +34,7 @@ export const itemAliases = {
 export const agreementAliases = {
   id: "ID",
   agreementid: "Agreement ID",
-  itemid: "Display Name/Code",
+  itemid: "Item Id",
   baseprice: "Base Price",
   basepriceunit: "Base Price Unit",
   qtymin: "Qty Min",
@@ -46,9 +46,9 @@ export const agreementAliases = {
   paymenttype: "Payment Type",
   qtyfree: "Qty Free",
   perunit: "Per Unit",
-  displayname: "Item Name/Number",
-  price: "Base Price",
-  unitstype: "Unit",
+  displayname: "Display Name",
+  price: "Price",
+  unitstype: "Unit Type",
   agreementcode: "Agreement Code",
   agreementname: "Agreement Name",
   createdby: "Created By",
@@ -56,6 +56,14 @@ export const agreementAliases = {
   customform: "Custom Form",
   effectivedate: "Effective Date",
   enddate: "End Date",
+  itemcategory: "Category",
+  itemfree: "Item Free",
+  unitfree: "Unit Free",
+  discount: "Discount",
+  itemprocessfamily: "Item Category",
+  saleunit: "Sale Unit",
+  stock: "Stock",
+  stockunit: "Stock Unit",
 };
 
 export const salesOrderAliases = {
@@ -278,7 +286,7 @@ export const stockAdjustmentAliases = {
     qty: "Qty",
     units: "Unit",
     price: "Price",
-    onhand: "On Hand"
+    onhand: "On Hand",
   },
 };
 

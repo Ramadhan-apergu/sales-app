@@ -362,22 +362,22 @@ export default function Detail() {
 
   const dataformAgreementGroups = [
     [
-      { key: "id", input: "input", isAlias: false },
-      { key: "agreementid", input: "input", isAlias: false },
-      { key: "itemcategory", input: "input", isAlias: false },
-      { key: "qtymin", input: "input", isAlias: false },
-      { key: "qtymax", input: "input", isAlias: false },
-      { key: "discountnominal", input: "input", isAlias: false },
+      { key: "id", input: "input", isAlias: true, hidden: true },
+      { key: "agreementid", input: "input", isAlias: true, hidden: true },
+      { key: "itemcategory", input: "input", isAlias: true },
+      { key: "qtymin", input: "input", isAlias: true },
+      { key: "qtymax", input: "input", isAlias: true },
+      { key: "discountnominal", input: "input", isAlias: true },
     ],
     [
-      { key: "id", input: "input", isAlias: false },
-      { key: "agreementid", input: "input", isAlias: false },
-      { key: "itemcategory", input: "input", isAlias: false },
-      { key: "qtymin", input: "input", isAlias: false },
-      { key: "qtymax", input: "input", isAlias: false },
-      { key: "qtyfree", input: "input", isAlias: false },
-      { key: "unitfree", input: "input", isAlias: false },
-      { key: "itemfree", input: "input", isAlias: false },
+      { key: "id", input: "input", isAlias: true, hidden: true },
+      { key: "agreementid", input: "input", isAlias: true, hidden: true },
+      { key: "itemcategory", input: "input", isAlias: true },
+      { key: "qtymin", input: "input", isAlias: true },
+      { key: "qtymax", input: "input", isAlias: true },
+      { key: "qtyfree", input: "input", isAlias: true },
+      { key: "unitfree", input: "input", isAlias: true },
+      { key: "itemfree", input: "input", isAlias: true },
     ],
   ];
 
@@ -459,7 +459,7 @@ export default function Detail() {
                       { key: "customform", input: "input", isAlias: true },
                       { key: "agreementcode", input: "input", isAlias: true },
                       { key: "agreementname", input: "input", isAlias: true },
-                      { key: "effectivedate", input: "input", isAlias: false },
+                      { key: "effectivedate", input: "input", isAlias: true },
                       { key: "enddate", input: "input", isAlias: true },
                       { key: "status", input: "input", isAlias: true },
                       { key: "description", input: "text", isAlias: true },
@@ -503,7 +503,7 @@ export default function Detail() {
                             ? dataformAgreementGroups[0]
                             : dataformAgreementGroups[1]
                         }
-                        aliases={customerAliases}
+                        aliases={agreementAliases}
                       />
                       <div className="w-full flex flex-col gap-4">
                         <Divider

@@ -341,7 +341,7 @@ export default function AgreementNew() {
   }, []);
 
   const [payloadCustomForm, setPayloadCustomForm] = useState({
-    customform: "1",
+    customform: "2",
   });
 
   const [payloadGeneral, setPayloadGeneral] = useState({
@@ -892,11 +892,11 @@ export default function AgreementNew() {
   };
 
   const formOptions = [
-    { label: "Discount Percentage (%)", value: "1" },
+    // { label: "Discount Percentage (%)", value: "1" },
     { label: "Special Price (Rp)", value: "2" },
     { label: "Payment Method", value: "3" },
-    { label: "Free Item", value: "4" },
-    { label: "Discount Group", value: "5" },
+    // { label: "Free Item", value: "4" },
+    { label: "Free Item", value: "5" },
   ];
 
   function handleSelectItem(record) {
@@ -1137,7 +1137,7 @@ export default function AgreementNew() {
                 </div>
               ) : (
                 <div className="w-full flex flex-col gap-4">
-                  <div className="flex justify-end gap-2 items-center">
+                  {/* <div className="flex justify-end gap-2 items-center">
                     <Switch
                       size="small"
                       checked={isPayloadGroupItem}
@@ -1153,8 +1153,55 @@ export default function AgreementNew() {
                       }}
                     />
                     <p className="font-semibold">Free Item Type</p>
-                  </div>
-                  {!isPayloadGroupItem ? (
+                  </div> */}
+                  <InputForm
+                    title="agreement groups (Items)"
+                    type="group"
+                    payload={payloadGroup}
+                    data={[
+                      {
+                        key: "itemcategory",
+                        input: "select",
+                        options: itemprocessfamilyOptions,
+                        isAlias: true,
+                        rules: [{ required: true, message: "is required!" }],
+                      },
+                      {
+                        key: "qtymin",
+                        input: "number",
+                        isAlias: true,
+                        rules: [{ required: true, message: "is required!" }],
+                      },
+                      {
+                        key: "qtymax",
+                        input: "number",
+                        isAlias: true,
+                        rules: [{ required: true, message: "is required!" }],
+                      },
+                      {
+                        key: "qtyfree",
+                        input: "number",
+                        isAlias: true,
+                        rules: [{ required: true, message: "is required!" }],
+                      },
+                      {
+                        key: "unitfree",
+                        input: "select",
+                        options: unitOptions,
+                        isAlias: true,
+                        rules: [{ required: true, message: "is required!" }],
+                      },
+                      {
+                        key: "itemfree",
+                        input: "select",
+                        options: dataItem,
+                        isAlias: true,
+                      },
+                    ]}
+                    aliases={agreementAliases}
+                    onChange={handleChangePayload}
+                  />
+                  {/* {!isPayloadGroupItem ? (
                     <InputForm
                       title="agreement groups (Price)"
                       type="group"
@@ -1237,7 +1284,7 @@ export default function AgreementNew() {
                       aliases={agreementAliases}
                       onChange={handleChangePayload}
                     />
-                  )}
+                  )} */}
                   <GroupItemList category={payloadGroup.itemcategory} />
                 </div>
               )}
