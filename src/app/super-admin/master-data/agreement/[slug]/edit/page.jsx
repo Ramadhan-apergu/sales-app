@@ -992,11 +992,11 @@ export default function AgreementEdit() {
   };
 
   const formOptions = [
-    { label: "Discount Percentage (%)", value: "1" },
+    // { label: "Discount Percentage (%)", value: "1" },
     { label: "Special Price (Rp)", value: "2" },
     { label: "Payment Method", value: "3" },
-    { label: "Free Item", value: "4" },
-    { label: "Discount Group", value: "5" },
+    // { label: "Free Item", value: "4" },
+    { label: "Free Item", value: "5" },
   ];
 
   function handleSelectItem(record) {
@@ -1268,7 +1268,7 @@ export default function AgreementEdit() {
                       </div>
                     ) : (
                       <div className="w-full flex flex-col gap-4">
-                        <div className="flex justify-end gap-2 items-center">
+                        {/* <div className="flex justify-end gap-2 items-center">
                           <Switch
                             size="small"
                             checked={isPayloadGroupItem}
@@ -1284,7 +1284,7 @@ export default function AgreementEdit() {
                             }}
                           />
                           <p className="font-semibold">Free Item Type</p>
-                        </div>
+                        </div> */}
                         {!isPayloadGroupItem ? (
                           <InputForm
                             title="agreement groups (Price)"
@@ -1296,12 +1296,14 @@ export default function AgreementEdit() {
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true
                               },
                               {
                                 key: "agreementid",
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true
                               },
                               {
                                 key: "itemcategory",
@@ -1351,12 +1353,14 @@ export default function AgreementEdit() {
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true
                               },
                               {
                                 key: "agreementid",
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true
                               },
                               {
                                 key: "itemcategory",
@@ -1404,7 +1408,7 @@ export default function AgreementEdit() {
                                 key: "itemfree",
                                 input: "select",
                                 options: dataItem,
-                                isAlias: false,
+                                isAlias: true,
                               },
                             ]}
                             aliases={agreementAliases}

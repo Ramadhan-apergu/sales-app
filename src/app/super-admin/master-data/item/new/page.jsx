@@ -198,7 +198,8 @@ export default function CustomerNew() {
                             input: 'number',
                             isAlias: false,
                             accounting: true,
-                            rules: [], // Optional, tidak ada validasi required
+                            rules: [],
+                            hidden: true
                             },
                         ]}
                         aliases={itemAliases}
