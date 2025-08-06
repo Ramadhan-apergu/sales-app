@@ -1,4 +1,3 @@
-// app/sales-outdoor/sales-order/[slug]/page.js
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -6,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Layout from '@/components/salesOutdoor/Layout';
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
 import SalesOrderFetch from '@/modules/salesApi/salesOrder';
-import { Button, Table, Spin, Empty, Divider, Tooltip } from 'antd';
+import { Button, Table, Spin, Empty, Divider, Tooltip, Form, Input } from 'antd';
 
 const formatRupiah = (value) => {
     const num = Number(value);
@@ -192,6 +191,10 @@ export default function SalesOrderDetail() {
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         order.status === 'Fulfilled' 
                           ? 'bg-green-100 text-green-800' 
+                          : order.status === 'Partially Fulfilled'
+                          ? 'bg-orange-100 text-orange-800'
+                          : ['Credit Hold', 'Canceled'].includes(order.status)
+                          ? 'bg-red-100 text-red-800'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
                         {order.status}
@@ -305,11 +308,36 @@ export default function SalesOrderDetail() {
                       bordered
                       size="small"
                       scroll={{ x: 'max-content' }}
-                      tableLayout="auto" // Gunakan auto layout
-                      className="sticky-table-container" // Tambahkan class untuk styling
+                      tableLayout="auto"
+                      className="sticky-table-container"
                     />
                   </div>
                 </div>
+
+                {order.sales_order_item_free && order.sales_order_item_free.length > 0 && (
+                  <div>
+                    <Divider
+                      style={{
+                        margin: 0,
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                      }}
+                      orientation="left"
+                    >
+                      Item Free
+                    </Divider>
+                    <div className="space-y-1 text-sm">
+                       {order.sales_order_item_free.map((item, i) => (
+                        <div key={i} className="flex justify-between border rounded-lg p-2 border-gray-300">
+                          <span className="text-gray-500">Free {item.qtyfree} :</span>
+                          <span className="text-right">
+                            {item.itemcode}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
                   <div className="flex w-full  border rounded-lg p-2 border-gray-300">
@@ -346,7 +374,6 @@ export default function SalesOrderDetail() {
         </div>
       </div>
       
-      {/* Tambahkan styling khusus untuk sticky header */}
       <style jsx global>{`
         .sticky-table-container .ant-table-thead > tr > th[colspan]:not([colspan="1"]) {
           position: sticky;
