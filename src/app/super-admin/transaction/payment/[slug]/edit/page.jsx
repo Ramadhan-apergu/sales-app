@@ -8,6 +8,8 @@ import {
   Divider,
   Empty,
   Form,
+  Input,
+  InputNumber,
   List,
   Modal,
   Select,
@@ -45,7 +47,7 @@ import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { paymentAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
 
-function TableCustom({ data, keys, aliases, onChange }) {
+function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
   const columns = [
     {
       title: "Apply",
@@ -63,7 +65,7 @@ function TableCustom({ data, keys, aliases, onChange }) {
       ),
     },
     ...keys.map((key) => {
-      if (key == "applydate") {
+      if (["applydate"].includes(key)) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
@@ -72,13 +74,43 @@ function TableCustom({ data, keys, aliases, onChange }) {
           render: (text) => <p>{formatDateToShort(text)}</p>,
         };
       } else if (["total", "due", "amount"].includes(key)) {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "right",
-          render: (text) => <p>{formatRupiah(text)}</p>,
-        };
+        if (key == "amount") {
+          return {
+            title: aliases?.[key] || key,
+            dataIndex: key,
+            key: key,
+            align: "right",
+            render: (text, record) => {
+              if (record.ischecked) {
+                return (
+                  <InputNumber
+                    max={Number(record.total)}
+                    size="small"
+                    style={{ width: "100%" }}
+                    value={Number(text)}
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/,/g, "")}
+                    onChange={(value) => {
+                      onChangeAmount(record.invoiceid, value);
+                    }}
+                  />
+                );
+              } else {
+                return <p>{formatRupiah(text)}</p>;
+              }
+            },
+          };
+        } else {
+          return {
+            title: aliases?.[key] || key,
+            dataIndex: key,
+            key: key,
+            align: "right",
+            render: (text) => <p>{formatRupiah(text)}</p>,
+          };
+        }
       } else {
         return {
           title: aliases?.[key] || key,
@@ -377,17 +409,12 @@ export default function Details() {
     let updatedData = state.payloadPaymentApplies;
 
     if (isChecked) {
-      updatedData = [...updatedData, data];
+      updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
     } else {
       updatedData = updatedData.filter(
         (item) => item.invoiceid !== data.invoiceid
       );
     }
-
-    const totalApplied = updatedData.reduce(
-      (sum, item) => sum + (Number(item.amount) || 0),
-      0
-    );
 
     dispatch({
       type: "SET_PAYMENTAPPLY",
@@ -395,19 +422,17 @@ export default function Details() {
     });
 
     dispatch({
-      type: "SET_SUMMARY",
-      payload: {
-        applied: totalApplied,
-        unapplied: (Number(state.payloadSummary.toapply) || 0) - totalApplied,
-      },
-    });
-    dispatch({
       type: "SET_ITEMS",
       payload: state.dataTableItem.map((item) => {
-        if (item.invoiceid == data.invoiceid) {
+        if (item.invoiceid === data.invoiceid) {
+          const updatedAmount = isChecked ? item.amount || 0 : 0;
+          const updatedDue = (Number(item.total) || 0) - updatedAmount;
+
           return {
             ...item,
             ischecked: isChecked,
+            amount: updatedAmount,
+            due: updatedDue,
           };
         } else {
           return item;
@@ -415,6 +440,45 @@ export default function Details() {
       }),
     });
   };
+
+  function handleAmountChange(invoiceid, amount) {
+    const updateDataTable = state.dataTableItem.map((item) => {
+      if (item.invoiceid === invoiceid) {
+        if (!item.ischecked) return item; // prevent editing if not checked
+
+        const updatedAmount = Number(amount) || 0;
+        const updatedDue = (Number(item.total) || 0) - updatedAmount;
+
+        return {
+          ...item,
+          amount: updatedAmount,
+          due: updatedDue,
+        };
+      }
+      return item;
+    });
+
+    const updatedPayloadPaymentApplies = state.payloadPaymentApplies.map(
+      (item) =>
+        item.invoiceid === invoiceid
+          ? {
+              ...item,
+              amount: Number(amount) || 0,
+              due: (Number(item.total) || 0) - (Number(amount) || 0),
+            }
+          : item
+    );
+
+    dispatch({
+      type: "SET_ITEMS",
+      payload: updateDataTable,
+    });
+
+    dispatch({
+      type: "SET_PAYMENTAPPLY",
+      payload: updatedPayloadPaymentApplies,
+    });
+  }
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -477,6 +541,30 @@ export default function Details() {
       setIsLoadingSubmit(false);
     }
   };
+
+  useEffect(() => {
+    const dataInvoiceApply = state.payloadPaymentApplies || [];
+
+    const totalAmount = dataInvoiceApply.reduce(
+      (sum, item) => sum + (Number(item.amount) || 0),
+      0
+    );
+
+    dispatch({
+      type: "SET_PAYMENT",
+      payload: {
+        payment: totalAmount,
+      },
+    });
+
+    dispatch({
+      type: "SET_SUMMARY",
+      payload: {
+        toapply: totalAmount,
+        applied: totalAmount,
+      },
+    });
+  }, [state.payloadPaymentApplies]);
 
   return (
     <>
@@ -622,6 +710,7 @@ export default function Details() {
                         key: "payment",
                         input: "number",
                         isAlias: true,
+                        hidden: true,
                       },
                       {
                         key: "depositedate",
@@ -641,26 +730,26 @@ export default function Details() {
                     aliases={paymentAliases.payment}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
-
-                      const toApply = Number(payload.payment) || 0;
-                      const applied = Number(state.payloadSummary.applied) || 0;
-
-                      dispatch({
-                        type: "SET_SUMMARY",
-                        payload: {
-                          toapply: toApply,
-                          unapplied: toApply - applied,
-                        },
-                      });
                     }}
                   />
-                  <div className="w-full flex flex-col gap-8">
-                    <TableCustom
-                      onChange={handleChecked}
-                      data={state.dataTableItem}
-                      keys={keyTableItem}
-                      aliases={paymentAliases.payment}
-                    />
+                  <div className="w-full flex flex-col gap-2 items-end">
+                    <div className="w-full">
+                      <TableCustom
+                        onChange={handleChecked}
+                        data={state.dataTableItem}
+                        keys={keyTableItem}
+                        aliases={paymentAliases.payment}
+                        onChangeAmount={handleAmountChange}
+                      />
+                    </div>
+                    <div className="w-full lg:w-1/2 xl:w-1/3 flex items-center gap-4">
+                      <p className="text-nowrap">Total Payment</p>
+                      <Input
+                        value={formatRupiah(state.payloadPayment.payment || 0)}
+                        readOnly
+                        style={{ textAlign: "right" }}
+                      />
+                    </div>
                   </div>
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-2">
@@ -685,12 +774,6 @@ export default function Details() {
                           <p className="w-1/2">Applied</p>
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.applied)}
-                          </p>
-                        </div>
-                        <div className="flex w-full font-semibold">
-                          <p className="w-1/2">Unapplied</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.unapplied)}
                           </p>
                         </div>
                       </div>
