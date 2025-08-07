@@ -670,7 +670,7 @@ export default function Enter() {
           {/* {headline} */}
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              Sales Order Enter
+              Detail Sales Order
             </p>
             <Button
               icon={<UnorderedListOutlined />}

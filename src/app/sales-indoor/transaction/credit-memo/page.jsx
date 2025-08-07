@@ -219,13 +219,13 @@ function List() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -261,13 +261,13 @@ function List() {
                 }
                 options={dataCustomer}
                 styles={{
-    popup: {
-      root: {
-        minWidth: 250,
-        whiteSpace: "nowrap",
-      },
-    },
-  }}
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
@@ -296,7 +296,14 @@ function List() {
                   { value: "closed", label: "Closed" },
                   { value: "pending approval", label: "Pending Approval" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 100,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

@@ -123,7 +123,7 @@ export default function Details() {
     payloadPayment: {
       paymentoption: "cash",
       payment: 0,
-      depositedate: 0,
+      depositedate: "",
       bankaccount: "",
     },
     payloadPaymentApplies: [],
@@ -215,7 +215,7 @@ export default function Details() {
       payload: {
         paymentoption: data.paymentoption,
         payment: data.payment,
-        depositedate: formatDateToShort(data.depositedate),
+        depositedate: formatDateToShort(data?.depositedate || null),
         bankaccount: data.bankaccount,
       },
     });

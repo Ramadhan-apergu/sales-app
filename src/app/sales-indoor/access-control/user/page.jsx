@@ -248,7 +248,14 @@ function UserRoles() {
                   { value: "active", label: "Active" },
                   { value: "inactive", label: "Inactive" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 250,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

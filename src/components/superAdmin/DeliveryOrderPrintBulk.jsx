@@ -216,7 +216,7 @@ export default function DeliveryOrderPrintBulk({ datas }) {
 
               @media print {
                 .print-do-bulk {
-                  font-size: 0.9rem;
+                  font-size: 0.8rem;
                 }
 
                 @page {
@@ -225,13 +225,13 @@ export default function DeliveryOrderPrintBulk({ datas }) {
 
                 @media print and (max-width: 595px) {
                   .print-do-bulk {
-                    font-size: 0.65rem;
+                    font-size: 0.55rem;
                   }
                 }
 
                 @media print and (min-width: 595px) and (max-width: 842px) {
                   .print-do-bulk {
-                    font-size: 0.775rem;
+                    font-size: 0.675rem;
                   }
                 }
               }
