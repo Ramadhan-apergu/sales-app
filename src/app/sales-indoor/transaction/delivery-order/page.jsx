@@ -309,7 +309,14 @@ function DeliveryOrder() {
                   { value: "open", label: "Open" },
                   { value: "shipped", label: "Shipped" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 100,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

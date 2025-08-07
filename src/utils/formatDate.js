@@ -1,4 +1,5 @@
 export function formatDateToShort(dateString) {
+  if (!dateString) return null;
   const date = new Date(dateString);
 
   const day = date.getDate().toString().padStart(2, "0");
@@ -27,7 +28,20 @@ export function formatDateToShort(dateString) {
 
 export function formatDateWithSepMinus(dateStr) {
   const [day, month, year] = dateStr.split("-");
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   return `${day} ${monthNames[parseInt(month, 10) - 1]} ${year}`;
 }
 
@@ -41,8 +55,7 @@ export function formatDateStartDay(isoString) {
 
     return `${day}-${month}-${year}`;
   } catch (error) {
-    console.error('Parsing date Error: ' + error.message)
-    return ""
+    console.error("Parsing date Error: " + error.message);
+    return "";
   }
 }
-

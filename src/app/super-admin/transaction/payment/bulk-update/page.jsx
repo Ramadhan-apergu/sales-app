@@ -135,7 +135,7 @@ function Payment() {
       ),
     },
     {
-      title: "Date",
+      title: "Payment Date",
       dataIndex: "trandate",
       key: "trandate",
       render: (text) => <p>{formatDateToShort(text)}</p>,

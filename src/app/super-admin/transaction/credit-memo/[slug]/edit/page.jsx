@@ -20,6 +20,7 @@ import {
   CloseOutlined,
   InfoCircleOutlined,
   LeftOutlined,
+  SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 
@@ -43,6 +44,7 @@ import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 import { formatDateToShort } from "@/utils/formatDate";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import { creditMemoAliases } from "@/utils/aliases";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({
   data,
@@ -77,6 +79,22 @@ function TableCustom({
           key: key,
           align: "right",
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
+      } else if (key == "trandate") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{formatDateToShort(text)}</p>,
+        };
+      } else if (["due", "amount", "payment", "rate"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{formatRupiah(text)}</p>,
         };
       } else {
         return {
@@ -245,7 +263,7 @@ export default function Enter() {
 
     setCustomerSelected({
       ...customerSelectedFetch,
-      label: customerSelectedFetch.companyname,
+      label: customerSelectedFetch.customerid,
       value: customerSelectedFetch.id,
     });
 
@@ -383,7 +401,7 @@ export default function Enter() {
   ];
 
   const keyTableItem = [
-    "invoiceid",
+    // "invoiceid",
     "refnum",
     "trandate",
     "due",
@@ -472,7 +490,6 @@ export default function Enter() {
         credit_memo_applies: updateCreditApplies,
         credit_memo_items: updateCreditItems,
       };
-
 
       const response = await CreditMemoFetch.update(slug, payloadToInsert);
 
@@ -724,7 +741,6 @@ export default function Enter() {
       (total, item) => total + (Number(item.amount) || 0),
       0
     );
-
 
     let taxtotal = newDataItem.reduce(
       (total, item) => total + (Number(item.taxamount) || 0),
@@ -978,7 +994,7 @@ export default function Enter() {
                     initialValues={{ customer: customerSelected?.id }}
                   >
                     <Form.Item
-                      label={<span className="capitalize">Customer Name</span>}
+                      label={<span className="capitalize">Customer ID</span>}
                       name="customer"
                       style={{ margin: 0 }}
                       className="w-full"
@@ -1028,6 +1044,7 @@ export default function Enter() {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                hidden: true,
               },
               {
                 key: "trandate",
@@ -1055,15 +1072,17 @@ export default function Enter() {
             data={[
               {
                 key: "unapplied",
-                input: "input",
+                input: "number",
                 isAlias: true,
                 isRead: true,
+                accounting: true,
               },
               {
                 key: "applied",
-                input: "input",
+                input: "number",
                 isAlias: true,
                 isRead: true,
+                accounting: true,
               },
             ]}
             aliases={creditMemoAliases.item}
@@ -1081,7 +1100,7 @@ export default function Enter() {
             onDelete={handleDeleteTableItem}
             data={state.credit_memo_items}
             keys={[
-              "item",
+              //   "item",
               "displayname",
               "quantity",
               "units",

@@ -143,14 +143,12 @@ function SalesOrder() {
       dataIndex: "salesrep",
       key: "salesrep",
     },
-        {
+    {
       title: "Total (After Discount)",
       dataIndex: "amount",
       key: "amount",
-      render: (text) => (
-        <p>{formatRupiahAccounting(text)}</p>
-      ),
-      align: 'right'
+      render: (text) => <p>{formatRupiahAccounting(text)}</p>,
+      align: "right",
     },
     {
       title: "Status",
@@ -315,7 +313,14 @@ function SalesOrder() {
                   { value: "partially paid", label: "Partially Paid" },
                   { value: "paid in full", label: "Paid in Full" },
                 ]}
-                dropdownStyle={{ minWidth: "150px", whiteSpace: "nowrap" }}
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 150,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
