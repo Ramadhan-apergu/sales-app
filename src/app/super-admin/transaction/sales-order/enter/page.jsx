@@ -324,7 +324,7 @@ export default function Enter() {
       notify(
         "error",
         "Error",
-        "Select the payment type first in the billing section"
+        "Select the payment option first in the billing section."
       );
       return;
     }
@@ -509,9 +509,9 @@ export default function Enter() {
 
       dataItemFree.forEach((item) => {
         if (!item.item) {
-            throw new Error("Please enter free item")
+          throw new Error("Please enter free item");
         }
-      })
+      });
 
       let payloadToInsert = {
         ...state.payloadPrimary,
@@ -523,7 +523,7 @@ export default function Enter() {
           delete item.displayname;
           delete item.itemid;
 
-          return item
+          return item;
         }),
         sales_order_item_free: dataItemFree,
       };
@@ -531,7 +531,7 @@ export default function Enter() {
       delete payloadToInsert.companyname;
       delete payloadToInsert.salesrep;
 
-      console.log(payloadToInsert)
+      console.log(payloadToInsert);
 
       if (!payloadToInsert.entity) {
         throw new Error("Customer is required");
@@ -1061,12 +1061,20 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           align: "right", // semua kolom di-align ke kanan
           render: (text) => <p>{formatRupiah(text)}</p>,
         };
+      } else if (["item"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "left", // semua kolom di-align ke kanan
+          render: (text) => <p>{formatRupiah(text)}</p>,
+        };
       } else {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right", // semua kolom di-align ke kanan
+          align: "center", // semua kolom di-align ke kanan
         };
       }
     }),

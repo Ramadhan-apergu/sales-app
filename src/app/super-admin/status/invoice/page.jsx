@@ -367,7 +367,14 @@ function SalesOrder() {
                     { value: "partially paid", label: "Partially Paid" },
                     { value: "paid in full", label: "Paid in Full" },
                   ]}
-                  dropdownStyle={{ minWidth: "150px", whiteSpace: "nowrap" }}
+                  styles={{
+                    popup: {
+                      root: {
+                        minWidth: 150,
+                        whiteSpace: "nowrap",
+                      },
+                    },
+                  }}
                   // dropdownAlign={{ points: ["tr", "br"] }}
                 />
               </div>

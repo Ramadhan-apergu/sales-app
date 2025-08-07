@@ -177,7 +177,7 @@ function DeliveryOrder() {
       render: (_, record) => (
         <div className="flex flex-col justify-center items-center gap-2">
           <Button
-          disabled={record?.shipstatus?.toLowerCase() == 'shipped'}
+            disabled={record?.shipstatus?.toLowerCase() == "shipped"}
             type={"link"}
             size="small"
             icon={<EditOutlined />}
@@ -222,17 +222,16 @@ function DeliveryOrder() {
         shipstatus: status,
         id: [id],
       });
-      console.log(response)
+      console.log(response);
 
       if (response.status_code == 200) {
-        notify('success', 'successfully updated the status ship')
+        notify("success", "successfully updated the status ship");
         setToggleRefetch(!toggleRefetch);
       } else {
         response.errors.forEach((error) => {
-            notify('error', 'Failed', error)
-        })
+          notify("error", "Failed", error);
+        });
       }
-
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");
     } finally {
@@ -316,7 +315,14 @@ function DeliveryOrder() {
                   { value: "open", label: "Open" },
                   { value: "shipped", label: "Shipped" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 100,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

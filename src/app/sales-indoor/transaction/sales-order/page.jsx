@@ -368,7 +368,14 @@ function SalesOrder() {
                   { value: "closed", label: "Closed" },
                   { value: "pending approval", label: "Pending Approval" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 100,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

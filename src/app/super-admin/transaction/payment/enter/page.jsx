@@ -575,9 +575,9 @@ export default function Enter() {
               },
               {
                 key: "depositedate",
-                input: "date",
+                input: "input",
                 isAlias: true,
-                hidden: state.payloadPayment.paymentoption != "giro",
+                hidden: true,
               },
               {
                 key: "bankaccount",

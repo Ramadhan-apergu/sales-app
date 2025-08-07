@@ -131,7 +131,7 @@ function DeliveryOrder() {
 
   const [isStatusUpdate, setIsStatusUpdate] = useState(false);
   const [idsSelected, setIdsSelected] = useState([]);
-  const [isLoadingItemFetch, setIsLoadingFetchItem] = useState(false)
+  const [isLoadingItemFetch, setIsLoadingFetchItem] = useState(false);
 
   const columns = [
     {
@@ -268,46 +268,11 @@ function DeliveryOrder() {
   };
 
   const handleSelect = async (id, checked) => {
-    setIsLoadingFetchItem(true);
-    if (checked) {
-      setIdsSelected((prev) => [...prev, id]);
+    try {
+      setIsLoadingFetchItem(true);
+      if (checked) {
+        setIdsSelected((prev) => [...prev, id]);
 
-      const response = await FullfillmentFetch.getById(id);
-      let resData = getByIdResponseHandler(response);
-
-      if (resData) {
-        const promisesItem = resData.fulfillment_items.map(
-          async (itemFullfil) => {
-            const responseItem = await ItemFetch.getById(itemFullfil.item);
-            let resDataItem = getByIdResponseHandler(responseItem);
-
-            return {
-              ...itemFullfil,
-              itemid: resDataItem.itemid,
-              displayname: resDataItem.displayname,
-            };
-          }
-        );
-
-        const fulfillmentItems = await Promise.all(promisesItem);
-        resData = { ...resData, fulfillment_items: fulfillmentItems };
-
-        setDoDetailDatas((prev) => [...prev, resData]);
-      }
-    } else {
-      setIdsSelected((prev) => prev.filter((item) => item !== id));
-      setDoDetailDatas((prev) => prev.filter((item) => item.id !== id));
-    }
-    setIsLoadingFetchItem(false);
-  };
-
-  const handleSelectAll = async (checked) => {
-    setIsLoadingFetchItem(true);
-    if (checked) {
-      const allIds = datas.map((item) => item.id);
-      setIdsSelected(allIds);
-
-      const promises = allIds.map(async (id) => {
         const response = await FullfillmentFetch.getById(id);
         let resData = getByIdResponseHandler(response);
 
@@ -326,16 +291,61 @@ function DeliveryOrder() {
           );
 
           const fulfillmentItems = await Promise.all(promisesItem);
-          return { ...resData, fulfillment_items: fulfillmentItems };
-        }
-        setIsLoadingFetchItem(false);
-      });
+          resData = { ...resData, fulfillment_items: fulfillmentItems };
 
-      const datasAll = await Promise.all(promises);
-      setDoDetailDatas(datasAll);
-    } else {
-      setIdsSelected([]);
-      setDoDetailDatas([]);
+          setDoDetailDatas((prev) => [...prev, resData]);
+        }
+      } else {
+        setIdsSelected((prev) => prev.filter((item) => item !== id));
+        setDoDetailDatas((prev) => prev.filter((item) => item.id !== id));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoadingFetchItem(false);
+    }
+  };
+
+  const handleSelectAll = async (checked) => {
+    setIsLoadingFetchItem(true);
+    try {
+      if (checked) {
+        const allIds = datas.map((item) => item.id);
+        setIdsSelected(allIds);
+
+        const promises = allIds.map(async (id) => {
+          const response = await FullfillmentFetch.getById(id);
+          let resData = getByIdResponseHandler(response);
+
+          if (resData) {
+            const promisesItem = resData.fulfillment_items.map(
+              async (itemFullfil) => {
+                const responseItem = await ItemFetch.getById(itemFullfil.item);
+                let resDataItem = getByIdResponseHandler(responseItem);
+
+                return {
+                  ...itemFullfil,
+                  itemid: resDataItem.itemid,
+                  displayname: resDataItem.displayname,
+                };
+              }
+            );
+
+            const fulfillmentItems = await Promise.all(promisesItem);
+            return { ...resData, fulfillment_items: fulfillmentItems };
+          }
+        });
+
+        const datasAll = await Promise.all(promises);
+        setDoDetailDatas(datasAll);
+      } else {
+        setIdsSelected([]);
+        setDoDetailDatas([]);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoadingFetchItem(false);
     }
   };
 
@@ -359,7 +369,9 @@ function DeliveryOrder() {
             <Button
               disabled={doDetailDatas.length == 0 || isLoadingItemFetch}
               type="primary"
-              icon={isLoadingItemFetch ? <LoadingOutlined/> : <PrinterOutlined />}
+              icon={
+                isLoadingItemFetch ? <LoadingOutlined /> : <PrinterOutlined />
+              }
               onClick={() => handlePrint()}
             >
               {isLargeScreen ? `Print` : ""}
@@ -411,7 +423,14 @@ function DeliveryOrder() {
                   { value: "open", label: "Open" },
                   { value: "shipped", label: "Shipped" },
                 ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 100,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

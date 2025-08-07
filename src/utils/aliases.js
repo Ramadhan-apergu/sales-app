@@ -237,7 +237,7 @@ export const paymentAliases = {
     total: "Total",
     due: "Amount Due",
     amount: "Payment",
-    depositedate: "Deposite Date",
+    depositedate: "Deposited Date",
     bankaccount: "Bank Account",
   },
 };
