@@ -121,7 +121,7 @@ export default function Edit() {
 
   const unitstypeOptions = [
     { label: "KG", value: "kg" },
-    { label: "Bal", value: "bal" },
+    // { label: "Bal", value: "bal" },
   ];
 
   const itemprocessfamilyOptions = [
