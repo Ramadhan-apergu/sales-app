@@ -60,7 +60,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
                 {data.notes}
               </p>
             </div>
-            <br />
+            {/* <br />
             <div className="w-full flex">
               <p className="w-3/12 break-words whitespace-normal font-semibold">
                 Sales :
@@ -68,7 +68,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
               <p className="w-8/12 border break-words whitespace-normal">
                 {data.salesrep || ""}
               </p>
-            </div>
+            </div> */}
           </div>
           <div className="w-1/2">
             <div className="w-full flex justify-end">
