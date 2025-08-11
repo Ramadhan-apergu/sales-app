@@ -64,6 +64,12 @@ const formatRupiah = (value) => {
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      render: (text, record, index) => index + 1, // nomor urut mulai dari 1
+    },
     ...keys.map((key) => {
       if (
         [

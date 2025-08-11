@@ -22,7 +22,7 @@ import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { soReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
-import { PiExport } from "react-icons/pi";
+import { ExportOutlined } from "@ant-design/icons";
 import { exportJSONToExcel } from "@/utils/export";
 
 const DEFAULT_PAGE = 1;
@@ -171,7 +171,7 @@ function SalesOrder() {
   ];
 
   async function handleExport() {
-    exportJSONToExcel(datas, soReportAliases, 'so-report.xlsx')
+    exportJSONToExcel(datas, soReportAliases, "so-report.xlsx");
   }
 
   return (
@@ -181,7 +181,11 @@ function SalesOrder() {
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
             Sales Order Report
           </p>
-          <Button onClick={handleExport} disabled={!datas || datas.length == 0} icon={<PiExport/>}>
+          <Button
+            onClick={handleExport}
+            disabled={!datas || datas.length == 0}
+            icon={<ExportOutlined />}
+          >
             Export
           </Button>
         </div>

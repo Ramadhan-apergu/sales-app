@@ -331,8 +331,8 @@ export const productReportAliases = {
   itemid: "Kode Barang",
   qty_belum: "Qty Belum",
   qty_sisa: "Qty Sisa",
-  qty_stok: "Qty Stok",
-  unit: "Satuan",
+  qty_stock: "Qty Stok",
+  satuan: "Satuan",
   no: "No",
 };
 
