@@ -118,7 +118,7 @@ function SalesOrder() {
           key: key,
           render: (text) => <p>{formatDateWithSepMinus(text)}</p>,
         };
-      } else if (["harga", "jumlah"].includes(key)) {
+      } else if (["harga", "jumlah", "dpp", "ppn"].includes(key)) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,

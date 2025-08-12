@@ -74,7 +74,7 @@ function TableCustom({
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
         };
       } else if (key == "trandate") {
@@ -82,7 +82,7 @@ function TableCustom({
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
           render: (text) => <p>{formatDateToShort(text)}</p>,
         };
       } else if (["due", "amount", "payment", "rate", "taxamount"].includes(key)) {
@@ -90,7 +90,7 @@ function TableCustom({
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "left",
           render: (text) => <p>{formatRupiah(text)}</p>,
         };
       } else {
@@ -98,7 +98,7 @@ function TableCustom({
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
         };
       }
     }),
@@ -1106,7 +1106,7 @@ export default function Enter() {
                   disabled: !stateItemTable.tax.taxable,
                 },
               ]}
-              aliases={[]}
+              aliases={creditMemoAliases.item}
               onChange={(type, payload) => {
                 dispatchItemTable({ type, payload });
               }}
