@@ -133,7 +133,7 @@ function SalesOrder() {
           key: key,
           render: (text) => <p>{formatDateWithSepMinus(text)}</p>,
         };
-      } else if (["harga_satuan", "diskon_satuan", "jumlah"].includes(key)) {
+      } else if (["harga_satuan", "diskon_satuan", "jumlah", "dpp", "ppn"].includes(key)) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
