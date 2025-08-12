@@ -18,6 +18,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import ItemFetch from "@/modules/salesApi/item";
 import Search from "antd/es/input/Search";
 import AgreementFetch from "@/modules/salesApi/agreement";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function SelectItem({ onselect }) {
   const isLargeScreen = useBreakpoint("lg");
@@ -273,16 +274,28 @@ function GroupItemList({ category }) {
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (["price", "discountnominal"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "center",
+          render: (text) => formatRupiah(text),
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "center",
+        };
+      }
+    }),
     {
       title: "Action",
       key: "action",
-      align: "right", // kolom action juga ke kanan
+      align: "center", // kolom action juga ke kanan
       render: (_, record) => (
         <Button type="link" onClick={() => onDelete(record)}>
           Delete
@@ -855,7 +868,14 @@ export default function AgreementNew() {
         },
       };
 
-      const { customform, agreementcode, agreementname, status } = payload;
+      const {
+        customform,
+        agreementcode,
+        agreementname,
+        status,
+        effectivedate,
+        enddate,
+      } = payload;
 
       if (!customform) {
         notify("error", "Error", "Customer Form is required");
@@ -875,6 +895,29 @@ export default function AgreementNew() {
       if (!status) {
         notify("error", "Error", "Status required");
         return null;
+      }
+
+      if ((effectivedate && !enddate) || (!effectivedate && enddate)) {
+        notify(
+          "error",
+          "Error",
+          "Both Effective Date and End Date must be filled together."
+        );
+        return null;
+      }
+
+      if (effectivedate && enddate) {
+        const start = new Date(effectivedate);
+        const end = new Date(enddate);
+
+        if (end < start) {
+          notify(
+            "error",
+            "Error",
+            "End Date cannot be earlier than Effective Date."
+          );
+          return null;
+        }
       }
 
       const response = await AgreementFetch.add(payload);
@@ -1118,8 +1161,9 @@ export default function AgreementNew() {
                     orientation="left"
                   >
                     {
-                      formOptions[parseInt(payloadCustomForm.customform) - 1]
-                        .label
+                      formOptions.find(
+                        (form) => form.value == payloadCustomForm.customform
+                      ).label
                     }{" "}
                     Detail
                   </Divider>
@@ -1131,7 +1175,9 @@ export default function AgreementNew() {
                   <TableCustom
                     onDelete={handleDeleteDetail}
                     data={payloadDetail}
-                    keys={keys[parseInt(payloadCustomForm.customform) - 1]}
+                    keys={keys[
+                      parseInt(payloadCustomForm.customform) - 1
+                    ].filter((key) => !["id"].includes(key))}
                     aliases={agreementAliases}
                   />
                 </div>
@@ -1155,7 +1201,7 @@ export default function AgreementNew() {
                     <p className="font-semibold">Free Item Type</p>
                   </div> */}
                   <InputForm
-                    title="agreement groups (Items)"
+                    title="Free Items"
                     type="group"
                     payload={payloadGroup}
                     data={[

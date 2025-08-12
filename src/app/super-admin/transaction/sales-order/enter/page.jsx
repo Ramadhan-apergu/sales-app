@@ -22,6 +22,7 @@ import {
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import { Button, Divider, FloatButton, Form, Modal, Select, Table } from "antd";
+import { Input } from "antd/lib";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
@@ -222,6 +223,7 @@ export default function Enter() {
   ];
 
   const keyTableItem = [
+    "itemid",
     "displayname",
     "quantity",
     "units",
@@ -917,46 +919,52 @@ export default function Enter() {
                 >
                   Item
                 </Divider>
-                <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                  <p>Display Name</p>
-                  <Select
-                    value={itemSelected?.value || undefined}
-                    showSearch
-                    placeholder="Select an item"
-                    optionFilterProp="label"
-                    onChange={(_, item) => {
-                      const isDuplicate = dataTableItem.some(
-                        (tableItem) => tableItem.item === item.value
-                      );
+                <div className="w-full flex gap-2">
+                  <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                    <p>Item Name/Number</p>
+                    <Select
+                      value={itemSelected?.value || undefined}
+                      showSearch
+                      placeholder="Select an item"
+                      optionFilterProp="label"
+                      onChange={(_, item) => {
+                        const isDuplicate = dataTableItem.some(
+                          (tableItem) => tableItem.item === item.value
+                        );
 
-                      if (isDuplicate) {
-                        notify("error", "Error", "Item has been added.");
-                        return;
-                      }
+                        if (isDuplicate) {
+                          notify("error", "Error", "Item has been added.");
+                          return;
+                        }
 
-                      setItemSelected(item);
+                        setItemSelected(item);
 
-                      dispatchItemTable({
-                        type: "SET_ITEM",
-                        payload: {
-                          item: item.id,
-                          units: item.unitstype,
-                          rate: item.price,
-                          displayname: item.displayname,
-                          itemprocessfamily: item.itemprocessfamily,
-                          itemid: item.itemid,
-                        },
-                      });
-                    }}
-                    onSearch={{}}
-                    options={dataItem.filter(
-                      (data) =>
-                        !dataTableItem
-                          .map((item) => item.item)
-                          .includes(data.value)
-                    )}
-                    style={{ width: "100%" }}
-                  />
+                        dispatchItemTable({
+                          type: "SET_ITEM",
+                          payload: {
+                            item: item.id,
+                            units: item.unitstype,
+                            rate: item.price,
+                            displayname: item.displayname,
+                            itemprocessfamily: item.itemprocessfamily,
+                            itemid: item.itemid,
+                          },
+                        });
+                      }}
+                      onSearch={{}}
+                      options={dataItem.filter(
+                        (data) =>
+                          !dataTableItem
+                            .map((item) => item.item)
+                            .includes(data.value)
+                      )}
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+                  <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                    <p>Display Name</p>
+                    <Input disabled value={itemSelected?.displayname || ""} />
+                  </div>
                 </div>
               </div>
             </div>

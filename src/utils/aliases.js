@@ -87,7 +87,8 @@ export const salesOrderAliases = {
     paymentoption: "Payment Option",
   },
   item: {
-    displayname: "Item",
+    displayname: "Display Name",
+    itemid: "Item",
     quantity: "Qty",
     units: "Unit",
     rate: "Rate",
@@ -253,7 +254,7 @@ export const creditMemoAliases = {
     applied: "Applied",
     item: "Item ID",
     displayname: "Display Name",
-    quantity: "Qty",
+    quantity: "Qty (Kg)",
     units: "Unit",
     itemdescription: "Description",
     rate: "Rate",
@@ -309,6 +310,8 @@ export const soReportAliases = {
   status_so: "Status SO",
   customerid: "Customer ID",
   created_by: "Created By",
+  dpp: "DPP",
+  ppn: "PPN",
 };
 
 export const salesReportAliases = {
@@ -324,6 +327,10 @@ export const salesReportAliases = {
   satuan: "Unit",
   harga: "Price",
   jumlah: "Total",
+  dpp: "DPP",
+  ppn: "PPN",
+  customerid: "Customer ID",
+  no: "No",
 };
 
 export const productReportAliases = {
