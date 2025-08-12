@@ -318,7 +318,7 @@ export default function Details() {
         paymentoption: data.paymentoption,
         payment: data.payment,
         depositedate: data.depositedate
-          ? dayjs(data.depositedate)
+          ? dayjs(data.depositedate) || ""
           : data.depositedate,
         bankaccount: data.bankaccount,
       },
@@ -716,7 +716,7 @@ export default function Details() {
                         key: "depositedate",
                         input: "date",
                         isAlias: true,
-                        hidden: state.payloadPayment.paymentoption != "giro",
+                        hidden: true,
                       },
                       {
                         key: "bankaccount",

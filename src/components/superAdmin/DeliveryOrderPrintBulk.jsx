@@ -6,6 +6,8 @@ export default function DeliveryOrderPrintBulk({ datas }) {
     return null;
   }
 
+  console.log(datas)
+
   return (
     <div>
       {datas.map((data) => {
@@ -71,15 +73,15 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                       {data.notes}
                     </p>
                   </div>
-                  {/* <br />
+                  <br />
                   <div className="w-full flex">
                     <p className="w-3/12 break-words whitespace-normal font-semibold">
                       Sales :
                     </p>
                     <p className="w-8/12 border break-words whitespace-normal">
-                      {data.sales || ""}
+                      {data.salesrep || ""}
                     </p>
-                  </div> */}
+                  </div>
                 </div>
                 <div className="w-1/2">
                   <div className="w-full flex justify-end">
@@ -199,7 +201,7 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                   </div>
                 </div>
                 <div className="w-[25%] border h-20 flex flex-col px-1">
-                  <p>Keterangan: JEMPUT</p>
+                  <p>Keterangan:</p>
                 </div>
               </div>
               <p>{`[${currentDate}]`}</p>

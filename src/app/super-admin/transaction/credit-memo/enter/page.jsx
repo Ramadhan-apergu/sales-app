@@ -85,7 +85,7 @@ function TableCustom({
           align: "right",
           render: (text) => <p>{formatDateToShort(text)}</p>,
         };
-      } else if (["due", "amount", "payment"].includes(key)) {
+      } else if (["due", "amount", "payment", "rate", "taxamount"].includes(key)) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
@@ -907,10 +907,10 @@ export default function Enter() {
             onDelete={handleDeleteTableItem}
             data={state.credit_memo_items}
             keys={[
-              "item",
+            //   "item",
               "displayname",
               "quantity",
-              "units",
+            //   "units",
               "itemdescription",
               "rate",
               "taxable",
