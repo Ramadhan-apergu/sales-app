@@ -401,7 +401,7 @@ export default function Details() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
-                        hidden: state.payloadPayment.paymentoption != "giro",
+                        hidden: (data.status?.toLowerCase() || "") !== "deposited"
                       },
                       {
                         key: "bankaccount",

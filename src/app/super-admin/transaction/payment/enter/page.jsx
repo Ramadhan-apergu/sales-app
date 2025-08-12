@@ -85,10 +85,18 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
                     size="small"
                     style={{ width: "100%" }}
                     value={Number(text)}
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value) => value.replace(/,/g, "")}
+                    formatter={(value) => {
+                      if (!value) return "";
+                      return `Rp ${String(value).replace(
+                        /\B(?=(\d{3})+(?!\d))/g,
+                        "."
+                      )}`;
+                    }}
+                    parser={(value) => {
+                      return value
+                        ?.replace(/[Rp\s.]/g, "") // hapus "Rp", spasi, dan titik
+                        .replace(/[^\d]/g, ""); // pastikan hanya angka
+                    }}
                     onChange={(value) => {
                       onChangeAmount(record.invoiceid, value);
                     }}

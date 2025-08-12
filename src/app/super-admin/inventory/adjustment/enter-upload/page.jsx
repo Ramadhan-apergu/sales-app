@@ -6,6 +6,7 @@ import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
   DeleteOutlined,
+  DownloadOutlined,
   InboxOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -85,27 +86,27 @@ export default function Enter() {
 
   const { Dragger } = Upload;
 
+  const allowedHeaders = ["Item Name/Number", "Qty"]; // contoh header
+
   const props = {
     name: "file",
     multiple: false,
-    accept: ".xlsx, .xls",
+    accept: ".xlsx", // hanya xlsx
     beforeUpload(file) {
-      const isExcel =
+      const isXlsx =
         file.type ===
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-        file.type === "application/vnd.ms-excel";
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-      if (!isExcel) {
+      if (!isXlsx) {
         notify(
           "error",
           "Invalid File",
-          "Only Excel (.xlsx/.xls) files are allowed."
+          "Only Excel (.xlsx) files are allowed."
         );
-        return false;
+        return Upload.LIST_IGNORE;
       }
 
       const reader = new FileReader();
-
       reader.onload = async (e) => {
         try {
           const data = new Uint8Array(e.target.result);
@@ -119,10 +120,22 @@ export default function Enter() {
             return;
           }
 
-          const itemids = json.map((item) => {
-            return item["Item Name/Number"];
-          });
+          // Validasi header
+          const fileHeaders = Object.keys(json[0]);
+          const missingHeaders = allowedHeaders.filter(
+            (header) => !fileHeaders.includes(header)
+          );
 
+          if (missingHeaders.length > 0) {
+            notify(
+              "error",
+              "Invalid Header",
+              `Please use the provided template.`
+            );
+            return;
+          }
+
+          const itemids = json.map((item) => item["Item Name/Number"]);
           let checkData = await checkItem(itemids);
           let updateJson = [];
 
@@ -133,25 +146,21 @@ export default function Enter() {
 
             updateJson = json.map((item, i) => {
               const findCheckItem = checkMap.get(item["Item Name/Number"]);
-              console.log(findCheckItem);
               return {
                 no: i + 1,
                 ...item,
-                is_valid: findCheckItem.is_valid,
-                messages: findCheckItem.is_valid ? [] : ["Invalid Item"],
+                is_valid: findCheckItem?.is_valid,
+                messages: findCheckItem?.is_valid ? [] : ["Invalid Item"],
               };
             });
 
-            console.log(updateJson);
-
+            // Cek duplikat
             const countMap = {};
-
             updateJson.forEach((item) => {
               const name = item["Item Name/Number"];
               countMap[name] = (countMap[name] || 0) + 1;
             });
 
-            // 2. Update is_valid jika duplikat
             updateJson = updateJson.map((item) => {
               const name = item["Item Name/Number"];
               if (countMap[name] > 1) {
@@ -163,12 +172,10 @@ export default function Enter() {
               }
               return item;
             });
-
-            console.log(updateJson);
           }
 
           setParsedData(updateJson);
-          setUploadedFile(file);
+          setUploadedFile(file); // replace file lama
         } catch (err) {
           console.log(err);
           notify("error", "Parse Error", "Failed to read Excel file.");
@@ -181,7 +188,7 @@ export default function Enter() {
 
       reader.readAsArrayBuffer(file);
 
-      return false; // prevent auto upload
+      return Upload.LIST_IGNORE; // supaya antd tidak auto upload
     },
   };
 
@@ -209,7 +216,11 @@ export default function Enter() {
     }
 
     if (parsedData.filter((item) => item.is_valid == false).length > 0) {
-      notify("error", "Invalid", "There are invalid items.");
+      notify(
+        "error",
+        "Invalid",
+        "Invalid or duplicate item found. Please check the table."
+      );
       return;
     }
 
@@ -230,6 +241,17 @@ export default function Enter() {
       setIsLoadingSubmit(false);
     }
   };
+
+  function handleDownloadTemplate() {
+    const header = [["Item Name/Number", "Qty"]];
+
+    const ws = XLSX.utils.aoa_to_sheet(header);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    XLSX.writeFile(wb, "template.xlsx");
+  }
   return (
     <>
       <Layout pageTitle="">
@@ -258,6 +280,12 @@ export default function Enter() {
                   {uploadedFile.name}
                 </Button>
               )}
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={handleDownloadTemplate}
+              >
+                {isLargeScreen ? "Template" : ""}
+              </Button>
               <Button
                 type="primary"
                 icon={<CheckOutlined />}

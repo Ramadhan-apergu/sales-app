@@ -321,10 +321,10 @@ const LayoutTesting = ({ children }) => {
   }
 
   return (
-    <Layout style={{ width: "100%", minHeight: "100dvh" }}>
+    <Layout style={{ width: "100%", minHeight: "100dvh" }} className="print:hidden">
       <Header
         style={{ padding: 0, gap: "2rem" }}
-        className="flex items-center justify-between"
+        className="flex items-center justify-between print:hidden"
       >
         <div className="h-full ml-4 lg:ml-12 py-2">
           <img

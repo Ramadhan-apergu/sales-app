@@ -40,7 +40,7 @@ export default function InputForm({
 
   const handleValuesChange = (changedValues, allValues) => {
     if (onChange) {
-      onChange(type, allValues); 
+      onChange(type, allValues);
     }
   };
 
@@ -97,17 +97,20 @@ export default function InputForm({
                       placeholder={placeholder}
                       formatter={(value) => {
                         if (accounting) {
-                          return `${value}`.replace(
+                          if (!value) return "";
+                          return `Rp ${String(value).replace(
                             /\B(?=(\d{3})+(?!\d))/g,
-                            ","
-                          );
+                            "."
+                          )}`;
                         } else {
                           return value;
                         }
                       }}
                       parser={(value) => {
                         if (accounting) {
-                          return value.replace(/\$\s?|(,*)/g, "");
+                          return value
+                            ?.replace(/[Rp\s.]/g, "") // hapus "Rp", spasi, dan titik
+                            .replace(/[^\d]/g, ""); // pastikan hanya angka
                         } else {
                           return value;
                         }
