@@ -23,7 +23,7 @@ import {
   SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, FloatButton, Form, Modal, Select, Table } from "antd";
+import { Button, Divider, FloatButton, Form, Input, Modal, Select, Table } from "antd";
 import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
@@ -162,6 +162,7 @@ export default function Enter() {
       const getSo = await fetchSoById(slug);
       if (getSo) {
         setDataSo(getSo);
+        console.log(getSo);
         mappingData(getSo, getItem?.list || [], getCustomer?.list || []);
       }
     } catch (error) {
@@ -225,6 +226,7 @@ export default function Enter() {
 
     const syncItems = data.sales_order_items.map((item) => ({
       item: item.item,
+      itemcode: item.itemcode,
       displayname: item.displayname,
       quantity: item.quantity,
       units: item.units,
@@ -313,6 +315,7 @@ export default function Enter() {
   ];
 
   const keyTableItem = [
+    "itemcode",
     "displayname",
     "quantity",
     "units",
@@ -332,6 +335,7 @@ export default function Enter() {
       units: "",
       description: "",
       rate: 0,
+      itemcode: "",
       displayname: "",
       itemprocessfamily: "",
       itemid: "",
@@ -507,7 +511,6 @@ export default function Enter() {
       const resData = getResponseHandler(response);
 
       setDataDiscount(resData);
-      console.log(resData);
 
       if (resData.diskon_group && resData.diskon_group.length > 0) {
         const discountFreeItem = resData.diskon_group.map((discount) => ({
@@ -614,6 +617,7 @@ export default function Enter() {
           delete item.itemprocessfamily;
           delete item.displayname;
           delete item.itemid;
+          delete item.itemcode;
 
           return item;
         }),
@@ -1020,46 +1024,53 @@ export default function Enter() {
                 >
                   Item
                 </Divider>
-                <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                  <p>Display Name</p>
-                  <Select
-                    value={itemSelected?.value || undefined}
-                    showSearch
-                    placeholder="Select an item"
-                    optionFilterProp="label"
-                    onChange={(_, item) => {
-                      const isDuplicate = dataTableItem.some(
-                        (tableItem) => tableItem.item === item.value
-                      );
+                <div className="w-full flex gap-2">
+                  <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                    <p>Item Name/Number</p>
+                    <Select
+                      value={itemSelected?.value || undefined}
+                      showSearch
+                      placeholder="Select an item"
+                      optionFilterProp="label"
+                      onChange={(_, item) => {
+                        const isDuplicate = dataTableItem.some(
+                          (tableItem) => tableItem.item === item.value
+                        );
 
-                      if (isDuplicate) {
-                        notify("error", "Error", "Item has been added.");
-                        return;
-                      }
+                        if (isDuplicate) {
+                          notify("error", "Error", "Item has been added.");
+                          return;
+                        }
 
-                      setItemSelected(item);
+                        setItemSelected(item);
 
-                      dispatchItemTable({
-                        type: "SET_ITEM",
-                        payload: {
-                          item: item.id,
-                          units: item.unitstype,
-                          rate: item.price,
-                          displayname: item.displayname,
-                          itemprocessfamily: item.itemprocessfamily,
-                          itemid: item.itemid,
-                        },
-                      });
-                    }}
-                    onSearch={{}}
-                    options={dataItem.filter(
-                      (data) =>
-                        !dataTableItem
-                          .map((item) => item.item)
-                          .includes(data.value)
-                    )}
-                    style={{ width: "100%" }}
-                  />
+                        dispatchItemTable({
+                          type: "SET_ITEM",
+                          payload: {
+                            item: item.id,
+                            units: item.unitstype,
+                            rate: item.price,
+                            displayname: item.displayname,
+                            itemprocessfamily: item.itemprocessfamily,
+                            itemid: item.itemid,
+                            itemcode: item.itemid,
+                          },
+                        });
+                      }}
+                      onSearch={{}}
+                      options={dataItem.filter(
+                        (data) =>
+                          !dataTableItem
+                            .map((item) => item.item)
+                            .includes(data.value)
+                      )}
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+                  <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                    <p>Display Name</p>
+                    <Input disabled value={itemSelected?.displayname || ""} />
+                  </div>
                 </div>
               </div>
             </div>

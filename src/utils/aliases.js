@@ -88,7 +88,8 @@ export const salesOrderAliases = {
   },
   item: {
     displayname: "Display Name",
-    itemid: "Item",
+    itemid: "Item Name/Number",
+    itemcode: "Item Name/Number",
     quantity: "Qty",
     units: "Unit",
     rate: "Rate",

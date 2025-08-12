@@ -70,7 +70,7 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
           render: (text) => <p>{formatDateToShort(text)}</p>,
         };
       } else if (["total", "due", "amount"].includes(key)) {
@@ -79,21 +79,33 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
             title: aliases?.[key] || key,
             dataIndex: key,
             key: key,
-            align: "right",
+            align: "left",
             render: (text, record) => {
               if (record.ischecked) {
                 return (
                   <InputNumber
-                    max={Number(record.total)}
+                    max={Number(String(record?.total).replace(/[^\d]/g, ""))}
                     size="small"
                     style={{ width: "100%" }}
-                    value={Number(text)}
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value) => value.replace(/,/g, "")}
+                    value={Number(String(text).replace(/[^\d]/g, ""))}
+                    formatter={(val) => {
+                      if (val === undefined || val === null || val === "")
+                        return "";
+                      const num = String(val).replace(/[^\d]/g, "");
+                      return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    }}
+                    parser={(val) => (val ? val.replace(/[^\d]/g, "") : "")}
                     onChange={(value) => {
-                      onChangeAmount(record.invoiceid, value);
+                      const numeric = Number(
+                        String(value).replace(/[^\d]/g, "")
+                      );
+                      const maxValue = Number(
+                        String(record?.total).replace(/[^\d]/g, "")
+                      );
+                      onChangeAmount(
+                        record.invoiceid,
+                        numeric > maxValue ? maxValue : numeric
+                      );
                     }}
                   />
                 );
@@ -107,7 +119,7 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
             title: aliases?.[key] || key,
             dataIndex: key,
             key: key,
-            align: "right",
+            align: "left",
             render: (text) => <p>{formatRupiah(text)}</p>,
           };
         }
@@ -116,7 +128,7 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
         };
       }
     }),
