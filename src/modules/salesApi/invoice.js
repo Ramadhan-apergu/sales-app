@@ -12,6 +12,17 @@ export default class InvoiceFetch extends ProcessFetch {
     }
   }
 
+    static async getdO(offset = 0, limit = 10, status = "", customer = "") {
+    try {
+      const response = await this.axios.get("/trx/item-fulfillment-invoice", {
+        params: { offset, limit, status, customer },
+      });
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
   static async getById(id) {
     try {
       const response = await this.axios.get(`/trx/invoices/${id}`)

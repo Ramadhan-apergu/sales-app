@@ -297,7 +297,7 @@ export default function Detail() {
     "rate",
     "quantity",
     "units",
-    "description",
+    // "description",
     "totalamount",
     "totaldiscount",
     "subtotal",

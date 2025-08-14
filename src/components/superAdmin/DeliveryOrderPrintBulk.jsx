@@ -6,7 +6,7 @@ export default function DeliveryOrderPrintBulk({ datas }) {
     return null;
   }
 
-  console.log(datas)
+  console.log(datas);
 
   return (
     <div>
@@ -130,14 +130,14 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                 <p className="border-r break-words whitespace-normal w-[20%]">
                   Nama Barang
                 </p>
-                <p className="border-r break-words whitespace-normal w-[20%]">
-                  Memo
-                </p>
                 <p className="border-r break-words whitespace-normal w-[15%] text-right">
                   Qty (Kq)
                 </p>
                 <p className="border-r break-words whitespace-normal w-[15%] text-right">
                   Qty (Bal)
+                </p>
+                <p className="border-r break-words whitespace-normal w-[20%]">
+                  Memo
                 </p>
               </div>
               {dataTable &&
@@ -156,14 +156,14 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                     <p className="border-r break-words whitespace-normal w-[20%]">
                       {item.displayname || "-"}
                     </p>
-                    <p className="border-r break-words whitespace-normal w-[20%]">
-                      {item.memo || "-"}
-                    </p>
                     <p className="border-r break-words whitespace-normal w-[15%] text-right">
                       {item.quantity || 0}
                     </p>
                     <p className="border-r break-words whitespace-normal w-[15%] text-right">
                       {item.quantity2 || 0}
+                    </p>
+                    <p className="border-r break-words whitespace-normal w-[20%]">
+                      {item.memo || "-"}
                     </p>
                   </div>
                 ))}
@@ -171,13 +171,13 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                 <p className="break-words whitespace-normal w-[5%] text-right"></p>
                 <p className="break-words whitespace-normal w-[25%]"></p>
                 <p className="break-words whitespace-normal w-[20%]"></p>
-                <p className="break-words whitespace-normal w-[20%]"></p>
                 <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
                   {count.qty}
                 </p>
                 <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
                   {count.qty2}
                 </p>
+                <p className="break-words whitespace-normal w-[20%]"></p>
               </div>
             </section>
             <section className="w-full flex flex-col items-end gap-4">
