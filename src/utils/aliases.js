@@ -136,7 +136,7 @@ export const deliveryOrderAliases = {
     item: "Item",
     itemprocessfamily: "Item",
     displayname: "Display Name",
-    memo: "Description",
+    memo: "Memo",
     location: "Location",
     quantityremaining: "Remaining",
     quantity1: "Quantity (Kg)",

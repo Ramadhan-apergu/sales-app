@@ -80,6 +80,7 @@ export default function InputForm({
                 hidden = false,
                 cursorDisable = false,
                 accounting = false,
+                number = false
               },
               i
             ) => {
@@ -102,6 +103,11 @@ export default function InputForm({
                             /\B(?=(\d{3})+(?!\d))/g,
                             "."
                           )}`;
+                        } else if (number) {
+                          return `${value}`.replace(
+                            /\B(?=(\d{3})+(?!\d))/g,
+                            "."
+                          );
                         } else {
                           return value;
                         }
@@ -111,6 +117,11 @@ export default function InputForm({
                           return value
                             ?.replace(/[Rp\s.]/g, "") // hapus "Rp", spasi, dan titik
                             .replace(/[^\d]/g, ""); // pastikan hanya angka
+                        } else if (number) {
+                          return `${value}`.replace(
+                            /\B(?=(\d{3})+(?!\d))/g,
+                            "."
+                          );
                         } else {
                           return value;
                         }

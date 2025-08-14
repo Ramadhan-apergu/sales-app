@@ -228,7 +228,7 @@ export default function Enter() {
     "quantity",
     "units",
     "rate",
-    "description",
+    // "description",
     "taxable",
     "taxrate",
     "totalamount",
@@ -1006,6 +1006,7 @@ export default function Enter() {
                   key: "description",
                   input: "text",
                   isAlias: true,
+                  hidden: true
                 },
               ]}
               aliases={salesOrderAliases.item}
@@ -1032,7 +1033,7 @@ export default function Enter() {
                   input: "number",
                   isAlias: true,
                   disabled: !stateItemTable.tax.taxable,
-                  accounting: true,
+                  number: true,
                 },
               ]}
               aliases={salesOrderAliases.item}
