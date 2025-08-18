@@ -111,7 +111,7 @@ function SelectItem({ onselect }) {
         <div className="flex gap-2">
           <div className="flex flex-col justify-start items-start gap-1">
             <label className="hidden lg:block text-sm font-semibold leading-none">
-              Code
+              Item Name/Number
             </label>
             <Input
               value={searchCode}
@@ -123,7 +123,7 @@ function SelectItem({ onselect }) {
           </div>
           <div className="flex flex-col justify-start items-start gap-1">
             <label className="hidden lg:block text-sm font-semibold leading-none">
-              Display Name
+              Display Name/Code
             </label>
             <Search
               placeholder={isLargeScreen ? "" : "Name"}
