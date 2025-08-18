@@ -80,31 +80,40 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
             render: (text, record) => {
               if (record.ischecked) {
                 return (
-                  <InputNumber
-                    max={Number(String(record?.total).replace(/[^\d]/g, ""))}
-                    size="small"
-                    style={{ width: "100%" }}
-                    value={Number(String(text).replace(/[^\d]/g, ""))}
-                    formatter={(val) => {
-                      if (val === undefined || val === null || val === "")
-                        return "";
-                      const num = String(val).replace(/[^\d]/g, "");
-                      return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                    }}
-                    parser={(val) => (val ? val.replace(/[^\d]/g, "") : "")}
-                    onChange={(value) => {
-                      const numeric = Number(
-                        String(value).replace(/[^\d]/g, "")
-                      );
-                      const maxValue = Number(
-                        String(record?.total).replace(/[^\d]/g, "")
-                      );
-                      onChangeAmount(
-                        record.invoiceid,
-                        numeric > maxValue ? maxValue : numeric
-                      );
-                    }}
-                  />
+                  <div className="flex items-center gap-2 w-full">
+                    <span>Rp</span>
+                    <InputNumber
+                      maxLength={
+                        String(record?.total)
+                          .replace(/[^\d]/g, "")
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ".").length
+                      }
+                      // max={Number(String(record?.total).replace(/[^\d]/g, ""))}
+                      size="small"
+                      style={{ width: "100%" }}
+                      value={Number(String(text).replace(/[^\d]/g, ""))}
+                      formatter={(val) => {
+                        if (val === undefined || val === null || val === "")
+                          return "";
+                        const num = String(val).replace(/[^\d]/g, "");
+                        return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                      }}
+                      parser={(val) => (val ? val.replace(/[^\d]/g, "") : "")}
+                      onChange={(value) => {
+                        const rawValue = String(value).replace(/[^\d]/g, ""); // angka murni
+                        const rawTotal = String(record.total).replace(
+                          /[^\d]/g,
+                          ""
+                        ); // angka murni
+
+                        if (rawValue.length < rawTotal.length) {
+                          onChangeAmount(record.invoiceid, Number(rawValue));
+                        } else {
+                          onChangeAmount(record.invoiceid, Number(rawTotal));
+                        }
+                      }}
+                    />
+                  </div>
                 );
               } else {
                 return <p>{formatRupiah(text)}</p>;

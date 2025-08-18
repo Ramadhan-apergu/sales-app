@@ -126,9 +126,14 @@ export default function InvoicePrint({ data, dataTable }) {
             <br />
             <div className="w-full flex justify-end">
               <p className="w-3/12 font-semibold break-words whitespace-normal border-y border-l">
-                No. Rek
+                Info Pembayaran
               </p>
-              <p className="w-7/12 border break-words whitespace-normal"></p>
+              <p className="w-7/12 border break-words whitespace-normal">
+                BCA : 
+                123-456-7890 a.n CV Sukses Mandiri <br />
+                CIMB : 
+                987-654-3210 a.n CV Sukses Mandiri
+              </p>
             </div>
           </div>
         </div>
@@ -228,7 +233,9 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="border break-words whitespace-normal w-[8%] text-right">
             {count.quantity}
           </p>
-          <p className="break-words whitespace-normal w-[8%] text-right">{count.quantity2}</p>
+          <p className="break-words whitespace-normal w-[8%] text-right">
+            {count.quantity2}
+          </p>
 
           <p className="break-words whitespace-normal w-[10%] text-right"></p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
