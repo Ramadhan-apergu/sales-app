@@ -227,9 +227,11 @@ function Enter({ fulfillmentId }) {
         const customerData = getResponseHandler(customerRes);
         if (!customerData) throw new Error("Failed to fetch customer");
 
-        const soItemRes = await FullfillmentFetch.getSoItem(
-          fulfillmentData.salesorderid
-        );
+        // const soItemRes = await FullfillmentFetch.getSoItem(
+        //   fulfillmentData.salesorderid
+        // );
+
+        const soItemRes = await InvoiceFetch.getdOItemInv(fulfillmentData.id);
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch sales order items");
 
@@ -252,9 +254,12 @@ function Enter({ fulfillmentId }) {
               (soItem) => soItem.item === fulfillment.item
             );
 
+            console.log(fulfillment);
+
             const itemSo = soItemData.find(
-              (item) => item.id === fulfillment.item
+              (item) => item.item === fulfillment.item
             );
+
             const displayname = itemSo?.displayname || "";
             const location = fulfillment?.location || "";
 
@@ -381,9 +386,9 @@ function Enter({ fulfillmentId }) {
     "memo",
     "location",
     "quantity",
-    "units",
+    // "units",
     "quantity2",
-    "units2",
+    // "units2",
     "rate",
     "subtotal",
     "totaldiscount",
