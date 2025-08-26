@@ -40,6 +40,8 @@ import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 import { creditMemoAliases } from "@/utils/aliases";
+import { formatDateToShort } from "@/utils/formatDate";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({
   data,
@@ -72,15 +74,31 @@ function TableCustom({
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
+      } else if (key == "trandate") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "center",
+          render: (text) => <p>{formatDateToShort(text)}</p>,
+        };
+      } else if (["due", "amount", "payment", "rate", "taxamount"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "left",
+          render: (text) => <p>{formatRupiah(text)}</p>,
         };
       } else {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
         };
       }
     }),
@@ -139,7 +157,7 @@ export default function Enter() {
           const addLabelCustomer = resData.list.map((customer) => {
             return {
               ...customer,
-              label: customer.companyname,
+              label: customer.customerid,
               value: customer.id,
             };
           });
@@ -222,7 +240,7 @@ export default function Enter() {
   ];
 
   const keyTableItem = [
-    "invoiceid",
+    // "invoiceid",
     "refnum",
     "trandate",
     "due",
@@ -231,10 +249,6 @@ export default function Enter() {
   ];
 
   const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
-  function formatRupiah(number) {
-    return number.toLocaleString("id-ID") + ",-";
-  }
 
   const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
 
@@ -247,7 +261,7 @@ export default function Enter() {
         const addLabelItem = resData.map((item) => {
           return {
             ...item,
-            label: item.displayname,
+            label: item.itemid,
             value: item.id,
           };
         });
@@ -256,7 +270,7 @@ export default function Enter() {
         setDataItem([]);
       }
     } catch (error) {
-        console.log(error.message)
+      console.log(error.message);
       notify("error", "Error", "Failed get data item");
     }
   }
@@ -311,7 +325,6 @@ export default function Enter() {
         credit_memo_applies: updateCreditApplies,
         credit_memo_items: updateCreditItems,
       };
-
 
       const response = await CreditMemoFetch.create(payloadToInsert);
 
@@ -460,10 +473,14 @@ export default function Enter() {
     }
 
     if (
-      Number(stateItemTable.item.quantity) < 1
-      || Number(stateItemTable.item.quantity) > itemSelected.qty_invoice
+      Number(stateItemTable.item.quantity) < 1 ||
+      Number(stateItemTable.item.quantity) > itemSelected.qty_invoice
     ) {
-      notify("error", "Error", "Quantity must be between 1 and " + itemSelected.qty_invoice);
+      notify(
+        "error",
+        "Error",
+        "Quantity must be between 1 and " + itemSelected.qty_invoice
+      );
       return;
     }
 
@@ -780,12 +797,12 @@ export default function Enter() {
                 }}
                 orientation="left"
               >
-                Customer Name
+                Customer
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                 <Form layout="vertical">
                   <Form.Item
-                    label={<span className="capitalize">Customer</span>}
+                    label={<span className="capitalize">Customer ID</span>}
                     name="customer"
                     style={{ margin: 0 }}
                     className="w-full"
@@ -811,7 +828,7 @@ export default function Enter() {
                           },
                         });
                         fetchInvoiceCustmer(customer.id);
-                        fetchItemCustomerInv(customer.id)
+                        fetchItemCustomerInv(customer.id);
                       }}
                       options={dataCustomer}
                       style={{ width: "100%" }}
@@ -834,6 +851,7 @@ export default function Enter() {
                 input: "input",
                 isAlias: true,
                 isRead: true,
+                hidden: true,
               },
               {
                 key: "trandate",
@@ -861,15 +879,17 @@ export default function Enter() {
             data={[
               {
                 key: "unapplied",
-                input: "input",
+                input: "number",
                 isAlias: true,
                 isRead: true,
+                accounting: true
               },
               {
                 key: "applied",
-                input: "input",
+                input: "number",
                 isAlias: true,
                 isRead: true,
+                accounting: true
               },
             ]}
             aliases={creditMemoAliases.item}
@@ -887,10 +907,10 @@ export default function Enter() {
             onDelete={handleDeleteTableItem}
             data={state.credit_memo_items}
             keys={[
-              "item",
+            //   "item",
               "displayname",
               "quantity",
-              "units",
+            //   "units",
               "itemdescription",
               "rate",
               "taxable",
@@ -988,7 +1008,7 @@ export default function Enter() {
                   Item
                 </Divider>
                 <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                  <p>Display Name</p>
+                  <p>Item Name/Number</p>
                   <Select
                     value={itemSelected?.value || undefined}
                     showSearch
@@ -1013,7 +1033,7 @@ export default function Enter() {
                           units: item.unitstype,
                           rate: item.price,
                           displayname: item.displayname,
-                          quantity: 0
+                          quantity: 0,
                         },
                       });
                     }}
@@ -1034,6 +1054,7 @@ export default function Enter() {
                   input: "input",
                   isAlias: true,
                   isRead: true,
+                  hidden: true
                 },
                 {
                   key: "quantity",
@@ -1048,9 +1069,10 @@ export default function Enter() {
                 },
                 {
                   key: "rate",
-                  input: "input",
+                  input: "number",
                   isAlias: true,
                   isRead: true,
+                  accounting: true
                 },
                 {
                   key: "itemdescription",
@@ -1058,7 +1080,7 @@ export default function Enter() {
                   isAlias: true,
                 },
               ]}
-              aliases={[]}
+              aliases={creditMemoAliases.item}
               onChange={(type, payload) => {
                 dispatchItemTable({ type, payload });
               }}
@@ -1084,7 +1106,7 @@ export default function Enter() {
                   disabled: !stateItemTable.tax.taxable,
                 },
               ]}
-              aliases={[]}
+              aliases={creditMemoAliases.item}
               onChange={(type, payload) => {
                 dispatchItemTable({ type, payload });
               }}

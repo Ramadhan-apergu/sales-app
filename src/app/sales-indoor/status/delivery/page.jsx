@@ -57,6 +57,7 @@ function SalesOrder() {
   const [modal, contextHolder] = Modal.useModal();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [searchName, setSearchName] = useState("");
+  const [searchSoNumb, setSearchSoNumb] = useState(so_numb);
   const [dateRange, setDateRange] = useState(["", ""]);
   const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
@@ -309,7 +310,8 @@ function SalesOrder() {
                       so_numb: value,
                     });
                   }}
-                  value={so_numb}
+                  value={searchSoNumb}
+                  onChange={(e) => setSearchSoNumb(e.target.value)}
                   enterButton
                   allowClear
                 />
@@ -317,7 +319,7 @@ function SalesOrder() {
               <div className="flex gap-2">
                 <div className="hidden lg:flex flex-col justify-start items-start gap-1">
                   <label className="text-sm font-semibold leading-none">
-                    Customer Name
+                    Customer ID
                   </label>
                   <Select
                     showSearch

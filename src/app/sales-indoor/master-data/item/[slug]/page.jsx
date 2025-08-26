@@ -242,7 +242,7 @@ export default function Detail() {
                     payload={pricing}
                     data={[
                       { key: "price", input: "input", isAlias: false },
-                      { key: "discount", input: "input", isAlias: false },
+                      { key: "discount", input: "input", isAlias: false, hidden:true },
                     ]}
                     aliases={itemAliases}
                   />

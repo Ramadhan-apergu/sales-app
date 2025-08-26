@@ -1,31 +1,20 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-} from "antd";
+import { Modal, Pagination, Table, Select, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
-import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import { formatDateToShort, formatDateWithSepMinus } from "@/utils/formatDate";
+import { formatDateWithSepMinus } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { salesReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
+import ExportSalesReport from "@/components/superAdmin/ExportSalesReport";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -34,7 +23,6 @@ function SalesOrder() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const isLargeScreen = useBreakpoint("lg");
   const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
@@ -45,8 +33,6 @@ function SalesOrder() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
   const [tableKeys, setTableKeys] = useState([]);
@@ -132,7 +118,7 @@ function SalesOrder() {
           key: key,
           render: (text) => <p>{formatDateWithSepMinus(text)}</p>,
         };
-      } else if (["harga", "jumlah"].includes(key)) {
+      } else if (["harga", "jumlah", "dpp", "ppn"].includes(key)) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
@@ -158,52 +144,55 @@ function SalesOrder() {
           </p>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
-          <div className="flex gap-2">
-            <div className="hidden lg:flex flex-col justify-start items-start gap-1">
-              <label className="text-sm font-semibold leading-none">
-                Customer Name
-              </label>
-              <Select
-                showSearch
-                placeholder="Select a person"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
+          <div className="w-full flex justify-between items-end">
+            <div className="flex gap-2 items-end">
+              <div className="flex flex-col justify-start items-start gap-1">
+                <label className="text-sm font-semibold leading-none">
+                  Customer Name
+                </label>
+                <Select
+                  showSearch
+                  placeholder="Select a person"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={dataCustomer}
+                  styles={{
+                    popup: {
+                      root: {
+                        minWidth: 250,
+                        whiteSpace: "nowrap",
+                      },
                     },
-                  },
-                }}
-                onChange={(value, option) => {
-                  setSearchName(option?.companyname || "");
-                }}
-                allowClear
-              />
-            </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Date
-              </label>
-              <div className="flex justify-center items-start gap-2">
-                <RangePicker
-                  showTime={false}
-                  format="YYYY-MM-DD"
-                  onChange={(value, dateString) => {
-                    setDateRange(dateString);
                   }}
-                  //   onOk={(val) => {
-                  //   }}
+                  onChange={(value, option) => {
+                    setSearchName(option?.companyname || "");
+                  }}
+                  allowClear
                 />
               </div>
+              <div className="flex flex-col justify-start items-start gap-1">
+                <label className="hidden lg:block text-sm font-semibold leading-none">
+                  Date
+                </label>
+                <div className="flex justify-center items-start gap-2">
+                  <RangePicker
+                    showTime={false}
+                    format="YYYY-MM-DD"
+                    onChange={(value, dateString) => {
+                      setDateRange(dateString);
+                    }}
+                    //   onOk={(val) => {
+                    //   }}
+                  />
+                </div>
+              </div>
             </div>
+            <ExportSalesReport />
           </div>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <div className="flex lg:hidden flex-col justify-start items-start gap-1">
               <Select
                 showSearch
@@ -229,29 +218,7 @@ function SalesOrder() {
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
-            {/* <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Status
-              </label>
-              <Select
-                defaultValue="all"
-                onChange={(e) => {
-                  setStatusFilter(e);
-                }}
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "fulfilled", label: "Fulfilled" },
-                  { value: "partially fulfilled", label: "Partially Fulfilled" },
-                  { value: "credit hold", label: "Credit Hold" },
-                  { value: "closed", label: "Closed" },
-                  { value: "pending approval", label: "Pending Approval" },
-                ]}
-                dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
-                dropdownAlign={{ points: ["tr", "br"] }}
-              />
-            </div> */}
-          </div>
+          </div> */}
         </div>
         {!isLoading ? (
           <>

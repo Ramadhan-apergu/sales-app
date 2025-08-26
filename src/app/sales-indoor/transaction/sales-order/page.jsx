@@ -368,7 +368,7 @@ function SalesOrder() {
                   { value: "closed", label: "Closed" },
                   { value: "pending approval", label: "Pending Approval" },
                 ]}
-                styles={{
+                                styles={{
                   popup: {
                     root: {
                       minWidth: 100,

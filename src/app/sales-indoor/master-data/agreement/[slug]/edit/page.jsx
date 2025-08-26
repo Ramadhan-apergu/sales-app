@@ -27,6 +27,7 @@ function SelectItem({ onselect }) {
   const [page, setPage] = useState(1);
   const offset = (page - 1) * 50;
   const [searchName, setSearchName] = useState("");
+  const [searchFamily, setSearchFamily] = useState("");
   const [searchCode, setSearchCode] = useState();
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -43,7 +44,8 @@ function SelectItem({ onselect }) {
         offset,
         50,
         searchName === "" ? null : searchName,
-        !searchCode || searchCode === "" ? null : searchCode
+        !searchCode || searchCode === "" ? null : searchCode,
+        searchFamily === "" ? null : searchFamily
       );
       const resData = getResponseHandler(response, notify);
       if (resData) {
@@ -58,7 +60,7 @@ function SelectItem({ onselect }) {
   };
 
   useEffect(() => {
-    if (!searchCode && searchName === "") {
+    if (!searchCode && searchName === "" && searchFamily === "") {
       fetchData();
     }
   }, [page]);
@@ -70,13 +72,13 @@ function SelectItem({ onselect }) {
   };
 
   const columns = [
-    {
-      title: "Internal ID",
-      dataIndex: "id",
-      key: "id",
-      onHeaderCell: () => ({ style: { minWidth: 200 } }),
-      onCell: () => ({ style: { minWidth: 200 } }),
-    },
+    //   {
+    //     title: 'Internal ID',
+    //     dataIndex: 'id',
+    //     key: 'id',
+    //     onHeaderCell: () => ({ style: { minWidth: 200 } }),
+    //     onCell: () => ({ style: { minWidth: 200 } }),
+    //   },
     {
       title: "Item Name/Number",
       dataIndex: "displayname",
@@ -109,7 +111,7 @@ function SelectItem({ onselect }) {
         <div className="flex gap-2">
           <div className="flex flex-col justify-start items-start gap-1">
             <label className="hidden lg:block text-sm font-semibold leading-none">
-              Code
+              Item Name/Number
             </label>
             <Input
               value={searchCode}
@@ -121,7 +123,7 @@ function SelectItem({ onselect }) {
           </div>
           <div className="flex flex-col justify-start items-start gap-1">
             <label className="hidden lg:block text-sm font-semibold leading-none">
-              Display Name
+              Display Name/Code
             </label>
             <Search
               placeholder={isLargeScreen ? "" : "Name"}
@@ -129,6 +131,21 @@ function SelectItem({ onselect }) {
               value={searchName}
               onChange={(e) => {
                 setSearchName(e.target.value);
+              }}
+              onSearch={fetchData}
+              onKeyDown={(e) => handleEnter(e)}
+            />
+          </div>
+          <div className="flex flex-col justify-start items-start gap-1">
+            <label className="hidden lg:block text-sm font-semibold leading-none">
+              Item P.Family
+            </label>
+            <Search
+              placeholder={isLargeScreen ? "" : "Process family"}
+              allowClear
+              value={searchFamily}
+              onChange={(e) => {
+                setSearchFamily(e.target.value);
               }}
               onSearch={fetchData}
               onKeyDown={(e) => handleEnter(e)}
@@ -992,11 +1009,11 @@ export default function AgreementEdit() {
   };
 
   const formOptions = [
-    { label: "Discount Percentage (%)", value: "1" },
+    // { label: "Discount Percentage (%)", value: "1" },
     { label: "Special Price (Rp)", value: "2" },
     { label: "Payment Method", value: "3" },
-    { label: "Free Item", value: "4" },
-    { label: "Discount Group", value: "5" },
+    // { label: "Free Item", value: "4" },
+    { label: "Free Item", value: "5" },
   ];
 
   function handleSelectItem(record) {
@@ -1268,7 +1285,7 @@ export default function AgreementEdit() {
                       </div>
                     ) : (
                       <div className="w-full flex flex-col gap-4">
-                        <div className="flex justify-end gap-2 items-center">
+                        {/* <div className="flex justify-end gap-2 items-center">
                           <Switch
                             size="small"
                             checked={isPayloadGroupItem}
@@ -1284,7 +1301,7 @@ export default function AgreementEdit() {
                             }}
                           />
                           <p className="font-semibold">Free Item Type</p>
-                        </div>
+                        </div> */}
                         {!isPayloadGroupItem ? (
                           <InputForm
                             title="agreement groups (Price)"
@@ -1296,12 +1313,14 @@ export default function AgreementEdit() {
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true,
                               },
                               {
                                 key: "agreementid",
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true,
                               },
                               {
                                 key: "itemcategory",
@@ -1351,12 +1370,14 @@ export default function AgreementEdit() {
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true,
                               },
                               {
                                 key: "agreementid",
                                 input: "input",
                                 isAlias: false,
                                 isRead: true,
+                                hidden: true,
                               },
                               {
                                 key: "itemcategory",
@@ -1404,7 +1425,7 @@ export default function AgreementEdit() {
                                 key: "itemfree",
                                 input: "select",
                                 options: dataItem,
-                                isAlias: false,
+                                isAlias: true,
                               },
                             ]}
                             aliases={agreementAliases}
