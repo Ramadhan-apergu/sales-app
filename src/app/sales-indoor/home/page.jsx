@@ -4,7 +4,7 @@ import SearchStatus from "@/components/superAdmin/SearchStatus";
 import useNotification from "@/hooks/useNotification";
 import DashboardFetch from "@/modules/salesApi/dashboard";
 import { formatDateStartDay } from "@/utils/formatDate";
-import { formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import { Button, DatePicker, Tooltip as Tooltipantd } from "antd";
 import dayjs from "dayjs";
@@ -114,11 +114,20 @@ export default function Page() {
     return monthNames[parseInt(trandate.split("-")[0]) - 1];
   }
 
+  function formatIndonesia(num) {
+    if (num === null || num === undefined || num === "") return "";
+
+    return num
+      .toString()
+      .replace(".", ",") // ubah titik jadi koma untuk desimal
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
   return (
     <Layout>
       <div className="w-full">
         <div className="w-full flex flex-col gap-4">
-          <div className="w-full flex flex-col lg:flex-row justify-between items-end">
+          <div className="w-full flex flex-col lg:flex-row justify-between items-end pt-6 px-6">
             <p className="w-full lg:w-auto text-2xl font-bold text-blue-6">
               Dashboard
             </p>
@@ -164,13 +173,26 @@ export default function Page() {
                   <p className="text-sm font-medium text-blue-6">Sales Order</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-blue-8">
-                    {yearData &&
-                    yearData.kg !== undefined &&
-                    yearData.kg !== null
-                      ? yearData.kg
-                      : "-"}
-                  </p>
+                  <Tooltipantd
+                    title={
+                      yearData &&
+                      yearData.kg !== undefined &&
+                      yearData.kg !== null
+                        ? formatIndonesia(yearData.kg)
+                        : "-"
+                    }
+                  >
+                    <p
+                      className="text-3xl font-bold text-blue-8 truncate"
+                      style={{ maxWidth: "100%" }}
+                    >
+                      {yearData &&
+                      yearData.kg !== undefined &&
+                      yearData.kg !== null
+                        ? formatIndonesia(yearData.kg)
+                        : "-"}
+                    </p>
+                  </Tooltipantd>
                   <p className="text-sm text-blue-5">Kg</p>
                 </div>
               </div>
@@ -183,13 +205,26 @@ export default function Page() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-blue-8">
-                    {yearData &&
-                    yearData.kg_avg !== undefined &&
-                    yearData.kg_avg !== null
-                      ? yearData.kg_avg
-                      : "-"}
-                  </p>
+                  <Tooltipantd
+                    title={
+                      yearData &&
+                      yearData.kg_avg !== undefined &&
+                      yearData.kg_avg !== null
+                        ? formatIndonesia(yearData.kg_avg)
+                        : "-"
+                    }
+                  >
+                    <p
+                      className="text-3xl font-bold text-blue-8 truncate"
+                      style={{ maxWidth: "100%" }}
+                    >
+                      {yearData &&
+                      yearData.kg_avg !== undefined &&
+                      yearData.kg_avg !== null
+                        ? formatIndonesia(yearData.kg_avg)
+                        : "-"}
+                    </p>
+                  </Tooltipantd>
                   <p className="text-sm text-blue-5">Kg</p>
                 </div>
               </div>
@@ -200,13 +235,26 @@ export default function Page() {
                   <p className="text-sm font-medium text-green-6">Penjualan</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-green-8">
-                    {yearData &&
-                    yearData.amount !== undefined &&
-                    yearData.amount !== null
-                      ? formatRupiahAccounting(yearData.amount)
-                      : "-"}
-                  </p>
+                  <Tooltipantd
+                    title={
+                      yearData &&
+                      yearData.amount !== undefined &&
+                      yearData.amount !== null
+                        ? formatRupiah(yearData.amount)
+                        : "-"
+                    }
+                  >
+                    <p
+                      className="text-3xl font-bold text-green-8 truncate"
+                      style={{ maxWidth: "100%" }}
+                    >
+                      {yearData &&
+                      yearData.amount !== undefined &&
+                      yearData.amount !== null
+                        ? formatRupiah(yearData.amount)
+                        : "-"}
+                    </p>
+                  </Tooltipantd>
                   <p className="text-sm text-green-5">Amount</p>
                 </div>
               </div>
@@ -219,13 +267,26 @@ export default function Page() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-green-8">
-                    {yearData &&
-                    yearData.amount_avg !== undefined &&
-                    yearData.amount_avg !== null
-                      ? formatRupiahAccounting(yearData.amount_avg)
-                      : "-"}
-                  </p>
+                  <Tooltipantd
+                    title={
+                      yearData &&
+                      yearData.amount_avg !== undefined &&
+                      yearData.amount_avg !== null
+                        ? formatRupiah(yearData.amount_avg)
+                        : "-"
+                    }
+                  >
+                    <p
+                      className="text-3xl font-bold text-green-8 truncate"
+                      style={{ maxWidth: "100%" }}
+                    >
+                      {yearData &&
+                      yearData.amount_avg !== undefined &&
+                      yearData.amount_avg !== null
+                        ? formatRupiah(yearData.amount_avg)
+                        : "-"}
+                    </p>
+                  </Tooltipantd>
                   <p className="text-sm text-green-5">Amount</p>
                 </div>
               </div>
@@ -273,13 +334,13 @@ export default function Page() {
                   <p className="text-sm font-medium text-blue-6">Sales Order</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-blue-8">
-                    {monthData &&
-                    monthData.kg !== undefined &&
-                    monthData.kg !== null
-                      ? monthData.kg
-                      : "-"}
-                  </p>
+                  <Tooltipantd title={formatIndonesia(monthData?.kg)}>
+                    <p className="text-3xl font-bold text-blue-8 truncate max-w-full">
+                      {monthData?.kg !== undefined && monthData?.kg !== null
+                        ? formatIndonesia(monthData.kg)
+                        : "-"}
+                    </p>
+                  </Tooltipantd>
                   <p className="text-sm text-blue-5">Kg</p>
                 </div>
               </div>
@@ -290,13 +351,14 @@ export default function Page() {
                   <p className="text-sm font-medium text-green-6">Penjualan</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-green-8">
-                    {monthData &&
-                    monthData.amount !== undefined &&
-                    monthData.amount !== null
-                      ? formatRupiahAccounting(monthData.amount)
-                      : "-"}
-                  </p>
+                  <Tooltipantd title={formatRupiah(monthData?.amount)}>
+                    <p className="text-3xl font-bold text-green-8 truncate max-w-full">
+                      {monthData?.amount !== undefined &&
+                      monthData?.amount !== null
+                        ? formatRupiah(monthData.amount)
+                        : "-"}
+                    </p>
+                  </Tooltipantd>
                   <p className="text-sm text-green-5">Amount</p>
                 </div>
               </div>

@@ -299,7 +299,7 @@ function List() {
                 styles={{
                   popup: {
                     root: {
-                      minWidth: 100,
+                      minWidth: 250,
                       whiteSpace: "nowrap",
                     },
                   },

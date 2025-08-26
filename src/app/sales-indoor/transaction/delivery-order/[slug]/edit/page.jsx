@@ -462,6 +462,7 @@ export default function Page() {
                   input: "input",
                   isAlias: true,
                   disabled: true,
+                  hidden: true
                 },
                 {
                   key: "displayname",
@@ -474,6 +475,7 @@ export default function Page() {
                   input: "input",
                   isAlias: true,
                   disabled: true,
+                  hidden: true
                 },
                 {
                   key: "memo",
@@ -515,7 +517,7 @@ export default function Page() {
                   disabled: true,
                 },
               ]}
-              aliases={[]}
+              aliases={deliveryOrderAliases.item}
               onChange={(type, payload) => {
                 setEditItem((prev) => ({
                   ...prev,

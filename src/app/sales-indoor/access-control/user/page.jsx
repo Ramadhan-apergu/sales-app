@@ -251,7 +251,7 @@ function UserRoles() {
                 styles={{
                   popup: {
                     root: {
-                      minWidth: 250,
+                      minWidth: 100,
                       whiteSpace: "nowrap",
                     },
                   },

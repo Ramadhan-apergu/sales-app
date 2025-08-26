@@ -48,20 +48,43 @@ import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import SalesOrderSelect from "./SalesOrderSelect";
 import { deliveryOrderAliases } from "@/utils/aliases";
 
-function TableCustom({ data, keys, aliases, onEdit }) {
+function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
+  console.log(data);
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (key == "apply") {
+        return {
+          title: "Apply",
+          key: "apply",
+          align: "center", // tengah biar rapi
+          render: (_, record) => (
+            <Checkbox
+              checked={record.apply}
+              onChange={(e) => {
+                onChecked(record.lineid, e.target.checked);
+              }}
+            />
+          ),
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right", // semua kolom di-align ke kanan
+        };
+      }
+    }),
     {
       title: "Action",
       key: "action",
       align: "right", // kolom action juga ke kanan
       render: (_, record) => (
-        <Button type="link" onClick={() => onEdit(record)}>
+        <Button
+          disabled={!record.apply}
+          type="link"
+          onClick={() => onEdit(record)}
+        >
           Edit
         </Button>
       ),
@@ -160,6 +183,7 @@ function Enter({ salesOrderId }) {
         setDataSalesOrderItemRetrieve(soItemData);
         setDataTableItem(
           soItemData.map((item) => ({
+            apply: false,
             displayname: item.displayname,
             id: item.id,
             itemid: item.itemid,
@@ -208,13 +232,14 @@ function Enter({ salesOrderId }) {
   ];
 
   const keyTableItem = [
+    "apply",
     "itemid",
     "displayname",
     "location",
-    "memo",
     "quantity1",
     "quantity2",
     "quantityremaining",
+    "memo",
   ];
 
   const [dataTableItem, setDataTableItem] = useState([]);
@@ -230,7 +255,11 @@ function Enter({ salesOrderId }) {
 
       delete payloadToInsert.customer;
 
-      const fulfillment_items = dataTableItem.map((data) => {
+      let fulfillment_items = dataTableItem.filter(
+        (item) => item.apply == true
+      );
+
+      fulfillment_items = fulfillment_items.map((data) => {
         return {
           item: data.id,
           memo: data.memo,
@@ -242,6 +271,11 @@ function Enter({ salesOrderId }) {
           units2: data.unit2,
         };
       });
+
+      if (fulfillment_items.length == 0) {
+        notify("error", "Error", "Select at least one item.");
+        return;
+      }
 
       payloadToInsert = { ...payloadToInsert, fulfillment_items };
 
@@ -257,11 +291,11 @@ function Enter({ salesOrderId }) {
         );
       }
 
-      if (resData) {
-        setTimeout(() => {
-          router.push(`/sales-indoor/transaction/${title}/${resData}`);
-        }, 3000);
-      }
+        if (resData) {
+          setTimeout(() => {
+            router.push(`/sales-indoor/transaction/${title}/${resData}`);
+          }, 3000);
+        }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
@@ -418,6 +452,16 @@ function Enter({ salesOrderId }) {
                 data={dataTableItem}
                 keys={keyTableItem}
                 aliases={deliveryOrderAliases.item}
+                onChecked={(lineid, isChecked) => {
+                  let updateDataTable = dataTableItem;
+
+                  updateDataTable = updateDataTable.map((item) => ({
+                    ...item,
+                    apply: item.lineid == lineid ? isChecked : item.apply,
+                  }));
+
+                  setDataTableItem(updateDataTable);
+                }}
               />
             </div>
           </div>
@@ -432,7 +476,7 @@ function Enter({ salesOrderId }) {
             notify(
               "error",
               "Failed",
-              "Quantity 1 cannot be more than the Remaining Quantity"
+              "Quantity kg cannot be more than the Remaining Quantity"
             );
             return;
           }
@@ -467,6 +511,7 @@ function Enter({ salesOrderId }) {
                   input: "input",
                   isAlias: true,
                   disabled: true,
+                  hidden: true,
                 },
                 {
                   key: "displayname",
@@ -520,7 +565,7 @@ function Enter({ salesOrderId }) {
                   disabled: true,
                 },
               ]}
-              aliases={[]}
+              aliases={deliveryOrderAliases.item}
               onChange={(type, payload) => {
                 setEditItem((prev) => ({
                   ...prev,

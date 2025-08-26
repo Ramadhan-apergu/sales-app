@@ -44,6 +44,8 @@ function StockItem() {
   const [modal, contextHolder] = Modal.useModal();
   const [searchItem, setSearchItem] = useState("");
   const [searchItemTemp, setSearchItemTemp] = useState("");
+  const [searchItemProcess, setSearchItemProcess] = useState("");
+  const [searchItemProcessTemp, setSearchItemProcessTemp] = useState("");
   const title = "user";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -56,7 +58,9 @@ function StockItem() {
         const response = await StockAdjustmentFetch.getStockStatus(
           offset,
           limit,
-          searchItem
+          searchItem,
+          null,
+          searchItemProcess
         );
 
         const resData = getResponseHandler(response, notify);
@@ -73,7 +77,7 @@ function StockItem() {
     };
 
     fetchData();
-  }, [page, limit, pathname, searchItem]);
+  }, [page, limit, pathname, searchItem, searchItemProcess]);
 
   const columns = [
     {
@@ -121,8 +125,12 @@ function StockItem() {
         style: { minWidth: 200 },
       }),
       render: (text) => (
-        <p>{typeof text == 'number' ? text.toLocaleString('en') : parseFloat(text).toLocaleString('en')}</p>
-      )
+        <p>
+          {typeof text == "number"
+            ? text.toLocaleString("en")
+            : parseFloat(text).toLocaleString("en")}
+        </p>
+      ),
     },
   ];
   return (
@@ -140,7 +148,7 @@ function StockItem() {
                 Item Name/Number
               </label>
               <Input
-                placeholder="Search User"
+                placeholder="Search Item"
                 styles={{
                   popup: {
                     root: {
@@ -159,6 +167,34 @@ function StockItem() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     setSearchItem(searchItemTemp);
+                  }
+                }}
+              />
+            </div>
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className="hidden md:block text-sm font-semibold leading-none">
+                Item Process F
+              </label>
+              <Input
+                placeholder="Search Item"
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 150,
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
+                value={searchItemProcessTemp}
+                onChange={(e) => {
+                  if (e.target.value.length == 0) {
+                    setSearchItemProcess("");
+                  }
+                  setSearchItemProcessTemp(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setSearchItemProcess(searchItemProcessTemp);
                   }
                 }}
               />

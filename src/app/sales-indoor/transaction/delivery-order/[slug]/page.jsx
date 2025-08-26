@@ -68,6 +68,7 @@ export default function Page() {
       shipstatus: "",
       trandate: "",
       tranid: "",
+      salesrep: "",
     },
     payloadShipping: {
       notes: "",
@@ -107,10 +108,10 @@ export default function Page() {
     "itemid",
     "displayname",
     "location",
-    "memo",
     "quantity1",
     "quantity2",
     "quantityremaining",
+    "memo",
     // "itemprocessfamily",
     // "displayname",
     // "memo",
@@ -166,6 +167,7 @@ export default function Page() {
         shipstatus: data.shipstatus,
         trandate: formatDateToShort(data.trandate),
         tranid: data.tranid,
+        salesrep: data.salesrep,
       },
     });
 
@@ -188,7 +190,7 @@ export default function Page() {
           quantity1: doItem.quantity,
           unit1: doItem.units,
           unit2: doItem.units2,
-          itemid: item.itemid
+          itemid: item.itemid,
         };
 
         delete updateData.quantity;
@@ -198,7 +200,7 @@ export default function Page() {
         return updateData;
       })
     );
-    console.log(dataFulfillmentWithItem)
+    console.log(dataFulfillmentWithItem);
 
     setDataTableItem(dataFulfillmentWithItem);
   };
@@ -208,9 +210,9 @@ export default function Page() {
       case "1":
         window.print();
         break;
-    //   case "2":
-    //     deleteModal();
-    //     break;
+      //   case "2":
+      //     deleteModal();
+      //     break;
       default:
         console.warn("Unhandled action:", key);
     }
@@ -220,31 +222,31 @@ export default function Page() {
     router.push(`/sales-indoor/transaction/${title}/${data.id}/edit`);
   };
 
-//   const deleteModal = () => {
-//     modal.confirm({
-//       title: `Cancel ${title} "${data.customer}"?`,
-//       content: "This action cannot be undone.",
-//       okText: "Yes",
-//       cancelText: "Cancel",
-//       onOk: () => {
-//         handleDelete(data.id);
-//       },
-//     });
-//   };
+  //   const deleteModal = () => {
+  //     modal.confirm({
+  //       title: `Cancel ${title} "${data.customer}"?`,
+  //       content: "This action cannot be undone.",
+  //       okText: "Yes",
+  //       cancelText: "Cancel",
+  //       onOk: () => {
+  //         handleDelete(data.id);
+  //       },
+  //     });
+  //   };
 
-//   const handleDelete = async (id) => {
-//     try {
-//       const response = await FullfillmentFetch.delete(id);
+  //   const handleDelete = async (id) => {
+  //     try {
+  //       const response = await FullfillmentFetch.delete(id);
 
-//       const resData = deleteResponseHandler(response, notify);
+  //       const resData = deleteResponseHandler(response, notify);
 
-//       if (resData) {
-//         router.push(`/sales-indoor/master-data/${title}`);
-//       }
-//     } catch (error) {
-//       notify("error", "Error", error?.message || "Internal Server error");
-//     }
-//   };
+  //       if (resData) {
+  //         router.push(`/sales-indoor/master-data/${title}`);
+  //       }
+  //     } catch (error) {
+  //       notify("error", "Error", error?.message || "Internal Server error");
+  //     }
+  //   };
 
   const [modal, contextHolder] = Modal.useModal();
 
@@ -318,6 +320,7 @@ export default function Page() {
                       </Button>
 
                       <Button
+                        disabled={data?.shipstatus?.toLowerCase() == "shipped"}
                         icon={<EditOutlined />}
                         type={"primary"}
                         onClick={handleEdit}
@@ -367,6 +370,12 @@ export default function Page() {
                       },
                       {
                         key: "shipstatus",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "salesrep",
                         input: "input",
                         isAlias: true,
                         isRead: true,

@@ -64,7 +64,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right", // semua kolom di-align ke kanan
+          align: "center", // semua kolom di-align ke kanan
           render: (text) => <p>{formatRupiah(text)}</p>,
         };
       } else {
@@ -72,14 +72,14 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right", // semua kolom di-align ke kanan
+          align: "center", // semua kolom di-align ke kanan
         };
       }
     }),
     {
       title: "Action",
       key: "action",
-      align: "right", // kolom action juga ke kanan
+      align: "center", // kolom action juga ke kanan
       render: (_, record) => (
         <Button type="link" onClick={() => onDelete(record)}>
           Delete
@@ -458,24 +458,28 @@ export default function Enter() {
                     input: "input",
                     isAlias: true,
                     isRead: true,
+                    disabled: true,
                   },
                   {
                     key: "displayname",
                     input: "input",
                     isAlias: true,
                     isRead: true,
+                    disabled: true,
                   },
                   {
                     key: "onhand",
                     input: "input",
                     isAlias: true,
                     isRead: true,
+                    disabled: true,
                   },
                   {
                     key: "stockreal",
                     input: "input",
                     isAlias: true,
                     isRead: true,
+                    disabled: true,
                   },
                   {
                     key: "qty",
@@ -487,12 +491,14 @@ export default function Enter() {
                     input: "input",
                     isAlias: true,
                     isRead: true,
+                    disabled: true,
                   },
                   {
                     key: "price",
                     input: "number",
                     isAlias: true,
                     isRead: true,
+                    disabled: true,
                     accounting: true
                   },
                 ]}

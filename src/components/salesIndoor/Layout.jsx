@@ -46,6 +46,7 @@ const headerItems = [
   { key: `${prefix}/master-data`, label: "Master Data" },
   { key: `${prefix}/inventory`, label: "Inventory" },
   { key: `${prefix}/report`, label: "Report" },
+  { key: `${prefix}/access-control`, label: "Access Control" },
 ];
 
 const siderMenuPerPage = {
@@ -133,6 +134,13 @@ const siderMenuPerPage = {
       key: "/report/production",
       label: "Production",
       icon: <BarChartOutlined />,
+    },
+  ],
+  "/access-control": [
+    {
+      key: "/access-control/user",
+      label: "User",
+      icon: <TeamOutlined />,
     },
   ],
 };
@@ -313,10 +321,10 @@ const LayoutTesting = ({ children }) => {
   }
 
   return (
-    <Layout style={{ width: "100%", minHeight: "100dvh" }}>
+    <Layout style={{ width: "100%", minHeight: "100dvh" }} className="print:hidden">
       <Header
         style={{ padding: 0, gap: "2rem" }}
-        className="flex items-center justify-between"
+        className="flex items-center justify-between print:hidden"
       >
         <div className="h-full ml-4 lg:ml-12 py-2">
           <img
@@ -361,12 +369,12 @@ const LayoutTesting = ({ children }) => {
       </Header>
 
       <div className="flex-1 px-4 lg:px-12 pb-4 pt-4 lg:pt-0 lg:pb-12">
-        <div className="hidden lg:block">
+        {/* <div className="hidden lg:block">
           <Breadcrumb style={{ margin: "16px 0" }} items={breadcrumbItems} />
-        </div>
+        </div> */}
         {pageSegment !== "home" ? (
           <Layout
-            className="py-4 lg:py-6"
+            className="py-4 lg:py-6 mt-9"
             style={{
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
@@ -374,10 +382,10 @@ const LayoutTesting = ({ children }) => {
           >
             <Sider
               width={200}
-              style={{
-                background: colorBgContainer,
-                display: isLargeScreen ? "block" : "none",
-              }}
+              className={`layout-sider ${
+                isLargeScreen ? "block-sider" : "hidden-sider"
+              }`}
+              style={{background: colorBgContainer}}
             >
               <Menu
                 onClick={handleNavSider}
@@ -410,9 +418,20 @@ const LayoutTesting = ({ children }) => {
           items={menuItems}
         />
       </Drawer>
-      <style jsx>{`
+      <style jsx global>{`
+        .block-sider {
+          display: block;
+        }
+        .hidden-sider {
+          display: none;
+        }
+
         @media print {
           #ham-menu {
+            display: none !important;
+          }
+
+          .layout-sider {
             display: none !important;
           }
         }

@@ -1,13 +1,13 @@
 import Cookies from "js-cookie";
 
 function handleUnauthorized(notifyFn) {
-  Cookies.remove("x_atkn", { path: "/" });
-  Cookies.remove("u_ctx", { path: "/" });
-  Cookies.remove("role", { path: "/" });
+  //   Cookies.remove("x_atkn", { path: "/" });
+  //   Cookies.remove("u_ctx", { path: "/" });
+  //   Cookies.remove("role", { path: "/" });
 
   callNotify(notifyFn, "error", "Session Expired", "Please log in again.");
 
-  window.location.href = "/auth/login";
+  //   window.location.href = "/auth/login";
 }
 
 function callNotify(notifyFn, ...args) {
