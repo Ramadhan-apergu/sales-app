@@ -64,6 +64,12 @@ const formatRupiah = (value) => {
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      render: (text, record, index) => index + 1, // nomor urut mulai dari 1
+    },
     ...keys.map((key) => {
       if (
         [
@@ -303,9 +309,9 @@ export default function EnterPage() {
     "memo",
     "location",
     "quantity",
-    "units",
+    // "units",
     "quantity2",
-    "units2",
+    // "units2",
     "rate",
     "subtotal",
     "totaldiscount",
@@ -580,19 +586,6 @@ export default function EnterPage() {
                             {formatRupiah(state.payloadSummary.discounttotal)}
                           </p>
                         </div>
-                        {/* <div className="flex w-full">
-                          <p className="w-1/2">Subtotal (After Discount)</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.subtotal)} Incl.
-                            PPN
-                          </p>
-                        </div>
-                        <div className="flex w-full">
-                          <p className="w-1/2">Tax Total</p>
-                          <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.taxtotal)}
-                          </p>
-                        </div> */}
                         <hr className="border-gray-5" />
                         <div className="flex w-full font-semibold">
                           <p className="w-1/2">Total</p>

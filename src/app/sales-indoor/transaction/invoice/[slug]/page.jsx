@@ -64,6 +64,12 @@ const formatRupiah = (value) => {
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      render: (text, record, index) => index + 1, // nomor urut mulai dari 1
+    },
     ...keys.map((key) => {
       if (
         [
@@ -282,12 +288,12 @@ export default function EnterPage() {
     let updatedInvoiceItems = await Promise.all(
       data.invoice_items.map(async (invoiceItem) => {
         const item = await getItem(invoiceItem.item);
-        
+
         return {
           ...invoiceItem,
           displayname: item ? item.displayname : "",
           lineid: crypto.randomUUID(),
-          itemid: item.itemid
+          itemid: item.itemid,
         };
       })
     );
@@ -305,9 +311,9 @@ export default function EnterPage() {
     "memo",
     "location",
     "quantity",
-    "units",
+    // "units",
     "quantity2",
-    "units2",
+    // "units2",
     "rate",
     "subtotal",
     "totaldiscount",

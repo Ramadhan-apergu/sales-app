@@ -9,6 +9,7 @@ import {
   Dropdown,
   Empty,
   Form,
+  Input,
   List,
   Modal,
   Select,
@@ -62,6 +63,12 @@ function formatRupiah(number) {
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      render: (text, record, index) => index + 1, // nomor urut mulai dari 1
+    },
     ...keys.map((key) => {
       if (
         [
@@ -124,6 +131,7 @@ export default function Detail() {
 
         if (resData) {
           setData(resData);
+          console.log(resData);
           mappingDataSalesOrder(resData);
         }
       } catch (error) {
@@ -181,101 +189,15 @@ export default function Detail() {
       },
     });
 
-    if (data.sales_order_items && data.sales_order_items.length > 0) {
-      const dataSalesOrderFetch = await Promise.all(
-        data.sales_order_items.map(async (so) => {
-          let data = so;
+    dispatch({
+      type: "SET_ITEMS",
+      payload: data.sales_order_items,
+    });
 
-          const item = await fetchItemById(data.item);
-
-          if (item) {
-            data = {
-              ...data,
-              itemid: item.itemid,
-              displayname: item.displayname,
-            };
-          } else {
-            data = {
-              ...data,
-              itemid: "",
-              displayname: "",
-            };
-          }
-
-          if (data.discountvalue1 && data.value1) {
-            data = {
-              ...data,
-              discountname1: "Discount Price",
-              discount1: "itemdiscount",
-            };
-          } else {
-            data = {
-              ...data,
-              discountname1: "",
-              discount1: "",
-              discountvalue1: data?.discountvalue1 || "",
-              value1: data?.value1 || "",
-            };
-          }
-
-          if (data.discount2) {
-            const agreement = await fetchAgreementById(data.discount2);
-            data = {
-              ...data,
-              discountname2: agreement ? agreement.agreementname : "",
-              discountvalue2: data.discountvalue2 == 1 ? "rp" : "%",
-            };
-          } else {
-            data = {
-              ...data,
-              discountname2: "",
-              discountvalue2: "",
-              discount2: "",
-            };
-          }
-
-          if (data.discount3) {
-            const agreement = await fetchAgreementById(data.discount3);
-            data = {
-              ...data,
-              discountname3: agreement ? agreement.agreementname : "",
-              discountvalue3: data.discountvalue3 == 1 ? "rp" : "%",
-            };
-          } else {
-            data = {
-              ...data,
-              discountname3: "",
-              discountvalue3: "",
-              discount3: "",
-            };
-          }
-
-          return data;
-        })
-      );
-
-      setDataTableItem(dataSalesOrderFetch);
-    }
-  }
-
-  async function fetchItemById(id) {
-    try {
-      const response = await ItemFetch.getById(id);
-      const resData = getResponseHandler(response);
-      return resData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data item");
-    }
-  }
-
-  async function fetchAgreementById(id) {
-    try {
-      const response = await AgreementFetch.getById(id);
-      const resData = getResponseHandler(response);
-      return resData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data agreement");
-    }
+    dispatch({
+      type: "SET_ITEM_FREE",
+      payload: data.sales_order_item_free,
+    });
   }
 
   const initialState = {
@@ -305,6 +227,7 @@ export default function Detail() {
       shippingaddress: "",
     },
     dataTableItem: [],
+    dataItemFree: [],
   };
 
   function reducer(state, action) {
@@ -354,6 +277,11 @@ export default function Detail() {
           ...state,
           dataTableItem: action.payload,
         };
+      case "SET_ITEM_FREE":
+        return {
+          ...state,
+          dataItemFree: action.payload,
+        };
       case "RESET":
         return initialState;
       default:
@@ -364,35 +292,18 @@ export default function Detail() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const keyTableItem = [
+    "itemcode",
     "displayname",
+    "rate",
     "quantity",
     "units",
-    "rate",
-    "description",
-    // "discountname1",
-    // "value1",
-    // "discountvalue1",
-    // "perunit1",
-    // "discountname2",
-    // "value2",
-    // "discountvalue2",
-    // "perunit2",
-    // "discountname3",
-    // "value3",
-    // "discountvalue3",
-    // "perunit3",
-    "subtotal",
+    // "description",
     "totalamount",
     "totaldiscount",
-    "qtyfree",
-    "unitfree",
-    "taxable",
+    "subtotal",
     "taxrate",
-    "taxvalue",
     "backordered",
   ];
-
-  const [dataTableItem, setDataTableItem] = useState([]);
 
   const handleEdit = () => {
     router.push(`/sales-indoor/transaction/${title}/${data.id}/edit`);
@@ -537,7 +448,9 @@ export default function Detail() {
                       </Button>
 
                       <Button
-                      disabled={['credit hold', 'fulfilled'].includes(data.status.toLowerCase())}
+                        disabled={["credit hold", "fulfilled"].includes(
+                          data.status.toLowerCase()
+                        )}
                         icon={<EditOutlined />}
                         type={"primary"}
                         onClick={handleEdit}
@@ -662,12 +575,60 @@ export default function Detail() {
                         Item
                       </Divider>
                       <TableCustom
-                        data={dataTableItem}
+                        data={state.dataTableItem}
                         keys={keyTableItem}
                         aliases={salesOrderAliases.item}
                       />
                     </div>
                   </div>
+
+                  {state.dataItemFree && state.dataItemFree.length > 0 && (
+                    <div className="w-full flex flex-col gap-8">
+                      <div className="w-full flex flex-col gap-2">
+                        <Divider
+                          style={{
+                            margin: 0,
+                            textTransform: "capitalize",
+                            borderColor: "#1677ff",
+                          }}
+                          orientation="left"
+                        >
+                          Item Free
+                        </Divider>
+
+                        <div className="w-full flex lg:pr-2 flex-col">
+                          <Form layout="vertical">
+                            <div className="w-full flex gap-4 flex-wrap">
+                              {state.dataItemFree.map((item, i) => (
+                                <Form.Item
+                                  key={i}
+                                  initialValue={item.itemcode}
+                                  label={
+                                    <span className="capitalize">
+                                      Free {item.qtyfree}
+                                    </span>
+                                  }
+                                  name={`freeitem${i}`}
+                                  style={{ margin: 0, width: "50%" }}
+                                  className="w-full"
+                                  labelCol={{ style: { padding: 0 } }}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: `Item is required`,
+                                    },
+                                  ]}
+                                >
+                                  <Input readOnly />
+                                </Form.Item>
+                              ))}
+                            </div>
+                          </Form>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="w-full flex flex-col gap-8">
                     <div className="w-full flex flex-col gap-2">
                       <Divider

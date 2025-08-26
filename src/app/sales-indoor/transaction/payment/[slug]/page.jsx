@@ -55,7 +55,7 @@ function TableCustom({ data, keys, aliases, onChange }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
           render: (text, record) => <p>{formatRupiah(text)}</p>,
         };
       } else {
@@ -63,7 +63,7 @@ function TableCustom({ data, keys, aliases, onChange }) {
           title: aliases?.[key] || key,
           dataIndex: key,
           key: key,
-          align: "right",
+          align: "center",
         };
       }
     }),
@@ -123,6 +123,8 @@ export default function Details() {
     payloadPayment: {
       paymentoption: "cash",
       payment: 0,
+      depositedate: "",
+      bankaccount: "",
     },
     payloadPaymentApplies: [],
     dataTableItem: [],
@@ -175,7 +177,8 @@ export default function Details() {
 
   const paymentOptions = [
     { label: "Cash", value: "cash" },
-    { label: "Credit", value: "credit" },
+    { label: "Bank Transfer", value: "transfer" },
+    { label: "Giro", value: "giro" },
   ];
 
   const keyTableItem = [
@@ -212,6 +215,8 @@ export default function Details() {
       payload: {
         paymentoption: data.paymentoption,
         payment: data.payment,
+        depositedate: formatDateToShort(data?.depositedate || null),
+        bankaccount: data.bankaccount,
       },
     });
 
@@ -326,6 +331,10 @@ export default function Details() {
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
                         icon={<EditOutlined />}
+                        disabled={
+                          (data?.paymentoption.toLowerCase() == "giro" &&
+                          data.status.toLowerCase() == "deposited") || data.status.toLowerCase() == "payment received"
+                        }
                         type={"primary"}
                         onClick={() => {
                           router.push(
@@ -385,7 +394,21 @@ export default function Details() {
                         input: "number",
                         isAlias: true,
                         isRead: true,
-                        accounting: true
+                        accounting: true,
+                      },
+                      {
+                        key: "depositedate",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        hidden: (data.status?.toLowerCase() || "") !== "deposited"
+                      },
+                      {
+                        key: "bankaccount",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        hidden: state.payloadPayment.paymentoption != "transfer",
                       },
                     ]}
                     aliases={paymentAliases.payment}

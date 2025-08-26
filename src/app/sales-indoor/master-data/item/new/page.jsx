@@ -2,7 +2,7 @@
 
 import React, {useState } from 'react';
 import { Button } from 'antd';
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from '@/components/salesIndoor/Layout';
 import {
     CheckOutlined,
   LeftOutlined,
@@ -36,7 +36,7 @@ export default function CustomerNew() {
 
   const unitstypeOptions = [
         { label: 'KG', value: 'kg' },
-        { label: 'Bal', value: 'bal' },
+        // { label: 'Bal', value: 'bal' },
     ]
 
     const itemprocessfamilyOptions = [
@@ -188,6 +188,7 @@ export default function CustomerNew() {
                             key: 'price',
                             input: 'number',
                             isAlias: false,
+                            accounting: true,
                             rules: [
                                 { required: true, message: `Price is required` },
                             ],
@@ -196,7 +197,9 @@ export default function CustomerNew() {
                             key: 'discount',
                             input: 'number',
                             isAlias: false,
-                            rules: [], // Optional, tidak ada validasi required
+                            accounting: true,
+                            rules: [],
+                            hidden: true
                             },
                         ]}
                         aliases={itemAliases}

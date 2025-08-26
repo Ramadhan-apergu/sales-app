@@ -29,6 +29,7 @@ import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
+import InvoiceFetch from "@/modules/salesApi/invoice";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -61,7 +62,7 @@ function DeliveryOrder() {
       try {
         setIsloading(true);
 
-        const response = await FullfillmentFetch.get(
+        const response = await InvoiceFetch.getdO(
           offset,
           limit,
           statusFilter,
@@ -69,10 +70,11 @@ function DeliveryOrder() {
         );
 
         const resData = getResponseHandler(response, notify);
+        console.log(resData)
 
         if (resData) {
-          setDatas(resData.list);
-          setTotalItems(resData.total_items);
+          setDatas(resData);
+          setTotalItems(resData.length);
         }
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");

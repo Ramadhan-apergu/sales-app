@@ -44,7 +44,7 @@ import { formatRupiahAccounting } from "@/utils/formatRupiah";
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 
-function DeliveryOrder() {
+function Payment() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -64,7 +64,7 @@ function DeliveryOrder() {
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
-  const title = "delivery-order";
+  const title = "payment";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
   const [isRefetch, setIsRefetch] = useState(false);
@@ -135,7 +135,7 @@ function DeliveryOrder() {
       ),
     },
     {
-      title: "Date",
+      title: "Payment Date",
       dataIndex: "trandate",
       key: "trandate",
       render: (text) => <p>{formatDateToShort(text)}</p>,
@@ -379,7 +379,7 @@ function DeliveryOrder() {
 export default function DeliveryPage() {
   return (
     <Suspense fallback={<LoadingSpinProcessing />}>
-      <DeliveryOrder />
+      <Payment />
     </Suspense>
   );
 }

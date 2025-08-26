@@ -29,7 +29,7 @@ import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import PaymentFetch from "@/modules/salesApi/payment";
-import { formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -163,7 +163,8 @@ function List() {
       title: "Total Payment",
       dataIndex: "payment",
       key: "payment",
-      render: (text) => <p>{formatRupiahAccounting(text) || ""}</p>,
+      align: 'right',
+      render: (text) => <p>{formatRupiah(text) || ""}</p>,
     },
     {
       title: "Status",
@@ -200,6 +201,7 @@ function List() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
+            disabled={(record?.paymentoption.toLowerCase() == 'giro' && record.status.toLowerCase() == 'deposited') || record.status.toLowerCase() == 'payment received'}
           >
             {isLargeScreen ? "Edit" : ""}
           </Button>
