@@ -235,7 +235,7 @@ function Enter({ salesOrderId }) {
     "apply",
     "itemid",
     "displayname",
-    "location",
+    // "location",
     "quantity1",
     "quantity2",
     "quantityremaining",
@@ -417,8 +417,8 @@ function Enter({ salesOrderId }) {
                 key: "notes",
                 input: "text",
                 isAlias: true,
-                isRead: true,
-                cursorDisable: true,
+                // isRead: true,
+                // cursorDisable: true,
               },
             ]}
             aliases={deliveryOrderAliases.shipping}
@@ -563,6 +563,7 @@ function Enter({ salesOrderId }) {
                   input: "input",
                   isAlias: true,
                   disabled: true,
+                  hidden: true
                 },
               ]}
               aliases={deliveryOrderAliases.item}

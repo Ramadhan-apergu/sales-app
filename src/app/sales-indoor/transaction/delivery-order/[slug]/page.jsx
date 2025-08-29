@@ -107,7 +107,7 @@ export default function Page() {
   const keyTableItem = [
     "itemid",
     "displayname",
-    "location",
+    // "location",
     "quantity1",
     "quantity2",
     "quantityremaining",
