@@ -26,7 +26,7 @@ import { ExportOutlined } from "@ant-design/icons";
 import { exportJSONToExcel } from "@/utils/export";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = null;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -35,7 +35,7 @@ function SalesOrder() {
   const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
-  const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
+  const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`);
   const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
@@ -51,6 +51,31 @@ function SalesOrder() {
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
+  const fieldOrder = [
+    "no",
+    "so_numb",
+    "trandate",
+    "customerid",
+    "nama_customer",
+    "sales",
+    "nama_barang",
+    "qty_so",
+    "qty_kirim",
+    "qty_sisa",
+    "tgl_kirim",
+    "harga_satuan",
+    "diskon_satuan",
+    "jumlah",
+    "dpp",
+    "ppn",
+    "created_by",
+    "status_so",
+    "kode_barang",
+    "satuan",
+    "itemprocessfamily",
+    "kode_customer",
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -59,7 +84,7 @@ function SalesOrder() {
 
         const response = await ReportSo.getSo(
           offset,
-          limit,
+          limit || "",
           searchName,
           dateRange[0],
           dateRange[1],
@@ -69,11 +94,35 @@ function SalesOrder() {
         const resData = getResponseHandler(response, notify);
 
         if (resData) {
-          setDatas(resData.list);
+          let data = resData.list.map((item, i) => ({ no: i + 1, ...item }));
+
+          data = data.map((item) => {
+            const ordered = {};
+
+            // masukkan sesuai urutan di fieldOrder
+            fieldOrder.forEach((key) => {
+              if (key in item) {
+                ordered[key] = item[key];
+              } else {
+                ordered[key] = null;
+              }
+            });
+
+            // tambahkan field lain yang tidak ada di fieldOrder, taruh di bawah
+            Object.keys(item).forEach((key) => {
+              if (!fieldOrder.includes(key)) {
+                ordered[key] = item[key];
+              }
+            });
+
+            return ordered;
+          });
+
+          setDatas(data);
           setTotalItems(resData.total_items);
           setTableKeys(
-            Array.isArray(resData.list) && resData.list.length > 0
-              ? Object.keys(resData.list[0]).filter(
+            Array.isArray(data) && data.length > 0
+              ? Object.keys(data[0]).filter(
                   (item) => item.toLowerCase() != "id"
                 )
               : []
@@ -92,8 +141,6 @@ function SalesOrder() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setIsloading(true);
-
         const response = await CustomerFetch.get(0, 10000, null);
 
         const resData = getResponseHandler(response, notify);
@@ -110,8 +157,6 @@ function SalesOrder() {
         }
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsloading(false);
       }
     };
 
@@ -133,7 +178,9 @@ function SalesOrder() {
           key: key,
           render: (text) => <p>{formatDateWithSepMinus(text)}</p>,
         };
-      } else if (["harga_satuan", "diskon_satuan", "jumlah", "dpp", "ppn"].includes(key)) {
+      } else if (
+        ["harga_satuan", "diskon_satuan", "jumlah", "dpp", "ppn"].includes(key)
+      ) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
@@ -304,7 +351,7 @@ function SalesOrder() {
                 tableLayout="auto"
               />
             </div>
-            <div>
+            {/* <div>
               <Pagination
                 total={totalItems}
                 defaultPageSize={limit}
@@ -317,7 +364,7 @@ function SalesOrder() {
                 size="small"
                 align={"end"}
               />
-            </div>
+            </div> */}
           </>
         ) : (
           <div className="w-full h-96">

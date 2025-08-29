@@ -293,26 +293,28 @@ export const stockAdjustmentAliases = {
 };
 
 export const soReportAliases = {
+  no: "No Urut",
   so_numb: "SO No",
   trandate: "Date",
-  kode_customer: "Customer Code",
+  customerid: "Customer ID",
   nama_customer: "Customer Name",
-  sales: "Sales Ref",
-  kode_barang: "Item Code",
+  sales: "Sales Rep",
   nama_barang: "Display Name",
   qty_so: "SO Qty",
   qty_kirim: "DO Qty",
-  qty_sisa: "Stock Qty",
-  satuan: "Unit",
+  qty_sisa: "Qty Sisa (Stock Qty)",
   tgl_kirim: "DO Date",
-  harga_satuan: "Price @",
-  diskon_satuan: "Discount @",
+  harga_satuan: "Price",
+  diskon_satuan: "Discount",
   jumlah: "Total",
-  status_so: "Status SO",
-  customerid: "Customer ID",
-  created_by: "Created By",
   dpp: "DPP",
   ppn: "PPN",
+  created_by: "Created By",
+  status_so: "Status SO",
+  kode_barang: "Item Code",
+  satuan: "Unit",
+  itemprocessfamily: "Category",
+  kode_customer: "Customer Code",
 };
 
 export const salesReportAliases = {

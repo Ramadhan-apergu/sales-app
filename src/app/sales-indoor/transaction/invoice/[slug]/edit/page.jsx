@@ -528,8 +528,8 @@ export default function EnterPage() {
                         key: "memo",
                         input: "text",
                         isAlias: true,
-                        isRead: true,
-                        cursorDisable: true,
+                        // isRead: true,
+                        // cursorDisable: true,
                       },
                     ]}
                     aliases={invoiceAliases.shipping}

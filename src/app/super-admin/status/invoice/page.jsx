@@ -61,6 +61,7 @@ function SalesOrder() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
+  const [searchDoc, setSearchDoc] = useState(doc_numb);
   const [dateRange, setDateRange] = useState(["", ""]);
   const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
@@ -221,8 +222,8 @@ function SalesOrder() {
     },
     {
       title: "Sales Rep",
-      dataIndex: "sales_rep",
-      key: "sales_rep",
+      dataIndex: "salesrep",
+      key: "salesrep",
     },
     {
       title: "Actions",
@@ -274,7 +275,8 @@ function SalesOrder() {
                     status,
                   });
                 }}
-                value={doc_numb}
+                value={searchDoc}
+                onChange={(e) => setSearchDoc(e.target.value)}
                 enterButton
                 allowClear
               />

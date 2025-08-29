@@ -118,7 +118,7 @@ export default function Page() {
   const keyTableItem = [
 
     "displayname",
-    "location",
+    // "location",
     "memo",
     "quantity1",
     "quantity2",
@@ -373,8 +373,8 @@ export default function Page() {
                         key: "notes",
                         input: "text",
                         isAlias: true,
-                        isRead: true,
-                        cursorDisable: true,
+                        // isRead: true,
+                        // cursorDisable: true,
                       },
                     ]}
                     aliases={deliveryOrderAliases.shipping}
@@ -515,6 +515,7 @@ export default function Page() {
                   input: "input",
                   isAlias: true,
                   disabled: true,
+                  hidden: true
                 },
               ]}
               aliases={deliveryOrderAliases.item}
