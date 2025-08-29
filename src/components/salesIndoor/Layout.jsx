@@ -46,7 +46,7 @@ const headerItems = [
   { key: `${prefix}/master-data`, label: "Master Data" },
   { key: `${prefix}/inventory`, label: "Inventory" },
   { key: `${prefix}/report`, label: "Report" },
-  { key: `${prefix}/access-control`, label: "Access Control" },
+//   { key: `${prefix}/access-control`, label: "Access Control" },
 ];
 
 const siderMenuPerPage = {
@@ -136,13 +136,13 @@ const siderMenuPerPage = {
       icon: <BarChartOutlined />,
     },
   ],
-  "/access-control": [
-    {
-      key: "/access-control/user",
-      label: "User",
-      icon: <TeamOutlined />,
-    },
-  ],
+//   "/access-control": [
+//     {
+//       key: "/access-control/user",
+//       label: "User",
+//       icon: <TeamOutlined />,
+//     },
+//   ],
 };
 const menuItems = [
   {

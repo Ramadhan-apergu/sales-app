@@ -52,14 +52,14 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
                 {data.shippingaddress}
               </p>
             </div>
-            <div className="w-full flex">
+            {/* <div className="w-full flex">
               <p className="w-3/12 break-words whitespace-normal font-semibold">
                 Notes :
               </p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
                 {data.notes}
               </p>
-            </div>
+            </div> */}
             <br />
             <div className="w-full flex">
               <p className="w-3/12 break-words whitespace-normal font-semibold">
@@ -109,8 +109,8 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
       <section className="w-full">
         <div className="w-full flex border table-padding font-semibold">
           <p className="border-r break-words whitespace-normal w-[5%]">No</p>
-          <p className="border-r break-words whitespace-normal w-[25%]">Kode</p>
-          <p className="border-r break-words whitespace-normal w-[20%]">
+          {/* <p className="border-r break-words whitespace-normal w-[25%]">Kode</p> */}
+          <p className="border-r break-words whitespace-normal w-[45%]">
             Nama Barang
           </p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
@@ -119,7 +119,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
             Qty (Bal)
           </p>
-          <p className="break-words whitespace-normal w-[20%]">Memo</p>
+          <p className="break-words whitespace-normal w-[20%]">Keterangan</p>
         </div>
         {dataTable &&
           dataTable.length > 0 &&
@@ -131,10 +131,10 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
               <p className="border-r break-words whitespace-normal w-[5%] text-right">
                 {i + 1}
               </p>
-              <p className="border-r break-words whitespace-normal w-[25%]">
+              {/* <p className="border-r break-words whitespace-normal w-[25%]">
                 {item.itemid || "-"}
-              </p>
-              <p className="border-r break-words whitespace-normal w-[20%]">
+              </p> */}
+              <p className="border-r break-words whitespace-normal w-[45%]">
                 {item.displayname || "-"}
               </p>
               <p className="border-r break-words whitespace-normal w-[15%] text-right">
@@ -150,8 +150,8 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           ))}
         <div className="w-full flex table-padding border-r border-white">
           <p className="break-words whitespace-normal w-[5%] text-right"></p>
-          <p className="break-words whitespace-normal w-[25%]"></p>
-          <p className="break-words whitespace-normal w-[20%]"></p>
+          {/* <p className="break-words whitespace-normal w-[25%]"></p> */}
+          <p className="break-words whitespace-normal w-[45%]"></p>
           <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty}
           </p>
