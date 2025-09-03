@@ -42,7 +42,7 @@ export default function CustomerNew() {
   });
 
   const [payloadFinancial, setPayloadFinancial] = useState({
-    terms: "7",
+    terms: "0",
     creditlimit: 0,
     resalenumber: "",
   });
@@ -347,8 +347,7 @@ export default function CustomerNew() {
                 data={[
                   {
                     key: "terms",
-                    input: "select",
-                    options: termOptions,
+                    input: "number",
                     isAlias: true,
                     rules: [
                       {
