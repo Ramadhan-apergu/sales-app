@@ -8,7 +8,7 @@ export const customerAliases = {
   addressee: "Address EE",
   addr1: "Address",
   creditlimit: "Credit Limit",
-  terms: "Term",
+  terms: "Term (Day)",
   resalenumber: "NPWP / NIK",
   internalid: "Internal ID",
   entityid: "Entity ID",

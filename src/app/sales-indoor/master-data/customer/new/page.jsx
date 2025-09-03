@@ -347,8 +347,7 @@ export default function CustomerNew() {
                 data={[
                   {
                     key: "terms",
-                    input: "select",
-                    options: termOptions,
+                    input: "number",
                     isAlias: true,
                     rules: [
                       {
