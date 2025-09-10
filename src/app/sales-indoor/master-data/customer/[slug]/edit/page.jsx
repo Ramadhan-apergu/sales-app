@@ -163,6 +163,11 @@ export default function Detail() {
         return;
       }
 
+      payloadToInsert = {
+        ...payloadToInsert,
+        terms: String(payloadToInsert.terms) || "",
+      };
+
       if (!resalenumber) {
         notify(
           "error",

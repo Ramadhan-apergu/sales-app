@@ -171,6 +171,11 @@ export default function CustomerNew() {
         return;
       }
 
+      payloadToInsert = {
+        ...payloadToInsert,
+        terms: String(payloadToInsert.terms) || "",
+      };
+
       if (!resalenumber) {
         notify(
           "error",
