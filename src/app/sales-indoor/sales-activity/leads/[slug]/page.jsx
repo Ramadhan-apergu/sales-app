@@ -1,0 +1,279 @@
+"use client";
+
+import React, { useEffect, useReducer, useRef, useState } from "react";
+import {
+  Button,
+  Checkbox,
+  Collapse,
+  Divider,
+  Dropdown,
+  Empty,
+  Form,
+  Input,
+  InputNumber,
+  List,
+  Modal,
+  Select,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
+import Layout from "@/components/superAdmin/Layout";
+import {
+  CheckOutlined,
+  EditOutlined,
+  InfoCircleOutlined,
+  LeftOutlined,
+  MoreOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
+
+import useNotification from "@/hooks/useNotification";
+import { useParams, useRouter } from "next/navigation";
+import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import CustomerFetch from "@/modules/salesApi/customer";
+import {
+  createResponseHandler,
+  deleteResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
+import InputForm from "@/components/superAdmin/InputForm";
+import SalesOrderFetch from "@/modules/salesApi/salesOrder";
+import ItemFetch from "@/modules/salesApi/item";
+import convertToLocalDate from "@/utils/convertToLocalDate";
+import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+import dayjs from "dayjs";
+import PaymentFetch from "@/modules/salesApi/payment";
+import { leadAliases, paymentAliases, targetAliases } from "@/utils/aliases";
+import { formatDateToShort } from "@/utils/formatDate";
+import { formatRupiah } from "@/utils/formatRupiah";
+import TargetFetch from "@/modules/salesApi/crm/target";
+import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import LeadsFetch from "@/modules/salesApi/crm/leads";
+import LayoutSalesIndoor from "@/components/salesIndoor/Layout";
+
+export default function Enter() {
+  const { notify, contextHolder: contextNotify } = useNotification();
+  const router = useRouter();
+  const isLargeScreen = useBreakpoint("lg");
+  const title = "leads";
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const initialState = {
+    payloadPrimary: {
+      addedon: "",
+      addr1: "",
+      city: "",
+      companyname: "",
+      createdby: "",
+      createddate: "",
+      email: "",
+      id: "",
+      leadid: "",
+      name: "",
+      owner: "",
+      ownername: "",
+      phone: "",
+      stageid: null,
+      state: "",
+      status: "",
+    },
+  };
+
+  const roleOptions = [
+    { label: "Sales Indoor", value: "sales-indoor" },
+    { label: "Sales Outdoor", value: "sales-outdoor" },
+  ];
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case "SET_PRIMARY":
+        return {
+          ...state,
+          payloadPrimary: {
+            ...state.payloadPrimary,
+            ...action.payload,
+          },
+        };
+      case "RESET":
+        return initialState;
+      default:
+        return state;
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const { slug } = useParams();
+
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      const response = await LeadsFetch.getById(slug);
+      const resData = getResponseHandler(response);
+      setData(resData);
+      if (resData) {
+        console.log(resData);
+        mappingDataPayload(resData);
+      }
+    } catch (error) {
+      console.log(error);
+      notify("error", "Error", "Failed get data customer");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const mappingDataPayload = (data) => {
+    dispatch({
+      type: "SET_PRIMARY",
+      payload: {
+        addedon: formatDateToShort(data.addedon),
+        addr1: data.addr1,
+        city: data.city,
+        companyname: data.companyname,
+        createdby: data.createdby,
+        createddate: formatDateToShort(data.createddate),
+        email: data.email,
+        id: data.id,
+        leadid: data.leadid,
+        name: data.name,
+        owner: data.owner,
+        ownername: data.ownername,
+        phone: data.phone,
+        stageid: data.stageid,
+        state: data.state,
+        status: data.status,
+      },
+    });
+  };
+
+  return (
+    <>
+      <LayoutSalesIndoor pageTitle="">
+        <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex justify-between items-center">
+            <p className="text-xl lg:text-2xl font-semibold text-blue-6">
+              Lead Detail
+            </p>
+            <Button
+              icon={<UnorderedListOutlined />}
+              type="link"
+              onClick={() => {
+                router.push(`/sales-indoor/sales-activity/${title}`);
+              }}
+            >
+              {isLargeScreen ? "List" : ""}
+            </Button>
+          </div>
+
+          {!isLoading ? (
+            <>
+              {data?.id ? (
+                <>
+                  <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+                    <div className="w-full lg:w-1/2 flex gap-1 flex-col">
+                      <p className="w-full lg:text-lg">{data.leadid}</p>
+                      <div>
+                        <Tag
+                          style={{
+                            textTransform: "capitalize",
+                            fontSize: "16px",
+                          }}
+                          color={
+                            ["open"].includes(data?.status.toLowerCase())
+                              ? "green"
+                              : ["pending"].includes(data?.status.toLowerCase())
+                              ? "orange"
+                              : ["closed"].includes(data?.status.toLowerCase())
+                              ? "red"
+                              : "default"
+                          }
+                        >
+                          {data.status || "-"}
+                        </Tag>
+                      </div>
+                    </div>
+                  </div>
+                  <InputForm
+                    title="primary"
+                    type="SET_PRIMARY"
+                    payload={state.payloadPrimary}
+                    data={[
+                      {
+                        key: "ownername",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "email",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "phone",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "companyname",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "addr1",
+                        input: "text",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "city",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "state",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "addedon",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                      },
+                    ]}
+                    aliases={leadAliases}
+                    onChange={(type, payload) => {
+                      dispatch({ type, payload });
+                    }}
+                  />
+                </>
+              ) : (
+                <div className="w-full h-96">
+                  <EmptyCustom />
+                </div>
+              )}
+            </>
+          ) : (
+            <LoadingSpin />
+          )}
+        </div>
+      </LayoutSalesIndoor>
+      {isLoadingSubmit && <LoadingSpinProcessing />}
+      {contextNotify}
+    </>
+  );
+}

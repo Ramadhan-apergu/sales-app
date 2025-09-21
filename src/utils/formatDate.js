@@ -59,3 +59,34 @@ export function formatDateStartDay(isoString) {
     return "";
   }
 }
+
+export function formatDateTimeToShort(isoString) {
+  if (!isoString) return null;
+  const date = new Date(isoString);
+
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const monthIndex = date.getUTCMonth();
+  const year = date.getUTCFullYear();
+
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const month = monthNames[monthIndex];
+
+  return `${day} ${month} ${year}, ${hours}:${minutes}`;
+}

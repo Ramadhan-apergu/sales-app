@@ -1,0 +1,380 @@
+"use client";
+
+import React, { useEffect, useReducer, useRef, useState } from "react";
+import {
+  Button,
+  Checkbox,
+  Collapse,
+  Divider,
+  Empty,
+  Form,
+  Input,
+  InputNumber,
+  List,
+  Modal,
+  Select,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
+import Layout from "@/components/superAdmin/Layout";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  EditOutlined,
+  InfoCircleOutlined,
+  LeftOutlined,
+  SaveOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
+
+import useNotification from "@/hooks/useNotification";
+import { useParams, useRouter } from "next/navigation";
+import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import CustomerFetch from "@/modules/salesApi/customer";
+import {
+  createResponseHandler,
+  getResponseHandler,
+  updateResponseHandler,
+} from "@/utils/responseHandlers";
+import InputForm from "@/components/superAdmin/InputForm";
+import SalesOrderFetch from "@/modules/salesApi/salesOrder";
+import ItemFetch from "@/modules/salesApi/item";
+import convertToLocalDate from "@/utils/convertToLocalDate";
+import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+import dayjs from "dayjs";
+import PaymentFetch from "@/modules/salesApi/payment";
+import { leadActAliases, paymentAliases, targetAliases } from "@/utils/aliases";
+import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
+import { formatRupiah } from "@/utils/formatRupiah";
+import TargetFetch from "@/modules/salesApi/crm/target";
+import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
+import LeadsFetch from "@/modules/salesApi/crm/leads";
+
+export default function Enter() {
+  const { notify, contextHolder: contextNotify } = useNotification();
+  const router = useRouter();
+  const isLargeScreen = useBreakpoint("lg");
+  const title = "lead-activity";
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const initialState = {
+    payloadPrimary: {
+      activitydate: "",
+      channelname: null,
+      channelnamestr: "",
+      channelreff: "",
+      companyname: "",
+      createdby: "",
+      createddate: "",
+      id: "",
+      lead: "",
+      lead_name: "",
+      summary: "",
+      visitdoc: "",
+    },
+  };
+
+  const roleOptions = [
+    { label: "Sales Indoor", value: "sales-indoor" },
+    { label: "Sales Outdoor", value: "sales-outdoor" },
+  ];
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case "SET_PRIMARY":
+        return {
+          ...state,
+          payloadPrimary: {
+            ...state.payloadPrimary,
+            ...action.payload,
+          },
+        };
+      case "RESET":
+        return initialState;
+      default:
+        return state;
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [leadOptions, setLeadOptions] = useState([]);
+
+  const channelOptions = [
+    { value: 1, label: "Phone" },
+    { value: 2, label: "Email" },
+    { value: 3, label: "Meetings" },
+    { value: 4, label: "Record Visit" },
+  ];
+
+  const { slug } = useParams();
+
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      const response = await LeadActivityFetch.getById(slug);
+      const resData = getResponseHandler(response);
+      setData(resData);
+      if (resData) {
+        console.log(resData);
+        mappingDataPayload(resData);
+      }
+    } catch (error) {
+      console.log(error);
+      notify("error", "Error", "Failed get data customer");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const fetchDataLead = async () => {
+    try {
+      const response = await LeadsFetch.get(0, 10000, "");
+
+      const resData = getResponseHandler(response, notify);
+
+      if (resData) {
+        setLeadOptions(
+          resData.list.map((lead) => ({
+            ...lead,
+            value: lead.id,
+            label: lead.companyname,
+          }))
+        );
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    fetchDataLead();
+  }, []);
+
+  const [channelLabel, setChannelLabel] = useState("phone number");
+
+  const mappingDataPayload = (data) => {
+    dispatch({
+      type: "SET_PRIMARY",
+      payload: {
+        activitydate: dayjs(data.activitydate) || "",
+        channelname: data.channelname,
+        channelnamestr: data.channelnamestr,
+        channelreff: data.channelreff,
+        companyname: data.companyname,
+        createdby: data.createdby,
+        createddate: dayjs(data.createddate) || "",
+        id: data.id,
+        lead: data.lead,
+        lead_name: data.lead_name,
+        summary: data.summary,
+        visitdoc: data.visitdoc,
+      },
+    });
+
+    const label = () => {
+      switch (data.channelname) {
+        case 1:
+          return "Phone Number";
+        case 2:
+          return "Email";
+        case 3:
+          return "PIC";
+        case 4:
+          return "Lead Address";
+      }
+    };
+    setChannelLabel(label);
+  };
+
+  const handleSubmit = async () => {
+    setIsLoadingSubmit(true);
+    try {
+      let payloadToInsert = { ...state.payloadPrimary };
+
+      if (!payloadToInsert.channelname) {
+        throw new Error("Channel name is required.");
+      }
+      if (!payloadToInsert.channelreff) {
+        throw new Error(`${channelLabel} is required.`);
+      }
+      if (!payloadToInsert.activitydate) {
+        throw new Error("Activity date is required.");
+      }
+      if (!payloadToInsert.lead) {
+        throw new Error("Lead is required.");
+      }
+
+      const formData = new FormData();
+      formData.append("lead", payloadToInsert.lead);
+      formData.append("channelname", payloadToInsert.channelname);
+      formData.append("channelreff", payloadToInsert.channelreff);
+      formData.append("activitydate", payloadToInsert.activitydate);
+      formData.append("status", payloadToInsert.status || "");
+      formData.append("summary", payloadToInsert.summary || "");
+
+      if (payloadToInsert.channelname === 4) {
+        if (!fileList || fileList.length === 0) {
+          throw new Error("A file is required.");
+        }
+
+        const file = fileList[0]?.originFileObj;
+        if (!file) {
+          throw new Error("File upload failed. Please try again.");
+        }
+
+        formData.append("files", file);
+      }
+
+      const response = await LeadActivityFetch.update(data.id, formData);
+
+      const resData = updateResponseHandler(response, notify);
+
+      if (resData) {
+        router.push(`/super-admin/sales-activity/${title}/${resData}`);
+      }
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      setIsLoadingSubmit(false);
+    }
+  };
+
+  return (
+    <>
+      <Layout pageTitle="">
+        <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex justify-between items-center">
+            <p className="text-xl lg:text-2xl font-semibold text-blue-6">
+              Edit Activity
+            </p>
+          </div>
+
+          {!isLoading ? (
+            <>
+              {data?.id ? (
+                <>
+                  <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+                    <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+                      <div className="w-full lg:w-1/2 flex gap-1">
+                        <Button
+                          icon={<CloseOutlined />}
+                          onClick={() => router.back()}
+                        >
+                          {isLargeScreen ? "Cancel" : ""}
+                        </Button>
+                      </div>
+                      <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+                        <Button
+                          type={"primary"}
+                          icon={<SaveOutlined />}
+                          onClick={handleSubmit}
+                        >
+                          {isLargeScreen ? "Save" : ""}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <InputForm
+                    title="primary"
+                    type="SET_PRIMARY"
+                    payload={state.payloadPrimary}
+                    data={[
+                      {
+                        key: "lead",
+                        input: "select",
+                        isAlias: true,
+                        options: leadOptions || [],
+                        rules: [
+                          { required: true, message: `Lead is required` },
+                        ],
+                      },
+                      {
+                        key: "activitydate",
+                        input: "datetime",
+                        isAlias: true,
+                        rules: [
+                          {
+                            required: true,
+                            message: `Activity Date is required`,
+                          },
+                        ],
+                      },
+                      {
+                        key: "channelname",
+                        input: "select",
+                        isAlias: true,
+                        options: channelOptions,
+                        rules: [
+                          {
+                            required: true,
+                            message: `Channel Name is required`,
+                          },
+                        ],
+                      },
+                      {
+                        key: "channelreff",
+                        input:
+                          state.payloadPrimary.channelname == 4
+                            ? "text"
+                            : "input",
+                        labeled: channelLabel,
+                        rules: [
+                          {
+                            required: true,
+                            message: `Channel Reff is required`,
+                          },
+                        ],
+                      },
+                      {
+                        key: "status",
+                        input: "input",
+                        isAlias: true,
+                      },
+                      {
+                        key: "summary",
+                        input: "text",
+                        isAlias: true,
+                      },
+                    ]}
+                    aliases={leadActAliases}
+                    onChange={(type, payload) => {
+                      dispatch({ type, payload });
+
+                      const label = () => {
+                        switch (payload.channelname) {
+                          case 1:
+                            return "Phone Number";
+                          case 2:
+                            return "Email";
+                          case 3:
+                            return "PIC";
+                          case 4:
+                            return "Lead Address";
+                        }
+                      };
+                      setChannelLabel(label);
+                    }}
+                  />
+                </>
+              ) : (
+                <div className="w-full h-96">
+                  <EmptyCustom />
+                </div>
+              )}
+            </>
+          ) : (
+            <LoadingSpin />
+          )}
+        </div>
+      </Layout>
+      {isLoadingSubmit && <LoadingSpinProcessing />}
+      {contextNotify}
+    </>
+  );
+}
