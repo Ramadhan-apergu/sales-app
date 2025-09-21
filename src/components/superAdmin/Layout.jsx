@@ -29,6 +29,8 @@ import {
   TeamOutlined,
   UnlockOutlined,
   StockOutlined,
+  AimOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { PiSpeedometer, PiSwap } from "react-icons/pi";
 import { HiOutlineFolder, HiOutlinePrinter } from "react-icons/hi";
@@ -47,6 +49,7 @@ const headerItems = [
   { key: `${prefix}/inventory`, label: "Inventory" },
   { key: `${prefix}/report`, label: "Report" },
   { key: `${prefix}/access-control`, label: "Access Control" },
+  { key: `${prefix}/sales-activity`, label: "Sales Activity" },
 ];
 
 const siderMenuPerPage = {
@@ -143,6 +146,28 @@ const siderMenuPerPage = {
       icon: <TeamOutlined />,
     },
   ],
+  "/sales-activity": [
+    {
+      key: "/sales-activity/target",
+      label: "Target",
+      icon: <AimOutlined />,
+    },
+    {
+      key: "/sales-activity/leads",
+      label: "Leads",
+      icon: <TeamOutlined />,
+    },
+    {
+      key: "/sales-activity/lead-activity",
+      label: "Lead Activity",
+      icon: <CheckCircleOutlined />,
+    },
+    {
+      key: "/sales-activity/log-activity",
+      label: "Log Activity",
+      icon: <UnorderedListOutlined />,
+    },
+  ],
 };
 const menuItems = [
   {
@@ -236,7 +261,7 @@ const menuItems = [
   },
 ];
 
-const LayoutTesting = ({ children }) => {
+const LayoutAdmin = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const {
@@ -321,7 +346,10 @@ const LayoutTesting = ({ children }) => {
   }
 
   return (
-    <Layout style={{ width: "100%", minHeight: "100dvh" }} className="print:hidden">
+    <Layout
+      style={{ width: "100%", minHeight: "100dvh" }}
+      className="print:hidden"
+    >
       <Header
         style={{ padding: 0, gap: "2rem" }}
         className="flex items-center justify-between print:hidden"
@@ -334,7 +362,7 @@ const LayoutTesting = ({ children }) => {
           />
         </div>
 
-        <div className="hidden w-[700px] lg:block">
+        <div className="hidden w-[750px] lg:block">
           <Menu
             theme="dark"
             mode="horizontal"
@@ -385,7 +413,7 @@ const LayoutTesting = ({ children }) => {
               className={`layout-sider ${
                 isLargeScreen ? "block-sider" : "hidden-sider"
               }`}
-              style={{background: colorBgContainer}}
+              style={{ background: colorBgContainer }}
             >
               <Menu
                 onClick={handleNavSider}
@@ -440,4 +468,4 @@ const LayoutTesting = ({ children }) => {
   );
 };
 
-export default LayoutTesting;
+export default LayoutAdmin;

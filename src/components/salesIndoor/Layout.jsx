@@ -29,6 +29,7 @@ import {
   TeamOutlined,
   UnlockOutlined,
   StockOutlined,
+  AimOutlined,
 } from "@ant-design/icons";
 import { PiSpeedometer, PiSwap } from "react-icons/pi";
 import { HiOutlineFolder, HiOutlinePrinter } from "react-icons/hi";
@@ -46,7 +47,7 @@ const headerItems = [
   { key: `${prefix}/master-data`, label: "Master Data" },
   { key: `${prefix}/inventory`, label: "Inventory" },
   { key: `${prefix}/report`, label: "Report" },
-//   { key: `${prefix}/access-control`, label: "Access Control" },
+  { key: `${prefix}/sales-activity`, label: "Sales Activity" },
 ];
 
 const siderMenuPerPage = {
@@ -136,13 +137,18 @@ const siderMenuPerPage = {
       icon: <BarChartOutlined />,
     },
   ],
-//   "/access-control": [
-//     {
-//       key: "/access-control/user",
-//       label: "User",
-//       icon: <TeamOutlined />,
-//     },
-//   ],
+  "/sales-activity": [
+    {
+      key: "/sales-activity/target",
+      label: "Target",
+      icon: <AimOutlined />,
+    },
+    {
+      key: "/sales-activity/leads",
+      label: "Leads",
+      icon: <TeamOutlined />,
+    },
+  ],
 };
 const menuItems = [
   {
@@ -236,7 +242,7 @@ const menuItems = [
   },
 ];
 
-const LayoutTesting = ({ children }) => {
+const LayoutSalesIndoor = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const {
@@ -440,4 +446,4 @@ const LayoutTesting = ({ children }) => {
   );
 };
 
-export default LayoutTesting;
+export default LayoutSalesIndoor;

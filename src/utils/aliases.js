@@ -363,3 +363,35 @@ export const userAliasesEdit = {
   roleid: "Role Name",
   password: "New Password",
 };
+
+export const targetAliases = {
+  startdate: "Start Date",
+  enddate: "End Date",
+  totaltarget: "Total Target",
+  address: "Address",
+  description: "Description",
+  roleid: "Role",
+  notes: "Notes",
+};
+
+export const leadAliases = {
+  ownername: "Owner Name",
+  phone: "Phone Number",
+  address: "Address",
+  email: "Email",
+  companyname: "Company",
+  city: "City",
+  state: "State",
+  addedon: "Added On",
+};
+
+export const leadActAliases = {
+  lead_name: "Lead Name",
+  activitydate: "Activity Date",
+  channelnamestr: "Channel Name",
+  channelname: "Channel Name",
+  channelreff: "Channel Ref",
+  companyname: "Company",
+  summary: "Summary",
+  visitdoc: "Visit Doc",
+};

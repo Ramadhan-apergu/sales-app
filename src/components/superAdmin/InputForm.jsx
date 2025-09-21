@@ -72,6 +72,7 @@ export default function InputForm({
                 input,
                 options = [],
                 isAlias = false,
+                labeled = null,
                 props = {},
                 rules = [],
                 disabled = false,
@@ -80,11 +81,11 @@ export default function InputForm({
                 hidden = false,
                 cursorDisable = false,
                 accounting = false,
-                number = false
+                number = false,
               },
               i
             ) => {
-              const label = isAlias ? aliases[key] || key : key;
+              const label = labeled ? labeled : isAlias ? aliases[key] || key : key;
 
               let inputComponent;
               switch (input) {
@@ -146,6 +147,18 @@ export default function InputForm({
                       {...props}
                       style={{ width: "100%" }}
                       format={props?.format || "DD-MM-YYYY"}
+                      disabled={isReadOnly || disabled || isRead}
+                      placeholder={placeholder}
+                    />
+                  );
+                  break;
+                case "datetime":
+                  inputComponent = (
+                    <DatePicker
+                      {...props}
+                      style={{ width: "100%" }}
+                      showTime={{ format: "HH:mm" }}
+                      format={props?.format || "DD-MM-YYYY HH:mm"}
                       disabled={isReadOnly || disabled || isRead}
                       placeholder={placeholder}
                     />
