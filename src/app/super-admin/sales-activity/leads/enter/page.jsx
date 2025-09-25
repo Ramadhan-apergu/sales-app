@@ -307,7 +307,7 @@ export default function Enter() {
               },
               {
                 key: "addedon",
-                input: "date",
+                input: "datetime",
                 isAlias: true,
                 rules: [{ required: true, message: `Added on is required` }],
               },

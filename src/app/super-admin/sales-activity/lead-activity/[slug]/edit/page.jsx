@@ -52,6 +52,8 @@ import TargetFetch from "@/modules/salesApi/crm/target";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -76,6 +78,7 @@ export default function Enter() {
       lead_name: "",
       summary: "",
       visitdoc: "",
+      status: "",
     },
   };
 
@@ -162,7 +165,7 @@ export default function Enter() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
-        activitydate: dayjs(data.activitydate) || "",
+        activitydate: dayjs.utc(data.activitydate) || "",
         channelname: data.channelname,
         channelnamestr: data.channelnamestr,
         channelreff: data.channelreff,
@@ -174,6 +177,7 @@ export default function Enter() {
         lead_name: data.lead_name,
         summary: data.summary,
         visitdoc: data.visitdoc,
+        status: data.status,
       },
     });
 
@@ -244,6 +248,47 @@ export default function Enter() {
       setIsLoadingSubmit(false);
     }
   };
+
+  const statusOptions = [
+    [
+      {
+        value: "answered",
+        label: "Answered",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      {
+        value: "sent",
+        label: "Sent",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      {
+        value: "scheduled",
+        label: "Scheduled",
+      },
+      {
+        value: "rescheduled",
+        label: "Re-Scheduled",
+      },
+      {
+        value: "canceled",
+        label: "Canceled",
+      },
+      {
+        value: "done",
+        label: "Done",
+      },
+    ],
+  ];
 
   return (
     <>
@@ -333,8 +378,11 @@ export default function Enter() {
                       },
                       {
                         key: "status",
-                        input: "input",
+                        input: "select",
                         isAlias: true,
+                        options:
+                          statusOptions[state.payloadPrimary.channelname - 1],
+                        hidden: state.payloadPrimary.channelname == 4,
                       },
                       {
                         key: "summary",
@@ -344,7 +392,18 @@ export default function Enter() {
                     ]}
                     aliases={leadActAliases}
                     onChange={(type, payload) => {
-                      dispatch({ type, payload });
+                      let updatePayload = payload;
+                      if (
+                        updatePayload.channelname !=
+                        state.payloadPrimary.channelname
+                      ) {
+                        updatePayload = {
+                          ...updatePayload,
+                          status: "",
+                          channelreff: "",
+                        };
+                      }
+                      dispatch({ type, payload: updatePayload });
 
                       const label = () => {
                         switch (payload.channelname) {

@@ -52,6 +52,8 @@ import TargetFetch from "@/modules/salesApi/crm/target";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
 import UserManageFetch from "@/modules/salesApi/userManagement";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -145,7 +147,7 @@ export default function Enter() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
-        addedon: dayjs(data.addedon),
+        addedon: dayjs.utc(data.addedon),
         addr1: data.addr1,
         city: data.city,
         companyname: data.companyname,
@@ -417,7 +419,7 @@ export default function Enter() {
                       },
                       {
                         key: "addedon",
-                        input: "date",
+                        input: "datetime",
                         isAlias: true,
                         rules: [
                           { required: true, message: `Added on is required` },
