@@ -45,7 +45,8 @@ function Lead() {
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [statusList, setStatusList] = useState([{ value: "", label: "All" }]);
   const [modal, contextHolder] = Modal.useModal();
   const title = "leads";
   const { notify, contextHolder: notificationContextHolder } =
@@ -73,6 +74,34 @@ function Lead() {
 
     fetchData();
   }, [page, limit, pathname, statusFilter]);
+
+  useEffect(() => {
+    fetchFilterList();
+  }, []);
+
+  const fetchFilterList = async () => {
+    try {
+      setIsloading(true);
+
+      const response = await LeadsFetch.getStages();
+
+      const resData = getResponseHandler(response, notify);
+
+      if (resData) {
+        setStatusList((prev) => [
+          ...prev,
+          ...resData.map((data) => ({
+            value: data.name.toLowerCase() || "",
+            label: data.name || "",
+          })),
+        ]);
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    } finally {
+      setIsloading(false);
+    }
+  };
 
   const handleEdit = (record) => {
     router.push(`/super-admin/sales-activity/${title}/${record.id}/edit`);
@@ -173,16 +202,11 @@ function Lead() {
                 Status
               </label>
               <Select
-                defaultValue="all"
+                defaultValue={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e);
                 }}
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "partially paid", label: "Partially Paid" },
-                  { value: "paid in full", label: "Paid in Full" },
-                ]}
+                options={statusList}
                 styles={{
                   popup: {
                     root: {

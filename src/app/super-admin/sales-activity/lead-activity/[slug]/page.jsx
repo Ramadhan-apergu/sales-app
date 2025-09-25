@@ -75,6 +75,7 @@ export default function Enter() {
       lead_name: "",
       summary: "",
       visitdoc: "",
+      status: "",
     },
   };
 
@@ -142,6 +143,7 @@ export default function Enter() {
         lead_name: data.lead_name,
         summary: data.summary,
         visitdoc: data.visitdoc,
+        status: data.status,
       },
     });
 
@@ -159,7 +161,7 @@ export default function Enter() {
     };
     setChannelLabel(label);
   };
-  
+
   const [modalDelete, setModalDelete] = useState(false);
 
   const dropdownItems = [
@@ -278,6 +280,12 @@ export default function Enter() {
                             : "input",
 
                         labeled: channelLabel,
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "status",
+                        input: "input",
                         isAlias: true,
                         isRead: true,
                       },

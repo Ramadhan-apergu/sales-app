@@ -27,6 +27,7 @@ import InvoiceFetch from "@/modules/salesApi/invoice";
 import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
+import LeadsFetch from "@/modules/salesApi/crm/leads";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -45,9 +46,55 @@ function Activity() {
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("");
   const [channelFilter, setChannelFilter] = useState("");
   const [modal, contextHolder] = Modal.useModal();
+  const [statusList, setStatusList] = useState([]);
+
+  const statusOptions = [
+    [
+      { value: "", label: "All" },
+      {
+        value: "answered",
+        label: "Answered",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      { value: "", label: "All" },
+      {
+        value: "sent",
+        label: "Sent",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      { value: "", label: "All" },
+      {
+        value: "scheduled",
+        label: "Scheduled",
+      },
+      {
+        value: "rescheduled",
+        label: "Re-Scheduled",
+      },
+      {
+        value: "canceled",
+        label: "Canceled",
+      },
+      {
+        value: "done",
+        label: "Done",
+      },
+    ],
+  ];
+
   const title = "lead-activity";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -166,16 +213,11 @@ function Activity() {
                 Status
               </label>
               <Select
-                defaultValue="all"
+                value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e);
                 }}
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "partially paid", label: "Partially Paid" },
-                  { value: "paid in full", label: "Paid in Full" },
-                ]}
+                options={statusList}
                 styles={{
                   popup: {
                     root: {
@@ -195,6 +237,8 @@ function Activity() {
                 defaultValue=""
                 onChange={(e) => {
                   setChannelFilter(e);
+                  setStatusFilter("");
+                  setStatusList(statusOptions[Number(e) - 1]);
                 }}
                 options={[
                   { value: "", label: "All" },

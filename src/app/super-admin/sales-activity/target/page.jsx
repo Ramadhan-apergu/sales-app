@@ -197,8 +197,7 @@ function Target() {
                 options={[
                   { value: "all", label: "All" },
                   { value: "open", label: "Open" },
-                  { value: "partially paid", label: "Partially Paid" },
-                  { value: "paid in full", label: "Paid in Full" },
+                  { value: "close", label: "Close" },
                 ]}
                 styles={{
                   popup: {
