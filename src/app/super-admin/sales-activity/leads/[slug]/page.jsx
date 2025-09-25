@@ -47,7 +47,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import { leadAliases, paymentAliases, targetAliases } from "@/utils/aliases";
-import { formatDateToShort } from "@/utils/formatDate";
+import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
@@ -134,7 +134,7 @@ export default function Enter() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
-        addedon: formatDateToShort(data.addedon),
+        addedon: formatDateTimeToShort(data.addedon),
         addr1: data.addr1,
         city: data.city,
         companyname: data.companyname,

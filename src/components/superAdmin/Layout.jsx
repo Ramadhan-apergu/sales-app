@@ -148,6 +148,11 @@ const siderMenuPerPage = {
   ],
   "/sales-activity": [
     {
+      key: "/sales-activity/dashboard",
+      label: "Dashboard",
+      icon: <DashboardOutlined />,
+    },
+    {
       key: "/sales-activity/target",
       label: "Target",
       icon: <AimOutlined />,
