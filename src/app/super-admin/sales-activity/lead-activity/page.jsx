@@ -210,27 +210,6 @@ function Activity() {
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
-                Status
-              </label>
-              <Select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e);
-                }}
-                options={statusList}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 150,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
-                dropdownAlign={{ points: ["tr", "br"] }}
-              />
-            </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
                 Channel
               </label>
               <Select
@@ -258,6 +237,29 @@ function Activity() {
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
+            {channelFilter != "" && (
+              <div className="flex flex-col justify-start items-start gap-1">
+                <label className="hidden lg:block text-sm font-semibold leading-none">
+                  Status
+                </label>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e);
+                  }}
+                  options={statusList}
+                  styles={{
+                    popup: {
+                      root: {
+                        minWidth: 150,
+                        whiteSpace: "nowrap",
+                      },
+                    },
+                  }}
+                  dropdownAlign={{ points: ["tr", "br"] }}
+                />
+              </div>
+            )}
           </div>
         </div>
         {!isLoading ? (

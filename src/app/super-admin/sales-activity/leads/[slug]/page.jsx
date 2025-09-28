@@ -250,9 +250,13 @@ export default function Enter() {
                             fontSize: "16px",
                           }}
                           color={
-                            ["open"].includes(data?.status.toLowerCase())
+                            ["qualified"].includes(data?.status.toLowerCase())
                               ? "green"
-                              : ["pending"].includes(data?.status.toLowerCase())
+                              : [
+                                  "engaged",
+                                  "prospecting",
+                                  "Negotiating",
+                                ].includes(data?.status.toLowerCase())
                               ? "orange"
                               : ["closed"].includes(data?.status.toLowerCase())
                               ? "red"
