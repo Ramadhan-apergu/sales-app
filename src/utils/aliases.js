@@ -383,6 +383,7 @@ export const leadAliases = {
   city: "City",
   state: "State",
   addedon: "Added On",
+  stageid: "Status",
 };
 
 export const leadActAliases = {

@@ -210,6 +210,10 @@ export default function Enter() {
         throw new Error("Company is required.");
       }
 
+      await LeadsFetch.updateStaged(data.id, {
+        stageid: payloadToInsert.stageid,
+      });
+
       const response = await LeadsFetch.update(data.id, payloadToInsert);
 
       const resData = updateResponseHandler(response, notify);
@@ -401,6 +405,7 @@ export default function Enter() {
                         key: "stageid",
                         input: "select",
                         options: stageOptions,
+                        isAlias: true
                       },
                       {
                         key: "addr1",
