@@ -91,7 +91,7 @@ function Lead() {
         setStatusList((prev) => [
           ...prev,
           ...resData.map((data) => ({
-            value: data.name.toLowerCase() || "",
+            value: data.id,
             label: data.name || "",
           })),
         ]);
@@ -128,6 +128,12 @@ function Lead() {
       fixed: "left",
     },
     {
+      title: "Company Name",
+      dataIndex: "companyname",
+      key: "companyname",
+      align: "center",
+    },
+    {
       title: "Owner",
       dataIndex: "ownername",
       key: "ownername",
@@ -141,9 +147,11 @@ function Lead() {
       render: (text, record) => (
         <Tag
           color={
-            ["prospecting"].includes(record.status.toLowerCase())
+            ["qualified"].includes(record.status.toLowerCase())
               ? "green"
-              : ["pending", "negotiation"].includes(record.status.toLowerCase())
+              : ["engaged", "prospecting", "Negotiating"].includes(
+                  record.status.toLowerCase()
+                )
               ? "orange"
               : ["closed"].includes(record.status.toLowerCase())
               ? "red"

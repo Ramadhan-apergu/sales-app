@@ -131,6 +131,11 @@ export default function Enter() {
           throw new Error("File upload failed. Please try again.");
         }
 
+        const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
+        if (file.size > maxSize) {
+          throw new Error("File size must be less than 2MB.");
+        }
+
         formData.append("files", file);
       }
 
@@ -318,7 +323,11 @@ export default function Enter() {
               if (
                 updatePayload.channelname != state.payloadPrimary.channelname
               ) {
-                updatePayload = { ...updatePayload, status: "", channelreff: "" };
+                updatePayload = {
+                  ...updatePayload,
+                  status: "",
+                  channelreff: "",
+                };
               }
               dispatch({ type, payload: updatePayload });
 

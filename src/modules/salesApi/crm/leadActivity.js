@@ -14,7 +14,9 @@ export default class LeadActivityFetch extends ProcessFetch {
 
   static async create(payload) {
     try {
-      const response = await this.axios.post(`/crm/lead-activity`, payload);
+      const response = await this.axios.post(`/crm/lead-activity`, payload, {
+        isMultipart: true,
+      });
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

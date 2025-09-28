@@ -100,6 +100,12 @@ function Lead() {
       fixed: "left",
     },
     {
+      title: "Company Name",
+      dataIndex: "companyname",
+      key: "companyname",
+      align: "center",
+    },
+    {
       title: "Owner",
       dataIndex: "ownername",
       key: "ownername",

@@ -39,6 +39,15 @@ export default class LeadsFetch extends ProcessFetch {
     }
   }
 
+    static async updateStaged(id, payload) {
+    try {
+      const response = await this.axios.put(`/crm/lead-stage/${id}`, payload);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
   static async delete(id) {
     try {
       const response = await this.axios.delete(`/crm/lead/${id}`);
