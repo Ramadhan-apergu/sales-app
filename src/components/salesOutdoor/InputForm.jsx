@@ -47,8 +47,9 @@ export default function InputForm({
         className={`w-full grid grid-cols-1 ${isSingleCol ? 'lg:grid-cols-1' : 'lg:grid-cols-2'} px-4 gap-4`}
         onValuesChange={handleValuesChange}
       >
-        {data.map(({ key, input, options = [], isAlias = false, props = {}, rules = [] , disabled = false, isRead = false, placeholder = undefined, hidden = false}) => {
-          const label = isAlias ? aliases[key] || key : key;
+        {data.map(({ key, input, options = [], isAlias = false, props = {}, rules = [] , disabled = false, isRead = false, placeholder = undefined, hidden = false, 
+                labeled = null}) => {
+          const label = labeled ? labeled : isAlias ? aliases[key] || key : key;
 
           let inputComponent;
           switch (input) {
