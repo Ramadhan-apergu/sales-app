@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useReducer, Suspense } from 'react';
+import { useState, useEffect, useReducer, Suspense, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from "@/components/salesOutdoor/Layout";
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
@@ -12,8 +12,11 @@ import { leadActAliases } from "@/utils/aliases";
 import dayjs from "dayjs";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
-function EditLeadActivityPageContent({ slug }) {
+function EditLeadActivityPageContent({ params }) {
+    const { slug } = use(params); 
     const router = useRouter();
     const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
     const [channelLabel, setChannelLabel] = useState("Phone Number");
@@ -109,6 +112,47 @@ function EditLeadActivityPageContent({ slug }) {
         { value: 4, label: "Record Visit" },
     ];
 
+    const statusOptions = [
+        [
+        {
+            value: "answered",
+            label: "Answered",
+        },
+        {
+            value: "no response",
+            label: "No Response",
+        },
+        ],
+        [
+        {
+            value: "sent",
+            label: "Sent",
+        },
+        {
+            value: "no response",
+            label: "No Response",
+        },
+        ],
+        [
+        {
+            value: "scheduled",
+            label: "Scheduled",
+        },
+        {
+            value: "rescheduled",
+            label: "Re-Scheduled",
+        },
+        {
+            value: "canceled",
+            label: "Canceled",
+        },
+        {
+            value: "done",
+            label: "Done",
+        },
+        ],
+    ];
+
     const fetchDataLead = async () => {
         try {
             const response = await LeadsFetch.get(0, 10000, "");
@@ -146,7 +190,7 @@ function EditLeadActivityPageContent({ slug }) {
                         lead: resData.lead,
                         channelname: resData.channelname,
                         channelreff: resData.channelreff,
-                        activitydate: dayjs(resData.activitydate),
+                        activitydate: dayjs.utc(resData.activitydate),
                         status: resData.status,
                         summary: resData.summary,
                     }
@@ -276,8 +320,11 @@ function EditLeadActivityPageContent({ slug }) {
                                             },
                                             {
                                                 key: "status",
-                                                input: "input",
+                                                input: "select",
                                                 isAlias: true,
+                                                options:
+                                                statusOptions[state.payloadPrimary.channelname - 1],
+                                                hidden: state.payloadPrimary.channelname == 4,
                                             },
                                             {
                                                 key: "summary",
@@ -366,7 +413,7 @@ function EditLeadActivityPageContent({ slug }) {
 export default function EditLeadActivityPage({ params }) {
     return (
         <Suspense fallback={<div className="flex justify-center items-center h-screen w-full"><Spin size="large" /></div>}>
-            <EditLeadActivityPageContent slug={params.slug} />
+            <EditLeadActivityPageContent params={params} />
         </Suspense>
     );
 }

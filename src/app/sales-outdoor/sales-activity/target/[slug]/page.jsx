@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from "@/components/salesOutdoor/Layout";
 import FixedHeaderBar from "@/components/salesOutdoor/FixedHeaderBar";
@@ -10,7 +10,8 @@ import { getResponseHandler } from "@/utils/responseHandlers";
 import { formatDateToShort } from "@/utils/formatDate";
 import Link from 'next/link';
 
-function TargetDetailPageContent({ slug }) {
+function TargetDetailPageContent({ params }) {
+    const { slug } = use(params); 
     const router = useRouter();
     const [target, setTarget] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -161,7 +162,7 @@ function TargetDetailPageContent({ slug }) {
 export default function TargetDetailPage({ params }) {
     return (
         <Suspense fallback={<div className="flex justify-center items-center h-screen w-full"><Spin size="large" /></div>}>
-            <TargetDetailPageContent slug={params.slug} />
+            <TargetDetailPageContent params={params} />
         </Suspense>
     );
 }

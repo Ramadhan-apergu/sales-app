@@ -131,9 +131,10 @@ function CreateLeadPageContent() {
                                                 rules: [{ required: true, message: `Company is required` }],
                                             },
                                             {
-                                                key: "addr1",
+                                                key: "address",
                                                 input: "text",
                                                 isAlias: true,
+                                                labeled: "Address"
                                             },
                                             {
                                                 key: "city",

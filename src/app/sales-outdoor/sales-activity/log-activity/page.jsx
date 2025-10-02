@@ -149,15 +149,15 @@ function LogActivityPageContent() {
 
                 <div className="w-full relative">
                     <div className="w-full py-4 flex justify-center items-center gap-2 px-4 bg-gray-3">
+                        <div>Log Type Filter</div>
                         <Select
-                            className="w-full"
+                            className="flex-1"
                             defaultValue="all"
                             onChange={(e) => setLogTypeFilter(e)}
                             options={logTypeOptions}
                             styles={{
                                 popup: {
                                     root: {
-                                        minWidth: 150,
                                         whiteSpace: "nowrap",
                                     },
                                 },
@@ -174,17 +174,10 @@ function LogActivityPageContent() {
                         <Empty className="p-8" description="No Log Activities found" />
                     ) : (
                         logs.map(log => (
-                            <Link
+                            <CardList
                                 key={log.id}
-                                href={`/sales-outdoor/sales-activity/log-activity/${log.id}`}
-                                shallow
-                                scroll={false}
-                            >
-                                <CardList
-                                    key={log.id}
-                                    data={log}
-                                />
-                            </Link>
+                                data={log}
+                            />
                         ))
                     )}
 
