@@ -300,6 +300,7 @@ export default function Enter() {
                         input: "text",
                         isAlias: true,
                         isRead: true,
+                        hidden: state.payloadPrimary.channelname != 4
                       },
                     ]}
                     aliases={leadActAliases}
@@ -307,35 +308,39 @@ export default function Enter() {
                       dispatch({ type, payload });
                     }}
                   />
-                  <div className="w-full flex flex-col gap-8">
-                    <div className="w-full flex flex-col gap-2">
-                      <Divider
-                        style={{
-                          margin: "0",
-                          textTransform: "capitalize",
-                          borderColor: "#1677ff",
-                        }}
-                        orientation="left"
-                      >
-                        Preview
-                      </Divider>
-                      <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                        <Form layout="vertical">
-                          <Form.Item
-                            label={<span className="capitalize">Preview</span>}
-                            style={{ margin: 0 }}
-                            className="w-full"
-                            labelCol={{ style: { padding: 0 } }}
-                          >
-                            <img
-                              src={state.payloadPrimary.visitdoc}
-                              alt="Visit Doc"
-                            />
-                          </Form.Item>
-                        </Form>
+                  {state.payloadPrimary.channelname == 4 && (
+                    <div className="w-full flex flex-col gap-8">
+                      <div className="w-full flex flex-col gap-2">
+                        <Divider
+                          style={{
+                            margin: "0",
+                            textTransform: "capitalize",
+                            borderColor: "#1677ff",
+                          }}
+                          orientation="left"
+                        >
+                          Preview
+                        </Divider>
+                        <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                          <Form layout="vertical">
+                            <Form.Item
+                              label={
+                                <span className="capitalize">Preview</span>
+                              }
+                              style={{ margin: 0 }}
+                              className="w-full"
+                              labelCol={{ style: { padding: 0 } }}
+                            >
+                              <img
+                                src={state.payloadPrimary.visitdoc || null}
+                                alt="Visit Doc"
+                              />
+                            </Form.Item>
+                          </Form>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </>
               ) : (
                 <div className="w-full h-96">

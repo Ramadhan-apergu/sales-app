@@ -36,7 +36,8 @@ export default class LeadActivityFetch extends ProcessFetch {
     try {
       const response = await this.axios.put(
         `/crm/lead-activity/${id}`,
-        payload
+        payload,
+        { isMultipart: true }
       );
       return new this().processResponse(response);
     } catch (error) {
