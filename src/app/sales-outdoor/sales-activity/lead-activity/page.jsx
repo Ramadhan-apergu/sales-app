@@ -62,13 +62,58 @@ function LeadActivityPageContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [channelFilter, setChannelFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState("");
+    const [channelFilter, setChannelFilter] = useState("");
+    const [statusList, setStatusList] = useState([]);
 
     const [pagination, setPagination] = useState({ offset: 0, limit: DEFAULT_LIMIT });
     const [hasMore, setHasMore] = useState(true);
 
     const containerRef = useRef(null);
+
+    const statusOptions = [
+        [
+          { value: "", label: "All" },
+          {
+            value: "answered",
+            label: "Answered",
+          },
+          {
+            value: "no response",
+            label: "No Response",
+          },
+        ],
+        [
+          { value: "", label: "All" },
+          {
+            value: "sent",
+            label: "Sent",
+          },
+          {
+            value: "no response",
+            label: "No Response",
+          },
+        ],
+        [
+          { value: "", label: "All" },
+          {
+            value: "scheduled",
+            label: "Scheduled",
+          },
+          {
+            value: "rescheduled",
+            label: "Re-Scheduled",
+          },
+          {
+            value: "canceled",
+            label: "Canceled",
+          },
+          {
+            value: "done",
+            label: "Done",
+          },
+        ],
+    ];
 
     const fetchActivities = useCallback(async (isInitial = false, overrideOffset, overrideLimit) => {
         if (loading || (!isInitial && !hasMore)) return;
@@ -82,7 +127,7 @@ function LeadActivityPageContent() {
             const response = await LeadActivityFetch.get(
                 actualOffset,
                 actualLimit,
-                statusFilter === 'all' ? '' : statusFilter,
+                statusFilter,
                 channelFilter
             );
 
@@ -130,19 +175,22 @@ function LeadActivityPageContent() {
         }
     }, [fetchActivities, loading]);
 
+    const handleChannelChange = (value) => {
+        setChannelFilter(value);
+        setStatusFilter(""); 
+        if (value && statusOptions[Number(value) - 1]) {
+            setStatusList(statusOptions[Number(value) - 1]); 
+        } else {
+            setStatusList([]); 
+        }
+    };
+
     const channelOptions = [
         { value: "", label: "All" },
         { value: "1", label: "Phone" },
         { value: "2", label: "Email" },
         { value: "3", label: "Meetings" },
         { value: "4", label: "Record Visit" },
-    ];
-
-    const statusOptions = [
-        { value: "all", label: "All" },
-        { value: "completed", label: "Completed" },
-        { value: "scheduled", label: "Scheduled" },
-        { value: "cancelled", label: "Cancelled" },
     ];
 
     return (
@@ -156,31 +204,16 @@ function LeadActivityPageContent() {
                 <OverviewButtons />
 
                 <div className="w-full relative">
-                    <div className="w-full py-4 flex justify-center items-center gap-2 px-4 bg-gray-3">
+                    <div className={`w-full pt-4 ${channelFilter ? 'pb-1': 'pb-4'} flex justify-center items-center gap-2 px-4 bg-gray-3`}>
+                        <div>Channel Filter</div>
                         <Select
-                            className="w-full"
-                            defaultValue="all"
-                            onChange={(e) => setStatusFilter(e)}
-                            options={statusOptions}
-                            styles={{
-                                popup: {
-                                    root: {
-                                        minWidth: 150,
-                                        whiteSpace: "nowrap",
-                                    },
-                                },
-                            }}
-                            dropdownAlign={{ points: ["tr", "br"] }}
-                        />
-                        <Select
-                            className="w-full"
+                            className="flex-1"
                             defaultValue=""
-                            onChange={(e) => setChannelFilter(e)}
+                            onChange={handleChannelChange}
                             options={channelOptions}
                             styles={{
                                 popup: {
                                     root: {
-                                        minWidth: 150,
                                         whiteSpace: "nowrap",
                                     },
                                 },
@@ -188,6 +221,25 @@ function LeadActivityPageContent() {
                             dropdownAlign={{ points: ["tr", "br"] }}
                         />
                     </div>
+                    {channelFilter && 
+                        <div className="w-full pb-4 pt-1 flex justify-center items-center gap-2 px-4 bg-gray-3">
+                            <div>Status Filter</div>
+                            <Select
+                                className="flex-1"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e)}
+                                options={statusList}
+                                styles={{
+                                    popup: {
+                                        root: {
+                                            whiteSpace: "nowrap",
+                                        },
+                                    },
+                                }}
+                                dropdownAlign={{ points: ["tr", "br"] }}
+                            />
+                        </div>
+                    }
 
                     {loading && activities.length === 0 ? (
                         <div className="flex justify-center items-center p-8"><Spin /></div>
@@ -220,7 +272,7 @@ function LeadActivityPageContent() {
                     )}
 
                     <div className="fixed bottom-[12%] right-1/2 transform translate-x-1/2 max-w-md w-full flex justify-end pr-6 z-50">
-                        <Link href="/sales-outdoor/sales-activity/lead-activity/new">
+                        <Link href="/sales-outdoor/sales-activity/lead-activity/enter">
                             <FloatingButton />
                         </Link>
                     </div>

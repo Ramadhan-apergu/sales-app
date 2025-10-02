@@ -62,7 +62,8 @@ function LeadsPageContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [statusList, setStatusList] = useState([{ value: "", label: "All" }]);
 
     const [pagination, setPagination] = useState({ offset: 0, limit: DEFAULT_LIMIT });
     const [hasMore, setHasMore] = useState(true);
@@ -113,6 +114,37 @@ function LeadsPageContent() {
         fetchLeads(true, 0, DEFAULT_LIMIT);
     }, [statusFilter]);
 
+    const fetchFilterList = useCallback(async () => {
+        try {
+            const response = await LeadsFetch.getStages();
+            const resData = getResponseHandler(response, message.error);
+
+            if (resData) {
+                setStatusList(prev => {
+                    const existingValues = new Set(prev.map(item => item.value));
+                    const newOptions = resData
+                        .filter(data => !existingValues.has(data.id)) 
+                        .map(data => ({
+                            value: data.id,
+                            label: data.name || "",
+                        }));
+
+                    return [
+                        ...prev,
+                        ...newOptions,
+                    ];
+                });
+            }
+        } catch (error) {
+            setError(error.message || 'Failed to fetch stages');
+        } finally {
+        }
+    }, []); 
+
+    useEffect(() => {
+        fetchFilterList();
+    }, [fetchFilterList]); 
+    
     useEffect(() => {
         const handleScroll = () => {
             if (!containerRef.current) return;
@@ -140,22 +172,17 @@ function LeadsPageContent() {
 
                 <div className="w-full relative">
                     <div className="w-full py-4 flex justify-center items-center gap-2 px-4 bg-gray-3">
+                        <div>Status Filter</div>
                         <Select
-                            className="w-full"
-                            defaultValue="all"
+                            className="flex-1"
+                            defaultValue=""
                             onChange={(e) => {
                             setStatusFilter(e);
                             }}
-                            options={[
-                            { value: "all", label: "All" },
-                            { value: "open", label: "Open" },
-                            { value: "partially paid", label: "Partially Paid" },
-                            { value: "paid in full", label: "Paid in Full" },
-                            ]}
+                            options={statusList}
                             styles={{
                             popup: {
                                 root: {
-                                minWidth: 150,
                                 whiteSpace: "nowrap",
                                 },
                             },

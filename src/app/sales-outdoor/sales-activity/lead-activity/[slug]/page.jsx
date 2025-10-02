@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from "@/components/salesOutdoor/Layout";
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
@@ -9,8 +9,10 @@ import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
 import Link from 'next/link';
 import { EditOutlined, MoreOutlined } from '@ant-design/icons';
 import { getResponseHandler, deleteResponseHandler } from "@/utils/responseHandlers";
+import { formatDateTimeToShort } from "@/utils/formatDate";
 
-function LeadActivityDetailPageContent({ slug }) {
+function LeadActivityDetailPageContent({ params }) {
+    const { slug } = use(params); 
     const router = useRouter();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -190,7 +192,7 @@ function LeadActivityDetailPageContent({ slug }) {
                                             </div>
                                             <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                 <span className="text-gray-500">Activity Date:</span>
-                                                <span className="text-right">{activity.activitydate}</span>
+                                                <span className="text-right">{formatDateTimeToShort(activity.activitydate)}</span>
                                             </div>
                                             <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                 <span className="text-gray-500">Channel:</span>
@@ -209,26 +211,32 @@ function LeadActivityDetailPageContent({ slug }) {
                                                 </span>
                                             </div>
                                             <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                                                <span className="text-gray-500">Status:</span>
+                                                <span className="text-right">{activity.status}</span>
+                                            </div>
+                                            <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                 <span className="text-gray-500">Summary:</span>
                                                 <span className="text-right">{activity.summary}</span>
                                             </div>
-                                            <div className="flex justify-between border rounded-lg p-2 border-gray-300">
-                                                <span className="text-gray-500">Visit Document:</span>
-                                                <span className="text-right">
-                                                    {activity.visitdoc ? (
-                                                        <a 
-                                                            href={activity.visitdoc} 
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer"
-                                                            className="text-blue-600 hover:underline"
-                                                        >
-                                                            Open Document
-                                                        </a>
-                                                    ) : (
-                                                        '-'
-                                                    )}
-                                                </span>
-                                            </div>
+                                            {activity.channelname === 4 && 
+                                                <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                                                    <span className="text-gray-500">Visit Document:</span>
+                                                    <span className="text-right">
+                                                        {activity.visitdoc ? (
+                                                            <a 
+                                                                href={activity.visitdoc} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:underline"
+                                                            >
+                                                                Open Document
+                                                            </a>
+                                                        ) : (
+                                                            '-'
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -273,7 +281,7 @@ function LeadActivityDetailPageContent({ slug }) {
 export default function LeadActivityDetailPage({ params }) {
     return (
         <Suspense fallback={<div className="flex justify-center items-center h-screen w-full"><Spin size="large" /></div>}>
-            <LeadActivityDetailPageContent slug={params.slug} />
+            <LeadActivityDetailPageContent params={params} />
         </Suspense>
     );
 }
