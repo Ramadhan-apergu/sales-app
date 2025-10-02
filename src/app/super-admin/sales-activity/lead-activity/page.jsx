@@ -237,7 +237,7 @@ function Activity() {
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
-            {channelFilter != "" && (
+            {![4, ""].includes(channelFilter) && (
               <div className="flex flex-col justify-start items-start gap-1">
                 <label className="hidden lg:block text-sm font-semibold leading-none">
                   Status
