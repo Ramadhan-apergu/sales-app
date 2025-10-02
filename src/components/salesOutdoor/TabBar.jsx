@@ -1,6 +1,6 @@
 'use client';
 
-import { HiHome, HiOutlineHome } from "react-icons/hi";
+import { HiHome, HiOutlineHome, HiOutlineListBullet, HiListBullet } from "react-icons/hi2"; 
 import { HiOutlineTruck, HiTruck, HiOutlinePrinter, HiPrinter, HiOutlineClipboardDocumentList, HiClipboardDocumentList } from "react-icons/hi2";
 
 import Link from 'next/link';
@@ -44,14 +44,28 @@ export default function TabBar() {
         outline: HiOutlinePrinter,
       },
     },
+    {
+      path: '/sales-activity',
+      title: 'Activities',
+      icon: {
+        solid: HiListBullet,
+        outline: HiOutlineListBullet,
+      },
+    },
   ];
   
 
   return (
     <div className="h-full w-full flex justify-center items-center bg-gray-12">
       {items.map((item, index) => {
-          const fullPath = `${basePath}${item.path}`;
-          const isActive = pathname === fullPath;
+          let fullPath = `${basePath}${item.path}`;
+          let isActive = pathname.startsWith(fullPath);
+
+          if (item.title === 'Activities') {
+            fullPath = `${basePath}${item.path}/target`;
+            isActive = pathname.startsWith(`${basePath}${item.path}`);
+          }
+
           const Icon = isActive ? item.icon.solid : item.icon.outline;
 
         return (
@@ -64,7 +78,7 @@ export default function TabBar() {
                 )}
               >
                 <Icon className="w-5 h-5" />
-                <span>{item.title}</span>
+                <span className="text-xs">{item.title}</span>
               </div>
             </Link>
           </div>
