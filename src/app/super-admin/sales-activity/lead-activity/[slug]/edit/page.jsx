@@ -16,6 +16,7 @@ import {
   Table,
   Tag,
   Tooltip,
+  Upload,
 } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
@@ -194,6 +195,15 @@ export default function Enter() {
       }
     };
     setChannelLabel(label);
+
+    setFileList([
+      {
+        uid: "-1",
+        name: "visitdoc",
+        status: "done",
+        url: data.visitdoc,
+      },
+    ]);
   };
 
   const handleSubmit = async () => {
@@ -227,12 +237,22 @@ export default function Enter() {
           throw new Error("A file is required.");
         }
 
-        const file = fileList[0]?.originFileObj;
-        if (!file) {
-          throw new Error("File upload failed. Please try again.");
-        }
+        const fileObj = fileList[0];
 
-        formData.append("files", file);
+        if (fileObj.originFileObj) {
+          // user upload file baru
+          const file = fileObj.originFileObj;
+
+          const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
+          if (file.size > maxSize) {
+            throw new Error("File size must be less than 2MB.");
+          }
+
+          formData.append("files", file);
+        } else {
+          // file lama (hanya URL, tidak ada originFileObj)
+          formData.append("files", "");
+        }
       }
 
       const response = await LeadActivityFetch.update(data.id, formData);
@@ -289,6 +309,13 @@ export default function Enter() {
       },
     ],
   ];
+
+  const [fileList, setFileList] = useState([]);
+
+  const handleChangeFile = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+    console.log(fileList);
+  };
 
   return (
     <>
@@ -420,6 +447,62 @@ export default function Enter() {
                       setChannelLabel(label);
                     }}
                   />
+
+                  {state.payloadPrimary.channelname == 4 && (
+                    <div className="w-full flex flex-col gap-8">
+                      <div className="w-full flex flex-col gap-2">
+                        <Divider
+                          style={{
+                            margin: "0",
+                            textTransform: "capitalize",
+                            borderColor: "#1677ff",
+                          }}
+                          orientation="left"
+                        >
+                          Files
+                        </Divider>
+                        <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                          <Form layout="vertical">
+                            <Form.Item
+                              label={<span className="capitalize">Files</span>}
+                              style={{ margin: 0 }}
+                              className="w-full"
+                              labelCol={{ style: { padding: 0 } }}
+                              required
+                            >
+                              <Upload
+                                style={{ width: "100%" }}
+                                name="file"
+                                accept="image/*"
+                                maxCount={1}
+                                fileList={fileList}
+                                beforeUpload={(file) => {
+                                  const isImage =
+                                    file.type.startsWith("image/");
+                                  if (!isImage) {
+                                    notify(
+                                      "error",
+                                      "Failed",
+                                      "You can only upload image files!"
+                                    );
+                                    return Upload.LIST_IGNORE;
+                                  }
+                                  return false;
+                                }}
+                                onChange={({ fileList: newFileList }) =>
+                                  setFileList(newFileList)
+                                }
+                              >
+                                <Button style={{ width: "100%" }} block>
+                                  Select Image
+                                </Button>
+                              </Upload>
+                            </Form.Item>
+                          </Form>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="w-full h-96">
