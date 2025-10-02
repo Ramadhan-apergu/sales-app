@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { HiOutlineTicket, HiMiniUser, HiCalendarDays } from "react-icons/hi2"; // Changed icons for leads
+import { HiOutlineTicket, HiMiniUser, HiCalendarDays } from "react-icons/hi2";
 import { HiCheckCircle, HiClock, HiXCircle } from "react-icons/hi";
 
 function formatDate(isoString) {
@@ -13,7 +13,6 @@ function formatDate(isoString) {
   return `${day}/${month}/${year}`;
 }
 
-// Icon component is not directly used for leads status, but kept for potential future use or consistency
 function Icon({ title }) {
     let IconComponent = null;
     let style = ''
@@ -86,6 +85,10 @@ export default function CardList({ data }) {
                         <div className="w-full h-full flex flex-col justify-left items-start">
                             <p className="text-xs text-gray-12/70">Lead Name</p>
                             <p className="text-sm truncate w-full">{data?.name || '-'}</p>
+                        </div>
+                        <div className="w-full h-full flex flex-col justify-left items-start">
+                            <p className="text-xs text-gray-12/70">Company Name</p>
+                            <p className="text-sm truncate w-full">{data?.companyname || '-'}</p>
                         </div>
                     </div>
                 </div>

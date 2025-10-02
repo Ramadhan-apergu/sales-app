@@ -140,8 +140,9 @@ function TargetPageContent() {
 
                 <div className="w-full relative">
                     <div className="w-full py-4 flex justify-center items-center gap-2 px-4 bg-gray-3">
+                        <div>Status Filter</div>
                         <Select
-                            className="w-full"
+                            className="flex-1"
                             defaultValue="all"
                             onChange={(e) => {
                             setStatusFilter(e);
@@ -149,13 +150,11 @@ function TargetPageContent() {
                             options={[
                             { value: "all", label: "All" },
                             { value: "open", label: "Open" },
-                            { value: "partially paid", label: "Partially Paid" },
-                            { value: "paid in full", label: "Paid in Full" },
+                            { value: "close", label: "Close" },
                             ]}
                             styles={{
                             popup: {
                                 root: {
-                                minWidth: 150,
                                 whiteSpace: "nowrap",
                                 },
                             },

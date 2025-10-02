@@ -113,19 +113,45 @@ function CreateLeadActivityPageContent() {
     ];
 
     const statusOptions = [
-        {
-            value: "answered",
-            label: "Answered",
-        },
-        {
-            value: "sent",
-            label: "Sent",
-        },
-        {
-            value: "scheduled",
-            label: "Scheduled",
-        },
-    ];
+    [
+      {
+        value: "answered",
+        label: "Answered",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      {
+        value: "sent",
+        label: "Sent",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      {
+        value: "scheduled",
+        label: "Scheduled",
+      },
+      {
+        value: "rescheduled",
+        label: "Re-Scheduled",
+      },
+      {
+        value: "canceled",
+        label: "Canceled",
+      },
+      {
+        value: "done",
+        label: "Done",
+      },
+    ],
+  ];
 
     const fetchDataLead = async () => {
         try {
@@ -224,10 +250,12 @@ function CreateLeadActivityPageContent() {
                                                     },
                                                 ],
                                             },
-                                            {
+                                             {
                                                 key: "status",
-                                                input: "input",
+                                                input: "select",
                                                 isAlias: true,
+                                                options: statusOptions[state.payloadPrimary.channelname - 1],
+                                                hidden: state.payloadPrimary.channelname == 4,
                                             },
                                             {
                                                 key: "summary",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from "@/components/salesOutdoor/Layout";
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
@@ -14,7 +14,8 @@ import {
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 
-function LeadDetailPageContent({ slug }) {
+function LeadDetailPageContent({ params }) {
+    const { slug } = use(params);
     const router = useRouter();
     const [lead, setLead] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -226,22 +227,7 @@ function LeadDetailPageContent({ slug }) {
                                                 <span className="text-gray-500">Added On:</span>
                                                 <span className="text-right">{lead.addedon}</span>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Divider
-                                            style={{
-                                                marginBottom: "8px",
-                                                textTransform: "capitalize",
-                                                borderColor: "#1677ff",
-                                            }}
-                                            orientation="left"
-                                        >
-                                            Address
-                                        </Divider>
-                                        <div className="space-y-1 text-sm">
-                                            <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                                             <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                 <span className="text-gray-500">Address:</span>
                                                 <span className="text-right">{lead.addr1}</span>
                                             </div>
@@ -254,6 +240,7 @@ function LeadDetailPageContent({ slug }) {
                                                 <span className="text-right">{lead.state}</span>
                                             </div>
                                         </div>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -297,7 +284,7 @@ function LeadDetailPageContent({ slug }) {
 export default function LeadDetailPage({ params }) {
     return (
         <Suspense fallback={<div className="flex justify-center items-center h-screen w-full"><Spin size="large" /></div>}>
-            <LeadDetailPageContent slug={params.slug} />
+            <LeadDetailPageContent params={params} />
         </Suspense>
     );
 }

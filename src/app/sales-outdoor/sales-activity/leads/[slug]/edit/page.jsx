@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from "@/components/salesOutdoor/Layout";
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
@@ -13,12 +13,14 @@ import { leadAliases } from "@/utils/aliases";
 import dayjs from "dayjs";
 import { CheckOutlined } from "@ant-design/icons";
 
-function EditLeadPageContent({ slug }) {
+function EditLeadPageContent({ params }) {
+    const { slug } = use(params); 
     const router = useRouter();
     const [lead, setLead] = useState(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
+    const [stageOptions, setStageOptions] = useState([]);
     const [payload, setPayload] = useState({
         name: "",
         addedon: dayjs(new Date()),
@@ -29,6 +31,8 @@ function EditLeadPageContent({ slug }) {
         phone: "",
         state: "",
         owner: "",
+        status: "",
+        stageid: "",
     });
 
     useEffect(() => {
@@ -67,9 +71,30 @@ function EditLeadPageContent({ slug }) {
             }
         }
 
+
+        async function fetchStage() {
+            try {
+                const response = await LeadsFetch.getStages();
+                const resData = getResponseHandler(response, message.error); 
+                if (resData) {
+                    const dataMap = resData.map((stage) => ({
+                        ...stage,
+                        value: stage.id,
+                        label: stage.name,
+                    }));
+            
+                    setStageOptions(dataMap);
+                }
+            } catch (error) {
+                console.error('Error fetching stages', error);
+                message.error("Failed get data stages");
+            }
+        }
+
         if (slug) {
             fetchLead();
             fetchProfile();
+            fetchStage();
         }
     }, [slug]);
 
@@ -80,6 +105,13 @@ function EditLeadPageContent({ slug }) {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
+            
+            if (payload.stageid) {
+                await LeadsFetch.updateStaged(slug, {
+                    stageid: payload.stageid,
+                });
+            }
+            
             const response = await LeadsFetch.update(slug, payload);
             const resData = getResponseHandler(response, message.error);
 
@@ -187,9 +219,16 @@ function EditLeadPageContent({ slug }) {
                                                     rules: [{ required: true, message: `Company is required` }],
                                                 },
                                                 {
+                                                    key: "stageid",
+                                                    input: "select",
+                                                    options: stageOptions,
+                                                    isAlias: true
+                                                },
+                                                {
                                                     key: "addr1",
                                                     input: "text",
                                                     isAlias: true,
+                                                    labeled: "Address"
                                                 },
                                                 {
                                                     key: "city",
@@ -233,7 +272,7 @@ function EditLeadPageContent({ slug }) {
 export default function EditLeadPage({ params }) {
     return (
         <Suspense fallback={<div className="flex justify-center items-center h-screen w-full"><Spin size="large" /></div>}>
-            <EditLeadPageContent slug={params.slug} />
+            <EditLeadPageContent params={params} />
         </Suspense>
     );
 }

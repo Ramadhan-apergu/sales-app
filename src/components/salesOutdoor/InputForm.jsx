@@ -74,6 +74,18 @@ export default function InputForm({
                 />
               );
               break;
+            case "datetime":
+              inputComponent = (
+                <DatePicker
+                  {...props}
+                  style={{ width: "100%" }}
+                  showTime={{ format: "HH:mm" }}
+                  format={props?.format || "DD-MM-YYYY HH:mm"}
+                  disabled={isReadOnly || disabled || isRead}
+                  placeholder={placeholder}
+                />
+              );
+              break;
             case 'text':
               inputComponent = (
                 <Input.TextArea
