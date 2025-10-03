@@ -272,7 +272,7 @@ function LeadActivityPageContent() {
                     )}
 
                     <div className="fixed bottom-[12%] right-1/2 transform translate-x-1/2 max-w-md w-full flex justify-end pr-6 z-50">
-                        <Link href="/sales-outdoor/sales-activity/lead-activity/enter">
+                        <Link href="/sales-outdoor/sales-activity/lead-activity/new">
                             <FloatingButton />
                         </Link>
                     </div>
