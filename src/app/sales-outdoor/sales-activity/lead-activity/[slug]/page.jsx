@@ -210,10 +210,12 @@ function LeadActivityDetailPageContent({ params }) {
                                                     )}
                                                 </span>
                                             </div>
-                                            <div className="flex justify-between border rounded-lg p-2 border-gray-300">
-                                                <span className="text-gray-500">Status:</span>
-                                                <span className="text-right">{activity.status}</span>
-                                            </div>
+                                            {activity.channelname !== 4 && 
+                                                <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                                                    <span className="text-gray-500">Status:</span>
+                                                    <span className="text-right">{activity.status}</span>
+                                                </div>
+                                            }
                                             <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                 <span className="text-gray-500">Summary:</span>
                                                 <span className="text-right">{activity.summary}</span>
