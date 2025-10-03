@@ -33,7 +33,12 @@ export default function CardList({ data }) {
                     <div className="bg-gray-3 p-2 rounded border border-gray-5 flex justify-center px-2">
                         <div className="w-full h-full flex flex-col justify-left items-start">
                             <p className="text-xs text-gray-12/70">Activity Log</p>
-                            <p className="text-sm truncate w-full">{data?.activitylog || '-'}</p>
+                            <p 
+                                className="text-sm w-full"
+                                dangerouslySetInnerHTML={{ 
+                                    __html: data?.activitylog?.replace(/\\n/g, '<br />') || '-' 
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
