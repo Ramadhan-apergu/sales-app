@@ -32,14 +32,14 @@ export default function CardList({ data }) {
                 <div className="h-full flex flex-col justify-between">
                     <div className="bg-gray-3 p-2 rounded border border-gray-5 flex justify-center px-2">
                         <div className="w-full h-full flex flex-col justify-left items-start">
-                            <p className="text-xs text-gray-12/70">Summary</p>
-                            <p className="text-sm truncate w-full">{data?.summary || '-'}</p>
+                            <p className="text-xs text-gray-12/70">Channel Reff</p>
+                            <p className="text-sm truncate w-full">{data?.channelreff || '-'}</p>
                         </div>
                     </div>
                 </div>
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-1">
-                        <span className={`capitalize text-xs px-2 py-1 rounded-full bg-opacity-20 `}>{data?.status || '-'}</span>
+                        <span className={`capitalize text-xs px-2 py-1 rounded-full bg-opacity-20 `}>{data?.channelnamestr || '-'}</span>
                     </div>
                     <div className="flex gap-1 items-center justify-start">
                         <HiCalendarDays className="text-sm text-gray-12/70"/>
