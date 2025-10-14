@@ -29,6 +29,12 @@ export const itemAliases = {
   stockunit: "Stock Unit",
   unitstype: "Units Type",
   itemid: "Item ID",
+  unitstype2: "Units Type 2",
+  coversion: "Conversion",
+  itemlength: "Dim. Length",
+  itemwidth: "Dim. Width",
+  itemthick: "Dim. Thick",
+  iseditable: "Editable",
 };
 
 export const agreementAliases = {
@@ -64,6 +70,8 @@ export const agreementAliases = {
   saleunit: "Sale Unit",
   stock: "Stock",
   stockunit: "Stock Unit",
+  addons: "Addons",
+  agreementtype: "Agreement Type",
 };
 
 export const salesOrderAliases = {
@@ -139,10 +147,11 @@ export const deliveryOrderAliases = {
     memo: "Memo",
     location: "Location",
     quantityremaining: "Remaining",
-    quantity1: "Quantity (Kg)",
+    quantity1: "Qty 1",
     unit1: "Units 1",
-    quantity2: "Quantity (Bal)",
+    quantity2: "Qty 2",
     unit2: "Units 2",
+    isfree: "Free",
   },
   shipping: {
     shippingoption: "Shipping Option",
@@ -241,6 +250,8 @@ export const paymentAliases = {
     amount: "Payment",
     depositedate: "Deposited Date",
     bankaccount: "Bank Account",
+    giroduedate: "Giro Duedate",
+    gironumber: "Giro Number",
   },
 };
 

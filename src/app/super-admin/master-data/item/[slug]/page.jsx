@@ -3,7 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Dropdown, Modal } from "antd";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  MoreOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import { itemAliases } from "@/utils/aliases";
@@ -67,8 +71,13 @@ export default function Detail() {
       "unitstype",
       "createdby",
       "createddate",
+      "conversion",
+      "itemlength",
+      "itemthick",
+      "itemwidth",
+      "unitstype2",
     ],
-    pricing: ["price", "discount"],
+    pricing: ["price", "discount", "addons", "iseditable"],
   };
 
   const handleEdit = () => {
@@ -116,7 +125,9 @@ export default function Detail() {
           obj[k] = data[k] != null ? formatDateToShort(data[k]) : "";
         } else if (k === "createdby") {
           obj[k] = data[k] != null ? await getUserById(data[k]) : "";
-        } else if (['price', 'discount'].includes(k)) {
+        } else if (k === "iseditable") {
+          obj[k] = data[k] ? "Yes" : "No";
+        } else if (["price", "discount"].includes(k)) {
           obj[k] = data[k] != null ? await formatRupiah(data[k]) : "";
         } else {
           obj[k] = data[k] != null ? data[k] : "";
@@ -228,10 +239,24 @@ export default function Detail() {
                         input: "input",
                         isAlias: true,
                       },
-                      { key: "saleunit", input: "input", isAlias: true },
-                      { key: "stockunit", input: "input", isAlias: true },
+                      {
+                        key: "saleunit",
+                        input: "input",
+                        isAlias: true,
+                        hidden: true,
+                      },
+                      {
+                        key: "stockunit",
+                        input: "input",
+                        isAlias: true,
+                        hidden: true,
+                      },
                       { key: "unitstype", input: "input", isAlias: true },
-                      { key: "createdby", input: "input", isAlias: true },
+                      { key: "unitstype2", input: "input", isAlias: true },
+                      { key: "conversion", input: "input", isAlias: true },
+                      { key: "itemlength", input: "input", isAlias: true },
+                      { key: "itemwidth", input: "input", isAlias: true },
+                      { key: "itemthick", input: "input", isAlias: true },
                       { key: "createddate", input: "input", isAlias: true },
                     ]}
                     aliases={itemAliases}
@@ -242,7 +267,14 @@ export default function Detail() {
                     payload={pricing}
                     data={[
                       { key: "price", input: "input", isAlias: false },
-                      { key: "discount", input: "input", isAlias: false, hidden:true },
+                      { key: "addons", input: "input", isAlias: false },
+                      {
+                        key: "discount",
+                        input: "input",
+                        isAlias: false,
+                        hidden: true,
+                      },
+                      { key: "iseditable", input: "input", isAlias: true },
                     ]}
                     aliases={itemAliases}
                   />
