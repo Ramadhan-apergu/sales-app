@@ -108,19 +108,18 @@ export default function Page() {
     "itemid",
     "displayname",
     // "location",
+    "isfree",
     "quantity1",
+    "unit1",
     "quantity2",
-    "quantityremaining",
+    "unit2",
     "memo",
+    "quantityremaining",
     // "itemprocessfamily",
     // "displayname",
     // "memo",
     // "location",
     // "quantityremaining",
-    // "quantity1",
-    // "unit1",
-    // "quantity2",
-    // "unit2",
   ];
 
   useEffect(() => {
@@ -179,30 +178,25 @@ export default function Page() {
       },
     });
 
-    const dataFulfillmentWithItem = await Promise.all(
-      data.fulfillment_items.map(async (doItem) => {
-        const item = await fetchItemById(doItem.item);
-
-        let updateData = {
-          ...doItem,
-          itemprocessfamily: item?.itemprocessfamily || "",
-          displayname: item ? item.displayname : "",
-          quantity1: doItem.quantity,
-          unit1: doItem.units,
-          unit2: doItem.units2,
-          itemid: item.itemid,
+    const dataTable =
+      data.fulfillment_items.map((item) => {
+        const updateItem = {
+          ...item,
+          itemid: item?.itemid || "-",
+          displayname: item?.displayname || "-",
+          quantity1: item.quantity,
+          unit1: item.units,
+          unit2: item.units2,
         };
 
-        delete updateData.quantity;
-        delete updateData.units;
-        delete updateData.units2;
+        delete updateItem.quantity;
+        delete updateItem.units;
+        delete updateItem.units2;
 
-        return updateData;
-      })
-    );
-    console.log(dataFulfillmentWithItem);
+        return updateItem;
+      }) || [];
 
-    setDataTableItem(dataFulfillmentWithItem);
+    setDataTableItem(dataTable);
   };
 
   const handleClickAction = ({ key }) => {

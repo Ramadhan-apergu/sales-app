@@ -27,14 +27,15 @@ function Agreement() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1);
+  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
-  const { notify, contextHolder: notificationContextHolder  } = useNotification();
+  const { notify, contextHolder: notificationContextHolder } =
+    useNotification();
 
   const title = "apply-agreement";
 
@@ -45,15 +46,14 @@ function Agreement() {
 
         const response = await AgreementFetch.getAgreementApply(offset, limit);
 
-        const resData = getResponseHandler(response, notify)
+        const resData = getResponseHandler(response, notify);
 
         if (resData) {
-            setDatas(resData.list)
-            setTotalItems(resData.total_items)
+          setDatas(resData.list);
+          setTotalItems(resData.total_items);
         }
-
       } catch (error) {
-        notify('error', 'Error', error?.message || "Internal Server error");
+        notify("error", "Error", error?.message || "Internal Server error");
       } finally {
         setIsloading(false);
       }
@@ -79,7 +79,11 @@ function Agreement() {
   };
 
   const handleEdit = (record) => {
-    router.push(`/super-admin/master-data/${title}/${record.customerid}/edit`);
+    router.push(
+      `/super-admin/master-data/${title}/${
+        encodeURIComponent(record.customercode) || ""
+      }/edit`
+    );
   };
 
   const columns = [
@@ -100,7 +104,11 @@ function Agreement() {
       key: "customer",
       fixed: "left",
       render: (text, record) => (
-        <Link href={`/super-admin/master-data/${title}/${encodeURIComponent(record.customercode) || ""}`}>
+        <Link
+          href={`/super-admin/master-data/${title}/${
+            encodeURIComponent(record.customercode) || ""
+          }`}
+        >
           {text}
         </Link>
       ),
@@ -123,7 +131,9 @@ function Agreement() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-          >{isLargeScreen ? 'Edit' : ''}</Button>
+          >
+            {isLargeScreen ? "Edit" : ""}
+          </Button>
           {contextHolder}
         </div>
       ),
@@ -138,18 +148,20 @@ function Agreement() {
 
   return (
     <Layout pageTitle={title}>
-            <div className='w-full flex flex-col gap-4'>
-                <div className='w-full flex justify-between items-center'>
-                    <p className='text-xl lg:text-2xl font-semibold text-blue-6'>Apply Agreement List</p>
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
-                    >
-                        {isLargeScreen ? `New` : ""}
-                    </Button>
-                </div>
-                    {/* <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex justify-between items-center">
+          <p className="text-xl lg:text-2xl font-semibold text-blue-6">
+            Apply Agreement List
+          </p>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => router.push(`/super-admin/master-data/${title}/new`)}
+          >
+            {isLargeScreen ? `New` : ""}
+          </Button>
+        </div>
+        {/* <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
                         <div className='flex gap-2'>
                         </div>
                         <div className='flex gap-2'>
@@ -166,54 +178,50 @@ function Agreement() {
                             </div>  
                         </div>
                     </div> */}
-                {!isLoading ? (
-                    <>
-                        <div>
-                            <Table
-                                rowKey={(record) => record.customercode}
-                                size="small"
-                                pagination={false}
-                                columns={columns}
-                                dataSource={datas}
-                                scroll={{x: 'max-content'}}
-                                bordered
-                                tableLayout="auto"
-                            />
-                        </div>
-                        <div>
-                            <Pagination
-                                total={totalItems}
-                                defaultPageSize={limit}
-                                defaultCurrent={page}
-                                onChange={(newPage, newLimit) => {
-                                    router.push(
-                                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
-                                    )
-                                }}
-                                size='small'
-                                align={'end'}
-                            />
-                        </div>
-                    </>
-                ) : (
-                    <div className="w-full h-96">                    
-                        <LoadingSpin/>
-                    </div>
-                )}
+        {!isLoading ? (
+          <>
+            <div>
+              <Table
+                rowKey={(record) => record.customercode}
+                size="small"
+                pagination={false}
+                columns={columns}
+                dataSource={datas}
+                scroll={{ x: "max-content" }}
+                bordered
+                tableLayout="auto"
+              />
             </div>
-        {notificationContextHolder}
+            <div>
+              <Pagination
+                total={totalItems}
+                defaultPageSize={limit}
+                defaultCurrent={page}
+                onChange={(newPage, newLimit) => {
+                  router.push(
+                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
+                  );
+                }}
+                size="small"
+                align={"end"}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-96">
+            <LoadingSpin />
+          </div>
+        )}
+      </div>
+      {notificationContextHolder}
     </Layout>
   );
 }
 
 export default function AgreementPage() {
-    return (
-      <Suspense
-        fallback={
-          <LoadingSpinProcessing/>
-        }
-      >
-        <Agreement/>
-      </Suspense>
-    );
-  }
+  return (
+    <Suspense fallback={<LoadingSpinProcessing />}>
+      <Agreement />
+    </Suspense>
+  );
+}

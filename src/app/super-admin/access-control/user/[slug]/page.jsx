@@ -69,22 +69,18 @@ export default function UserDetails() {
     fetchData();
   }, []);
 
-  function mappingData(data) {
+  async function mappingData(data) {
+    const roles = await getRoles();
+
     setPayload({
       name: data.name,
       email: data.email,
       address: data.address,
       username: data.username,
       password: data.password,
-      roleid: roleOptions.find((role) => role.value == data.roleid).label,
+      roleid: roles.find((role) => role.value == data.roleid).label || "",
     });
   }
-
-  const roleOptions = [
-    { label: "Sales Outdoor", value: "b412115a-4f15-49af-a4f4-c4c073032c04" },
-    { label: "Sales Indoor", value: "9df500fd-afa2-4c6e-94ed-eccbf82ef142" },
-    { label: "Admin", value: "e6844731-f2fa-4449-9940-99a80a6276af" },
-  ];
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -129,6 +125,25 @@ export default function UserDetails() {
       setIsLoadingSubmit(false);
     }
   };
+
+  async function getRoles() {
+    try {
+      const response = await UserManageFetch.getRoles();
+      if (response.data && response.data.list) {
+        return (
+          response.data.list.map((role) => ({
+            value: role.id,
+            label: role.name,
+          })) || []
+        );
+      }
+
+      return [];
+    } catch (error) {
+      notify("error", "Error", "Failed fetch roles");
+      throw error;
+    }
+  }
 
   const items = [
     // {

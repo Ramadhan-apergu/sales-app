@@ -202,6 +202,8 @@ export default function Enter() {
     },
     payloadPayment: {
       paymentoption: "cash",
+      giroduedate: dayjs(new Date()),
+      gironumber: "",
       payment: 0,
       depositedate: "",
       bankaccount: "Bank BCA",
@@ -452,6 +454,7 @@ export default function Enter() {
       payloadToInsert = {
         ...payloadToInsert,
         payment_applies: updatePaymentApplies,
+        gironumber: String(payloadToInsert.gironumber ?? ""),
       };
 
       const response = await PaymentFetch.create(payloadToInsert);
@@ -587,6 +590,18 @@ export default function Enter() {
                 input: "select",
                 options: paymentOptions,
                 isAlias: true,
+              },
+              {
+                key: "gironumber",
+                input: "number",
+                isAlias: true,
+                hidden: state.payloadPayment.paymentoption != "giro",
+              },
+              {
+                key: "giroduedate",
+                input: "date",
+                isAlias: true,
+                hidden: state.payloadPayment.paymentoption != "giro",
               },
               {
                 key: "payment",

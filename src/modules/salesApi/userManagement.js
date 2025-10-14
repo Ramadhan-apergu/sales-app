@@ -56,4 +56,13 @@ export default class UserManageFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async getRoles() {
+    try {
+      const response = await this.axios.get(`/m/roles`);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }

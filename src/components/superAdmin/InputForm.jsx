@@ -9,9 +9,10 @@ import {
   Input,
   InputNumber,
   Select,
+  Tooltip,
 } from "antd";
 import { useEffect, useState } from "react";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import idID from "antd/locale/id_ID";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -82,10 +83,15 @@ export default function InputForm({
                 cursorDisable = false,
                 accounting = false,
                 number = false,
+                note = "",
               },
               i
             ) => {
-              const label = labeled ? labeled : isAlias ? aliases[key] || key : key;
+              const label = labeled
+                ? labeled
+                : isAlias
+                ? aliases[key] || key
+                : key;
 
               let inputComponent;
               switch (input) {
@@ -245,7 +251,16 @@ export default function InputForm({
                 <Form.Item
                   key={key}
                   // initialValue={input === "select" ? payload[key] : undefined}
-                  label={<span className="capitalize">{label}</span>}
+                  label={
+                    <div className="flex gap-1 items-center">
+                      <span className="capitalize">{label}</span>
+                      {note && (
+                        <Tooltip title={note}>
+                          <InfoCircleOutlined className="text-xs" />
+                        </Tooltip>
+                      )}
+                    </div>
+                  }
                   name={key}
                   rules={rules}
                   style={{ margin: 0, display: hidden ? "none" : "block" }}
