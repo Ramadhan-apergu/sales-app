@@ -23,7 +23,16 @@ import {
   SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, FloatButton, Form, Input, Modal, Select, Table } from "antd";
+import {
+  Button,
+  Divider,
+  FloatButton,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Table,
+} from "antd";
 import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
@@ -531,7 +540,8 @@ export default function Enter() {
           (discount) => discount.item_id === item.item
         );
 
-        const totalamount = item.quantity * item.rate;
+        const rate = findItemDiscount?.price || item.rate;
+        const totalamount = item.quantity * rate;
         const totaldiscount = findItemDiscount?.total_diskon || 0;
         const subtotal = totalamount - totaldiscount;
 
@@ -541,6 +551,7 @@ export default function Enter() {
           totaldiscount,
           totalamount,
           subtotal,
+          rate,
         };
       });
 
@@ -1112,7 +1123,7 @@ export default function Enter() {
                   key: "description",
                   input: "text",
                   isAlias: true,
-                  hidden: true
+                  hidden: true,
                 },
               ]}
               aliases={salesOrderAliases.item}

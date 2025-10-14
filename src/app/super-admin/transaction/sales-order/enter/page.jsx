@@ -363,6 +363,7 @@ export default function Enter() {
 
     const updateDiscountItem = await getDiscountItem(updateItemTable);
 
+    console.log(updateDiscountItem);
     setDataTableItem(updateDiscountItem);
 
     handleModalItemCancel();
@@ -419,6 +420,8 @@ export default function Enter() {
 
       setDataDiscount(resData);
 
+      console.log(resData);
+
       if (resData.diskon_group && resData.diskon_group.length > 0) {
         const discountFreeItem = resData.diskon_group.map((discount) => ({
           item: "",
@@ -438,7 +441,8 @@ export default function Enter() {
           (discount) => discount.item_id === item.item
         );
 
-        const totalamount = item.quantity * item.rate;
+        const rate = findItemDiscount?.price || item.rate;
+        const totalamount = item.quantity * rate;
         const totaldiscount = findItemDiscount?.total_diskon || 0;
         const subtotal = totalamount - totaldiscount;
 
@@ -448,6 +452,7 @@ export default function Enter() {
           totaldiscount,
           totalamount,
           subtotal,
+          rate,
         };
       });
 
@@ -1001,12 +1006,13 @@ export default function Enter() {
                   cursorDisable: true,
                   accounting: true,
                   isReadOnly: true,
+                  note: "Base rate item"
                 },
                 {
                   key: "description",
                   input: "text",
                   isAlias: true,
-                  hidden: true
+                  hidden: true,
                 },
               ]}
               aliases={salesOrderAliases.item}

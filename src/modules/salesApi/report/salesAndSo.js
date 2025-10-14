@@ -4,14 +4,27 @@ export default class ReportSo extends ProcessFetch {
   static async getSo(
     offset = 0,
     limit = 10,
-    customer = "",
+    customerid = "",
     startdate = "",
     enddate = "",
-    status = ""
+    status = "",
+    itemprocessfamily = "",
+    salesrep = "",
+    displayname = ""
   ) {
     try {
       const response = await this.axios.get("/report/sales-order", {
-        params: { offset, limit, customer, startdate, enddate, status },
+        params: {
+          offset,
+          limit,
+          customerid,
+          startdate,
+          enddate,
+          status,
+          itemprocessfamily,
+          salesrep,
+          displayname,
+        },
       });
       return new this().processResponse(response);
     } catch (error) {
@@ -19,16 +32,28 @@ export default class ReportSo extends ProcessFetch {
     }
   }
 
-    static async getSales(
+  static async getSales(
     offset = 0,
     limit = 10,
-    customer = "",
+    customerid = "",
     startdate = "",
-    enddate = ""
+    enddate = "",
+    itemprocessfamily = "",
+    salesrep = "",
+    displayname = ""
   ) {
     try {
       const response = await this.axios.get("/report/penjualan", {
-        params: { offset, limit, customer, startdate, enddate },
+        params: {
+          offset,
+          limit,
+          customerid,
+          startdate,
+          enddate,
+          itemprocessfamily,
+          salesrep,
+          displayname,
+        },
       });
       return new this().processResponse(response);
     } catch (error) {
@@ -36,7 +61,7 @@ export default class ReportSo extends ProcessFetch {
     }
   }
 
-      static async getProduct(
+  static async getProduct(
     offset = 0,
     limit = 10,
     startdate = "",

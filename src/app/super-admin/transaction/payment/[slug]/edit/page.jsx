@@ -235,6 +235,8 @@ export default function Details() {
       payment: 0,
       depositedate: "",
       bankaccount: "",
+      giroduedate: "",
+      gironumber: "",
     },
     payloadPaymentApplies: [],
     dataTableItem: [],
@@ -342,6 +344,8 @@ export default function Details() {
           ? dayjs(data.depositedate) || ""
           : data.depositedate,
         bankaccount: data.bankaccount,
+        giroduedate: dayjs(data.giroduedate),
+        gironumber: data.gironumber,
       },
     });
 
@@ -547,6 +551,7 @@ export default function Details() {
       payloadToInsert = {
         ...payloadToInsert,
         payment_applies: updatePaymentApplies,
+        gironumber: String(payloadToInsert.gironumber ?? ""),
       };
 
       const response = await PaymentFetch.update(slug, payloadToInsert);
@@ -746,6 +751,18 @@ export default function Details() {
                         isAlias: true,
                         hidden:
                           state.payloadPayment.paymentoption != "transfer",
+                      },
+                      {
+                        key: "gironumber",
+                        input: "number",
+                        isAlias: true,
+                        hidden: state.payloadPayment.paymentoption != "giro",
+                      },
+                      {
+                        key: "giroduedate",
+                        input: "date",
+                        isAlias: true,
+                        hidden: state.payloadPayment.paymentoption != "giro",
                       },
                     ]}
                     aliases={paymentAliases.payment}

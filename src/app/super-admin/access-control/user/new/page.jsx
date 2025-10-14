@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
@@ -24,44 +24,24 @@ export default function UserNew() {
     address: "",
     username: "",
     password: "",
-    roleid: "b412115a-4f15-49af-a4f4-c4c073032c04",
+    roleid: "",
   });
 
-  const roleOptions = [
-    { label: "Sales Outdoor", value: "b412115a-4f15-49af-a4f4-c4c073032c04" },
-    { label: "Sales Indoor", value: "9df500fd-afa2-4c6e-94ed-eccbf82ef142" },
-    { label: "Admin", value: "e6844731-f2fa-4449-9940-99a80a6276af" },
-  ];
-
+  const [roleoptions, setRoleoption] = useState([]);
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
     try {
-
-      const {
-        username,
-        email,
-        name,
-        roleid,
-        password,
-      } = payload;
+      const { username, email, name, roleid, password } = payload;
       if (!username) {
-        notify(
-          "error",
-          "Failed",
-          `${userAliases["username"]} is required`
-        );
+        notify("error", "Failed", `${userAliases["username"]} is required`);
         return;
       }
 
       if (!name) {
-        notify(
-          "error",
-          "Failed",
-          `${userAliases["name"]} is required`
-        );
+        notify("error", "Failed", `${userAliases["name"]} is required`);
         return;
       }
 
@@ -94,6 +74,32 @@ export default function UserNew() {
       setIsLoadingSubmit(false);
     }
   };
+
+  async function getRoles() {
+    try {
+      const response = await UserManageFetch.getRoles();
+      if (response.data && response.data.list) {
+        setRoleoption(
+          response.data.list.map((role) => ({
+            value: role.id,
+            label: role.name,
+          })) || []
+        );
+
+        setPayload((prev) => ({
+          ...prev,
+          roleid: response.data.list[0].id || "",
+        }));
+      }
+    } catch (error) {
+      notify("error", "Error", "Failed fetch roles");
+      throw error;
+    }
+  }
+
+  useEffect(() => {
+    getRoles();
+  }, []);
 
   return (
     <>
@@ -162,7 +168,7 @@ export default function UserNew() {
                     key: "roleid",
                     input: "select",
                     isAlias: true,
-                    options: roleOptions,
+                    options: roleoptions,
                     rules: [
                       {
                         required: true,

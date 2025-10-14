@@ -59,8 +59,19 @@ export default function Edit() {
   const title = "item";
 
   const fieldGroups = {
-    general: ["itemid", "displayname", "itemprocessfamily", "unitstype"],
-    pricing: ["price", "discount"],
+    general: [
+      "id",
+      "itemid",
+      "displayname",
+      "itemprocessfamily",
+      "unitstype",
+      "conversion",
+      "itemlength",
+      "itemthick",
+      "itemwidth",
+      "unitstype2",
+    ],
+    pricing: ["price", "discount", "addons", "iseditable"],
   };
 
   const deleteModal = () => {
@@ -120,21 +131,30 @@ export default function Edit() {
   ];
 
   const unitstypeOptions = [
-    { label: "KG", value: "kg" },
-    // { label: "Bal", value: "bal" },
+    { label: "KG", value: "KG" },
+    { label: "Bal", value: "Bal" },
+    { label: "Kotak", value: "Kotak" },
   ];
 
   const itemprocessfamilyOptions = [
-    { label: "Assoy Cetak", value: "Assoy Cetak" },
-    { label: "K-Item", value: "K-Item" },
-    { label: "Emboss", value: "Emboss" },
-    { label: "C-Item", value: "C-Item" },
-    { label: "B-Item", value: "B-Item" },
-    { label: "HD 35B", value: "HD 35B" },
-    { label: "PP", value: "PP" },
-    { label: "HDP", value: "HDP" },
-    { label: "Assoy PE", value: "Assoy PE" },
-    { label: "PE Gulungan", value: "PE Gulungan" },
+    { label: "ASSOY B ITEM", value: "ASSOY B ITEM" },
+    { label: "ASSOY C ITEM", value: "ASSOY C ITEM" },
+    { label: "ASSOY DC BELANG", value: "ASSOY DC BELANG" },
+    { label: "ASSOY EMBOSS", value: "ASSOY EMBOSS" },
+    { label: "ASSOY HD", value: "ASSOY HD" },
+    { label: "ASSOY HD CETAK", value: "ASSOY HD CETAK" },
+    { label: "ASSOY HD CUSTOM", value: "ASSOY HD CUSTOM" },
+    { label: "ASSOY HD35B", value: "ASSOY HD35B" },
+    { label: "ASSOY K ITEM", value: "ASSOY K ITEM" },
+    { label: "ASSOY PE CETAK", value: "ASSOY PE CETAK" },
+    { label: "ASSOY PE CUSTOM", value: "ASSOY PE CUSTOM" },
+    { label: "KANTONGAN HD", value: "KANTONGAN HD" },
+    { label: "KANTONGAN HD CUSTOM", value: "KANTONGAN HD CUSTOM" },
+    { label: "KANTONGAN PP", value: "KANTONGAN PP" },
+    { label: "SARUNG TANGAN", value: "SARUNG TANGAN" },
+    { label: "SELANG POMPA", value: "SELANG POMPA" },
+    { label: "Y ITEM", value: "Y ITEM" },
+    { label: "GULUNGAN PE", value: "GULUNGAN PE" },
   ];
 
   const handleChangePayload = (type, payload) => {
@@ -156,8 +176,15 @@ export default function Edit() {
         ...pricing,
       };
 
-      const { itemid, displayname, itemprocessfamily, price, unitstype } =
-        payloadToInsert;
+      const {
+        itemid,
+        displayname,
+        itemprocessfamily,
+        price,
+        unitstype,
+        unitstype2,
+        conversion,
+      } = payloadToInsert;
       if (!itemid) {
         notify("error", "Failed", `${itemAliases["itemid"]} is required`);
         return;
@@ -187,6 +214,16 @@ export default function Edit() {
         return;
       }
 
+      if (!unitstype2) {
+        notify("error", "Failed", `${itemAliases["unitstype2"]} is required`);
+        return;
+      }
+
+      if (!conversion) {
+        notify("error", "Failed", `Conversation is required`);
+        return;
+      }
+
       const response = await ItemFetch.update(data.id, payloadToInsert);
 
       const resData = updateResponseHandler(response, notify);
@@ -200,6 +237,11 @@ export default function Edit() {
       setIsLoadingSubmit(false);
     }
   };
+
+  const editableOptions = [
+    { label: "No", value: 0 },
+    { label: "Yes", value: 1 },
+  ];
 
   return (
     <>
@@ -288,6 +330,45 @@ export default function Edit() {
                             },
                           ],
                         },
+
+                        {
+                          key: "unitstype2",
+                          input: "select",
+                          options: unitstypeOptions,
+                          isAlias: true,
+                          rules: [
+                            {
+                              required: true,
+                              message: `${itemAliases["unitstype2"]} is required`,
+                            },
+                          ],
+                        },
+                        {
+                          key: "conversion",
+                          input: "number",
+                          isAlias: false,
+                          rules: [
+                            {
+                              required: true,
+                              message: `Conversion is required`,
+                            },
+                          ],
+                        },
+                        {
+                          key: "itemlength",
+                          input: "input",
+                          isAlias: true,
+                        },
+                        {
+                          key: "itemwidth",
+                          input: "input",
+                          isAlias: true,
+                        },
+                        {
+                          key: "itemthick",
+                          input: "input",
+                          isAlias: true,
+                        },
                       ]}
                       aliases={itemAliases}
                       onChange={handleChangePayload}
@@ -307,12 +388,30 @@ export default function Edit() {
                           ],
                         },
                         {
+                          key: "addons",
+                          input: "number",
+                          isAlias: false,
+                          accounting: true,
+                        },
+                        {
                           key: "discount",
                           input: "number",
                           isAlias: false,
                           accounting: true,
                           rules: [],
-                          hidden: true
+                          hidden: true,
+                        },
+                        {
+                          key: "iseditable",
+                          input: "select",
+                          options: editableOptions,
+                          isAlias: true,
+                          rules: [
+                            {
+                              required: true,
+                              message: `${itemAliases["iseditable"]} is required`,
+                            },
+                          ],
                         },
                       ]}
                       aliases={itemAliases}
