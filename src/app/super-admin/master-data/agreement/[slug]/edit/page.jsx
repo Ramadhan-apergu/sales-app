@@ -474,8 +474,6 @@ export default function AgreementEdit() {
     qtymax: 0,
     discountnominal: 0,
     qtyfree: 0,
-    unitfree: "",
-    itemfree: "",
   });
 
   const [payloadDetail, setPayloadDetail] = useState([]);
@@ -781,6 +779,7 @@ export default function AgreementEdit() {
         input: "number",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
+        hidden: payloadGeneral.agreementtype != "diskon",
       },
       {
         key: "perunit",
@@ -1017,8 +1016,6 @@ export default function AgreementEdit() {
         agreement_groups: {
           ...payloadGroup,
           qtyfree: payloadGroup?.qtyfree || 0,
-          unitfree: payloadGroup?.unitfree || "",
-          itemfree: payloadGroup?.itemfree || "",
           discountnominal: payloadGroup?.discountnominal || 0,
         },
       };
@@ -1494,21 +1491,6 @@ export default function AgreementEdit() {
                                 rules: [
                                   { required: true, message: "is required!" },
                                 ],
-                              },
-                              {
-                                key: "unitfree",
-                                input: "select",
-                                options: unitOptions,
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                              {
-                                key: "itemfree",
-                                input: "select",
-                                options: dataItem,
-                                isAlias: true,
                               },
                             ]}
                             aliases={agreementAliases}
