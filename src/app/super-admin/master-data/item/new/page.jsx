@@ -25,10 +25,9 @@ export default function CustomerNew() {
     itemprocessfamily: "",
     unitstype: "",
     conversion: 0,
-    itemlength: "",
-    itemthick: "",
-    itemwidth: "",
     unitstype2: "",
+    dimensi: "",
+    itemcategory: "Plastik",
   });
 
   const [payloadPricing, setPayloadPricing] = useState({
@@ -47,6 +46,12 @@ export default function CustomerNew() {
   const editableOptions = [
     { label: "No", value: 0 },
     { label: "Yes", value: 1 },
+  ];
+
+  const categoryOptions = [
+    { label: "Plastik", value: "Plastik" },
+    { label: "Chemical", value: "Chemical" },
+    { label: "Other", value: "Other" },
   ];
 
   const itemprocessfamilyOptions = [
@@ -100,6 +105,7 @@ export default function CustomerNew() {
         unitstype,
         unitstype2,
         conversion,
+        itemcategory,
       } = payloadToInsert;
       if (!itemid) {
         notify("error", "Failed", `${itemAliases["itemid"]} is required`);
@@ -120,7 +126,7 @@ export default function CustomerNew() {
         return;
       }
 
-      if (!price) {
+      if (!price && itemcategory == "Plastik") {
         notify("error", "Failed", `price is required`);
         return;
       }
@@ -209,6 +215,18 @@ export default function CustomerNew() {
                     ],
                   },
                   {
+                    key: "itemcategory",
+                    input: "select",
+                    options: categoryOptions,
+                    isAlias: true,
+                    rules: [
+                      {
+                        required: true,
+                        message: `${itemAliases["itemcategory"]} is required`,
+                      },
+                    ],
+                  },
+                  {
                     key: "itemprocessfamily",
                     input: "select",
                     options: itemprocessfamilyOptions,
@@ -251,21 +269,6 @@ export default function CustomerNew() {
                     rules: [
                       { required: true, message: `Conversion is required` },
                     ],
-                  },
-                  {
-                    key: "itemlength",
-                    input: "input",
-                    isAlias: true,
-                  },
-                  {
-                    key: "itemwidth",
-                    input: "input",
-                    isAlias: true,
-                  },
-                  {
-                    key: "itemthick",
-                    input: "input",
-                    isAlias: true,
                   },
                 ]}
                 aliases={itemAliases}

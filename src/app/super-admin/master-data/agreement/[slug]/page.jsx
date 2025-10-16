@@ -389,8 +389,6 @@ export default function Detail() {
       { key: "qtymin", input: "input", isAlias: true },
       { key: "qtymax", input: "input", isAlias: true },
       { key: "qtyfree", input: "input", isAlias: true },
-      { key: "unitfree", input: "input", isAlias: true },
-      { key: "itemfree", input: "input", isAlias: true },
     ],
   ];
 

@@ -136,6 +136,7 @@ export default function Enter() {
       }
 
       const getItem = await fetchItem();
+      console.log(getItem);
       if (getItem) {
         const updateLabelItem = getItem.list.map((item) => ({
           ...item,
@@ -247,6 +248,7 @@ export default function Enter() {
       itemprocessfamily: "",
       itemid: "",
       agreementcode: "",
+      iseditable: 0,
     },
     tax: {
       taxable: false,
@@ -412,6 +414,8 @@ export default function Enter() {
           item_id: item.item,
           itemprocessfamily: item.itemprocessfamily,
           qty: item.quantity,
+          unit: item.unit,
+          price: item.rate,
         })),
       };
 
@@ -953,6 +957,7 @@ export default function Enter() {
                             displayname: item.displayname,
                             itemprocessfamily: item.itemprocessfamily,
                             itemid: item.itemid,
+                            iseditable: item.iseditable,
                           },
                         });
                       }}
@@ -1000,17 +1005,27 @@ export default function Enter() {
                 },
                 {
                   key: "rate",
+                  labeled: `Rate (${
+                    stateItemTable.item.iseditable == 1
+                      ? "Editable"
+                      : "Non Editable"
+                  })`,
                   input: "number",
                   isAlias: true,
-                  isRead: true,
+                  isRead: stateItemTable.item.iseditable == 0,
                   cursorDisable: true,
                   accounting: true,
-                  isReadOnly: true,
-                  note: "Base rate item"
+                  note: "Base rate item",
                 },
                 {
                   key: "description",
                   input: "text",
+                  isAlias: true,
+                  hidden: true,
+                },
+                {
+                  key: "iseditable",
+                  input: "input",
                   isAlias: true,
                   hidden: true,
                 },
