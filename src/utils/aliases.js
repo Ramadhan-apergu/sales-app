@@ -35,6 +35,8 @@ export const itemAliases = {
   itemwidth: "Dim. Width",
   itemthick: "Dim. Thick",
   iseditable: "Editable",
+  itemcategory: "Category",
+  dimensi: "Dimensions",
 };
 
 export const agreementAliases = {

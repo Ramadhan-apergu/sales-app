@@ -72,9 +72,8 @@ export default function Detail() {
       "createdby",
       "createddate",
       "conversion",
-      "itemlength",
-      "itemthick",
-      "itemwidth",
+      "dimensi",
+      "itemcategory",
       "unitstype2",
     ],
     pricing: ["price", "discount", "addons", "iseditable"],
@@ -235,6 +234,11 @@ export default function Detail() {
                       },
                       { key: "itemid", input: "input", isAlias: true },
                       {
+                        key: "itemcategory",
+                        input: "input",
+                        isAlias: true,
+                      },
+                      {
                         key: "itemprocessfamily",
                         input: "input",
                         isAlias: true,
@@ -254,9 +258,7 @@ export default function Detail() {
                       { key: "unitstype", input: "input", isAlias: true },
                       { key: "unitstype2", input: "input", isAlias: true },
                       { key: "conversion", input: "input", isAlias: true },
-                      { key: "itemlength", input: "input", isAlias: true },
-                      { key: "itemwidth", input: "input", isAlias: true },
-                      { key: "itemthick", input: "input", isAlias: true },
+                      { key: "dimensi", input: "input", isAlias: true },
                       { key: "createddate", input: "input", isAlias: true },
                     ]}
                     aliases={itemAliases}

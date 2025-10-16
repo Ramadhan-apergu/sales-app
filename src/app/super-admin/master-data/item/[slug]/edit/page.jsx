@@ -66,9 +66,8 @@ export default function Edit() {
       "itemprocessfamily",
       "unitstype",
       "conversion",
-      "itemlength",
-      "itemthick",
-      "itemwidth",
+      "dimensi",
+      "itemcategory",
       "unitstype2",
     ],
     pricing: ["price", "discount", "addons", "iseditable"],
@@ -136,6 +135,12 @@ export default function Edit() {
     { label: "Kotak", value: "Kotak" },
   ];
 
+  const categoryOptions = [
+    { label: "Plastik", value: "Plastik" },
+    { label: "Chemical", value: "Chemical" },
+    { label: "Other", value: "Other" },
+  ];
+
   const itemprocessfamilyOptions = [
     { label: "ASSOY B ITEM", value: "ASSOY B ITEM" },
     { label: "ASSOY C ITEM", value: "ASSOY C ITEM" },
@@ -184,6 +189,7 @@ export default function Edit() {
         unitstype,
         unitstype2,
         conversion,
+        itemcategory,
       } = payloadToInsert;
       if (!itemid) {
         notify("error", "Failed", `${itemAliases["itemid"]} is required`);
@@ -204,7 +210,7 @@ export default function Edit() {
         return;
       }
 
-      if (!price) {
+      if (!price && itemcategory == "Plastik") {
         notify("error", "Failed", `price is required`);
         return;
       }
@@ -307,6 +313,18 @@ export default function Edit() {
                           ],
                         },
                         {
+                          key: "itemcategory",
+                          input: "select",
+                          options: categoryOptions,
+                          isAlias: true,
+                          rules: [
+                            {
+                              required: true,
+                              message: `${itemAliases["itemcategory"]} is required`,
+                            },
+                          ],
+                        },
+                        {
                           key: "itemprocessfamily",
                           input: "select",
                           options: itemprocessfamilyOptions,
@@ -355,17 +373,7 @@ export default function Edit() {
                           ],
                         },
                         {
-                          key: "itemlength",
-                          input: "input",
-                          isAlias: true,
-                        },
-                        {
-                          key: "itemwidth",
-                          input: "input",
-                          isAlias: true,
-                        },
-                        {
-                          key: "itemthick",
+                          key: "dimensi",
                           input: "input",
                           isAlias: true,
                         },
