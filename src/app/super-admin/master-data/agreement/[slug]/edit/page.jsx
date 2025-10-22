@@ -279,6 +279,8 @@ function TableCustom({ data, keys, aliases, onDelete, agreementtype }) {
     ...keys.map((key) => {
       if (agreementtype != "addons" && key == "addons") {
         return null;
+      } else if (agreementtype != "diskon" && key == "discountnominal") {
+        return null;
       } else {
         return {
           title: aliases?.[key] || key,
@@ -1166,6 +1168,13 @@ export default function AgreementEdit() {
 
   function handleAddDetail(instance) {
     const currentPayload = payloadDetailInitRef.current;
+
+    currentPayload = {
+      ...currentPayload,
+      discountnominal: !currentPayload.discountnominal
+        ? 0
+        : currentPayload.discountnominal,
+    };
 
     const isAnyEmpty = Object.values(currentPayload).some(
       (value) => value === "" || value === null || value === undefined

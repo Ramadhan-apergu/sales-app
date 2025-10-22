@@ -48,9 +48,22 @@ import { paymentAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
+  const allChecked = data?.length > 0 && data.every((item) => item.ischecked);
+  const someChecked = data?.some((item) => item.ischecked) && !allChecked;
+
   const columns = [
     {
-      title: "Apply",
+      title: (
+        <Checkbox
+          checked={allChecked}
+          indeterminate={someChecked}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            // kirim satu event global ke parent
+            onChange?.("all", checked);
+          }}
+        />
+      ),
       dataIndex: "apply",
       key: "apply",
       align: "center",
@@ -431,39 +444,61 @@ export default function Details() {
   }
 
   const handleChecked = (data, isChecked) => {
-    let updatedData = state.payloadPaymentApplies;
+    if (data === "all") {
+      // ✅ Jika checkbox header (Select All) ditekan
+      const updatedItems = state.dataTableItem.map((item) => {
+        const updatedAmount = item.amount || 0;
+        const updatedDue = (Number(item.total) || 0) - updatedAmount;
 
-    if (isChecked) {
-      updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
+        return {
+          ...item,
+          ischecked: isChecked,
+          due: updatedDue,
+        };
+      });
+
+      // update semua apply items jika checked
+      const updatedApplies = isChecked
+        ? updatedItems.map((item) => ({ ...item, amount: item.amount || 0 }))
+        : [];
+
+      dispatch({ type: "SET_ITEMS", payload: updatedItems });
+      dispatch({ type: "SET_PAYMENTAPPLY", payload: updatedApplies });
     } else {
-      updatedData = updatedData.filter(
-        (item) => item.invoiceid !== data.invoiceid
-      );
+      // ✅ Jika checkbox individual ditekan
+      let updatedData = state.payloadPaymentApplies;
+
+      if (isChecked) {
+        updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
+      } else {
+        updatedData = updatedData.filter(
+          (item) => item.invoiceid !== data.invoiceid
+        );
+      }
+
+      dispatch({
+        type: "SET_PAYMENTAPPLY",
+        payload: updatedData,
+      });
+
+      dispatch({
+        type: "SET_ITEMS",
+        payload: state.dataTableItem.map((item) => {
+          if (item.invoiceid === data.invoiceid) {
+            const updatedAmount = item.amount || 0;
+            const updatedDue = (Number(item.total) || 0) - updatedAmount;
+
+            return {
+              ...item,
+              ischecked: isChecked,
+              due: updatedDue,
+            };
+          } else {
+            return item;
+          }
+        }),
+      });
     }
-
-    dispatch({
-      type: "SET_PAYMENTAPPLY",
-      payload: updatedData,
-    });
-
-    dispatch({
-      type: "SET_ITEMS",
-      payload: state.dataTableItem.map((item) => {
-        if (item.invoiceid === data.invoiceid) {
-          const updatedAmount = isChecked ? item.amount || 0 : 0;
-          const updatedDue = (Number(item.total) || 0) - updatedAmount;
-
-          return {
-            ...item,
-            ischecked: isChecked,
-            amount: updatedAmount,
-            due: updatedDue,
-          };
-        } else {
-          return item;
-        }
-      }),
-    });
   };
 
   function handleAmountChange(invoiceid, amount) {

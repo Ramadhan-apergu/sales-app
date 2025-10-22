@@ -23,9 +23,6 @@ export default function CustomerNew() {
     itemid: "",
     displayname: "",
     itemprocessfamily: "",
-    unitstype: "",
-    conversion: 0,
-    unitstype2: "",
     dimensi: "",
     itemcategory: "Plastik",
   });
@@ -35,6 +32,12 @@ export default function CustomerNew() {
     discount: 0,
     addons: 0,
     iseditable: 0,
+  });
+
+  const [payloadConversion, setPayloadConversion] = useState({
+    unitstype: "KG",
+    conversion: 0,
+    unitstype2: "Bal",
   });
 
   const unitstypeOptions = [
@@ -83,6 +86,9 @@ export default function CustomerNew() {
       case "primary":
         setPayloadGeneral(payload);
         break;
+      case "conversion":
+        setPayloadConversion(payload);
+        break;
       default:
         setPayloadPricing(payload);
         break;
@@ -95,6 +101,7 @@ export default function CustomerNew() {
       const payloadToInsert = {
         ...payloadGeneral,
         ...payloadPricing,
+        ...payloadConversion,
       };
 
       const {
@@ -239,36 +246,9 @@ export default function CustomerNew() {
                     ],
                   },
                   {
-                    key: "unitstype",
-                    input: "select",
-                    options: unitstypeOptions,
+                    key: "dimensi",
+                    input: "input",
                     isAlias: true,
-                    rules: [
-                      {
-                        required: true,
-                        message: `${itemAliases["unitstype"]} is required`,
-                      },
-                    ],
-                  },
-                  {
-                    key: "unitstype2",
-                    input: "select",
-                    options: unitstypeOptions,
-                    isAlias: true,
-                    rules: [
-                      {
-                        required: true,
-                        message: `${itemAliases["unitstype2"]} is required`,
-                      },
-                    ],
-                  },
-                  {
-                    key: "conversion",
-                    input: "number",
-                    isAlias: false,
-                    rules: [
-                      { required: true, message: `Conversion is required` },
-                    ],
                   },
                 ]}
                 aliases={itemAliases}
@@ -311,6 +291,50 @@ export default function CustomerNew() {
                         message: `${itemAliases["iseditable"]} is required`,
                       },
                     ],
+                  },
+                ]}
+                aliases={itemAliases}
+                onChange={handleChangePayload}
+              />
+
+              <InputForm
+                type="conversion"
+                payload={payloadConversion}
+                data={[
+                  {
+                    key: "unitstype",
+                    input: "select",
+                    options: unitstypeOptions,
+                    isAlias: true,
+                    rules: [
+                      {
+                        required: true,
+                        message: `${itemAliases["unitstype"]} is required`,
+                      },
+                    ],
+                  },
+                  {
+                    key: "unitstype2",
+                    input: "select",
+                    options: unitstypeOptions,
+                    isAlias: true,
+                    rules: [
+                      {
+                        required: true,
+                        message: `${itemAliases["unitstype2"]} is required`,
+                      },
+                    ],
+                    note: "Unit 2 bernilai 1",
+                  },
+                  {
+                    key: "conversion",
+                    input: "number",
+                    isAlias: false,
+                    rules: [
+                      { required: true, message: `Conversion is required` },
+                    ],
+                    note: `
+                    Isi Conversion untuk menentukan berapa Base Unit yang setara dengan Unit 2.`,
                   },
                 ]}
                 aliases={itemAliases}
