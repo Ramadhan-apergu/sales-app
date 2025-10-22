@@ -80,7 +80,7 @@ export default class SalesOrderFetch extends ProcessFetch {
     }
   }
 
-    static async getCalDiscount(payload) {
+  static async getCalDiscount(payload) {
     try {
       const response = await this.axios.post("/trx/so/get-diskon", payload);
       return new this().processResponse(response);
@@ -100,7 +100,10 @@ export default class SalesOrderFetch extends ProcessFetch {
 
   static async updateStatus(id, payload) {
     try {
-      const response = await this.axios.put(`/trx/sales-order/status/${id}`, payload);
+      const response = await this.axios.put(
+        `/trx/sales-order/status/${id}`,
+        payload
+      );
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);
@@ -124,6 +127,24 @@ export default class SalesOrderFetch extends ProcessFetch {
         `/trx/sales-order/verify/${id}`,
         {}
       );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
+  static async getForDo(
+    offset = 0,
+    limit = 10,
+    status = "",
+    customer = "",
+    startdate = "",
+    enddate = ""
+  ) {
+    try {
+      const response = await this.axios.get("/trx/sales-order-do", {
+        params: { offset, limit, status, customer, startdate, enddate },
+      });
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

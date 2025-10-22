@@ -68,15 +68,13 @@ export default function Detail() {
       "itemprocessfamily",
       "saleunit",
       "stockunit",
-      "unitstype",
       "createdby",
       "createddate",
-      "conversion",
       "dimensi",
       "itemcategory",
-      "unitstype2",
     ],
     pricing: ["price", "discount", "addons", "iseditable"],
+    conversion: ["unitstype2", "conversion", "unitstype"],
   };
 
   const handleEdit = () => {
@@ -116,6 +114,10 @@ export default function Detail() {
     Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
   );
 
+  const [conversion, setConversion] = useState(
+    Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
+  );
+
   async function mapingGroup(data) {
     const pick = async (keys) => {
       const obj = {};
@@ -137,6 +139,7 @@ export default function Detail() {
 
     setGeneral(await pick(fieldGroups.general));
     setPricing(await pick(fieldGroups.pricing));
+    setConversion(await pick(fieldGroups.conversion));
   }
 
   async function getUserById(id) {
@@ -255,9 +258,6 @@ export default function Detail() {
                         isAlias: true,
                         hidden: true,
                       },
-                      { key: "unitstype", input: "input", isAlias: true },
-                      { key: "unitstype2", input: "input", isAlias: true },
-                      { key: "conversion", input: "input", isAlias: true },
                       { key: "dimensi", input: "input", isAlias: true },
                       { key: "createddate", input: "input", isAlias: true },
                     ]}
@@ -277,6 +277,29 @@ export default function Detail() {
                         hidden: true,
                       },
                       { key: "iseditable", input: "input", isAlias: true },
+                    ]}
+                    aliases={itemAliases}
+                  />
+
+                  <InputForm
+                    isReadOnly={true}
+                    type="conversion"
+                    payload={conversion}
+                    data={[
+                      { key: "unitstype", input: "input", isAlias: true },
+                      {
+                        key: "unitstype2",
+                        input: "input",
+                        isAlias: true,
+                        note: "Unit 2 bernilai 1",
+                      },
+                      {
+                        key: "conversion",
+                        input: "input",
+                        isAlias: true,
+                        note: `
+                    Conversion untuk menentukan berapa Base Unit yang setara dengan Unit 2.`,
+                      },
                     ]}
                     aliases={itemAliases}
                   />

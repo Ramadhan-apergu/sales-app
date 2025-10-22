@@ -64,13 +64,11 @@ export default function Edit() {
       "itemid",
       "displayname",
       "itemprocessfamily",
-      "unitstype",
-      "conversion",
       "dimensi",
       "itemcategory",
-      "unitstype2",
     ],
     pricing: ["price", "discount", "addons", "iseditable"],
+    conversion: ["unitstype2", "conversion", "unitstype"],
   };
 
   const deleteModal = () => {
@@ -105,6 +103,9 @@ export default function Edit() {
   const [pricing, setPricing] = useState(
     Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
   );
+  const [conversions, setConversion] = useState(
+    Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
+  );
 
   function mapingGroup(data) {
     const pick = (keys) =>
@@ -119,6 +120,7 @@ export default function Edit() {
 
     setGeneral(pick(fieldGroups.general));
     setPricing(pick(fieldGroups.pricing));
+    setConversion(pick(fieldGroups.conversion));
   }
 
   const items = [
@@ -167,6 +169,9 @@ export default function Edit() {
       case "primary":
         setGeneral(payload);
         break;
+      case "conversion":
+        setConversion(payload);
+        break;
       default:
         setPricing(payload);
         break;
@@ -179,6 +184,7 @@ export default function Edit() {
       const payloadToInsert = {
         ...general,
         ...pricing,
+        ...conversions,
       };
 
       const {
@@ -216,7 +222,7 @@ export default function Edit() {
       }
 
       if (!unitstype) {
-        notify("error", "Failed", `${itemAliases["unitstype"]}`);
+        notify("error", "Failed", `${itemAliases["unitstype"]} is required`);
         return;
       }
 
@@ -337,42 +343,6 @@ export default function Edit() {
                           ],
                         },
                         {
-                          key: "unitstype",
-                          input: "select",
-                          options: unitstypeOptions,
-                          isAlias: true,
-                          rules: [
-                            {
-                              required: true,
-                              message: `${itemAliases["unitstype"]} is required`,
-                            },
-                          ],
-                        },
-
-                        {
-                          key: "unitstype2",
-                          input: "select",
-                          options: unitstypeOptions,
-                          isAlias: true,
-                          rules: [
-                            {
-                              required: true,
-                              message: `${itemAliases["unitstype2"]} is required`,
-                            },
-                          ],
-                        },
-                        {
-                          key: "conversion",
-                          input: "number",
-                          isAlias: false,
-                          rules: [
-                            {
-                              required: true,
-                              message: `Conversion is required`,
-                            },
-                          ],
-                        },
-                        {
                           key: "dimensi",
                           input: "input",
                           isAlias: true,
@@ -420,6 +390,53 @@ export default function Edit() {
                               message: `${itemAliases["iseditable"]} is required`,
                             },
                           ],
+                        },
+                      ]}
+                      aliases={itemAliases}
+                      onChange={handleChangePayload}
+                    />
+
+                    <InputForm
+                      type="conversion"
+                      payload={conversions}
+                      data={[
+                        {
+                          key: "unitstype",
+                          input: "select",
+                          options: unitstypeOptions,
+                          isAlias: true,
+                          rules: [
+                            {
+                              required: true,
+                              message: `${itemAliases["unitstype"]} is required`,
+                            },
+                          ],
+                        },
+                        {
+                          key: "unitstype2",
+                          input: "select",
+                          options: unitstypeOptions,
+                          isAlias: true,
+                          rules: [
+                            {
+                              required: true,
+                              message: `${itemAliases["unitstype2"]} is required`,
+                            },
+                          ],
+                          note: "Unit 2 bernilai 1",
+                        },
+                        {
+                          key: "conversion",
+                          input: "number",
+                          isAlias: false,
+                          rules: [
+                            {
+                              required: true,
+                              message: `Conversion is required`,
+                            },
+                          ],
+                          note: `
+                    Isi Conversion untuk menentukan berapa Base Unit yang setara dengan Unit 2.`,
                         },
                       ]}
                       aliases={itemAliases}

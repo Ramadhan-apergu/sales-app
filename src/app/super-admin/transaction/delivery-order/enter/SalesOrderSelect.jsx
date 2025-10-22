@@ -60,7 +60,7 @@ function SalesOrder() {
       try {
         setIsloading(true);
 
-        const response = await SalesOrderFetch.get(
+        const response = await SalesOrderFetch.getForDo(
           offset,
           limit,
           statusFilter,
