@@ -88,6 +88,14 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           align: "right",
           render: (text, record) => <p>{formatRupiah(text)}</p>,
         };
+      } else if (key == "isfree") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          render: (text) => <p>{text ? "Yes" : "No"}</p>,
+          align: "right",
+        };
       } else {
         return {
           title: aliases?.[key] || key,
@@ -232,6 +240,8 @@ function Enter({ fulfillmentId }) {
         // );
 
         const soItemRes = await InvoiceFetch.getdOItemInv(fulfillmentData.id);
+        console.log(fulfillmentData.id);
+        console.log(soItemRes);
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch sales order items");
 
@@ -281,8 +291,8 @@ function Enter({ fulfillmentId }) {
                   displayname,
                   quantity,
                   units: fulfillment.units,
-                  quantity2: quantity / 25,
-                  units2: "bal",
+                  quantity2: fulfillment.quantity2,
+                  units2: fulfillment.units2,
                   rate,
                   amount,
                   totaldiscount,
@@ -293,6 +303,7 @@ function Enter({ fulfillmentId }) {
                   memo: fulfillment.memo,
                   lineid: crypto.randomUUID(),
                   location,
+                  isfree: fulfillment.isfree,
                 };
               } else {
                 return {
@@ -300,8 +311,8 @@ function Enter({ fulfillmentId }) {
                   displayname,
                   quantity: fulfillment.quantity,
                   units: fulfillment.units,
-                  quantity2: quantity / 25,
-                  units2: "bbal",
+                  quantity2: fulfillment.quantity2,
+                  units2: fulfillment.units2,
                   rate: 0,
                   amount: 0,
                   totaldiscount: 0,
@@ -312,6 +323,7 @@ function Enter({ fulfillmentId }) {
                   memo: fulfillment.memo,
                   lineid: crypto.randomUUID(),
                   location,
+                  isfree: fulfillment.isfree,
                 };
               }
             }
@@ -321,8 +333,8 @@ function Enter({ fulfillmentId }) {
               displayname,
               quantity: fulfillment.quantity,
               units: fulfillment.units,
-              quantity2: quantity / 25,
-              units2: "bal",
+              quantity2: fulfillment.quantity2,
+              units2: fulfillment.units2,
               rate: 0,
               amount: 0,
               totaldiscount: 0,
@@ -333,6 +345,7 @@ function Enter({ fulfillmentId }) {
               memo: fulfillment.memo,
               lineid: crypto.randomUUID(),
               location,
+              isfree: fulfillment.isfree,
             };
           })
         );
@@ -367,6 +380,7 @@ function Enter({ fulfillmentId }) {
           },
         });
       } catch (error) {
+        console.error(error);
         notify("error", "Error", error.message || "Failed to fetch data");
       } finally {
         setIsLoading(false);
@@ -384,11 +398,12 @@ function Enter({ fulfillmentId }) {
   const keyTableItem = [
     "displayname",
     "memo",
+    "isfree",
     "location",
     "quantity",
-    // "units",
+    "units",
     "quantity2",
-    // "units2",
+    "units2",
     "rate",
     "subtotal",
     "totaldiscount",
@@ -424,6 +439,7 @@ function Enter({ fulfillmentId }) {
           dpp: data.dpp,
           taxrate: data.taxrate,
           taxvalue: data.taxvalue,
+          isfree: data.isfree,
         };
       });
 

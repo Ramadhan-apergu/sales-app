@@ -27,12 +27,24 @@ import DeliveryOrderPrint from "@/components/superAdmin/DeliveryOrderPrint";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (key == "isfree") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
   ];
 
   return (

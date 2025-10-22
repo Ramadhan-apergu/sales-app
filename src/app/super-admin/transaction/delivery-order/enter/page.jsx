@@ -295,6 +295,16 @@ function Enter({ salesOrderId }) {
 
       const response = await FullfillmentFetch.create(payloadToInsert);
 
+      if (
+        response?.message.toLowerCase() == "warning" &&
+        response?.errors.length > 0
+      ) {
+        for (let i = 0; i < response.errors.length; i++) {
+          const error = response.errors[i];
+          notify("warning", "Warning", `${error}`);
+        }
+      }
+
       const resData = createResponseHandler(response, notify);
 
       if (payloadToInsert.shipstatus.toLowerCase() == "open") {
@@ -486,15 +496,6 @@ function Enter({ salesOrderId }) {
       <Modal
         open={isEditItem}
         onOk={() => {
-          if (editItem.quantity1 > editItem.quantityremaining) {
-            notify(
-              "error",
-              "Failed",
-              "Quantity kg cannot be more than the Remaining Quantity"
-            );
-            return;
-          }
-
           const updatedDataTableItem = dataTableItem.map((item) => {
             if (item.id == editItem.id) {
               return editItem;

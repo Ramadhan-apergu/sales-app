@@ -21,7 +21,7 @@ export function createResponseHandler(response, notifyFn) {
     case 200:
     case 201:
       callNotify(notifyFn, "success", "Successful");
-      return response.data.id;
+      return response.data?.id || true;
     case 401:
     case 403:
       handleUnauthorized(notifyFn);
