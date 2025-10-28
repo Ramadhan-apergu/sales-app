@@ -519,7 +519,6 @@ export default function Page() {
                   key: "quantity2",
                   input: "number",
                   isAlias: true,
-                  disabled: true,
                 },
                 {
                   key: "unit2",
@@ -549,13 +548,19 @@ export default function Page() {
                 },
               ]}
               aliases={deliveryOrderAliases.item}
-              onChange={(type, payload) => {
-                setEditItem((prev) => ({
-                  ...prev,
-                  quantity1: payload.quantity1,
-                  quantity2: payload.quantity2,
-                  memo: payload.memo,
-                }));
+              onChange={(type, payload, key) => {
+                if (key == "quantity1") {
+                  setEditItem((prev) => ({
+                    ...prev,
+                    quantity1: payload.quantity1,
+                    quantity2:
+                      Math.ceil((payload.quantity1 / prev.conversion) * 10) /
+                      10,
+                    memo: payload.memo,
+                  }));
+                } else {
+                  setEditItem(payload);
+                }
               }}
             />
           </div>
