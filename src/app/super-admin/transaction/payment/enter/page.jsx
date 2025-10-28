@@ -116,7 +116,10 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
                           /[^\d]/g,
                           ""
                         );
-                        if (rawValue.length < rawTotal.length) {
+                        if (
+                          rawValue.length <= rawTotal.length &&
+                          Number(rawValue) < Number(rawTotal)
+                        ) {
                           onChangeAmount(record.invoiceid, Number(rawValue));
                         } else {
                           onChangeAmount(record.invoiceid, Number(rawTotal));
