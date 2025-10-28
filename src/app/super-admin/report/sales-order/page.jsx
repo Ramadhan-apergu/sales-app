@@ -356,10 +356,10 @@ function SalesOrder() {
             {/* Item Name */}
             <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
               <label className="text-sm font-semibold text-gray-700">
-                Item Name
+                Display Name
               </label>
               <Search
-                placeholder="Search item name"
+                placeholder="Search Display Name"
                 onSearch={(value) => handleFilter("displayname", value)}
                 onChange={(e) => {
                   if (!e.target.value && filters.displayname)

@@ -40,8 +40,9 @@ export default function InputForm({
   }, [payload, form]);
 
   const handleValuesChange = (changedValues, allValues) => {
+    const firstKey = Object.keys(changedValues)[0];
     if (onChange) {
-      onChange(type, allValues);
+      onChange(type, allValues, firstKey);
     }
   };
 
