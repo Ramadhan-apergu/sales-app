@@ -68,4 +68,13 @@ export default class ItemFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async getItemFamily(id) {
+    try {
+      const response = await this.axios.get(`/master/itemprocessfamily`);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }

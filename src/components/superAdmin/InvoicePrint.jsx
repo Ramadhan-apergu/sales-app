@@ -27,7 +27,8 @@ export default function InvoicePrint({ data, dataTable }) {
         quantity2: acc.quantity2 + (item.quantity2 || 0),
         dpp: acc.dpp + (item.dpp || 0),
         taxvalue: acc.taxvalue + (item.taxvalue || 0),
-        totaldiscount: acc.totaldiscount + (item.totaldiscount || 0),
+        totaldiscount:
+          acc.totaldiscount + (item.isfree ? item.subtotal || 0 : 0),
         subtotal: acc.subtotal + (item.subtotal || 0),
       }),
       {
@@ -200,7 +201,7 @@ export default function InvoicePrint({ data, dataTable }) {
                 {formatRupiah(item.discountsatuan) || "-"}
               </p>
               <p className=" break-words whitespace-normal w-[15%] text-right">
-                {formatRupiah(item.amount) || "-"}
+                {formatRupiah(item.subtotal) || "-"}
               </p>
             </div>
           ))}

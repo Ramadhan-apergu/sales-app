@@ -559,7 +559,10 @@ export default function Page() {
                     memo: payload.memo,
                   }));
                 } else {
-                  setEditItem(payload);
+                  setEditItem((prev) => ({
+                    ...prev,
+                    [key]: payload[key]
+                  }));
                 }
               }}
             />

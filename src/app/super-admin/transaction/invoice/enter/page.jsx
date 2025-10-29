@@ -79,6 +79,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           "amount",
           "dpp",
           "taxvalue",
+          "discountsatuan",
         ].includes(key)
       ) {
         return {
@@ -240,8 +241,6 @@ function Enter({ fulfillmentId }) {
         // );
 
         const soItemRes = await InvoiceFetch.getdOItemInv(fulfillmentData.id);
-        console.log(fulfillmentData.id);
-        console.log(soItemRes);
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch sales order items");
 
@@ -264,8 +263,6 @@ function Enter({ fulfillmentId }) {
               (soItem) => soItem.item === fulfillment.item
             );
 
-            console.log(fulfillment);
-
             const itemSo = soItemData.find(
               (item) => item.item === fulfillment.item
             );
@@ -274,58 +271,38 @@ function Enter({ fulfillmentId }) {
             const location = fulfillment?.location || "";
 
             if (findItemSo) {
-              if (fulfillment.memo !== "free item") {
-                const quantity = fulfillment.quantity;
-                const rate = findItemSo.rate;
-                const amount = quantity * rate;
-                const totaldiscount = findItemSo.totaldiscount;
-                const subtotal = amount - totaldiscount;
-                const taxrate = findItemSo.taxrate;
-                const taxvalue = findItemSo.taxable
-                  ? Math.ceil((amount / (1 + taxrate / 100)) * (taxrate / 100))
-                  : 0;
+              const quantity = fulfillment.quantity;
+              const rate = findItemSo.rate;
+              const amount = quantity * rate;
+              const totaldiscount = findItemSo.totaldiscount;
+              const subtotal = amount - totaldiscount;
+              const taxrate = findItemSo.taxrate;
+              const taxvalue = findItemSo.taxable
+                ? Math.ceil((amount / (1 + taxrate / 100)) * (taxrate / 100))
+                : 0;
 
-                const dpp = amount - taxvalue;
-                return {
-                  item: fulfillment.item,
-                  displayname,
-                  quantity,
-                  units: fulfillment.units,
-                  quantity2: fulfillment.quantity2,
-                  units2: fulfillment.units2,
-                  rate,
-                  amount,
-                  totaldiscount,
-                  subtotal,
-                  dpp,
-                  taxrate,
-                  taxvalue,
-                  memo: fulfillment.memo,
-                  lineid: crypto.randomUUID(),
-                  location,
-                  isfree: fulfillment.isfree,
-                };
-              } else {
-                return {
-                  item: fulfillment.item,
-                  displayname,
-                  quantity: fulfillment.quantity,
-                  units: fulfillment.units,
-                  quantity2: fulfillment.quantity2,
-                  units2: fulfillment.units2,
-                  rate: 0,
-                  amount: 0,
-                  totaldiscount: 0,
-                  subtotal: 0,
-                  dpp: 0,
-                  taxrate: 0,
-                  taxvalue: 0,
-                  memo: fulfillment.memo,
-                  lineid: crypto.randomUUID(),
-                  location,
-                  isfree: fulfillment.isfree,
-                };
-              }
+              const dpp = amount - taxvalue;
+              const discountsatuan = itemSo?.discountsatuan || 0;
+              return {
+                item: fulfillment.item,
+                displayname,
+                quantity,
+                units: fulfillment.units,
+                quantity2: fulfillment.quantity2,
+                units2: fulfillment.units2,
+                rate,
+                amount,
+                totaldiscount,
+                discountsatuan,
+                subtotal,
+                dpp,
+                taxrate,
+                taxvalue,
+                memo: fulfillment.memo,
+                lineid: crypto.randomUUID(),
+                location,
+                isfree: fulfillment.isfree,
+              };
             }
 
             return {
@@ -338,6 +315,7 @@ function Enter({ fulfillmentId }) {
               rate: 0,
               amount: 0,
               totaldiscount: 0,
+              discountsatuan: 0,
               subtotal: 0,
               dpp: 0,
               taxrate: 0,
@@ -405,9 +383,10 @@ function Enter({ fulfillmentId }) {
     "quantity2",
     "units2",
     "rate",
-    "subtotal",
-    "totaldiscount",
     "amount",
+    "discountsatuan",
+    "totaldiscount",
+    "subtotal",
     "taxrate",
     "dpp",
     "taxvalue",
@@ -435,6 +414,7 @@ function Enter({ fulfillmentId }) {
           rate: data.rate,
           subtotal: data.subtotal,
           totaldiscount: data.totaldiscount,
+          discountsatuan: data.discountsatuan,
           amount: data.amount,
           dpp: data.dpp,
           taxrate: data.taxrate,
@@ -483,11 +463,11 @@ function Enter({ fulfillmentId }) {
     let amount = 0;
 
     dataTableItem.forEach((item) => {
-      if (item.memo !== "free item") {
-        totalamount += item.amount;
-        discounttotal += item.totaldiscount;
-        subtotal += item.subtotal;
-        amount += item.subtotal;
+      totalamount += item.amount;
+      subtotal += item.subtotal;
+      amount += item.subtotal;
+      if (item.isfree) {
+        discounttotal += item.subtotal;
       }
     });
 

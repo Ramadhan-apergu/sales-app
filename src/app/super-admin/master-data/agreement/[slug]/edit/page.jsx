@@ -329,6 +329,26 @@ export default function AgreementEdit() {
   const [data, setData] = useState(null);
   const [dataItem, setDataItem] = useState(null);
 
+  const [itemprocessfamilyOptions, setItemprocessfamilyOptions] = useState([]);
+
+  const fetchItemFamily = async () => {
+    try {
+      const response = await ItemFetch.getItemFamily();
+      const resData = getResponseHandler(response, notify);
+
+      if (resData && resData.list && resData.list.length > 0) {
+        const listActive =
+          resData.list.filter((item) => item.isdeleted == 0) || [];
+
+        setItemprocessfamilyOptions(
+          listActive.map((item) => ({ label: item.name, value: item.name }))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -452,6 +472,7 @@ export default function AgreementEdit() {
     };
 
     fetchDataItem();
+    fetchItemFamily();
   }, []);
 
   const [payloadCustomForm, setPayloadCustomForm] = useState({
@@ -585,19 +606,6 @@ export default function AgreementEdit() {
       "perunit",
     ],
     ["itemid", "displayname"],
-  ];
-
-  const itemprocessfamilyOptions = [
-    { label: "Assoy Cetak", value: "Assoy Cetak" },
-    { label: "K-Item", value: "K-Item" },
-    { label: "Emboss", value: "Emboss" },
-    { label: "C-Item", value: "C-Item" },
-    { label: "B-Item", value: "B-Item" },
-    { label: "HD 35B", value: "HD 35B" },
-    { label: "PP", value: "PP" },
-    { label: "HDP", value: "HDP" },
-    { label: "Assoy PE", value: "Assoy PE" },
-    { label: "PE Gulungan", value: "PE Gulungan" },
   ];
 
   const statusOptions = [
@@ -1167,7 +1175,7 @@ export default function AgreementEdit() {
   }
 
   function handleAddDetail(instance) {
-    const currentPayload = payloadDetailInitRef.current;
+    let currentPayload = payloadDetailInitRef.current;
 
     currentPayload = {
       ...currentPayload,
