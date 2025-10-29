@@ -497,7 +497,7 @@ function Enter({ salesOrderId }) {
         open={isEditItem}
         onOk={() => {
           const updatedDataTableItem = dataTableItem.map((item) => {
-            if (item.id == editItem.id) {
+            if (item.id == editItem.id && item.lineid == editItem.lineid) {
               return editItem;
             } else {
               return item;
@@ -600,7 +600,10 @@ function Enter({ salesOrderId }) {
                     memo: payload.memo,
                   }));
                 } else {
-                  setEditItem(payload);
+                  setEditItem((prev) => ({
+                    ...prev,
+                    [key]: payload[key],
+                  }));
                 }
               }}
             />
