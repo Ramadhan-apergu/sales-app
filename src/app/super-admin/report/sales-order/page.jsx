@@ -27,7 +27,7 @@ import { ExportOutlined } from "@ant-design/icons";
 import { exportJSONToExcel } from "@/utils/export";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = null;
+const DEFAULT_LIMIT = 50;
 
 const { Search } = Input;
 
@@ -386,7 +386,7 @@ function SalesOrder() {
                 tableLayout="auto"
               />
             </div>
-            {/* <div>
+            <div>
               <Pagination
                 total={totalItems}
                 defaultPageSize={limit}
@@ -399,7 +399,7 @@ function SalesOrder() {
                 size="small"
                 align={"end"}
               />
-            </div> */}
+            </div>
           </>
         ) : (
           <div className="w-full h-96">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
@@ -8,7 +8,10 @@ import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import { itemAliases } from "@/utils/aliases";
 import InputForm from "@/components/superAdmin/InputForm";
-import { createResponseHandler } from "@/utils/responseHandlers";
+import {
+  createResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import ItemFetch from "@/modules/salesApi/item";
@@ -57,26 +60,29 @@ export default function CustomerNew() {
     { label: "Other", value: "Other" },
   ];
 
-  const itemprocessfamilyOptions = [
-    { label: "ASSOY B ITEM", value: "ASSOY B ITEM" },
-    { label: "ASSOY C ITEM", value: "ASSOY C ITEM" },
-    { label: "ASSOY DC BELANG", value: "ASSOY DC BELANG" },
-    { label: "ASSOY EMBOSS", value: "ASSOY EMBOSS" },
-    { label: "ASSOY HD", value: "ASSOY HD" },
-    { label: "ASSOY HD CETAK", value: "ASSOY HD CETAK" },
-    { label: "ASSOY HD CUSTOM", value: "ASSOY HD CUSTOM" },
-    { label: "ASSOY HD35B", value: "ASSOY HD35B" },
-    { label: "ASSOY K ITEM", value: "ASSOY K ITEM" },
-    { label: "ASSOY PE CETAK", value: "ASSOY PE CETAK" },
-    { label: "ASSOY PE CUSTOM", value: "ASSOY PE CUSTOM" },
-    { label: "KANTONGAN HD", value: "KANTONGAN HD" },
-    { label: "KANTONGAN HD CUSTOM", value: "KANTONGAN HD CUSTOM" },
-    { label: "KANTONGAN PP", value: "KANTONGAN PP" },
-    { label: "SARUNG TANGAN", value: "SARUNG TANGAN" },
-    { label: "SELANG POMPA", value: "SELANG POMPA" },
-    { label: "Y ITEM", value: "Y ITEM" },
-    { label: "GULUNGAN PE", value: "GULUNGAN PE" },
-  ];
+  const [itemprocessfamilyOptions, setItemprocessfamilyOptions] = useState([]);
+
+  const fetchItemFamily = async () => {
+    try {
+      const response = await ItemFetch.getItemFamily();
+      const resData = getResponseHandler(response, notify);
+
+      if (resData && resData.list && resData.list.length > 0) {
+        const listActive =
+          resData.list.filter((item) => item.isdeleted == 0) || [];
+
+        setItemprocessfamilyOptions(
+          listActive.map((item) => ({ label: item.name, value: item.name }))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchItemFamily();
+  });
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

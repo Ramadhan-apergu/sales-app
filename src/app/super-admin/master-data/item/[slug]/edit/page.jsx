@@ -13,6 +13,7 @@ import InputForm from "@/components/superAdmin/InputForm";
 import {
   deleteResponseHandler,
   getByIdResponseHandler,
+  getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -31,6 +32,26 @@ export default function Edit() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
+
+  const [itemprocessfamilyOptions, setItemprocessfamilyOptions] = useState([]);
+
+  const fetchItemFamily = async () => {
+    try {
+      const response = await ItemFetch.getItemFamily();
+      const resData = getResponseHandler(response, notify);
+
+      if (resData && resData.list && resData.list.length > 0) {
+        const listActive =
+          resData.list.filter((item) => item.isdeleted == 0) || [];
+
+        setItemprocessfamilyOptions(
+          listActive.map((item) => ({ label: item.name, value: item.name }))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -54,6 +75,7 @@ export default function Edit() {
       }
     }
     fetchData();
+    fetchItemFamily();
   }, []);
 
   const title = "item";
@@ -141,27 +163,6 @@ export default function Edit() {
     { label: "Plastik", value: "Plastik" },
     { label: "Chemical", value: "Chemical" },
     { label: "Other", value: "Other" },
-  ];
-
-  const itemprocessfamilyOptions = [
-    { label: "ASSOY B ITEM", value: "ASSOY B ITEM" },
-    { label: "ASSOY C ITEM", value: "ASSOY C ITEM" },
-    { label: "ASSOY DC BELANG", value: "ASSOY DC BELANG" },
-    { label: "ASSOY EMBOSS", value: "ASSOY EMBOSS" },
-    { label: "ASSOY HD", value: "ASSOY HD" },
-    { label: "ASSOY HD CETAK", value: "ASSOY HD CETAK" },
-    { label: "ASSOY HD CUSTOM", value: "ASSOY HD CUSTOM" },
-    { label: "ASSOY HD35B", value: "ASSOY HD35B" },
-    { label: "ASSOY K ITEM", value: "ASSOY K ITEM" },
-    { label: "ASSOY PE CETAK", value: "ASSOY PE CETAK" },
-    { label: "ASSOY PE CUSTOM", value: "ASSOY PE CUSTOM" },
-    { label: "KANTONGAN HD", value: "KANTONGAN HD" },
-    { label: "KANTONGAN HD CUSTOM", value: "KANTONGAN HD CUSTOM" },
-    { label: "KANTONGAN PP", value: "KANTONGAN PP" },
-    { label: "SARUNG TANGAN", value: "SARUNG TANGAN" },
-    { label: "SELANG POMPA", value: "SELANG POMPA" },
-    { label: "Y ITEM", value: "Y ITEM" },
-    { label: "GULUNGAN PE", value: "GULUNGAN PE" },
   ];
 
   const handleChangePayload = (type, payload) => {
