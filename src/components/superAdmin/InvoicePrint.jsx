@@ -309,7 +309,11 @@ export default function InvoicePrint({ data, dataTable }) {
             </div>
           </div>
           <div className="w-[25%] border h-20 flex flex-col px-1">
-            <p>Keterangan:</p>
+            <p>
+              Keterangan:
+              <br />
+              {data?.memo}
+            </p>
           </div>
         </div>
         <p>{`[${currentDate}]`}</p>
