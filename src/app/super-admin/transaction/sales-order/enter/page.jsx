@@ -251,8 +251,8 @@ export default function Enter() {
       iseditable: 0,
     },
     tax: {
-      taxable: false,
-      taxrate: 0,
+      taxable: true,
+      taxrate: 11,
     },
     summary: {
       totaldiscount: 0,

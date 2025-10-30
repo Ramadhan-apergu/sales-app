@@ -110,14 +110,20 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         <div className="w-full flex border table-padding font-semibold">
           <p className="border-r break-words whitespace-normal w-[5%]">No</p>
           {/* <p className="border-r break-words whitespace-normal w-[25%]">Kode</p> */}
-          <p className="border-r break-words whitespace-normal w-[45%]">
+          <p className="border-r break-words whitespace-normal w-[25%]">
             Nama Barang
           </p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
-            Qty (Kg)
+            Qty 1
+          </p>
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Unit 1
           </p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
-            Qty (Bal)
+            Qty 2
+          </p>
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+            Unit 2
           </p>
           <p className="break-words whitespace-normal w-[20%]">Keterangan</p>
         </div>
@@ -134,14 +140,20 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
               {/* <p className="border-r break-words whitespace-normal w-[25%]">
                 {item.itemid || "-"}
               </p> */}
-              <p className="border-r break-words whitespace-normal w-[45%]">
+              <p className="border-r break-words whitespace-normal w-[25%]">
                 {item.displayname || "-"}
               </p>
               <p className="border-r break-words whitespace-normal w-[15%] text-right">
                 {item.quantity1 || "-"}
               </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.unit1 || "-"}
+              </p>
               <p className="border-r break-words whitespace-normal w-[15%] text-right">
                 {item.quantity2 || "-"}
+              </p>
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                {item.unit2 || "-"}
               </p>
               <p className="break-words whitespace-normal w-[20%]">
                 {item.memo || "-"}
@@ -151,12 +163,18 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         <div className="w-full flex table-padding border-r border-white">
           <p className="break-words whitespace-normal w-[5%] text-right"></p>
           {/* <p className="break-words whitespace-normal w-[25%]"></p> */}
-          <p className="break-words whitespace-normal w-[45%]"></p>
+          <p className="break-words whitespace-normal w-[25%]"></p>
           <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty}
           </p>
-          <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
+          <p className="border-l border-b break-words whitespace-normal w-[10%] text-right">
+            {"-"}
+          </p>
+          <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty2}
+          </p>
+          <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
+            {"-"}
           </p>
           <p className="break-words whitespace-normal w-[20%]"></p>
         </div>
