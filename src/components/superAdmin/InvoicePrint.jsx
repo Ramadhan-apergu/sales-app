@@ -99,7 +99,7 @@ export default function InvoicePrint({ data, dataTable }) {
                 Termin :
               </p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
-                {data?.term + " Hari" || "- Hari"}
+                {data?.term ? data.term + " Hari" || "- Hari" : "COD"}
               </p>
             </div>
           </div>
@@ -162,10 +162,10 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="border-r break-words whitespace-normal w-[8%] text-right">
             Satuan
           </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+          <p className="border-r break-words whitespace-normal w-[15%] text-right">
             Harga
           </p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
             Diskon
           </p>
           <p className=" break-words whitespace-normal w-[15%] text-right">
@@ -194,10 +194,10 @@ export default function InvoicePrint({ data, dataTable }) {
               <p className="border-r break-words whitespace-normal w-[8%] text-right">
                 {item.units || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+              <p className="border-r break-words whitespace-normal w-[15%] text-right">
                 {formatRupiah(item.rate) || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[15%] text-right">
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
                 {formatRupiah(item.discountsatuan) || "-"}
               </p>
               <p className=" break-words whitespace-normal w-[15%] text-right">
@@ -216,8 +216,8 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="break-words whitespace-normal w-[8%] text-right border-b border-r">
             KG
           </p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+          <p className="break-words whitespace-normal w-[15%] text-right"></p>
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
             Jumlah
           </p>
           <p className="break-words border-b whitespace-normal w-[15%] text-right">
@@ -245,6 +245,38 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
           <p className="break-words whitespace-normal w-[18%]"></p>
           <p className="break-words whitespace-normal w-[18%]"></p>
+          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+            DPP
+          </p>
+          <p className="break-words border-b whitespace-normal w-[15%] text-right">
+            {formatRupiah(count.totaldiscount)}
+          </p>
+        </div>
+
+        <div className="w-full flex border-r table-padding">
+          <p className="break-words whitespace-normal w-[44%] border">
+            Pembayaran Transfer Ke:
+          </p>
+          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+            PPN
+          </p>
+          <p className="break-words border-b whitespace-normal w-[15%] text-right">
+            {formatRupiah(count.taxvalue)}
+          </p>
+        </div>
+
+        <div className="w-full flex border-r table-padding">
+          <p className="break-words whitespace-normal w-[44%] border-x border-b">
+            Bank BCA: 383-148-7788 a.n CV Sukses Mandiri
+          </p>
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
           <p className="break-words whitespace-normal w-[10%] text-right"></p>
@@ -277,7 +309,11 @@ export default function InvoicePrint({ data, dataTable }) {
             </div>
           </div>
           <div className="w-[25%] border h-20 flex flex-col px-1">
-            <p>Keterangan:</p>
+            <p>
+              Keterangan:
+              <br />
+              {data?.memo}
+            </p>
           </div>
         </div>
         <p>{`[${currentDate}]`}</p>

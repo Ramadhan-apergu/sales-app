@@ -82,7 +82,7 @@ export default function CustomerNew() {
 
   useEffect(() => {
     fetchItemFamily();
-  });
+  }, []);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

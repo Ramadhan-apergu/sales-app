@@ -18,6 +18,7 @@ import { createResponseHandler } from "@/utils/responseHandlers";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 import * as XLSX from "xlsx";
 import ItemFetch from "@/modules/salesApi/item";
+import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 
 function TableCustom({ data, aliases }) {
   if (!data?.length) return null;
@@ -28,11 +29,22 @@ function TableCustom({ data, aliases }) {
   // Pastikan "No" muncul paling depan
   const orderedKeys = ["No", ...keys.filter((k) => k !== "No")];
 
-  const columns = orderedKeys.map((key) => ({
-    dataIndex: key,
-    key,
-    title: aliases?.[key] || key,
-  }));
+  const columns = orderedKeys.map((key) => {
+    if (["Price Family", "Addons", "Rate Transaksi"].includes(key)) {
+      return {
+        dataIndex: key,
+        key,
+        title: aliases?.[key] || key,
+        render: (text) => <p>{formatRupiah(text)}</p>,
+      };
+    } else {
+      return {
+        dataIndex: key,
+        key,
+        title: aliases?.[key] || key,
+      };
+    }
+  });
 
   return (
     <Table
@@ -40,8 +52,14 @@ function TableCustom({ data, aliases }) {
       dataSource={data}
       rowKey={(record, idx) => idx}
       bordered
-      pagination={false}
       scroll={{ x: "max-content" }}
+      pagination={{
+        pageSize: 100, // ✅ default 100 per halaman
+        showSizeChanger: true, // bisa ubah page size manual
+        pageSizeOptions: [50, 100, 200, 500],
+        showTotal: (total, range) =>
+          `${range[0]}-${range[1]} dari ${total} data`,
+      }}
     />
   );
 }
@@ -63,7 +81,8 @@ export default function Enter() {
     "Item Processing Family",
     "Price Family",
     "Addons",
-    "Price",
+    "Rate Transaksi",
+    "Effective Date",
   ];
 
   const props = {
@@ -139,7 +158,28 @@ export default function Enter() {
               let allEmpty = true;
               Object.keys(headerIndexMap).forEach((key) => {
                 const idx = headerIndexMap[key];
-                const val = row[idx] ? String(row[idx]).trim() : "";
+                let val = row[idx] ? String(row[idx]).trim() : "";
+
+                // ✅ Cek jika kolom adalah "Effective Date"
+                if (key === "Effective Date" && row[idx]) {
+                  const raw = row[idx];
+                  // Jika berupa angka (serial Excel)
+                  if (!isNaN(raw)) {
+                    // Excel date serial -> JS date
+                    const excelDate = new Date((raw - 25569) * 86400 * 1000);
+                    val = excelDate.toISOString().split("T")[0]; // YYYY-MM-DD
+                  } else {
+                    // Jika sudah string (misal "01/11/2025"), normalisasi
+                    const parts = raw.split(/[\/\-]/);
+                    if (parts.length === 3) {
+                      const [d, m, y] = parts.map(Number);
+                      if (y && m && d) {
+                        val = new Date(y, m - 1, d).toISOString().split("T")[0];
+                      }
+                    }
+                  }
+                }
+
                 obj[key] = val;
                 if (val !== "") allEmpty = false;
               });
@@ -198,7 +238,14 @@ export default function Enter() {
 
   const handleDownloadTemplate = () => {
     const header = [
-      ["Item Id", "Item Processing Family", "Price Family", "Addons", "Price"],
+      [
+        "Item Id",
+        "Item Processing Family",
+        "Price Family",
+        "Addons",
+        "Rate Transaksi",
+        "Effective Date",
+      ],
     ];
     const ws = XLSX.utils.aoa_to_sheet(header);
     const wb = XLSX.utils.book_new();
