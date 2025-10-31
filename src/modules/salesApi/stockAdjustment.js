@@ -27,9 +27,7 @@ export default class StockAdjustmentFetch extends ProcessFetch {
         "/trx/adjust-stock-upload",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          isMultipart: true,
         }
       );
       return new this().processResponse(response);
@@ -57,7 +55,10 @@ export default class StockAdjustmentFetch extends ProcessFetch {
 
   static async validasiItem(payload) {
     try {
-      const response = await this.axios.post("/trx/validate-itemid-stock", payload);
+      const response = await this.axios.post(
+        "/trx/validate-itemid-stock",
+        payload
+      );
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);
