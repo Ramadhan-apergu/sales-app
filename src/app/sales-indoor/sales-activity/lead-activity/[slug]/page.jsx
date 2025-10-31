@@ -37,7 +37,6 @@ import {
   createResponseHandler,
   deleteResponseHandler,
   getResponseHandler,
-  updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
@@ -46,39 +45,36 @@ import convertToLocalDate from "@/utils/convertToLocalDate";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
-import { leadAliases, paymentAliases, targetAliases } from "@/utils/aliases";
+import { leadActAliases, paymentAliases, targetAliases } from "@/utils/aliases";
 import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
-import LeadsFetch from "@/modules/salesApi/crm/leads";
+import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const title = "leads";
+  const title = "lead-activity";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const initialState = {
     payloadPrimary: {
-      addedon: "",
-      addr1: "",
-      city: "",
+      activitydate: "",
+      channelname: null,
+      channelnamestr: "",
+      channelreff: "",
       companyname: "",
       createdby: "",
       createddate: "",
-      email: "",
       id: "",
-      leadid: "",
-      name: "",
-      owner: "",
-      ownername: "",
-      phone: "",
-      stageid: null,
-      state: "",
+      lead: "",
+      lead_name: "",
+      summary: "",
+      visitdoc: "",
       status: "",
     },
   };
@@ -106,13 +102,14 @@ export default function Enter() {
   }
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [channelLabel, setChannelLabel] = useState("phone number");
 
   const { slug } = useParams();
 
   async function fetchData() {
     setIsLoading(true);
     try {
-      const response = await LeadsFetch.getById(slug);
+      const response = await LeadActivityFetch.getById(slug);
       const resData = getResponseHandler(response);
       setData(resData);
       if (resData) {
@@ -134,24 +131,35 @@ export default function Enter() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
-        addedon: formatDateTimeToShort(data.addedon),
-        addr1: data.addr1,
-        city: data.city,
+        activitydate: formatDateTimeToShort(data.activitydate) || "",
+        channelname: data.channelname,
+        channelnamestr: data.channelnamestr,
+        channelreff: data.channelreff,
         companyname: data.companyname,
         createdby: data.createdby,
-        createddate: formatDateToShort(data.createddate),
-        email: data.email,
+        createddate: formatDateTimeToShort(data.createddate) || "",
         id: data.id,
-        leadid: data.leadid,
-        name: data.name,
-        owner: data.owner,
-        ownername: data.ownername,
-        phone: data.phone,
-        stageid: data.stageid,
-        state: data.state,
+        lead: data.lead,
+        lead_name: data.lead_name,
+        summary: data.summary,
+        visitdoc: data.visitdoc,
         status: data.status,
       },
     });
+
+    const label = () => {
+      switch (data.channelname) {
+        case 1:
+          return "Phone Number";
+        case 2:
+          return "Email";
+        case 3:
+          return "PIC";
+        case 4:
+          return "Lead Address";
+      }
+    };
+    setChannelLabel(label);
   };
 
   const [modalDelete, setModalDelete] = useState(false);
@@ -159,10 +167,6 @@ export default function Enter() {
   const dropdownItems = [
     {
       key: "1",
-      label: "Covert",
-    },
-    {
-      key: "2",
       label: "Delete",
       danger: true,
     },
@@ -171,10 +175,6 @@ export default function Enter() {
   function handleDropdown({ key }) {
     switch (key) {
       case "1":
-        handleConvert();
-        break;
-
-      case "2":
         setModalDelete(true);
         break;
 
@@ -186,29 +186,12 @@ export default function Enter() {
   async function handleDelete() {
     setIsLoadingSubmit(true);
     try {
-      const response = await LeadsFetch.delete(data.id);
+      const response = await LeadActivityFetch.delete(data.id);
 
       const resData = deleteResponseHandler(response, notify);
 
       if (resData) {
         router.push(`/sales-indoor/sales-activity/${title}`);
-      }
-    } catch (error) {
-      notify("error", "Error", error.message || "Internal server error");
-    } finally {
-      setIsLoadingSubmit(false);
-    }
-  }
-
-  async function handleConvert() {
-    setIsLoadingSubmit(true);
-    try {
-      const response = await LeadsFetch.convert(data.id);
-
-      const resData = updateResponseHandler(response, notify);
-
-      if (resData) {
-        router.push(`/sales-indoor/sales-activity/${title}/${resData}`);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -223,7 +206,7 @@ export default function Enter() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              Lead Detail
+              Activity Detail
             </p>
             <Button
               icon={<UnorderedListOutlined />}
@@ -242,30 +225,7 @@ export default function Enter() {
                 <>
                   <div className="w-full flex flex-col lg:flex-row justify-between items-start">
                     <div className="w-full lg:w-1/2 flex gap-1 flex-col">
-                      <p className="w-full lg:text-lg">{data.leadid}</p>
-                      <div>
-                        <Tag
-                          style={{
-                            textTransform: "capitalize",
-                            fontSize: "16px",
-                          }}
-                          color={
-                            ["qualified"].includes(data?.status.toLowerCase())
-                              ? "green"
-                              : [
-                                  "engaged",
-                                  "prospecting",
-                                  "Negotiating",
-                                ].includes(data?.status.toLowerCase())
-                              ? "orange"
-                              : ["closed"].includes(data?.status.toLowerCase())
-                              ? "red"
-                              : "default"
-                          }
-                        >
-                          {data.status || "-"}
-                        </Tag>
-                      </div>
+                      <p className="w-full lg:text-lg">{data.companyname}</p>
                     </div>
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
@@ -295,59 +255,92 @@ export default function Enter() {
                     payload={state.payloadPrimary}
                     data={[
                       {
-                        key: "ownername",
+                        key: "lead_name",
                         input: "input",
                         isAlias: true,
                         isRead: true,
                       },
                       {
-                        key: "email",
+                        key: "activitydate",
                         input: "input",
                         isAlias: true,
                         isRead: true,
                       },
                       {
-                        key: "phone",
+                        key: "channelnamestr",
                         input: "input",
                         isAlias: true,
                         isRead: true,
                       },
                       {
-                        key: "companyname",
+                        key: "channelreff",
+                        input:
+                          state.payloadPrimary.channelname == 4
+                            ? "text"
+                            : "input",
+
+                        labeled: channelLabel,
+                        isAlias: true,
+                        isRead: true,
+                      },
+                      {
+                        key: "status",
                         input: "input",
                         isAlias: true,
                         isRead: true,
                       },
                       {
-                        key: "addr1",
+                        key: "summary",
                         input: "text",
                         isAlias: true,
                         isRead: true,
                       },
                       {
-                        key: "city",
-                        input: "input",
+                        key: "visitdoc",
+                        input: "text",
                         isAlias: true,
                         isRead: true,
-                      },
-                      {
-                        key: "state",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "addedon",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
+                        hidden: state.payloadPrimary.channelname != 4
                       },
                     ]}
-                    aliases={leadAliases}
+                    aliases={leadActAliases}
                     onChange={(type, payload) => {
                       dispatch({ type, payload });
                     }}
                   />
+                  {state.payloadPrimary.channelname == 4 && (
+                    <div className="w-full flex flex-col gap-8">
+                      <div className="w-full flex flex-col gap-2">
+                        <Divider
+                          style={{
+                            margin: "0",
+                            textTransform: "capitalize",
+                            borderColor: "#1677ff",
+                          }}
+                          orientation="left"
+                        >
+                          Preview
+                        </Divider>
+                        <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                          <Form layout="vertical">
+                            <Form.Item
+                              label={
+                                <span className="capitalize">Preview</span>
+                              }
+                              style={{ margin: 0 }}
+                              className="w-full"
+                              labelCol={{ style: { padding: 0 } }}
+                            >
+                              <img
+                                src={state.payloadPrimary.visitdoc || null}
+                                alt="Visit Doc"
+                              />
+                            </Form.Item>
+                          </Form>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="w-full h-96">
@@ -363,7 +356,7 @@ export default function Enter() {
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
       <Modal
-        title="Delete Lead"
+        title="Delete Activity"
         open={modalDelete}
         onCancel={() => setModalDelete(false)}
         footer={[
@@ -383,7 +376,7 @@ export default function Enter() {
           </Button>,
         ]}
       >
-        <p>Are you sure you want to delete this lead?</p>
+        <p>Are you sure you want to delete this activity?</p>
       </Modal>
     </>
   );

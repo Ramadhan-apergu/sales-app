@@ -29,12 +29,20 @@ import AgreementFetch from "@/modules/salesApi/agreement";
 import ItemFetch from "@/modules/salesApi/item";
 import UserManageFetch from "@/modules/salesApi/userManagement";
 
-function TableCustom({ data, keys, aliases }) {
-  const columns = keys.map((key) => ({
-    title: aliases?.[key] || key,
-    dataIndex: key,
-    key: key,
-  }));
+function TableCustom({ data, keys, aliases, agreementtype }) {
+  const columns = keys
+    .map((key) => {
+      if (agreementtype != "addons" && key == "addons") {
+        return null;
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+        };
+      }
+    })
+    .filter(Boolean);
 
   return (
     <Table
@@ -102,6 +110,7 @@ export default function Detail() {
       "customform",
       "agreementcode",
       "agreementname",
+      "agreementtype",
       "effectivedate",
       "enddate",
       "status",
@@ -315,6 +324,7 @@ export default function Detail() {
     [
       "displayname",
       "price",
+      "addons",
       "unitstype",
       "qtymin",
       "qtyminunit",
@@ -326,6 +336,7 @@ export default function Detail() {
     [
       "displayname",
       "price",
+      "addons",
       "unitstype",
       "qtymin",
       "qtyminunit",
@@ -337,6 +348,7 @@ export default function Detail() {
     [
       "displayname",
       "price",
+      "addons",
       "unitstype",
       "qtymin",
       "qtyminunit",
@@ -349,6 +361,7 @@ export default function Detail() {
     [
       "displayname",
       "price",
+      "addons",
       "unitstype",
       "qtymin",
       "qtyminunit",
@@ -376,8 +389,6 @@ export default function Detail() {
       { key: "qtymin", input: "input", isAlias: true },
       { key: "qtymax", input: "input", isAlias: true },
       { key: "qtyfree", input: "input", isAlias: true },
-      { key: "unitfree", input: "input", isAlias: true },
-      { key: "itemfree", input: "input", isAlias: true },
     ],
   ];
 
@@ -459,6 +470,12 @@ export default function Detail() {
                       { key: "customform", input: "input", isAlias: true },
                       { key: "agreementcode", input: "input", isAlias: true },
                       { key: "agreementname", input: "input", isAlias: true },
+                      {
+                        key: "agreementtype",
+                        input: "input",
+                        isAlias: true,
+                        hidden: general.customform != 2,
+                      },
                       { key: "effectivedate", input: "input", isAlias: true },
                       { key: "enddate", input: "input", isAlias: true },
                       { key: "status", input: "input", isAlias: true },
@@ -485,6 +502,7 @@ export default function Detail() {
                         data={agreementLinesWithItem}
                         keys={keys[parseInt(data.customform) - 1]}
                         aliases={agreementAliases}
+                        agreementtype={general.agreementtype}
                       />
                     </div>
                   ) : (

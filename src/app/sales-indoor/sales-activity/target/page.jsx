@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -26,7 +26,6 @@ import CustomerFetch from "@/modules/salesApi/customer";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
-import LayoutSalesIndoor from "@/components/salesIndoor/Layout";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -143,15 +142,45 @@ function Target() {
       key: "notes",
       align: "center",
     },
+    {
+      title: "Actions",
+      key: "actions",
+      fixed: "right",
+      align: "center",
+      width: isLargeScreen ? 87 : 30,
+      render: (_, record) => (
+        <div className="flex justify-center items-center gap-2">
+          <Button
+            disabled={record?.status == "closed"}
+            type={"link"}
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            {isLargeScreen ? "Edit" : ""}
+          </Button>
+          {contextHolder}
+        </div>
+      ),
+    },
   ];
 
   return (
-    <LayoutSalesIndoor>
+    <Layout>
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
             Target List
           </p>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() =>
+              router.push(`/sales-indoor/sales-activity/${title}/enter`)
+            }
+          >
+            {isLargeScreen ? `Enter` : ""}
+          </Button>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2"></div>
@@ -168,8 +197,7 @@ function Target() {
                 options={[
                   { value: "all", label: "All" },
                   { value: "open", label: "Open" },
-                  { value: "partially paid", label: "Partially Paid" },
-                  { value: "paid in full", label: "Paid in Full" },
+                  { value: "close", label: "Close" },
                 ]}
                 styles={{
                   popup: {
@@ -220,7 +248,7 @@ function Target() {
         )}
       </div>
       {notificationContextHolder}
-    </LayoutSalesIndoor>
+    </Layout>
   );
 }
 

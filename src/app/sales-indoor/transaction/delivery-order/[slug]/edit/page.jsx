@@ -30,12 +30,24 @@ import { deliveryOrderAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onEdit }) {
   const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+    ...keys.map((key) => {
+      if (key == "isfree") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+          render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
+      } else {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          align: "right",
+        };
+      }
+    }),
     {
       title: "Action",
       key: "action",
@@ -116,12 +128,13 @@ export default function Page() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
   const keyTableItem = [
-
     "displayname",
-    // "location",
-    "memo",
+    "isfree",
     "quantity1",
+    "unit1",
     "quantity2",
+    "unit2",
+    "memo",
     "quantityremaining",
   ];
 
@@ -187,27 +200,25 @@ export default function Page() {
       },
     });
 
-    const dataFulfillmentWithItem = await Promise.all(
-      data.fulfillment_items.map(async (doItem) => {
-        const item = await fetchItemById(doItem.item);
-
-        let updateData = {
-          ...doItem,
-          displayname: item ? item.displayname : "",
-          quantity1: doItem.quantity,
-          unit1: doItem.units,
-          unit2: doItem.units2,
+    const dataTable =
+      data.fulfillment_items.map((item) => {
+        const updateItem = {
+          ...item,
+          itemid: item?.itemid || "-",
+          displayname: item?.displayname || "-",
+          quantity1: item.quantity,
+          unit1: item.units,
+          unit2: item.units2,
         };
 
-        delete updateData.quantity;
-        delete updateData.units;
-        delete updateData.units2;
+        delete updateItem.quantity;
+        delete updateItem.units;
+        delete updateItem.units2;
 
-        return updateData;
-      })
-    );
+        return updateItem;
+      }) || [];
 
-    setDataTableItem(dataFulfillmentWithItem);
+    setDataTableItem(dataTable);
 
     const getCustomer = await fetchCustomerById(data.entity);
 
@@ -235,12 +246,23 @@ export default function Page() {
           units: data.unit1,
           quantity2: data.quantity2,
           units2: data.unit2,
+          isfree: data.isfree,
         };
       });
 
       payloadToInsert = { ...payloadToInsert, fulfillment_items };
 
       const response = await FullfillmentFetch.update(data.id, payloadToInsert);
+
+      if (
+        response?.message.toLowerCase() == "warning" &&
+        response?.errors.length > 0
+      ) {
+        for (let i = 0; i < response.errors.length; i++) {
+          const error = response.errors[i];
+          notify("warning", "Warning", `${error}`);
+        }
+      }
 
       const resData = updateResponseHandler(response, notify);
 
@@ -348,7 +370,7 @@ export default function Page() {
                         isAlias: true,
                         isRead: true,
                         cursorDisable: true,
-                        hidden: true
+                        hidden: true,
                       },
                     ]}
                     aliases={deliveryOrderAliases.primary}
@@ -462,7 +484,7 @@ export default function Page() {
                   input: "input",
                   isAlias: true,
                   disabled: true,
-                  hidden: true
+                  hidden: true,
                 },
                 {
                   key: "displayname",
@@ -475,7 +497,7 @@ export default function Page() {
                   input: "input",
                   isAlias: true,
                   disabled: true,
-                  hidden: true
+                  hidden: true,
                 },
                 {
                   key: "memo",
@@ -515,17 +537,33 @@ export default function Page() {
                   input: "input",
                   isAlias: true,
                   disabled: true,
-                  hidden: true
+                  hidden: true,
+                },
+                {
+                  key: "conversion",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                  //   hidden: true,
                 },
               ]}
               aliases={deliveryOrderAliases.item}
-              onChange={(type, payload) => {
-                setEditItem((prev) => ({
-                  ...prev,
-                  quantity1: payload.quantity1,
-                  quantity2: payload.quantity2,
-                  memo: payload.memo,
-                }));
+              onChange={(type, payload, key) => {
+                if (key == "quantity1") {
+                  setEditItem((prev) => ({
+                    ...prev,
+                    quantity1: payload.quantity1,
+                    quantity2:
+                      Math.ceil((payload.quantity1 / prev.conversion) * 10) /
+                      10,
+                    memo: payload.memo,
+                  }));
+                } else {
+                  setEditItem((prev) => ({
+                    ...prev,
+                    [key]: payload[key]
+                  }));
+                }
               }}
             />
           </div>

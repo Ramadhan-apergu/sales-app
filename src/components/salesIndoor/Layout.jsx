@@ -333,11 +333,11 @@ const LayoutSalesIndoor = ({ children }) => {
         className="flex items-center justify-between print:hidden"
       >
         <div className="h-full ml-4 lg:ml-12 py-2">
-          <img
+          {/* <img
             className="h-full filter brightness-0 invert"
             src="/images/karya-group-logo.webp"
             alt="Karya Group Logo"
-          />
+          /> */}
         </div>
 
         <div className="hidden w-[700px] lg:block">

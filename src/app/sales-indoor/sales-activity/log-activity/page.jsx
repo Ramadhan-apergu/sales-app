@@ -12,6 +12,10 @@ import {
   Tag,
   Select,
   DatePicker,
+  List,
+  Divider,
+  Typography,
+  Input,
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
@@ -21,17 +25,21 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import { formatDateToShort } from "@/utils/formatDate";
+import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
-import LeadsFetch from "@/modules/salesApi/crm/leads";
+import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
+import LogActivityFetch from "@/modules/salesApi/crm/logActivity";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 
-function Lead() {
+const { Text } = Typography;
+const { Search } = Input;
+
+function Activity() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -45,10 +53,10 @@ function Lead() {
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("");
-  const [statusList, setStatusList] = useState([{ value: "", label: "All" }]);
+  const [leadName, setLeadName] = useState("");
+  const [logType, setLogType] = useState("");
   const [modal, contextHolder] = Modal.useModal();
-  const title = "leads";
+  const title = "lead-activity";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -57,7 +65,12 @@ function Lead() {
       try {
         setIsloading(true);
 
-        const response = await LeadsFetch.get(offset, limit, statusFilter);
+        const response = await LogActivityFetch.get(
+          offset,
+          limit,
+          leadName,
+          logType
+        );
 
         const resData = getResponseHandler(response, notify);
 
@@ -73,35 +86,7 @@ function Lead() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter]);
-
-  useEffect(() => {
-    fetchFilterList();
-  }, []);
-
-  const fetchFilterList = async () => {
-    try {
-      setIsloading(true);
-
-      const response = await LeadsFetch.getStages();
-
-      const resData = getResponseHandler(response, notify);
-
-      if (resData) {
-        setStatusList((prev) => [
-          ...prev,
-          ...resData.map((data) => ({
-            value: data.id,
-            label: data.name || "",
-          })),
-        ]);
-      }
-    } catch (error) {
-      notify("error", "Error", error?.message || "Internal Server error");
-    } finally {
-      setIsloading(false);
-    }
-  };
+  }, [page, limit, pathname, leadName, logType]);
 
   const handleEdit = (record) => {
     router.push(`/sales-indoor/sales-activity/${title}/${record.id}/edit`);
@@ -109,9 +94,9 @@ function Lead() {
 
   const columns = [
     {
-      title: "Lead ID",
-      dataIndex: "leadid",
-      key: "leadid",
+      title: "Company Name",
+      dataIndex: "companyname",
+      key: "companyname",
       align: "center",
       fixed: isLargeScreen ? "left" : "",
       render: (text, record) => (
@@ -121,46 +106,25 @@ function Lead() {
       ),
     },
     {
-      title: "Leads Name",
-      dataIndex: "name",
-      key: "name",
+      title: "Date",
+      dataIndex: "activitydate",
+      key: "activitydate",
       align: "center",
-      fixed: "left",
+      render: (text, record) =>
+        formatDateTimeToShort(record?.activitydate || ""),
     },
     {
-      title: "Company Name",
-      dataIndex: "companyname",
-      key: "companyname",
+      title: "Channel Name",
+      dataIndex: "channelnamestr",
+      key: "channelnamestr",
       align: "center",
+      render: (text, record) => <p className="capitalize">{text}</p>,
     },
     {
-      title: "Owner",
-      dataIndex: "ownername",
-      key: "ownername",
+      title: "Channel Ref",
+      dataIndex: "channelreff",
+      key: "channelreff",
       align: "center",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      render: (text, record) => (
-        <Tag
-          color={
-            ["qualified"].includes(record.status.toLowerCase())
-              ? "green"
-              : ["engaged", "prospecting", "Negotiating"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "orange"
-              : ["closed"].includes(record.status.toLowerCase())
-              ? "red"
-              : "default"
-          }
-        >
-          {text || "-"}
-        </Tag>
-      ),
     },
     {
       title: "Actions",
@@ -190,31 +154,27 @@ function Lead() {
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Lead List
+            Activity List
           </p>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() =>
-              router.push(`/sales-indoor/sales-activity/${title}/enter`)
-            }
-          >
-            {isLargeScreen ? `Enter` : ""}
-          </Button>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2"></div>
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
-                Status
+                Log Type
               </label>
               <Select
-                defaultValue={statusFilter}
+                defaultValue=""
                 onChange={(e) => {
-                  setStatusFilter(e);
+                  setLogType(e);
                 }}
-                options={statusList}
+                options={[
+                  { value: "", label: "All" },
+                  { value: "target", label: "Target" },
+                  { value: "lead", label: "Lead" },
+                  { value: "lead activity", label: "Lead Activity" },
+                ]}
                 styles={{
                   popup: {
                     root: {
@@ -230,30 +190,55 @@ function Lead() {
         </div>
         {!isLoading ? (
           <>
-            <div>
-              <Table
-                rowKey={(record) => record.id}
-                size="small"
-                pagination={false}
-                columns={columns}
+            <div className="w-full">
+              <List
+                itemLayout="vertical"
                 dataSource={datas}
-                scroll={{ x: "max-content" }}
-                bordered
-                tableLayout="auto"
+                renderItem={(item) => (
+                  <List.Item key={item.id} className="border-b border-gray-200">
+                    <List.Item.Meta
+                      title={
+                        <div className="flex justify-between items-center">
+                          <Text strong>{item.activityname}</Text>
+                          <Text type="secondary">
+                            {new Date(item.activitydate).toLocaleString()}
+                          </Text>
+                        </div>
+                      }
+                      description={
+                        <div
+                          className="text-sm text-gray-700"
+                          dangerouslySetInnerHTML={{
+                            __html: item.activitylog.replace(
+                              /\\u003cbr\\u003e/g,
+                              "<br/>"
+                            ),
+                          }}
+                        />
+                      }
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>Type: {item.activitytype}</span>
+                      <span>Sales: {item.sales}</span>
+                    </div>
+                  </List.Item>
+                )}
               />
             </div>
-            <div>
+
+            <Divider style={{ margin: "12px 0" }} />
+
+            <div className="flex justify-end">
               <Pagination
                 total={totalItems}
                 defaultPageSize={limit}
                 defaultCurrent={page}
+                size="small"
                 onChange={(newPage, newLimit) => {
                   router.push(
                     `/sales-indoor/sales-activity/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
-                size="small"
-                align={"end"}
               />
             </div>
           </>
@@ -268,10 +253,10 @@ function Lead() {
   );
 }
 
-export default function LeadPage() {
+export default function ActivityPage() {
   return (
     <Suspense fallback={<LoadingSpinProcessing />}>
-      <Lead />
+      <Activity />
     </Suspense>
   );
 }

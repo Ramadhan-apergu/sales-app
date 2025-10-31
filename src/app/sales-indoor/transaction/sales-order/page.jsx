@@ -1,6 +1,7 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
 import {
+  CloseOutlined,
   EditOutlined,
   FilterOutlined,
   PlusOutlined,
@@ -31,6 +32,8 @@ import {
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
+import { Dropdown, Space } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -135,6 +138,18 @@ function SalesOrder() {
     });
   };
 
+  const closedModal = (record) => {
+    modal.confirm({
+      title: `Closed ${title} "${record.tranid}"?`,
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      cancelText: "Cancel",
+      onOk: () => {
+        updateHandleStatus(record.id, "Closed");
+      },
+    });
+  };
+
   const updateHandleStatus = async (id, status) => {
     try {
       setIsloading(true);
@@ -146,7 +161,12 @@ function SalesOrder() {
       const resData = updateResponseHandler(response, notify);
 
       if (resData) {
-        setToggleRefetch(!toggleRefetch);
+        setDatas((prev) => [
+          ...prev.map((data) => ({
+            ...data,
+            status: data.id == resData ? status : data.status,
+          })),
+        ]);
       }
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");
@@ -210,53 +230,80 @@ function SalesOrder() {
       key: "actions",
       fixed: "right",
       align: "center",
-      width: isLargeScreen ? 87 : 30,
-      render: (_, record) => (
-        <div className="flex flex-col justify-center items-center gap-2">
-          <Button
-            disabled={["credit hold", "fulfilled"].includes(
-              record.status.toLowerCase()
-            )}
-            type={"link"}
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            {isLargeScreen ? "Edit" : ""}
-          </Button>
-          {record.status && record.status.toLowerCase() == "credit hold" && (
-            <Button
-              type={"link"}
-              style={{ color: "#52c41a" }}
-              size="small"
-              icon={<UnlockOutlined />}
-              onClick={() => openCreditModal(record)}
+      width: 90,
+      render: (_, record) => {
+        const menuItems = [
+          {
+            key: "edit",
+            label: (
+              <Button
+                type="link"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => handleEdit(record)}
+                disabled={["credit hold", "fulfilled"].includes(
+                  record.status.toLowerCase()
+                )}
+                className="w-full text-left"
+              >
+                Edit
+              </Button>
+            ),
+          },
+        ];
+
+        if (record.status?.toLowerCase() === "credit hold") {
+          menuItems.push({
+            key: "openCredit",
+            label: (
+              <Button
+                type="link"
+                size="small"
+                icon={<UnlockOutlined />}
+                style={{ color: "#52c41a" }}
+                onClick={() => openCreditModal(record)}
+                className="w-full text-left"
+              >
+                Open Credit
+              </Button>
+            ),
+          });
+        }
+        if (record.status?.toLowerCase() != "closed") {
+          menuItems.push({
+            key: "closed",
+            label: (
+              <Button
+                type="link"
+                size="small"
+                icon={<CloseOutlined />}
+                danger
+                onClick={() => closedModal(record)}
+                className="w-full text-left"
+              >
+                Closed
+              </Button>
+            ),
+          });
+        }
+
+        return (
+          <>
+            <Dropdown
+              menu={{ items: menuItems }}
+              trigger={["click"]}
+              placement="bottomRight"
             >
-              {isLargeScreen ? "Open Credit" : ""}
-            </Button>
-          )}
-          {contextHolder}
-        </div>
-      ),
+              <Button size="small" icon={<MoreOutlined />} iconPosition="end">
+                More
+              </Button>
+            </Dropdown>
+            {contextHolder}
+          </>
+        );
+      },
     },
   ];
-
-  // const fetchData = async () => {
-  //   try {
-  //     setIsloading(true);
-  //     const response = await SalesOrderFetch.get(offset, limit, statusFilter, searchName);
-  //     const resData = getResponseHandler(response, notify)
-
-  //     if (resData) {
-  //         setDatas(resData.list)
-  //         setTotalItems(resData.total_items)
-  //     }
-  //   } catch (error) {
-  //       notify('error', 'Error', error?.message || "Internal Server error");
-  //   } finally {
-  //     setIsloading(false);
-  //   }
-  // };
 
   return (
     <Layout>
@@ -368,7 +415,7 @@ function SalesOrder() {
                   { value: "closed", label: "Closed" },
                   { value: "pending approval", label: "Pending Approval" },
                 ]}
-                                styles={{
+                styles={{
                   popup: {
                     root: {
                       minWidth: 100,

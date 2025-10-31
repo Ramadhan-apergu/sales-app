@@ -75,6 +75,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
         [
           "rate",
           "subtotal",
+          "discountsatuan",
           "totaldiscount",
           "amount",
           "dpp",
@@ -87,6 +88,14 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           key: key,
           align: "right",
           render: (text, record) => <p>{formatRupiah(text)}</p>,
+        };
+      } else if (key == "isfree") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key: key,
+          render: (text) => <p>{text ? "Yes" : "No"}</p>,
+          align: "right",
         };
       } else {
         return {
@@ -309,18 +318,20 @@ export default function EnterPage() {
   const keyTableItem = [
     "displayname",
     "memo",
-    "location",
+    "isfree",
     "quantity",
-    // "units",
+    "units",
     "quantity2",
-    // "units2",
+    "units2",
     "rate",
-    "subtotal",
-    "totaldiscount",
     "amount",
+    "discountsatuan",
+    "totaldiscount",
+    "subtotal",
     "taxrate",
     "dpp",
     "taxvalue",
+    "location",
   ];
 
   const [dataTableItem, setDataTableItem] = useState([]);

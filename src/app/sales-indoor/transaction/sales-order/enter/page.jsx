@@ -136,6 +136,7 @@ export default function Enter() {
       }
 
       const getItem = await fetchItem();
+      console.log(getItem);
       if (getItem) {
         const updateLabelItem = getItem.list.map((item) => ({
           ...item,
@@ -247,10 +248,11 @@ export default function Enter() {
       itemprocessfamily: "",
       itemid: "",
       agreementcode: "",
+      iseditable: 0,
     },
     tax: {
-      taxable: false,
-      taxrate: 0,
+      taxable: true,
+      taxrate: 11,
     },
     summary: {
       totaldiscount: 0,
@@ -363,6 +365,7 @@ export default function Enter() {
 
     const updateDiscountItem = await getDiscountItem(updateItemTable);
 
+    console.log(updateDiscountItem);
     setDataTableItem(updateDiscountItem);
 
     handleModalItemCancel();
@@ -411,6 +414,8 @@ export default function Enter() {
           item_id: item.item,
           itemprocessfamily: item.itemprocessfamily,
           qty: item.quantity,
+          unit: item.unit,
+          price: item.rate,
         })),
       };
 
@@ -418,6 +423,8 @@ export default function Enter() {
       const resData = getResponseHandler(response);
 
       setDataDiscount(resData);
+
+      console.log(resData);
 
       if (resData.diskon_group && resData.diskon_group.length > 0) {
         const discountFreeItem = resData.diskon_group.map((discount) => ({
@@ -438,7 +445,8 @@ export default function Enter() {
           (discount) => discount.item_id === item.item
         );
 
-        const totalamount = item.quantity * item.rate;
+        const rate = findItemDiscount?.price || item.rate;
+        const totalamount = item.quantity * rate;
         const totaldiscount = findItemDiscount?.total_diskon || 0;
         const subtotal = totalamount - totaldiscount;
 
@@ -448,6 +456,7 @@ export default function Enter() {
           totaldiscount,
           totalamount,
           subtotal,
+          rate,
         };
       });
 
@@ -533,7 +542,6 @@ export default function Enter() {
       delete payloadToInsert.companyname;
       delete payloadToInsert.salesrep;
 
-      console.log(payloadToInsert);
 
       if (!payloadToInsert.entity) {
         throw new Error("Customer is required");
@@ -948,6 +956,7 @@ export default function Enter() {
                             displayname: item.displayname,
                             itemprocessfamily: item.itemprocessfamily,
                             itemid: item.itemid,
+                            iseditable: item.iseditable,
                           },
                         });
                       }}
@@ -995,18 +1004,29 @@ export default function Enter() {
                 },
                 {
                   key: "rate",
+                  labeled: `Rate (${
+                    stateItemTable.item.iseditable == 1
+                      ? "Editable"
+                      : "Non Editable"
+                  })`,
                   input: "number",
                   isAlias: true,
-                  isRead: true,
+                  isRead: stateItemTable.item.iseditable == 0,
                   cursorDisable: true,
                   accounting: true,
-                  isReadOnly: true,
+                  note: "Base rate item",
                 },
                 {
                   key: "description",
                   input: "text",
                   isAlias: true,
-                  hidden: true
+                  hidden: true,
+                },
+                {
+                  key: "iseditable",
+                  input: "input",
+                  isAlias: true,
+                  hidden: true,
                 },
               ]}
               aliases={salesOrderAliases.item}
