@@ -21,17 +21,18 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import { formatDateToShort } from "@/utils/formatDate";
+import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
+import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 
-function Lead() {
+function Activity() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -46,9 +47,55 @@ function Lead() {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
-  const [statusList, setStatusList] = useState([{ value: "", label: "All" }]);
+  const [channelFilter, setChannelFilter] = useState("");
   const [modal, contextHolder] = Modal.useModal();
-  const title = "leads";
+  const [statusList, setStatusList] = useState([]);
+
+  const statusOptions = [
+    [
+      { value: "", label: "All" },
+      {
+        value: "answered",
+        label: "Answered",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      { value: "", label: "All" },
+      {
+        value: "sent",
+        label: "Sent",
+      },
+      {
+        value: "no response",
+        label: "No Response",
+      },
+    ],
+    [
+      { value: "", label: "All" },
+      {
+        value: "scheduled",
+        label: "Scheduled",
+      },
+      {
+        value: "rescheduled",
+        label: "Re-Scheduled",
+      },
+      {
+        value: "canceled",
+        label: "Canceled",
+      },
+      {
+        value: "done",
+        label: "Done",
+      },
+    ],
+  ];
+
+  const title = "lead-activity";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -57,7 +104,12 @@ function Lead() {
       try {
         setIsloading(true);
 
-        const response = await LeadsFetch.get(offset, limit, statusFilter);
+        const response = await LeadActivityFetch.get(
+          offset,
+          limit,
+          statusFilter,
+          channelFilter
+        );
 
         const resData = getResponseHandler(response, notify);
 
@@ -73,35 +125,7 @@ function Lead() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter]);
-
-  useEffect(() => {
-    fetchFilterList();
-  }, []);
-
-  const fetchFilterList = async () => {
-    try {
-      setIsloading(true);
-
-      const response = await LeadsFetch.getStages();
-
-      const resData = getResponseHandler(response, notify);
-
-      if (resData) {
-        setStatusList((prev) => [
-          ...prev,
-          ...resData.map((data) => ({
-            value: data.id,
-            label: data.name || "",
-          })),
-        ]);
-      }
-    } catch (error) {
-      notify("error", "Error", error?.message || "Internal Server error");
-    } finally {
-      setIsloading(false);
-    }
-  };
+  }, [page, limit, pathname, statusFilter, channelFilter]);
 
   const handleEdit = (record) => {
     router.push(`/sales-indoor/sales-activity/${title}/${record.id}/edit`);
@@ -109,9 +133,9 @@ function Lead() {
 
   const columns = [
     {
-      title: "Lead ID",
-      dataIndex: "leadid",
-      key: "leadid",
+      title: "Company Name",
+      dataIndex: "companyname",
+      key: "companyname",
       align: "center",
       fixed: isLargeScreen ? "left" : "",
       render: (text, record) => (
@@ -121,46 +145,25 @@ function Lead() {
       ),
     },
     {
-      title: "Leads Name",
-      dataIndex: "name",
-      key: "name",
+      title: "Date",
+      dataIndex: "activitydate",
+      key: "activitydate",
       align: "center",
-      fixed: "left",
+      render: (text, record) =>
+        formatDateTimeToShort(record?.activitydate || ""),
     },
     {
-      title: "Company Name",
-      dataIndex: "companyname",
-      key: "companyname",
+      title: "Channel Name",
+      dataIndex: "channelnamestr",
+      key: "channelnamestr",
       align: "center",
+      render: (text, record) => <p className="capitalize">{text}</p>,
     },
     {
-      title: "Owner",
-      dataIndex: "ownername",
-      key: "ownername",
+      title: "Channel Ref",
+      dataIndex: "channelreff",
+      key: "channelreff",
       align: "center",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      render: (text, record) => (
-        <Tag
-          color={
-            ["qualified"].includes(record.status.toLowerCase())
-              ? "green"
-              : ["engaged", "prospecting", "Negotiating"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "orange"
-              : ["closed"].includes(record.status.toLowerCase())
-              ? "red"
-              : "default"
-          }
-        >
-          {text || "-"}
-        </Tag>
-      ),
     },
     {
       title: "Actions",
@@ -190,7 +193,7 @@ function Lead() {
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Lead List
+            Activity List
           </p>
           <Button
             type="primary"
@@ -207,14 +210,22 @@ function Lead() {
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
-                Status
+                Channel
               </label>
               <Select
-                defaultValue={statusFilter}
+                defaultValue=""
                 onChange={(e) => {
-                  setStatusFilter(e);
+                  setChannelFilter(e);
+                  setStatusFilter("");
+                  setStatusList(statusOptions[Number(e) - 1]);
                 }}
-                options={statusList}
+                options={[
+                  { value: "", label: "All" },
+                  { value: 1, label: "Phone" },
+                  { value: 2, label: "Email" },
+                  { value: 3, label: "Meetings" },
+                  { value: 4, label: "Record Visit" },
+                ]}
                 styles={{
                   popup: {
                     root: {
@@ -226,6 +237,29 @@ function Lead() {
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>
+            {![4, ""].includes(channelFilter) && (
+              <div className="flex flex-col justify-start items-start gap-1">
+                <label className="hidden lg:block text-sm font-semibold leading-none">
+                  Status
+                </label>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e);
+                  }}
+                  options={statusList}
+                  styles={{
+                    popup: {
+                      root: {
+                        minWidth: 150,
+                        whiteSpace: "nowrap",
+                      },
+                    },
+                  }}
+                  dropdownAlign={{ points: ["tr", "br"] }}
+                />
+              </div>
+            )}
           </div>
         </div>
         {!isLoading ? (
@@ -268,10 +302,10 @@ function Lead() {
   );
 }
 
-export default function LeadPage() {
+export default function ActivityPage() {
   return (
     <Suspense fallback={<LoadingSpinProcessing />}>
-      <Lead />
+      <Activity />
     </Suspense>
   );
 }

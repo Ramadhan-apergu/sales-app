@@ -45,9 +45,22 @@ import { formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
+  // Cek apakah semua baris sudah tercentang
+  const allChecked = data?.length > 0 && data.every((item) => item.ischecked);
+  const someChecked = data?.some((item) => item.ischecked) && !allChecked;
+
   const columns = [
     {
-      title: "Apply",
+      title: (
+        <Checkbox
+          checked={allChecked}
+          indeterminate={someChecked}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            onChange?.("all", checked);
+          }}
+        />
+      ),
       dataIndex: "apply",
       key: "apply",
       align: "center",
@@ -71,7 +84,7 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
           render: (text) => <p>{formatDateToShort(text)}</p>,
         };
       } else if (["total", "due", "amount"].includes(key)) {
-        if (key == "amount") {
+        if (key === "amount") {
           return {
             title: aliases?.[key] || key,
             dataIndex: key,
@@ -88,25 +101,25 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
                           .replace(/[^\d]/g, "")
                           .replace(/\B(?=(\d{3})+(?!\d))/g, ".").length
                       }
-                      // max={Number(String(record?.total).replace(/[^\d]/g, ""))}
                       size="small"
                       style={{ width: "100%" }}
                       value={Number(String(text).replace(/[^\d]/g, ""))}
                       formatter={(val) => {
-                        if (val === undefined || val === null || val === "")
-                          return "";
+                        if (!val) return "";
                         const num = String(val).replace(/[^\d]/g, "");
                         return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                       }}
                       parser={(val) => (val ? val.replace(/[^\d]/g, "") : "")}
                       onChange={(value) => {
-                        const rawValue = String(value).replace(/[^\d]/g, ""); // angka murni
+                        const rawValue = String(value).replace(/[^\d]/g, "");
                         const rawTotal = String(record.total).replace(
                           /[^\d]/g,
                           ""
-                        ); // angka murni
-
-                        if (rawValue.length < rawTotal.length) {
+                        );
+                        if (
+                          rawValue.length <= rawTotal.length &&
+                          Number(rawValue) < Number(rawTotal)
+                        ) {
                           onChangeAmount(record.invoiceid, Number(rawValue));
                         } else {
                           onChangeAmount(record.invoiceid, Number(rawTotal));
@@ -202,6 +215,8 @@ export default function Enter() {
     },
     payloadPayment: {
       paymentoption: "cash",
+      giroduedate: dayjs(new Date()),
+      gironumber: "",
       payment: 0,
       depositedate: "",
       bankaccount: "Bank BCA",
@@ -299,8 +314,8 @@ export default function Enter() {
               refnum: item.tranid,
               applydate: item.trandate,
               total: item.amount,
-              due: item.amount,
-              amount: 0,
+              due: 0,
+              amount: item.amount,
             })) || [],
         });
       } catch (error) {
@@ -336,39 +351,61 @@ export default function Enter() {
   }, [state.payloadPaymentApplies]);
 
   const handleChecked = (data, isChecked) => {
-    let updatedData = state.payloadPaymentApplies;
+    if (data === "all") {
+      // ✅ Jika checkbox header (Select All) ditekan
+      const updatedItems = state.dataTableItem.map((item) => {
+        const updatedAmount = item.amount || 0;
+        const updatedDue = (Number(item.total) || 0) - updatedAmount;
 
-    if (isChecked) {
-      updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
+        return {
+          ...item,
+          ischecked: isChecked,
+          due: updatedDue,
+        };
+      });
+
+      // update semua apply items jika checked
+      const updatedApplies = isChecked
+        ? updatedItems.map((item) => ({ ...item, amount: item.amount || 0 }))
+        : [];
+
+      dispatch({ type: "SET_ITEMS", payload: updatedItems });
+      dispatch({ type: "SET_PAYMENTAPPLY", payload: updatedApplies });
     } else {
-      updatedData = updatedData.filter(
-        (item) => item.invoiceid !== data.invoiceid
-      );
+      // ✅ Jika checkbox individual ditekan
+      let updatedData = state.payloadPaymentApplies;
+
+      if (isChecked) {
+        updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
+      } else {
+        updatedData = updatedData.filter(
+          (item) => item.invoiceid !== data.invoiceid
+        );
+      }
+
+      dispatch({
+        type: "SET_PAYMENTAPPLY",
+        payload: updatedData,
+      });
+
+      dispatch({
+        type: "SET_ITEMS",
+        payload: state.dataTableItem.map((item) => {
+          if (item.invoiceid === data.invoiceid) {
+            const updatedAmount = item.amount || 0;
+            const updatedDue = (Number(item.total) || 0) - updatedAmount;
+
+            return {
+              ...item,
+              ischecked: isChecked,
+              due: updatedDue,
+            };
+          } else {
+            return item;
+          }
+        }),
+      });
     }
-
-    dispatch({
-      type: "SET_PAYMENTAPPLY",
-      payload: updatedData,
-    });
-
-    dispatch({
-      type: "SET_ITEMS",
-      payload: state.dataTableItem.map((item) => {
-        if (item.invoiceid === data.invoiceid) {
-          const updatedAmount = isChecked ? item.amount || 0 : 0;
-          const updatedDue = (Number(item.total) || 0) - updatedAmount;
-
-          return {
-            ...item,
-            ischecked: isChecked,
-            amount: updatedAmount,
-            due: updatedDue,
-          };
-        } else {
-          return item;
-        }
-      }),
-    });
   };
 
   function handleAmountChange(invoiceid, amount) {
@@ -452,6 +489,7 @@ export default function Enter() {
       payloadToInsert = {
         ...payloadToInsert,
         payment_applies: updatePaymentApplies,
+        gironumber: String(payloadToInsert.gironumber ?? ""),
       };
 
       const response = await PaymentFetch.create(payloadToInsert);
@@ -587,6 +625,18 @@ export default function Enter() {
                 input: "select",
                 options: paymentOptions,
                 isAlias: true,
+              },
+              {
+                key: "gironumber",
+                input: "number",
+                isAlias: true,
+                hidden: state.payloadPayment.paymentoption != "giro",
+              },
+              {
+                key: "giroduedate",
+                input: "date",
+                isAlias: true,
+                hidden: state.payloadPayment.paymentoption != "giro",
               },
               {
                 key: "payment",

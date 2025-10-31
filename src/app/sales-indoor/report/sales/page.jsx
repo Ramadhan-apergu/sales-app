@@ -2,7 +2,7 @@
 import Layout from "@/components/salesIndoor/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { Modal, Pagination, Table, Select, DatePicker } from "antd";
+import { Modal, Pagination, Table, Select, DatePicker, Input } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -19,6 +19,8 @@ import ExportSalesReport from "@/components/superAdmin/ExportSalesReport";
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
 
+const { Search } = Input;
+
 function SalesOrder() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -33,12 +35,24 @@ function SalesOrder() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [searchName, setSearchName] = useState("");
-  const [dateRange, setDateRange] = useState(["", ""]);
+  const [filters, setFilters] = useState({
+    searchName: "",
+    dateRange: ["", ""],
+    salesrep: "",
+    displayname: "",
+    itemprocessfamily: "",
+  });
   const [tableKeys, setTableKeys] = useState([]);
   const title = "sales-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
+
+  function handleFilter(type, value) {
+    setFilters((prev) => ({
+      ...prev,
+      [type]: value,
+    }));
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,9 +62,12 @@ function SalesOrder() {
         const response = await ReportSo.getSales(
           offset,
           limit,
-          searchName,
-          dateRange[0],
-          dateRange[1]
+          filters.searchName,
+          filters.dateRange[0],
+          filters.dateRange[1],
+          filters.itemprocessfamily,
+          filters.salesrep,
+          filters.displayname
         );
 
         const resData = getResponseHandler(response, notify);
@@ -72,7 +89,7 @@ function SalesOrder() {
     };
 
     fetchData();
-  }, [page, limit, pathname, searchName, dateRange]);
+  }, [page, limit, pathname, filters]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,8 +104,8 @@ function SalesOrder() {
           const mapingCustomerOption = resData.list.map((data) => {
             return {
               ...data,
-              value: data.id,
-              label: data.companyname,
+              value: data.customerid,
+              label: data.customerid,
             };
           });
           setDataCustomer(mapingCustomerOption);
@@ -143,82 +160,93 @@ function SalesOrder() {
             Sales Report
           </p>
         </div>
-        <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
-          <div className="w-full flex justify-between items-end">
-            <div className="flex gap-2 items-end">
-              <div className="flex flex-col justify-start items-start gap-1">
-                <label className="text-sm font-semibold leading-none">
-                  Customer Name
-                </label>
-                <Select
-                  showSearch
-                  placeholder="Select a person"
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  options={dataCustomer}
-                  styles={{
-                    popup: {
-                      root: {
-                        minWidth: 250,
-                        whiteSpace: "nowrap",
-                      },
-                    },
-                  }}
-                  onChange={(value, option) => {
-                    setSearchName(option?.companyname || "");
-                  }}
-                  allowClear
-                />
-              </div>
-              <div className="flex flex-col justify-start items-start gap-1">
-                <label className="hidden lg:block text-sm font-semibold leading-none">
-                  Date
-                </label>
-                <div className="flex justify-center items-start gap-2">
-                  <RangePicker
-                    showTime={false}
-                    format="YYYY-MM-DD"
-                    onChange={(value, dateString) => {
-                      setDateRange(dateString);
-                    }}
-                    //   onOk={(val) => {
-                    //   }}
-                  />
-                </div>
-              </div>
-            </div>
-            <ExportSalesReport />
-          </div>
-          {/* <div className="flex gap-2">
-            <div className="flex lg:hidden flex-col justify-start items-start gap-1">
+        <div className="w-full p-3 bg-gray-2 border border-gray-4 rounded-lg">
+          <div className="w-full flex flex-wrap gap-2">
+            {/* Customer ID */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Customer ID
+              </label>
               <Select
                 showSearch
-                placeholder="Select a person"
+                placeholder="Select customer"
                 filterOption={(input, option) =>
                   (option?.label ?? "")
                     .toLowerCase()
                     .includes(input.toLowerCase())
                 }
                 options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
-                onChange={(value, option) => {
-                  setSearchName(option?.companyname || "");
-                }}
+                onChange={(value) => handleFilter("searchName", value)}
                 allowClear
-                dropdownAlign={{ points: ["tr", "br"] }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div> */}
+
+            {/* Date */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Date
+              </label>
+              <RangePicker
+                format="YYYY-MM-DD"
+                onChange={(_, dateString) =>
+                  handleFilter("dateRange", dateString)
+                }
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            {/* Sales Rep */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Sales Rep
+              </label>
+              <Search
+                placeholder="Search sales rep"
+                onSearch={(value) => handleFilter("salesrep", value)}
+                onChange={(e) => {
+                  if (!e.target.value && filters.salesrep)
+                    handleFilter("salesrep", "");
+                }}
+                allowClear
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            {/* Item Family */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Item Family
+              </label>
+              <Search
+                placeholder="Search item family"
+                onSearch={(value) => handleFilter("itemprocessfamily", value)}
+                onChange={(e) => {
+                  if (!e.target.value && filters.itemprocessfamily)
+                    handleFilter("itemprocessfamily", "");
+                }}
+                allowClear
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            {/* Item Name */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Item Name
+              </label>
+              <Search
+                placeholder="Search item name"
+                onSearch={(value) => handleFilter("displayname", value)}
+                onChange={(e) => {
+                  if (!e.target.value && filters.displayname)
+                    handleFilter("displayname", "");
+                }}
+                allowClear
+                style={{ width: "100%" }}
+              />
+            </div>
+          </div>
         </div>
         {!isLoading ? (
           <>

@@ -79,6 +79,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           "amount",
           "dpp",
           "taxvalue",
+          "discountsatuan",
         ].includes(key)
       ) {
         return {
@@ -309,13 +310,14 @@ export default function EnterPage() {
     "memo",
     "location",
     "quantity",
-    // "units",
+    "units",
     "quantity2",
-    // "units2",
+    "units2",
     "rate",
-    "subtotal",
-    "totaldiscount",
     "amount",
+    "discountsatuan",
+    "totaldiscount",
+    "subtotal",
     "taxrate",
     "dpp",
     "taxvalue",
@@ -331,13 +333,9 @@ export default function EnterPage() {
         ...state.payloadSummary,
         ...state.payloadBilling,
         ...state.payloadShipping,
-        subtotalbruto: state.payloadSummary.totalamount,
-        total: state.payloadSummary.amount,
       };
 
       delete payloadToInsert.customer;
-      delete payloadToInsert.totalamount;
-      delete payloadToInsert.amount;
 
       const invoice_items = dataTableItem.map((data) => {
         return {

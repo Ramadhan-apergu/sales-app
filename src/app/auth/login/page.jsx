@@ -95,11 +95,11 @@ export default function Login() {
         <FixedHeaderBar bgColor="bg-transparent lg:hidden" />
         <div className="w-full lg:w-1/2 h-3/12 lg:h-full lg:p-8 flex flex-col gap-4 justify-center items-center lg:justify-start lg:items-start">
           <div className="h-16">
-            <img
+            {/* <img
               src={"/images/karya-group-logo.webp"}
               alt="karya group logo"
               className="h-full drop-shadow"
-            />
+            /> */}
           </div>
           <div className="hidden lg:flex w-full flex-1  justify-center items-center">
             <img

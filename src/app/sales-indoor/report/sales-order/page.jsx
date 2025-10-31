@@ -10,6 +10,7 @@ import {
   Tag,
   Select,
   DatePicker,
+  Input,
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
@@ -26,7 +27,9 @@ import { ExportOutlined } from "@ant-design/icons";
 import { exportJSONToExcel } from "@/utils/export";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = null;
+const DEFAULT_LIMIT = 50;
+
+const { Search } = Input;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -42,14 +45,27 @@ function SalesOrder() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState([]);
   const [modal, contextHolder] = Modal.useModal();
-  const [searchName, setSearchName] = useState("");
-  const [dateRange, setDateRange] = useState(["", ""]);
   const [tableKeys, setTableKeys] = useState([]);
   const title = "sales-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
+
+  const [filters, setFilters] = useState({
+    searchName: "",
+    statusFilter: [],
+    dateRange: ["", ""],
+    salesrep: "",
+    displayname: "",
+    itemprocessfamily: "",
+  });
+
+  function handleFilter(type, value) {
+    setFilters((prev) => ({
+      ...prev,
+      [type]: value,
+    }));
+  }
 
   const fieldOrder = [
     "no",
@@ -80,21 +96,25 @@ function SalesOrder() {
     const fetchData = async () => {
       try {
         setIsloading(true);
-        console.log(statusFilter);
-
         const response = await ReportSo.getSo(
           offset,
           limit || "",
-          searchName,
-          dateRange[0],
-          dateRange[1],
-          statusFilter.length == 0 ? "" : statusFilter.join(",")
+          filters.searchName,
+          filters.dateRange[0],
+          filters.dateRange[1],
+          filters.statusFilter.length == 0
+            ? ""
+            : filters.statusFilter.join(","),
+          filters.itemprocessfamily,
+          filters.salesrep,
+          filters.displayname
         );
 
         const resData = getResponseHandler(response, notify);
 
         if (resData) {
-          let data = resData.list.map((item, i) => ({ no: i + 1, ...item }));
+          let data =
+            resData?.list?.map((item, i) => ({ no: i + 1, ...item })) || [];
 
           data = data.map((item) => {
             const ordered = {};
@@ -136,7 +156,7 @@ function SalesOrder() {
     };
 
     fetchData();
-  }, [page, limit, pathname, searchName, dateRange, statusFilter]);
+  }, [page, limit, pathname, filters]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,8 +169,8 @@ function SalesOrder() {
           const mapingCustomerOption = resData.list.map((data) => {
             return {
               ...data,
-              value: data.id,
-              label: data.companyname,
+              value: data.customerid,
+              label: data.customerid,
             };
           });
           setDataCustomer(mapingCustomerOption);
@@ -164,7 +184,7 @@ function SalesOrder() {
   }, []);
 
   const handleEdit = (record) => {
-    router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
+    router.push(`/sales-indoor/transaction/${title}/${record.id}/edit`);
   };
 
   const aliases = soReportAliases;
@@ -236,92 +256,55 @@ function SalesOrder() {
             Export
           </Button>
         </div>
-        <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
-          <div className="flex gap-2">
-            <div className="hidden lg:flex flex-col justify-start items-start gap-1">
-              <label className="text-sm font-semibold leading-none">
-                Customer Name
+        <div className="w-full p-3 bg-gray-2 border border-gray-4 rounded-lg">
+          <div className="w-full flex flex-wrap gap-2">
+            {/* Customer ID */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Customer ID
               </label>
               <Select
                 showSearch
-                placeholder="Select a person"
+                placeholder="Select customer"
                 filterOption={(input, option) =>
                   (option?.label ?? "")
                     .toLowerCase()
                     .includes(input.toLowerCase())
                 }
                 options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
-                onChange={(value, option) => {
-                  setSearchName(option?.companyname || "");
-                }}
+                onChange={(value) => handleFilter("searchName", value)}
                 allowClear
+                style={{ width: "100%" }}
               />
             </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
+
+            {/* Date */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
                 Date
               </label>
-              <div className="flex justify-center items-start gap-2">
-                <RangePicker
-                  showTime={false}
-                  format="YYYY-MM-DD"
-                  onChange={(value, dateString) => {
-                    setDateRange(dateString);
-                  }}
-                  //   onOk={(val) => {
-                  //   }}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2 items-end">
-            <div className="flex lg:hidden flex-col justify-start items-start gap-1">
-              <Select
-                showSearch
-                placeholder="Select a person"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
+              <RangePicker
+                format="YYYY-MM-DD"
+                onChange={(_, dateString) =>
+                  handleFilter("dateRange", dateString)
                 }
-                options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
-                onChange={(value, option) => {
-                  setSearchName(option?.companyname || "");
-                }}
-                allowClear
-                dropdownAlign={{ points: ["tr", "br"] }}
+                style={{ width: "100%" }}
               />
             </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className=" text-sm font-semibold leading-none">
+
+            {/* Status */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
                 Status
               </label>
               <Select
-                maxTagCount={1}
                 mode="multiple"
+                maxTagCount={1}
                 allowClear
-                style={{ maxWidth: "200px" }} // lebar input
-                dropdownAlign={{ points: ["tr", "br"] }}
-                dropdownStyle={{ minWidth: "150px" }} // lebar dropdown
                 placeholder="Select status"
-                value={statusFilter}
-                onChange={setStatusFilter}
+                value={filters.statusFilter}
+                onChange={(val) => handleFilter("statusFilter", val)}
+                style={{ width: "100%" }}
                 options={[
                   { value: "open", label: "Open" },
                   { value: "fulfilled", label: "Fulfilled" },
@@ -335,8 +318,60 @@ function SalesOrder() {
                 ]}
               />
             </div>
+
+            {/* Sales Rep */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Sales Rep
+              </label>
+              <Search
+                placeholder="Search sales rep"
+                onSearch={(value) => handleFilter("salesrep", value)}
+                onChange={(e) => {
+                  if (!e.target.value && filters.salesrep)
+                    handleFilter("salesrep", "");
+                }}
+                allowClear
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            {/* Item Family */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Item Family
+              </label>
+              <Search
+                placeholder="Search item family"
+                onSearch={(value) => handleFilter("itemprocessfamily", value)}
+                onChange={(e) => {
+                  if (!e.target.value && filters.itemprocessfamily)
+                    handleFilter("itemprocessfamily", "");
+                }}
+                allowClear
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            {/* Item Name */}
+            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
+              <label className="text-sm font-semibold text-gray-700">
+                Display Name
+              </label>
+              <Search
+                placeholder="Search Display Name"
+                onSearch={(value) => handleFilter("displayname", value)}
+                onChange={(e) => {
+                  if (!e.target.value && filters.displayname)
+                    handleFilter("displayname", "");
+                }}
+                allowClear
+                style={{ width: "100%" }}
+              />
+            </div>
           </div>
         </div>
+
         {!isLoading ? (
           <>
             <div>
@@ -351,20 +386,20 @@ function SalesOrder() {
                 tableLayout="auto"
               />
             </div>
-            {/* <div>
+            <div>
               <Pagination
                 total={totalItems}
                 defaultPageSize={limit}
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"
                 align={"end"}
               />
-            </div> */}
+            </div>
           </>
         ) : (
           <div className="w-full h-96">

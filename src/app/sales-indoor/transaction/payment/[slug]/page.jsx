@@ -125,6 +125,8 @@ export default function Details() {
       payment: 0,
       depositedate: "",
       bankaccount: "",
+      giroduedate: "",
+      gironumber: "",
     },
     payloadPaymentApplies: [],
     dataTableItem: [],
@@ -217,6 +219,8 @@ export default function Details() {
         payment: data.payment,
         depositedate: formatDateToShort(data?.depositedate || null),
         bankaccount: data.bankaccount,
+        giroduedate: formatDateToShort(data?.giroduedate || null),
+        gironumber: data.gironumber,
       },
     });
 
@@ -333,7 +337,8 @@ export default function Details() {
                         icon={<EditOutlined />}
                         disabled={
                           (data?.paymentoption.toLowerCase() == "giro" &&
-                          data.status.toLowerCase() == "deposited") || data.status.toLowerCase() == "payment received"
+                            data.status.toLowerCase() == "deposited") ||
+                          data.status.toLowerCase() == "payment received"
                         }
                         type={"primary"}
                         onClick={() => {
@@ -401,14 +406,30 @@ export default function Details() {
                         input: "input",
                         isAlias: true,
                         isRead: true,
-                        hidden: (data.status?.toLowerCase() || "") !== "deposited"
+                        hidden:
+                          (data.status?.toLowerCase() || "") !== "deposited",
                       },
                       {
                         key: "bankaccount",
                         input: "input",
                         isAlias: true,
                         isRead: true,
-                        hidden: state.payloadPayment.paymentoption != "transfer",
+                        hidden:
+                          state.payloadPayment.paymentoption != "transfer",
+                      },
+                      {
+                        key: "giroduedate",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        hidden: state.payloadPayment.paymentoption != "giro",
+                      },
+                      {
+                        key: "gironumber",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        hidden: state.payloadPayment.paymentoption != "giro",
                       },
                     ]}
                     aliases={paymentAliases.payment}

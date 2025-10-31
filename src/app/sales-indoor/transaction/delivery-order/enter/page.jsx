@@ -49,7 +49,6 @@ import SalesOrderSelect from "./SalesOrderSelect";
 import { deliveryOrderAliases } from "@/utils/aliases";
 
 function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
-  console.log(data);
   const columns = [
     ...keys.map((key) => {
       if (key == "apply") {
@@ -61,18 +60,31 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
             <Checkbox
               checked={record.apply}
               onChange={(e) => {
-                onChecked(record.lineid, e.target.checked);
+                if (!record.isfree) {
+                  onChecked(record.lineid, e.target.checked);
+                } else {
+                }
               }}
             />
           ),
         };
       } else {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "right", // semua kolom di-align ke kanan
-        };
+        if (key == "isfree") {
+          return {
+            title: aliases?.[key] || key,
+            dataIndex: key,
+            key: key,
+            align: "right",
+            render: (text) => <p>{text ? "Yes" : "No"}</p>,
+          };
+        } else {
+          return {
+            title: aliases?.[key] || key,
+            dataIndex: key,
+            key: key,
+            align: "right",
+          };
+        }
       }
     }),
     {
@@ -177,13 +189,13 @@ function Enter({ salesOrderId }) {
         const soItemRes = await FullfillmentFetch.getSoItem(salesOrderId);
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch fulfillment items");
-
+        console.log(soItemData);
         setDataSalesOrder(salesOrderData);
         setDataCustomer(customerData);
         setDataSalesOrderItemRetrieve(soItemData);
         setDataTableItem(
           soItemData.map((item) => ({
-            apply: false,
+            apply: item.isfree ? true : false,
             displayname: item.displayname,
             id: item.id,
             itemid: item.itemid,
@@ -191,13 +203,12 @@ function Enter({ salesOrderId }) {
             quantityremaining: item.quantityremaining,
             quantity1: item.quantity,
             unit1: item.units,
-            quantity2:
-              item.units.toLowerCase() == "bal"
-                ? item.quantity * 1
-                : item.quantity / 25,
-            unit2: "bal",
+            quantity2: item.quantity2,
+            unit2: item.units2,
             location: "General Warehouse",
             lineid: crypto.randomUUID(),
+            isfree: item.isfree,
+            conversion: item.conversion,
           }))
         );
 
@@ -235,9 +246,11 @@ function Enter({ salesOrderId }) {
     "apply",
     "itemid",
     "displayname",
-    // "location",
+    "isfree",
     "quantity1",
+    "unit1",
     "quantity2",
+    "unit2",
     "quantityremaining",
     "memo",
   ];
@@ -269,6 +282,7 @@ function Enter({ salesOrderId }) {
           units: data.unit1,
           quantity2: data.quantity2,
           units2: data.unit2,
+          isfree: data.isfree,
         };
       });
 
@@ -281,6 +295,16 @@ function Enter({ salesOrderId }) {
 
       const response = await FullfillmentFetch.create(payloadToInsert);
 
+      if (
+        response?.message.toLowerCase() == "warning" &&
+        response?.errors.length > 0
+      ) {
+        for (let i = 0; i < response.errors.length; i++) {
+          const error = response.errors[i];
+          notify("warning", "Warning", `${error}`);
+        }
+      }
+
       const resData = createResponseHandler(response, notify);
 
       if (payloadToInsert.shipstatus.toLowerCase() == "open") {
@@ -291,11 +315,11 @@ function Enter({ salesOrderId }) {
         );
       }
 
-        if (resData) {
-          setTimeout(() => {
-            router.push(`/sales-indoor/transaction/${title}/${resData}`);
-          }, 3000);
-        }
+      if (resData) {
+        setTimeout(() => {
+          router.push(`/sales-indoor/transaction/${title}/${resData}`);
+        }, 3000);
+      }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
@@ -472,17 +496,8 @@ function Enter({ salesOrderId }) {
       <Modal
         open={isEditItem}
         onOk={() => {
-          if (editItem.quantity1 > editItem.quantityremaining) {
-            notify(
-              "error",
-              "Failed",
-              "Quantity kg cannot be more than the Remaining Quantity"
-            );
-            return;
-          }
-
           const updatedDataTableItem = dataTableItem.map((item) => {
-            if (item.id == editItem.id) {
+            if (item.id == editItem.id && item.lineid == editItem.lineid) {
               return editItem;
             } else {
               return item;
@@ -563,17 +578,33 @@ function Enter({ salesOrderId }) {
                   input: "input",
                   isAlias: true,
                   disabled: true,
-                  hidden: true
+                  hidden: true,
+                },
+                {
+                  key: "conversion",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                  //   hidden: true,
                 },
               ]}
               aliases={deliveryOrderAliases.item}
-              onChange={(type, payload) => {
-                setEditItem((prev) => ({
-                  ...prev,
-                  quantity1: payload.quantity1,
-                  quantity2: payload.quantity2,
-                  memo: payload.memo,
-                }));
+              onChange={(type, payload, key) => {
+                if (key == "quantity1") {
+                  setEditItem((prev) => ({
+                    ...prev,
+                    quantity1: payload.quantity1,
+                    quantity2:
+                      Math.ceil((payload.quantity1 / prev.conversion) * 10) /
+                      10,
+                    memo: payload.memo,
+                  }));
+                } else {
+                  setEditItem((prev) => ({
+                    ...prev,
+                    [key]: payload[key],
+                  }));
+                }
               }}
             />
           </div>

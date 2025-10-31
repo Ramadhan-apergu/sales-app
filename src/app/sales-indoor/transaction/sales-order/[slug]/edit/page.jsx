@@ -23,7 +23,16 @@ import {
   SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, FloatButton, Form, Input, Modal, Select, Table } from "antd";
+import {
+  Button,
+  Divider,
+  FloatButton,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Table,
+} from "antd";
 import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
@@ -340,6 +349,7 @@ export default function Enter() {
       itemprocessfamily: "",
       itemid: "",
       agreementcode: "",
+      iseditable: 0,
     },
     tax: {
       taxable: false,
@@ -504,6 +514,8 @@ export default function Enter() {
           item_id: item.item,
           itemprocessfamily: item.itemprocessfamily,
           qty: item.quantity,
+          unit: item.unit,
+          price: item.rate,
         })),
       };
 
@@ -531,7 +543,8 @@ export default function Enter() {
           (discount) => discount.item_id === item.item
         );
 
-        const totalamount = item.quantity * item.rate;
+        const rate = findItemDiscount?.price || item.rate;
+        const totalamount = item.quantity * rate;
         const totaldiscount = findItemDiscount?.total_diskon || 0;
         const subtotal = totalamount - totaldiscount;
 
@@ -541,6 +554,7 @@ export default function Enter() {
           totaldiscount,
           totalamount,
           subtotal,
+          rate,
         };
       });
 
@@ -1054,6 +1068,7 @@ export default function Enter() {
                             itemprocessfamily: item.itemprocessfamily,
                             itemid: item.itemid,
                             itemcode: item.itemid,
+                            iseditable: item.iseditable,
                           },
                         });
                       }}
@@ -1101,18 +1116,29 @@ export default function Enter() {
                 },
                 {
                   key: "rate",
+                  labeled: `Rate (${
+                    stateItemTable.item.iseditable == 1
+                      ? "Editable"
+                      : "Non Editable"
+                  })`,
                   input: "number",
                   isAlias: true,
-                  isRead: true,
+                  isRead: stateItemTable.item.iseditable == 0,
                   cursorDisable: true,
                   accounting: true,
-                  isReadOnly: true,
+                  note: "Base rate item",
                 },
                 {
                   key: "description",
                   input: "text",
                   isAlias: true,
-                  hidden: true
+                  hidden: true,
+                },
+                {
+                  key: "iseditable",
+                  input: "input",
+                  isAlias: true,
+                  hidden: true,
                 },
               ]}
               aliases={salesOrderAliases.item}
