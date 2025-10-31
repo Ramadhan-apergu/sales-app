@@ -255,7 +255,7 @@ function Item() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

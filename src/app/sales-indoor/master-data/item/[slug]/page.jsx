@@ -3,7 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Dropdown, Modal } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
-import { EditOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  MoreOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import { itemAliases } from "@/utils/aliases";
@@ -64,11 +68,13 @@ export default function Detail() {
       "itemprocessfamily",
       "saleunit",
       "stockunit",
-      "unitstype",
       "createdby",
       "createddate",
+      "dimensi",
+      "itemcategory",
     ],
-    pricing: ["price", "discount"],
+    pricing: ["price", "discount", "addons", "iseditable"],
+    conversion: ["unitstype2", "conversion", "unitstype"],
   };
 
   const handleEdit = () => {
@@ -108,6 +114,10 @@ export default function Detail() {
     Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
   );
 
+  const [conversion, setConversion] = useState(
+    Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
+  );
+
   async function mapingGroup(data) {
     const pick = async (keys) => {
       const obj = {};
@@ -116,7 +126,9 @@ export default function Detail() {
           obj[k] = data[k] != null ? formatDateToShort(data[k]) : "";
         } else if (k === "createdby") {
           obj[k] = data[k] != null ? await getUserById(data[k]) : "";
-        } else if (['price', 'discount'].includes(k)) {
+        } else if (k === "iseditable") {
+          obj[k] = data[k] ? "Yes" : "No";
+        } else if (["price", "discount"].includes(k)) {
           obj[k] = data[k] != null ? await formatRupiah(data[k]) : "";
         } else {
           obj[k] = data[k] != null ? data[k] : "";
@@ -127,6 +139,7 @@ export default function Detail() {
 
     setGeneral(await pick(fieldGroups.general));
     setPricing(await pick(fieldGroups.pricing));
+    setConversion(await pick(fieldGroups.conversion));
   }
 
   async function getUserById(id) {
@@ -224,14 +237,28 @@ export default function Detail() {
                       },
                       { key: "itemid", input: "input", isAlias: true },
                       {
+                        key: "itemcategory",
+                        input: "input",
+                        isAlias: true,
+                      },
+                      {
                         key: "itemprocessfamily",
                         input: "input",
                         isAlias: true,
                       },
-                      { key: "saleunit", input: "input", isAlias: true },
-                      { key: "stockunit", input: "input", isAlias: true },
-                      { key: "unitstype", input: "input", isAlias: true },
-                      { key: "createdby", input: "input", isAlias: true },
+                      {
+                        key: "saleunit",
+                        input: "input",
+                        isAlias: true,
+                        hidden: true,
+                      },
+                      {
+                        key: "stockunit",
+                        input: "input",
+                        isAlias: true,
+                        hidden: true,
+                      },
+                      { key: "dimensi", input: "input", isAlias: true },
                       { key: "createddate", input: "input", isAlias: true },
                     ]}
                     aliases={itemAliases}
@@ -242,7 +269,37 @@ export default function Detail() {
                     payload={pricing}
                     data={[
                       { key: "price", input: "input", isAlias: false },
-                      { key: "discount", input: "input", isAlias: false, hidden:true },
+                      { key: "addons", input: "input", isAlias: false },
+                      {
+                        key: "discount",
+                        input: "input",
+                        isAlias: false,
+                        hidden: true,
+                      },
+                      { key: "iseditable", input: "input", isAlias: true },
+                    ]}
+                    aliases={itemAliases}
+                  />
+
+                  <InputForm
+                    isReadOnly={true}
+                    type="conversion"
+                    payload={conversion}
+                    data={[
+                      { key: "unitstype", input: "input", isAlias: true },
+                      {
+                        key: "unitstype2",
+                        input: "input",
+                        isAlias: true,
+                        note: "Unit 2 bernilai 1",
+                      },
+                      {
+                        key: "conversion",
+                        input: "input",
+                        isAlias: true,
+                        note: `
+                    Conversion untuk menentukan berapa Base Unit yang setara dengan Unit 2.`,
+                      },
                     ]}
                     aliases={itemAliases}
                   />
