@@ -448,31 +448,36 @@ export default function Details() {
 
   const handleChecked = (data, isChecked) => {
     if (data === "all") {
-      // ✅ Jika checkbox header (Select All) ditekan
+      // ✅ Checkbox header (Select All)
       const updatedItems = state.dataTableItem.map((item) => {
-        const updatedAmount = item.amount || 0;
-        const updatedDue = (Number(item.total) || 0) - updatedAmount;
+        const updatedAmount = isChecked ? Number(item.total) || 0 : 0;
 
         return {
           ...item,
           ischecked: isChecked,
-          due: updatedDue,
+          amount: updatedAmount, // ubah amount
         };
       });
 
       // update semua apply items jika checked
       const updatedApplies = isChecked
-        ? updatedItems.map((item) => ({ ...item, amount: item.amount || 0 }))
+        ? updatedItems.map((item) => ({
+            ...item,
+            amount: Number(item.total) || 0,
+          }))
         : [];
 
       dispatch({ type: "SET_ITEMS", payload: updatedItems });
       dispatch({ type: "SET_PAYMENTAPPLY", payload: updatedApplies });
     } else {
-      // ✅ Jika checkbox individual ditekan
+      // ✅ Checkbox individual
       let updatedData = state.payloadPaymentApplies;
 
       if (isChecked) {
-        updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
+        updatedData = [
+          ...updatedData,
+          { ...data, amount: Number(data.total) || 0 },
+        ];
       } else {
         updatedData = updatedData.filter(
           (item) => item.invoiceid !== data.invoiceid
@@ -488,13 +493,12 @@ export default function Details() {
         type: "SET_ITEMS",
         payload: state.dataTableItem.map((item) => {
           if (item.invoiceid === data.invoiceid) {
-            const updatedAmount = item.amount || 0;
-            const updatedDue = (Number(item.total) || 0) - updatedAmount;
+            const updatedAmount = isChecked ? Number(item.total) || 0 : 0;
 
             return {
               ...item,
               ischecked: isChecked,
-              due: updatedDue,
+              amount: updatedAmount, // hanya ubah amount
             };
           } else {
             return item;
@@ -510,12 +514,10 @@ export default function Details() {
         if (!item.ischecked) return item; // prevent editing if not checked
 
         const updatedAmount = Number(amount) || 0;
-        const updatedDue = (Number(item.total) || 0) - updatedAmount;
 
         return {
           ...item,
           amount: updatedAmount,
-          due: updatedDue,
         };
       }
       return item;

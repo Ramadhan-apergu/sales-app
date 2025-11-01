@@ -28,11 +28,11 @@ import DeliveryOrderPrint from "@/components/superAdmin/DeliveryOrderPrint";
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
     ...keys.map((key) => {
-      if (key == "isfree") {
+      if (key === "isfree") {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
+          key,
           align: "right",
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
         };
@@ -40,12 +40,22 @@ function TableCustom({ data, keys, aliases, onDelete }) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
+          key,
           align: "right",
         };
       }
     }),
   ];
+
+  // Hitung total quantity
+  const totalQuantity1 = data.reduce(
+    (sum, r) => sum + (Number(r.quantity1) || 0),
+    0
+  );
+  const totalQuantity2 = data.reduce(
+    (sum, r) => sum + (Number(r.quantity2) || 0),
+    0
+  );
 
   return (
     <Table
@@ -55,6 +65,35 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      summary={() => (
+        <Table.Summary.Row>
+          {/* iterasi sesuai urutan columns agar posisi total tepat */}
+          {columns.map((col) => {
+            if (col.dataIndex === "quantity1") {
+              return (
+                <Table.Summary.Cell
+                  key={col.key || col.dataIndex}
+                  align="right"
+                >
+                  <b>{totalQuantity1.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+            if (col.dataIndex === "quantity2") {
+              return (
+                <Table.Summary.Cell
+                  key={col.key || col.dataIndex}
+                  align="right"
+                >
+                  <b>{totalQuantity2.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+            // kolom lainnya kosong agar alignment tetap rapi
+            return <Table.Summary.Cell key={col.key || col.dataIndex} />;
+          })}
+        </Table.Summary.Row>
+      )}
     />
   );
 }
@@ -127,6 +166,7 @@ export default function Page() {
     "unit2",
     "memo",
     "quantityremaining",
+    "onhand",
     // "itemprocessfamily",
     // "displayname",
     // "memo",
@@ -199,6 +239,7 @@ export default function Page() {
           quantity1: item.quantity,
           unit1: item.units,
           unit2: item.units2,
+          onhand: item.onhand,
         };
 
         delete updateItem.quantity;

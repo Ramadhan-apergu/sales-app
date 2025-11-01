@@ -18,10 +18,21 @@ import {
 
 import {
   CheckOutlined,
+  DeleteOutlined,
+  EditOutlined,
   InfoCircleOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, FloatButton, Form, Modal, Select, Table } from "antd";
+import {
+  Button,
+  Divider,
+  Flex,
+  FloatButton,
+  Form,
+  Modal,
+  Select,
+  Table,
+} from "antd";
 import { Input } from "antd/lib";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -361,7 +372,11 @@ export default function Enter() {
       ...stateItemTable.summary,
       ...stateItemTable.tax,
     };
-    const updateItemTable = [...dataTableItem, dataItemNew];
+
+    const updateItemTable = [
+      ...dataTableItem.filter((item) => item.item !== dataItemNew.item),
+      dataItemNew,
+    ];
 
     const updateDiscountItem = await getDiscountItem(updateItemTable);
 
@@ -542,7 +557,6 @@ export default function Enter() {
       delete payloadToInsert.companyname;
       delete payloadToInsert.salesrep;
 
-
       if (!payloadToInsert.entity) {
         throw new Error("Customer is required");
       }
@@ -579,6 +593,35 @@ export default function Enter() {
       setIsLoadingSubmit(false);
     }
   };
+
+  function handleEdit(record) {
+    const item = dataItem.find((item) => item.value == record.item);
+
+    setItemSelected(item);
+    dispatchItemTable({
+      type: "SET_ITEM",
+      payload: {
+        item: item.id,
+        units: item.unitstype,
+        rate: record.rate,
+        displayname: item.displayname,
+        itemprocessfamily: item.itemprocessfamily,
+        itemid: item.itemid,
+        itemcode: item.itemid,
+        iseditable: item.iseditable,
+        quantity: record.quantity,
+      },
+    });
+
+    dispatchItemTable({
+      type: "SET_TAX",
+      payload: {
+        taxable: record.taxable,
+        taxrate: record.taxrate,
+      },
+    });
+    setIsModalItemOpen(true);
+  }
 
   return (
     <>
@@ -786,6 +829,7 @@ export default function Enter() {
                 data={dataTableItem}
                 keys={keyTableItem}
                 aliases={salesOrderAliases.item}
+                onEdit={handleEdit}
               />
             </div>
           </div>
@@ -965,6 +1009,7 @@ export default function Enter() {
                         (data) =>
                           !dataTableItem
                             .map((item) => item.item)
+                            .filter((val) => val !== itemSelected?.value)
                             .includes(data.value)
                       )}
                       style={{ width: "100%" }}
@@ -1068,7 +1113,7 @@ export default function Enter() {
   );
 }
 
-function TableCustom({ data, keys, aliases, onDelete }) {
+function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
   const columns = [
     {
       title: "No",
@@ -1092,38 +1137,66 @@ function TableCustom({ data, keys, aliases, onDelete }) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
-          align: "right", // semua kolom di-align ke kanan
+          key,
+          align: "right",
           render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else if (["quantity"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "right",
+          render: (text) => <p>{Number(text) || 0}</p>,
         };
       } else if (["item"].includes(key)) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
-          align: "left", // semua kolom di-align ke kanan
-          render: (text) => <p>{formatRupiah(text)}</p>,
+          key,
+          align: "left",
+          render: (text) => <p>{text}</p>,
         };
       } else {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
-          align: "center", // semua kolom di-align ke kanan
+          key,
+          align: "center",
         };
       }
     }),
     {
       title: "Action",
       key: "action",
-      align: "right", // kolom action juga ke kanan
+      align: "right",
       render: (_, record) => (
-        <Button type="link" onClick={() => onDelete(record)}>
-          Delete
-        </Button>
+        <Flex gap={6}>
+          <Button
+            size="small"
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          />
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => onDelete(record)}
+          />
+        </Flex>
       ),
     },
   ];
+
+  // 🔢 Hitung total kolom
+  const totalQuantity = data.reduce((sum, r) => sum + (r.quantity || 0), 0);
+  const totalSubtotal = data.reduce((sum, r) => sum + (r.subtotal || 0), 0);
+  const totalAmount = data.reduce((sum, r) => sum + (r.totalamount || 0), 0);
+  const totalDiscount = data.reduce(
+    (sum, r) => sum + (r.totaldiscount || 0),
+    0
+  );
 
   return (
     <Table
@@ -1133,6 +1206,53 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      summary={() => (
+        <Table.Summary.Row>
+          {/* Kolom pertama: label Total */}
+          <Table.Summary.Cell index={0} align="center">
+            <b>Total</b>
+          </Table.Summary.Cell>
+
+          {/* Loop kolom agar posisi total dinamis sesuai keys */}
+          {keys.map((key, i) => {
+            if (key === "quantity")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{totalQuantity}</b>
+                </Table.Summary.Cell>
+              );
+            if (key === "subtotal")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{formatRupiah(totalSubtotal)}</b>
+                </Table.Summary.Cell>
+              );
+            if (key === "totalamount")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{formatRupiah(totalAmount)}</b>
+                </Table.Summary.Cell>
+              );
+            if (key === "totaldiscount")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{formatRupiah(totalDiscount)}</b>
+                </Table.Summary.Cell>
+              );
+
+            // kolom lain dikosongkan agar layout rapi
+            return (
+              <Table.Summary.Cell key={key} index={i + 1}></Table.Summary.Cell>
+            );
+          })}
+
+          {/* Kolom terakhir (Action) dikosongkan */}
+          <Table.Summary.Cell
+            index={keys.length + 1}
+            align="right"
+          ></Table.Summary.Cell>
+        </Table.Summary.Row>
+      )}
     />
   );
 }
