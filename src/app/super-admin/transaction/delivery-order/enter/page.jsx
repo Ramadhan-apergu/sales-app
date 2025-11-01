@@ -51,46 +51,43 @@ import { deliveryOrderAliases } from "@/utils/aliases";
 function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
   const columns = [
     ...keys.map((key) => {
-      if (key == "apply") {
+      if (key === "apply") {
         return {
           title: "Apply",
           key: "apply",
-          align: "center", // tengah biar rapi
+          align: "center",
           render: (_, record) => (
             <Checkbox
               checked={record.apply}
               onChange={(e) => {
                 if (!record.isfree) {
                   onChecked(record.lineid, e.target.checked);
-                } else {
                 }
               }}
             />
           ),
         };
+      } else if (key === "isfree") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "right",
+          render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
       } else {
-        if (key == "isfree") {
-          return {
-            title: aliases?.[key] || key,
-            dataIndex: key,
-            key: key,
-            align: "right",
-            render: (text) => <p>{text ? "Yes" : "No"}</p>,
-          };
-        } else {
-          return {
-            title: aliases?.[key] || key,
-            dataIndex: key,
-            key: key,
-            align: "right",
-          };
-        }
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "right",
+        };
       }
     }),
     {
       title: "Action",
       key: "action",
-      align: "right", // kolom action juga ke kanan
+      align: "right",
       render: (_, record) => (
         <Button
           disabled={!record.apply}
@@ -103,6 +100,10 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
     },
   ];
 
+  // Hitung total quantity
+  const totalQuantity1 = data.reduce((sum, r) => sum + (r.quantity1 || 0), 0);
+  const totalQuantity2 = data.reduce((sum, r) => sum + (r.quantity2 || 0), 0);
+
   return (
     <Table
       columns={columns}
@@ -111,6 +112,43 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      summary={() => {
+        return (
+          <Table.Summary.Row>
+            {columns.map((col, index) => {
+              // Kolom pertama: tampilkan label "Total"
+              if (index === 0) {
+                return (
+                  <Table.Summary.Cell key={col.key || index} align="center">
+                    <b>Total</b>
+                  </Table.Summary.Cell>
+                );
+              }
+
+              // Cek apakah kolom ini quantity1 atau quantity2
+              if (col.dataIndex === "quantity1") {
+                return (
+                  <Table.Summary.Cell key={col.key || index} align="right">
+                    <b>{totalQuantity1.toLocaleString()}</b>
+                  </Table.Summary.Cell>
+                );
+              }
+              if (col.dataIndex === "quantity2") {
+                return (
+                  <Table.Summary.Cell key={col.key || index} align="right">
+                    <b>{totalQuantity2.toLocaleString()}</b>
+                  </Table.Summary.Cell>
+                );
+              }
+
+              // Kolom lainnya kosong
+              return (
+                <Table.Summary.Cell key={col.key || index}></Table.Summary.Cell>
+              );
+            })}
+          </Table.Summary.Row>
+        );
+      }}
     />
   );
 }
@@ -189,7 +227,6 @@ function Enter({ salesOrderId }) {
         const soItemRes = await FullfillmentFetch.getSoItem(salesOrderId);
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch fulfillment items");
-        console.log(soItemData);
         setDataSalesOrder(salesOrderData);
         setDataCustomer(customerData);
         setDataSalesOrderItemRetrieve(soItemData);
@@ -209,6 +246,7 @@ function Enter({ salesOrderId }) {
             lineid: crypto.randomUUID(),
             isfree: item.isfree,
             conversion: item.conversion,
+            onhand: item.onhand,
           }))
         );
 
@@ -252,6 +290,7 @@ function Enter({ salesOrderId }) {
     "quantity2",
     "unit2",
     "quantityremaining",
+    "onhand",
     "memo",
   ];
 
@@ -582,6 +621,13 @@ function Enter({ salesOrderId }) {
                 },
                 {
                   key: "conversion",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                  //   hidden: true,
+                },
+                {
+                  key: "onhand",
                   input: "input",
                   isAlias: true,
                   disabled: true,

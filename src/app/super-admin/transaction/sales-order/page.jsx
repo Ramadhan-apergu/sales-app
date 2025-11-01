@@ -1,6 +1,7 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
 import {
+  CheckOutlined,
   CloseOutlined,
   EditOutlined,
   FilterOutlined,
@@ -150,6 +151,22 @@ function SalesOrder() {
     });
   };
 
+  const approveModal = (record) => {
+    modal.confirm({
+      title: `Approve ${title} "${record.tranid}"?`,
+      content: "Are you sure you want to approve this item?",
+      okText: "Approve",
+      cancelText: "Cancel",
+      okButtonProps: {
+        type: "primary",
+        style: { backgroundColor: "green", borderColor: "green" },
+      },
+      onOk: () => {
+        updateHandleStatus(record.id, "Open");
+      },
+    });
+  };
+
   const updateHandleStatus = async (id, status) => {
     try {
       setIsloading(true);
@@ -269,6 +286,7 @@ function SalesOrder() {
             ),
           });
         }
+
         if (record.status?.toLowerCase() != "closed") {
           menuItems.push({
             key: "closed",
@@ -282,6 +300,24 @@ function SalesOrder() {
                 className="w-full text-left"
               >
                 Closed
+              </Button>
+            ),
+          });
+        }
+
+        if (record.status?.toLowerCase() === "pending approval") {
+          menuItems.push({
+            key: "approve",
+            label: (
+              <Button
+                variant="link"
+                size="small"
+                icon={<CheckOutlined />}
+                color="green"
+                onClick={() => closedModal(record)}
+                className="w-full text-left"
+              >
+                Approve
               </Button>
             ),
           });

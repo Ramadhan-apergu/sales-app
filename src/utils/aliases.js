@@ -154,6 +154,7 @@ export const deliveryOrderAliases = {
     quantity2: "Qty 2",
     unit2: "Unit 2",
     isfree: "Free",
+    onhand: "Onhand",
   },
   shipping: {
     shippingoption: "Shipping Option",
