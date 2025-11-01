@@ -193,7 +193,7 @@ export default function Page() {
                         : "-"}
                     </p>
                   </Tooltipantd>
-                  <p className="text-sm text-blue-5">Kg</p>
+                  <p className="text-sm text-blue-5">Quantity</p>
                 </div>
               </div>
 
@@ -225,7 +225,7 @@ export default function Page() {
                         : "-"}
                     </p>
                   </Tooltipantd>
-                  <p className="text-sm text-blue-5">Kg</p>
+                  <p className="text-sm text-blue-5">Quantity</p>
                 </div>
               </div>
 
@@ -341,7 +341,7 @@ export default function Page() {
                         : "-"}
                     </p>
                   </Tooltipantd>
-                  <p className="text-sm text-blue-5">Kg</p>
+                  <p className="text-sm text-blue-5">Quantity</p>
                 </div>
               </div>
 

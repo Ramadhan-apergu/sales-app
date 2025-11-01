@@ -68,7 +68,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       title: "No",
       key: "no",
       align: "center",
-      render: (text, record, index) => index + 1, // nomor urut mulai dari 1
+      render: (text, record, index) => index + 1,
     },
     ...keys.map((key) => {
       if (
@@ -85,38 +85,39 @@ function TableCustom({ data, keys, aliases, onDelete }) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
+          key,
           align: "right",
-          render: (text, record) => <p>{formatRupiah(text)}</p>,
+          render: (text) => <p>{formatRupiah(text)}</p>,
         };
-      } else if (key == "isfree") {
+      } else if (key === "isfree") {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
-          render: (text) => <p>{text ? "Yes" : "No"}</p>,
-          align: "right",
+          key,
+          align: "center",
+          render: (text) => (text ? "Yes" : "No"),
         };
       } else {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
+          key,
           align: "right",
         };
       }
     }),
-    // {
-    //   title: "Action",
-    //   key: "action",
-    //   align: "right", // kolom action juga ke kanan
-    //   render: (_, record) => (
-    //     <Button type="link" onClick={() => onDelete(record)}>
-    //       Delete
-    //     </Button>
-    //   ),
-    // },
   ];
+
+  // 🔢 Hitung total kolom yang dibutuhkan
+  const totals = {
+    quantity: data.reduce((sum, r) => sum + (r.quantity || 0), 0),
+    quantity2: data.reduce((sum, r) => sum + (r.quantity2 || 0), 0),
+    totaldiscount: data.reduce((sum, r) => sum + (r.totaldiscount || 0), 0),
+    subtotal: data.reduce((sum, r) => sum + (r.subtotal || 0), 0),
+    dpp: data.reduce((sum, r) => sum + (r.dpp || 0), 0),
+    amount: data.reduce((sum, r) => sum + (r.amount || 0), 0),
+    taxvalue: data.reduce((sum, r) => sum + (r.taxvalue || 0), 0),
+  };
 
   return (
     <Table
@@ -126,6 +127,40 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      summary={() => (
+        <Table.Summary.Row>
+          {/* kolom pertama "Total" */}
+          <Table.Summary.Cell index={0} align="center">
+            <b>Total</b>
+          </Table.Summary.Cell>
+
+          {/* generate cell total sesuai posisi kolom */}
+          {keys.map((key, i) => {
+            if (key in totals) {
+              const value = totals[key];
+              const isCurrency = [
+                "totaldiscount",
+                "subtotal",
+                "dpp",
+                "amount",
+                "taxvalue",
+              ].includes(key);
+
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>
+                    {isCurrency ? formatRupiah(value) : value.toLocaleString()}
+                  </b>
+                </Table.Summary.Cell>
+              );
+            }
+
+            return (
+              <Table.Summary.Cell key={key} index={i + 1}></Table.Summary.Cell>
+            );
+          })}
+        </Table.Summary.Row>
+      )}
     />
   );
 }
