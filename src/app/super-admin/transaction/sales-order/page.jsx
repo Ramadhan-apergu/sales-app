@@ -314,7 +314,7 @@ function SalesOrder() {
                 size="small"
                 icon={<CheckOutlined />}
                 color="green"
-                onClick={() => closedModal(record)}
+                onClick={() => approveModal(record)}
                 className="w-full text-left"
               >
                 Approve
