@@ -241,7 +241,7 @@ export default function Enter() {
     "units",
     "rate",
     // "description",
-    "taxable",
+    // "taxable",
     "taxrate",
     "totalamount",
     "totaldiscount",
@@ -1103,7 +1103,11 @@ export default function Enter() {
               ]}
               aliases={salesOrderAliases.item}
               onChange={(type, payload) => {
-                dispatchItemTable({ type, payload });
+                const updatePayload = {
+                  ...payload,
+                  taxrate: payload.taxable ? payload.taxrate : 0,
+                };
+                dispatchItemTable({ type, payload: updatePayload });
               }}
             />
           </div>
