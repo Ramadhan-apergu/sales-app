@@ -188,10 +188,10 @@ function SalesOrder() {
                 Date
               </label>
               <RangePicker
-                format="YYYY-MM-DD"
-                onChange={(_, dateString) =>
-                  handleFilter("dateRange", dateString)
-                }
+                format="DD-MM-YYYY"
+                onChange={(dates, dateStrings) => {
+                  handleFilter("dateRange", dateStrings);
+                }}
                 style={{ width: "100%" }}
               />
             </div>
