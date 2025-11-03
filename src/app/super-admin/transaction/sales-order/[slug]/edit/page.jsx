@@ -673,7 +673,7 @@ export default function Enter() {
         throw new Error("Please enter a value greater than 0.");
       }
 
-      const response = await SalesOrderFetch.add(payloadToInsert);
+      const response = await SalesOrderFetch.update(slug, payloadToInsert);
 
       const resData = createResponseHandler(response, notify);
 
