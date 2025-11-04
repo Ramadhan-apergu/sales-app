@@ -136,16 +136,6 @@ export default function InvoicePrint({ data, dataTable }) {
                 {formatDateStartDay(data?.so_trandate) || "-"}
               </p>
             </div>
-            <br />
-            <div className="w-full flex justify-end">
-              <p className="w-3/12 font-semibold break-words whitespace-normal border-y border-l">
-                Info Pembayaran
-              </p>
-              <p className="w-7/12 border break-words whitespace-normal">
-                BCA : 123-456-7890 a.n CV Sukses Mandiri <br />
-                CIMB : 987-654-3210 a.n CV Sukses Mandiri
-              </p>
-            </div>
           </div>
         </div>
       </section>
