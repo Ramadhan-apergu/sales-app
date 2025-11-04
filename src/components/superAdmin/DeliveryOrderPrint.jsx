@@ -7,6 +7,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
     qty: 0,
     qty2: 0,
   });
+  const [updateData, setUpdateData] = useState([]);
 
   useEffect(() => {
     const date = new Date().toLocaleString("id-ID", {
@@ -21,7 +22,35 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
       { qty: 0, qty2: 0 }
     );
     setCount(total);
+
+    const mergedData = Object.values(
+      dataTable.reduce((acc, curr) => {
+        const key = curr.itemid;
+
+        if (!acc[key]) {
+          acc[key] = { ...curr };
+        } else {
+          acc[key].quantity1 += curr.quantity1;
+          acc[key].quantity2 += curr.quantity2;
+          acc[key].quantityremaining += curr.quantityremaining;
+
+          // gabungkan memo dengan koma, hindari koma dobel
+          const existingMemo = acc[key].memo?.trim();
+          const newMemo = curr.memo?.trim();
+          if (newMemo) {
+            acc[key].memo = existingMemo
+              ? `${existingMemo}, ${newMemo}`
+              : newMemo;
+          }
+        }
+
+        return acc;
+      }, {})
+    );
+
+    setUpdateData(mergedData);
   }, [dataTable]);
+
   return (
     <div id="print-do" className="w-full flex flex-col gap-8">
       <section className="w-full flex flex-col items-end gap-8">
@@ -125,11 +154,11 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           <p className="border-r break-words whitespace-normal w-[10%] text-right">
             Unit 2
           </p>
-          <p className="break-words whitespace-normal w-[20%]">Keterangan</p>
+          <p className="break-words whitespace-normal w-[20%]">Memo</p>
         </div>
-        {dataTable &&
-          dataTable.length > 0 &&
-          dataTable.map((item, i) => (
+        {updateData &&
+          updateData.length > 0 &&
+          updateData.map((item, i) => (
             <div
               key={i}
               className="w-full flex border-x border-b table-padding"

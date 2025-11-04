@@ -106,7 +106,7 @@ function SalesOrder() {
               <div className="flex justify-center items-start gap-2">
                 <RangePicker
                   showTime={false}
-                  format="DD-MM-YYYY"
+                  format="YYYY-MM-DD"
                   onChange={(value, dateString) => {
                     setDateRange(dateString);
                   }}
