@@ -491,32 +491,38 @@ function Enter({ fulfillmentId }) {
   };
 
   useEffect(() => {
-    let totalamount = 0;
-    let discounttotal = 0;
-    let subtotal = 0;
-    let taxtotal = 0;
-    let amount = 0;
+    if (!Array.isArray(dataTableItem)) return;
 
-    dataTableItem.forEach((item) => {
-      totalamount += item.amount;
-      subtotal += item.subtotal;
-      amount += item.subtotal;
-      if (item.isfree) {
-        discounttotal += item.subtotal;
+    const summary = dataTableItem.reduce(
+      (acc, item) => {
+        const amount = Number(item.amount) || 0;
+        const subtotal = Number(item.subtotal) || 0;
+
+        acc.totalamount += amount;
+        if (item.isfree) {
+          acc.discounttotal += subtotal;
+        }
+
+        return acc;
+      },
+      {
+        totalamount: 0,
+        discounttotal: 0,
+        subtotal: 0,
+        taxtotal: 0,
+        amount: 0,
       }
-    });
+    );
+
+    // Hitung subtotal & amount setelah looping
+    summary.subtotal = summary.totalamount - summary.discounttotal;
+    summary.amount = summary.subtotal;
 
     dispatch({
       type: "SET_SUMMARY",
-      payload: {
-        totalamount,
-        discounttotal,
-        subtotal,
-        taxtotal,
-        amount,
-      },
+      payload: summary,
     });
-  }, [dataTableItem]);
+  }, [JSON.stringify(dataTableItem)]);
 
   function formatRupiah(number) {
     return number.toLocaleString("id-ID") + ",-";

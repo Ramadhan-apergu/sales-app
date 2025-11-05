@@ -38,7 +38,6 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1) * limit;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -58,7 +57,7 @@ function SalesOrder() {
         setIsloading(true);
 
         const response = await InvoiceFetch.get(
-          offset,
+          page,
           limit,
           statusFilter,
           searchName,
@@ -191,23 +190,6 @@ function SalesOrder() {
       ),
     },
   ];
-
-  // const fetchData = async () => {
-  //   try {
-  //     setIsloading(true);
-  //     const response = await SalesOrderFetch.get(offset, limit, statusFilter, searchName);
-  //     const resData = getResponseHandler(response, notify)
-
-  //     if (resData) {
-  //         setDatas(resData.list)
-  //         setTotalItems(resData.total_items)
-  //     }
-  //   } catch (error) {
-  //       notify('error', 'Error', error?.message || "Internal Server error");
-  //   } finally {
-  //     setIsloading(false);
-  //   }
-  // };
 
   return (
     <Layout>
