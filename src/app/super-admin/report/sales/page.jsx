@@ -29,7 +29,6 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -60,7 +59,7 @@ function SalesOrder() {
         setIsloading(true);
 
         const response = await ReportSo.getSales(
-          offset,
+          page,
           limit,
           filters.searchName,
           filters.dateRange[0],

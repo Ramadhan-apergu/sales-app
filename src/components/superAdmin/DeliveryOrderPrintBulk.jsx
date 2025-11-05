@@ -26,6 +26,31 @@ export default function DeliveryOrderPrintBulk({ datas }) {
           { qty: 0, qty2: 0 }
         );
 
+        const mergedData = Object.values(
+          dataTable.reduce((acc, curr) => {
+            const key = curr.itemid;
+
+            if (!acc[key]) {
+              acc[key] = { ...curr };
+            } else {
+              acc[key].quantity += curr.quantity;
+              acc[key].quantity2 += curr.quantity2;
+              acc[key].quantityremaining += curr.quantityremaining;
+
+              // gabungkan memo dengan koma, hindari koma dobel
+              const existingMemo = acc[key].memo?.trim();
+              const newMemo = curr.memo?.trim();
+              if (newMemo) {
+                acc[key].memo = existingMemo
+                  ? `${existingMemo}, ${newMemo}`
+                  : newMemo;
+              }
+            }
+
+            return acc;
+          }, {})
+        );
+
         return (
           <div
             className="w-full flex flex-col gap-8 print-do-bulk"
@@ -51,7 +76,7 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                 <div className="w-1/2">
                   <div className="w-full flex">
                     <p className="w-3/12 break-words whitespace-normal font-semibold">
-                      To :
+                      Kepada :
                     </p>
                     <p className="w-8/12 border  break-words whitespace-normal">
                       {data.customer}
@@ -59,20 +84,20 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                   </div>
                   <div className="w-full flex">
                     <p className="w-3/12 break-words whitespace-normal font-semibold">
-                      Address :
+                      Alamat :
                     </p>
                     <p className="w-8/12 border-x border-b break-words whitespace-normal">
                       {data.shippingaddress}
                     </p>
                   </div>
                   {/* <div className="w-full flex">
-                    <p className="w-3/12 break-words whitespace-normal font-semibold">
-                      Notes :
-                    </p>
-                    <p className="w-8/12 border-x border-b break-words whitespace-normal">
-                      {data.notes}
-                    </p>
-                  </div> */}
+              <p className="w-3/12 break-words whitespace-normal font-semibold">
+                Notes :
+              </p>
+              <p className="w-8/12 border-x border-b break-words whitespace-normal">
+                {data.notes}
+              </p>
+            </div> */}
                   <br />
                   <div className="w-full flex">
                     <p className="w-3/12 break-words whitespace-normal font-semibold">
@@ -124,25 +149,29 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                 <p className="border-r break-words whitespace-normal w-[5%]">
                   No
                 </p>
-                {/* <p className="border-r break-words whitespace-normal w-[25%]">
-                  Kode
-                </p> */}
-                <p className="border-r break-words whitespace-normal w-[45%]">
+                {/* <p className="border-r break-words whitespace-normal w-[25%]">Kode</p> */}
+                <p className="border-r break-words whitespace-normal w-[25%]">
                   Nama Barang
                 </p>
                 <p className="border-r break-words whitespace-normal w-[15%] text-right">
-                  Qty (Kq)
+                  Qty 1
+                </p>
+                <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                  Unit 1
                 </p>
                 <p className="border-r break-words whitespace-normal w-[15%] text-right">
-                  Qty (Bal)
+                  Qty 2
                 </p>
-                <p className="border-r break-words whitespace-normal w-[20%]">
+                <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                  Unit 2
+                </p>
+                <p className="break-words whitespace-normal w-[20%]">
                   Keterangan
                 </p>
               </div>
-              {dataTable &&
-                dataTable.length > 0 &&
-                dataTable.map((item, i) => (
+              {mergedData &&
+                mergedData.length > 0 &&
+                mergedData.map((item, i) => (
                   <div
                     key={i}
                     className="w-full flex border-x border-b table-padding"
@@ -151,31 +180,45 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                       {i + 1}
                     </p>
                     {/* <p className="border-r break-words whitespace-normal w-[25%]">
-                      {item.itemid || "-"}
-                    </p> */}
-                    <p className="border-r break-words whitespace-normal w-[45%]">
+                {item.itemid || "-"}
+              </p> */}
+                    <p className="border-r break-words whitespace-normal w-[25%]">
                       {item.displayname || "-"}
                     </p>
                     <p className="border-r break-words whitespace-normal w-[15%] text-right">
-                      {item.quantity || 0}
+                      {item.quantity || "-"}
+                    </p>
+                    <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                      {item.unit1 || "-"}
                     </p>
                     <p className="border-r break-words whitespace-normal w-[15%] text-right">
-                      {item.quantity2 || 0}
+                      {item.quantity2 || "-"}
                     </p>
-                    <p className="border-r break-words whitespace-normal w-[20%]">
+                    <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                      {item.unit2 || "-"}
+                    </p>
+                    <p className="break-words whitespace-normal w-[20%]">
                       {item.memo || "-"}
                     </p>
                   </div>
                 ))}
-              <div className="w-full flex table-padding border-r border-white">
+              <div className="w-full flex table-padding border-r border-white font-medium">
                 <p className="break-words whitespace-normal w-[5%] text-right"></p>
                 {/* <p className="break-words whitespace-normal w-[25%]"></p> */}
-                <p className="break-words whitespace-normal w-[45%]"></p>
-                <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
+                <p className="break-words whitespace-normal w-[25%] border-b border-l">
+                  Total Qty
+                </p>
+                <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
                   {count.qty}
                 </p>
-                <p className="border-x border-b break-words whitespace-normal w-[15%] text-right">
+                <p className="border-l border-b break-words whitespace-normal w-[10%] text-right">
+                  {"-"}
+                </p>
+                <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
                   {count.qty2}
+                </p>
+                <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
+                  {"-"}
                 </p>
                 <p className="break-words whitespace-normal w-[20%]"></p>
               </div>
@@ -200,8 +243,12 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                     <hr className="w-full border-b" />
                   </div>
                 </div>
-                <div className="w-[25%] border h-20 flex flex-col px-1">
-                  <p>Keterangan:</p>
+                <div className="w-[25%] border min-h-20 flex flex-col px-1">
+                  <p>
+                    Memo:
+                    <br />
+                    <span className="text-xs">{data?.notes}</span>
+                  </p>
                 </div>
               </div>
               <p>{`[${currentDate}]`}</p>

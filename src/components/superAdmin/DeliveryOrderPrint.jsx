@@ -67,7 +67,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           <div className="w-1/2">
             <div className="w-full flex">
               <p className="w-3/12 break-words whitespace-normal font-semibold">
-                To :
+                Kepada :
               </p>
               <p className="w-8/12 border  break-words whitespace-normal">
                 {data.customer}
@@ -75,7 +75,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
             </div>
             <div className="w-full flex">
               <p className="w-3/12 break-words whitespace-normal font-semibold">
-                Address :
+                Alamat :
               </p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
                 {data.shippingaddress}
@@ -154,7 +154,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
           <p className="border-r break-words whitespace-normal w-[10%] text-right">
             Unit 2
           </p>
-          <p className="break-words whitespace-normal w-[20%]">Memo</p>
+          <p className="break-words whitespace-normal w-[20%]">Keterangan</p>
         </div>
         {updateData &&
           updateData.length > 0 &&
@@ -189,10 +189,10 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
               </p>
             </div>
           ))}
-        <div className="w-full flex table-padding border-r border-white">
+        <div className="w-full flex table-padding border-r border-white font-semibold">
           <p className="break-words whitespace-normal w-[5%] text-right"></p>
           {/* <p className="break-words whitespace-normal w-[25%]"></p> */}
-          <p className="break-words whitespace-normal w-[25%]"></p>
+          <p className="break-words whitespace-normal w-[25%] border-l border-b">Total Qty</p>
           <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty}
           </p>
@@ -228,11 +228,11 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
               <hr className="w-full border-b" />
             </div>
           </div>
-          <div className="w-[25%] border h-20 flex flex-col px-1">
+          <div className="w-[25%] border min-h-20 flex flex-col px-1">
             <p>
-              Keterangan:
+              Memo:
               <br />
-              {data?.notes}
+              <span className="text-xs">{data?.notes}</span>
             </p>
           </div>
         </div>
