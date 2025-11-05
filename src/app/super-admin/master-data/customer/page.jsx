@@ -24,7 +24,6 @@ function Customer() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1);
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -39,7 +38,7 @@ function Customer() {
       try {
         setIsloading(true);
 
-        const response = await CustomerFetch.get(offset, limit, statusFilter);
+        const response = await CustomerFetch.get(page, limit, statusFilter);
 
         const resData = getResponseHandler(response, notify)
 

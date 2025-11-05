@@ -22,14 +22,14 @@ export default function InvoicePrint({ data, dataTable }) {
 
     const total = dataTable.reduce(
       (acc, item) => ({
-        amount: acc.amount + (item.amount || 0),
-        quantity: acc.quantity + (item.quantity || 0),
-        quantity2: acc.quantity2 + (item.quantity2 || 0),
-        dpp: acc.dpp + (item.dpp || 0),
-        taxvalue: acc.taxvalue + (item.taxvalue || 0),
+        amount: acc.amount + (Number(item.amount) || 0),
+        quantity: acc.quantity + (Number(item.quantity) || 0),
+        quantity2: acc.quantity2 + (Number(item.quantity2) || 0),
+        dpp: acc.dpp + (Number(item.dpp) || 0),
+        taxvalue: acc.taxvalue + (Number(item.taxvalue) || 0),
         totaldiscount:
-          acc.totaldiscount + (item.isfree ? item.subtotal || 0 : 0),
-        subtotal: acc.subtotal + (item.subtotal || 0),
+          acc.totaldiscount + (item.isfree ? Number(item.subtotal) || 0 : 0),
+        subtotal: acc.subtotal + (Number(item.subtotal) || 0),
       }),
       {
         amount: 0,
@@ -41,6 +41,9 @@ export default function InvoicePrint({ data, dataTable }) {
         subtotal: 0,
       }
     );
+
+    // Hitung ulang subtotal dikurangi totaldiscount
+    total.subtotal = total.subtotal - total.totaldiscount;
 
     setCount(total);
   }, [dataTable]);
@@ -63,7 +66,7 @@ export default function InvoicePrint({ data, dataTable }) {
           <div className="w-1/2">
             <div className="w-full flex">
               <p className="w-3/12 font-semibold break-words whitespace-normal">
-                TO :
+                Kepada :
               </p>
               <p className="w-8/12 border  break-words whitespace-normal">
                 {data?.customer || "-"}
@@ -75,14 +78,6 @@ export default function InvoicePrint({ data, dataTable }) {
               </p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
                 {data?.billingaddress || "-"}
-              </p>
-            </div>
-            <div className="w-full flex">
-              <p className="w-3/12 font-semibold break-words whitespace-normal">
-                Note :
-              </p>
-              <p className="w-8/12 border-x border-b break-words whitespace-normal">
-                {data?.memo || "-"}
               </p>
             </div>
             <br />
@@ -142,15 +137,14 @@ export default function InvoicePrint({ data, dataTable }) {
       <section className="w-full">
         <div className="w-full flex border table-padding font-semibold">
           <p className="border-r break-words whitespace-normal w-[8%]">No</p>
-          <p className="border-r break-words whitespace-normal w-[18%]">Kode</p>
-          <p className="border-r break-words whitespace-normal w-[18%]">
+          <p className="border-r break-words whitespace-normal w-[36%]">
             Nama Barang
           </p>
-          <p className="border-r break-words whitespace-normal w-[8%] text-right">
+          <p className="border-r break-words whitespace-normal w-[13%] text-right">
             Qty
           </p>
-          <p className="border-r break-words whitespace-normal w-[8%] text-right">
-            Satuan
+          <p className="border-r break-words whitespace-normal w-[13%] text-right">
+            Unit
           </p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
             Harga
@@ -172,16 +166,13 @@ export default function InvoicePrint({ data, dataTable }) {
               <p className="border-r break-words whitespace-normal w-[8%] text-right">
                 {i + 1}
               </p>
-              <p className="border-r break-words whitespace-normal w-[18%]">
-                {item.itemid || "-"}
-              </p>
-              <p className="border-r break-words whitespace-normal w-[18%]">
+              <p className="border-r break-words whitespace-normal w-[36%]">
                 {item.displayname || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[8%] text-right">
+              <p className="border-r break-words whitespace-normal w-[13%] text-right">
                 {item.quantity || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[8%] text-right">
+              <p className="border-r break-words whitespace-normal w-[13%] text-right">
                 {item.units || "-"}
               </p>
               <p className="border-r break-words whitespace-normal w-[15%] text-right">
@@ -196,54 +187,49 @@ export default function InvoicePrint({ data, dataTable }) {
             </div>
           ))}
 
-        <div className="w-full flex border-r table-padding">
+        <div className="w-full flex table-padding">
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[18%]"></p>
-          <p className="break-words whitespace-normal w-[18%]"></p>
-          <p className="border-b border-x break-words whitespace-normal w-[8%] text-right">
+          <p className="break-words whitespace-normal w-[36%]"></p>
+          <p className="border-b border-x break-words whitespace-normal w-[13%] text-right">
             {count.quantity}
           </p>
-          <p className="break-words whitespace-normal w-[8%] text-right border-b border-r">
+          <p className="break-words whitespace-normal w-[13%] text-right border-b border-r">
             KG
           </p>
           <p className="break-words whitespace-normal w-[15%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
-            Jumlah
-          </p>
-          <p className="break-words border-b whitespace-normal w-[15%] text-right">
-            {formatRupiah(count.amount)}
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="break-words whitespace-normal w-[15%] text-right">
+            {/* {formatRupiah(count.amount)} */}
           </p>
         </div>
 
         <div className="w-full flex border-r table-padding">
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[18%]"></p>
-          <p className="break-words whitespace-normal w-[18%]"></p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+          <p className="break-words whitespace-normal w-[36%]"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
 
           <p className="break-words whitespace-normal w-[10%] text-right"></p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
             Diskon
           </p>
-          <p className="break-words border-b whitespace-normal w-[15%] text-right">
+          <p className="break-words border-b border-t whitespace-normal w-[15%] text-right">
             {formatRupiah(count.totaldiscount)}
           </p>
         </div>
 
         <div className="w-full flex border-r table-padding">
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[18%]"></p>
-          <p className="break-words whitespace-normal w-[18%]"></p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+          <p className="break-words whitespace-normal w-[36%]"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
 
           <p className="break-words whitespace-normal w-[10%] text-right"></p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
             DPP
           </p>
           <p className="break-words border-b whitespace-normal w-[15%] text-right">
-            {formatRupiah(count.totaldiscount)}
+            {formatRupiah(count.dpp)}
           </p>
         </div>
 
@@ -251,8 +237,8 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="break-words whitespace-normal w-[44%] border">
             Pembayaran Transfer Ke:
           </p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
 
           <p className="break-words whitespace-normal w-[10%] text-right"></p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
@@ -267,8 +253,8 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="break-words whitespace-normal w-[44%] border-x border-b">
             Bank BCA: 383-148-7788 a.n CV Sukses Mandiri
           </p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
+          <p className="break-words whitespace-normal w-[13%] text-right"></p>
           <p className="break-words whitespace-normal w-[10%] text-right"></p>
           <p className="border-r break-words whitespace-normal w-[15%] text-right">
             Total
@@ -298,11 +284,11 @@ export default function InvoicePrint({ data, dataTable }) {
               <hr className="w-full border-b" />
             </div>
           </div>
-          <div className="w-[25%] border h-20 flex flex-col px-1">
+          <div className="w-[25%] border min-h-20 flex flex-col px-1">
             <p>
-              Keterangan:
+              Memo:
               <br />
-              {data?.memo}
+              <span className="text-xs">{data?.memo}</span>
             </p>
           </div>
         </div>
