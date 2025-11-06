@@ -35,14 +35,48 @@ export default function InputForm({
     dayjs.locale("id");
   }, []);
 
+  // 🧠 Convert string date -> dayjs agar DatePicker bisa menampilkan nilai
   useEffect(() => {
-    form.setFieldsValue(payload);
-  }, [payload, form]);
+    const convertedPayload = Object.fromEntries(
+      Object.entries(payload).map(([key, value]) => {
+        const field = data.find((f) => f.key === key);
+        if (
+          (field?.input === "date" || field?.input === "datetime") &&
+          typeof value === "string" &&
+          dayjs(value).isValid()
+        ) {
+          return [key, dayjs(value)];
+        }
+        return [key, value];
+      })
+    );
+    form.setFieldsValue(convertedPayload);
+  }, [payload, data, form]);
 
+  // 🧠 Pastikan hasil DatePicker tetap dalam waktu lokal tanpa geser 1 hari
   const handleValuesChange = (changedValues, allValues) => {
     const firstKey = Object.keys(changedValues)[0];
+
+    const normalizedValues = Object.fromEntries(
+      Object.entries(allValues).map(([key, value]) => {
+        const field = data.find((f) => f.key === key);
+        if (dayjs.isDayjs(value)) {
+          const isDateTime = field?.input === "datetime";
+
+          if (!isDateTime) {
+            // Simpan tanggal tanpa geser timezone, jam di-set 00:00 lokal
+            return [key, value.startOf("day").format("YYYY-MM-DDT00:00:00Z")];
+          }
+
+          // Untuk datetime, tetap simpan sesuai waktu lokal tanpa konversi UTC
+          return [key, value.format("YYYY-MM-DDTHH:mm:ss")];
+        }
+        return [key, value];
+      })
+    );
+
     if (onChange) {
-      onChange(type, allValues, firstKey);
+      onChange(type, normalizedValues, firstKey);
     }
   };
 
@@ -123,8 +157,8 @@ export default function InputForm({
                       parser={(value) => {
                         if (accounting) {
                           return value
-                            ?.replace(/[Rp\s.]/g, "") // hapus "Rp", spasi, dan titik
-                            .replace(/[^\d]/g, ""); // pastikan hanya angka
+                            ?.replace(/[Rp\s.]/g, "")
+                            .replace(/[^\d]/g, "");
                         } else if (number) {
                           return `${value}`.replace(
                             /\B(?=(\d{3})+(?!\d))/g,
@@ -204,7 +238,7 @@ export default function InputForm({
                         icon={
                           <EyeOutlined
                             style={{
-                              color: visibleStates[i] ? "#1677ff" : "#bfbfbf", // antd primary vs grey
+                              color: visibleStates[i] ? "#1677ff" : "#bfbfbf",
                             }}
                           />
                         }
@@ -222,7 +256,6 @@ export default function InputForm({
                                 : "password";
                           }
 
-                          // Update state untuk icon
                           setVisibleStates((prev) => {
                             const newStates = [...prev];
                             newStates[i] = !newStates[i];
@@ -251,7 +284,6 @@ export default function InputForm({
               return (
                 <Form.Item
                   key={key}
-                  // initialValue={input === "select" ? payload[key] : undefined}
                   label={
                     <div className="flex gap-1 items-center">
                       <span className="capitalize">{label}</span>
