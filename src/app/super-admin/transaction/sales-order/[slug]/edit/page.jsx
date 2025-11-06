@@ -648,8 +648,6 @@ export default function Enter() {
       delete payloadToInsert.companyname;
       delete payloadToInsert.salesrep;
 
-      console.log(payloadToInsert);
-
       if (!payloadToInsert.entity) {
         throw new Error("Customer is required");
       }
