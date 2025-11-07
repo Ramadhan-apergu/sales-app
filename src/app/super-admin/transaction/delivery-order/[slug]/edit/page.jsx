@@ -311,7 +311,12 @@ export default function Page() {
         return updateItem;
       });
 
-      dataTable = [...dataTable, ...dataTableSoItem];
+      const filteredDataTableSoItem = dataTableSoItem.filter(
+        (soItem) =>
+          !dataTable.some((fulfillItem) => fulfillItem.item === soItem.item)
+      );
+
+      dataTable = [...dataTable, ...filteredDataTableSoItem];
     }
 
     setDataTableItem(dataTable);
