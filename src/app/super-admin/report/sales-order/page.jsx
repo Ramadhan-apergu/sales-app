@@ -183,7 +183,7 @@ function SalesOrder() {
   }, []);
 
   const handleEdit = (record) => {
-    router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
+    router.push(`/super-admin/report/${title}/${record.id}/edit`);
   };
 
   const aliases = soReportAliases;

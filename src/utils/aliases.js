@@ -37,6 +37,8 @@ export const itemAliases = {
   iseditable: "Editable",
   itemcategory: "Category",
   dimensi: "Dimensions PxLxT",
+  effectivedate: "Effective Date",
+  pricefamily: "Price Family",
 };
 
 export const agreementAliases = {
