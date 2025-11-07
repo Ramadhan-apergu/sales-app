@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Divider, Table, Modal, Input, Pagination, Switch } from "antd";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";

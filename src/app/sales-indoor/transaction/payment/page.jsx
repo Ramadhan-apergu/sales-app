@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import {
   CheckSquareOutlined,
   EditOutlined,

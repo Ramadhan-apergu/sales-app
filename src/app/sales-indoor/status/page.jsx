@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Layout from '@/components/superAdmin/Layout';
+import Layout from '@/components/salesIndoor/Layout';
 import LoadingSpin from '@/components/superAdmin/LoadingSpin';
 
 export default function Page() {

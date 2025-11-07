@@ -16,7 +16,7 @@ import {
   Tag,
   Tooltip,
 } from "antd";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import {
   CheckOutlined,
   EditOutlined,

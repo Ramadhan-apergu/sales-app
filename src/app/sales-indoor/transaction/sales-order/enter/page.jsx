@@ -1,7 +1,7 @@
 "use client";
 
 import InputForm from "@/components/superAdmin/InputForm";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useNotification from "@/hooks/useNotification";

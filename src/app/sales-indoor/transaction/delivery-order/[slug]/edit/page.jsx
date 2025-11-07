@@ -1,7 +1,7 @@
 "use client";
 
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import { Button, Checkbox, Divider, Dropdown, Modal, Table, Tag } from "antd";

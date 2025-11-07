@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { Modal, Pagination, Table, Select, DatePicker, Input } from "antd";

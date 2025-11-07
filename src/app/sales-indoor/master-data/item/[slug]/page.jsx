@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Button, Divider, Dropdown, Modal, Table } from "antd";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/salesIndoor/Layout";
 import {
   EditOutlined,
   MoreOutlined,
