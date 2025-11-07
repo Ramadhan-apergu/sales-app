@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Dropdown, Modal } from "antd";
+import { Button, Divider, Dropdown, Modal, Table } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
   EditOutlined,
@@ -16,6 +16,7 @@ import InputForm from "@/components/superAdmin/InputForm";
 import {
   deleteResponseHandler,
   getByIdResponseHandler,
+  updateResponseHandler,
 } from "@/utils/responseHandlers";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { formatDateToShort } from "@/utils/formatDate";
@@ -31,6 +32,7 @@ export default function Detail() {
   const isLargeScreen = useBreakpoint("lg");
   const { slug } = useParams();
   const [data, setData] = useState(null);
+  const [dataPrice, setDataPrice] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
 
@@ -140,6 +142,7 @@ export default function Detail() {
     setGeneral(await pick(fieldGroups.general));
     setPricing(await pick(fieldGroups.pricing));
     setConversion(await pick(fieldGroups.conversion));
+    setDataPrice(data?.item_price || []);
   }
 
   async function getUserById(id) {
@@ -263,23 +266,6 @@ export default function Detail() {
                     ]}
                     aliases={itemAliases}
                   />
-                  <InputForm
-                    isReadOnly={true}
-                    type="pricing"
-                    payload={pricing}
-                    data={[
-                      { key: "price", input: "input", isAlias: false },
-                      { key: "addons", input: "input", isAlias: false },
-                      {
-                        key: "discount",
-                        input: "input",
-                        isAlias: false,
-                        hidden: true,
-                      },
-                      { key: "iseditable", input: "input", isAlias: true },
-                    ]}
-                    aliases={itemAliases}
-                  />
 
                   <InputForm
                     isReadOnly={true}
@@ -303,6 +289,43 @@ export default function Detail() {
                     ]}
                     aliases={itemAliases}
                   />
+
+                  {/* <InputForm
+                    isReadOnly={true}
+                    type="pricing"
+                    payload={pricing}
+                    data={[
+                      { key: "price", input: "input", isAlias: false },
+                      { key: "addons", input: "input", isAlias: false },
+                      {
+                        key: "discount",
+                        input: "input",
+                        isAlias: false,
+                        hidden: true,
+                      },
+                      { key: "iseditable", input: "input", isAlias: true },
+                    ]}
+                    aliases={itemAliases}
+                  /> */}
+
+                  <div className="w-full flex flex-col gap-4">
+                    <Divider
+                      style={{
+                        margin: "0",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                      }}
+                      orientation="left"
+                    >
+                      Pricing
+                    </Divider>
+                    <PriceTable
+                      data={dataPrice}
+                      notify={notify}
+                      title={title}
+                      slug={slug}
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -319,5 +342,188 @@ export default function Detail() {
       </div>
       {contextNotify}
     </Layout>
+  );
+}
+
+function PriceTable({ data, title, notify, slug }) {
+  const [isEdit, setIsEdit] = useState(false);
+  const [dataEdit, setDataEdit] = useState({});
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+
+  const columns = [
+    {
+      title: "Effective Date",
+      dataIndex: "effectivedate",
+      key: "effectivedate",
+      render: (value) =>
+        new Date(value).toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+      render: (value) => value?.toLocaleString() ?? "-",
+    },
+    {
+      title: "Price Family",
+      dataIndex: "pricefamily",
+      key: "pricefamily",
+      render: (value) => value?.toLocaleString() ?? "-",
+    },
+    {
+      title: "Addons",
+      dataIndex: "addons",
+      key: "addons",
+      render: (value) => value ?? 0,
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <Button type="link" onClick={() => handleEdit(record)}>
+          Edit
+        </Button>
+      ),
+    },
+  ];
+
+  const handleEdit = (record) => {
+    const { id, pricefamily, isdefault, addons, effectivedate } = record;
+    setDataEdit({ id, pricefamily, isdefault, addons, effectivedate });
+    setIsEdit(true);
+  };
+
+  const handleSubmit = async () => {
+    setIsLoadingSubmit(true);
+    try {
+      let { id, isdefault, addons, effectivedate, pricefamily } = dataEdit;
+
+      if (!addons) {
+        addons = 0;
+      }
+      if (!effectivedate) {
+        notify(
+          "error",
+          "Failed",
+          `${itemAliases["effectivedate"]} is required`
+        );
+        return;
+      }
+      if (!pricefamily) {
+        notify("error", "Failed", `${itemAliases["pricefamily"]} is required`);
+        return;
+      }
+
+      const response = await ItemFetch.updatePrice(id, isdefault, {
+        pricefamily,
+        addons,
+        effectivedate,
+      });
+
+      const resData = updateResponseHandler(response, notify);
+
+      if (resData) {
+        window.location.reload();
+      }
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      setIsLoadingSubmit(false);
+    }
+  };
+
+  return (
+    <>
+      <Table
+        dataSource={data}
+        columns={columns}
+        rowKey="id"
+        pagination={false}
+      />
+
+      <Modal
+        maskClosable={false}
+        closable={!isLoadingSubmit} // ⛔ nonaktifkan tombol X saat loading
+        keyboard={!isLoadingSubmit} // ⛔ nonaktifkan ESC close
+        title="Edit Price"
+        open={isEdit}
+        onCancel={() => {
+          if (!isLoadingSubmit) {
+            // ⛔ cegah close manual saat loading
+            setIsEdit(false);
+            setDataEdit({});
+          }
+        }}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsEdit(false);
+              setDataEdit({});
+            }}
+            disabled={isLoadingSubmit} // ⛔ disable tombol cancel saat loading
+          >
+            Cancel
+          </Button>,
+          <Button
+            key="save"
+            type="primary"
+            loading={isLoadingSubmit}
+            onClick={handleSubmit}
+          >
+            Save
+          </Button>,
+        ]}
+      >
+        <InputForm
+          type="pricing"
+          payload={dataEdit}
+          data={[
+            {
+              key: "id",
+              input: "input",
+              isAlias: false,
+              hidden: true,
+            },
+            {
+              key: "isdefault",
+              input: "input",
+              isAlias: false,
+              hidden: true,
+            },
+            {
+              key: "pricefamily",
+              input: "number",
+              isAlias: true,
+              accounting: true,
+              rules: [{ required: true, message: "Price is required" }],
+            },
+            {
+              key: "addons",
+              input: "number",
+              isAlias: true,
+              accounting: true,
+            },
+            {
+              key: "effectivedate",
+              input: "date",
+              isAlias: true,
+              rules: [
+                {
+                  required: true,
+                  message: `${itemAliases["effectivedate"]} is required`,
+                },
+              ],
+            },
+          ]}
+          aliases={itemAliases}
+          onChange={(_, payload) => setDataEdit(payload)}
+        />
+      </Modal>
+    </>
   );
 }

@@ -262,48 +262,6 @@ export default function CustomerNew() {
               />
 
               <InputForm
-                type="pricing"
-                payload={payloadPricing}
-                data={[
-                  {
-                    key: "price",
-                    input: "number",
-                    isAlias: false,
-                    accounting: true,
-                    rules: [{ required: true, message: `Price is required` }],
-                  },
-                  {
-                    key: "addons",
-                    input: "number",
-                    isAlias: false,
-                    accounting: true,
-                  },
-                  {
-                    key: "discount",
-                    input: "number",
-                    isAlias: false,
-                    accounting: true,
-                    rules: [],
-                    hidden: true,
-                  },
-                  {
-                    key: "iseditable",
-                    input: "select",
-                    options: editableOptions,
-                    isAlias: true,
-                    rules: [
-                      {
-                        required: true,
-                        message: `${itemAliases["iseditable"]} is required`,
-                      },
-                    ],
-                  },
-                ]}
-                aliases={itemAliases}
-                onChange={handleChangePayload}
-              />
-
-              <InputForm
                 type="conversion"
                 payload={payloadConversion}
                 data={[
@@ -341,6 +299,48 @@ export default function CustomerNew() {
                     ],
                     note: `
                     Isi Conversion untuk menentukan berapa Base Unit yang setara dengan Unit 2.`,
+                  },
+                ]}
+                aliases={itemAliases}
+                onChange={handleChangePayload}
+              />
+
+              <InputForm
+                type="pricing"
+                payload={payloadPricing}
+                data={[
+                  {
+                    key: "price",
+                    input: "number",
+                    isAlias: false,
+                    accounting: true,
+                    rules: [{ required: true, message: `Price is required` }],
+                  },
+                  {
+                    key: "addons",
+                    input: "number",
+                    isAlias: false,
+                    accounting: true,
+                  },
+                  {
+                    key: "discount",
+                    input: "number",
+                    isAlias: false,
+                    accounting: true,
+                    rules: [],
+                    hidden: true,
+                  },
+                  {
+                    key: "iseditable",
+                    input: "select",
+                    options: editableOptions,
+                    isAlias: true,
+                    rules: [
+                      {
+                        required: true,
+                        message: `${itemAliases["iseditable"]} is required`,
+                      },
+                    ],
                   },
                 ]}
                 aliases={itemAliases}

@@ -34,7 +34,7 @@ function SalesOrder() {
   const [isLoading, setIsloading] = useState(false);
   const [dateRange, setDateRange] = useState(["", ""]);
   const [tableKeys, setTableKeys] = useState([]);
-  const title = "sales-order";
+  const title = "production";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -136,7 +136,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/report/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

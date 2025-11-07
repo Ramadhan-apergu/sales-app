@@ -77,4 +77,16 @@ export default class ItemFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async updatePrice(id, isDefault, payload) {
+    try {
+      const response = await this.axios.put(
+        `/master/items/price-family/${isDefault}/${id}`,
+        payload
+      );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }
