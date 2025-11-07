@@ -1,12 +1,7 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import {
-  Modal,
-  Pagination,
-  Table,
-  DatePicker,
-} from "antd";
+import { Modal, Pagination, Table, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -52,16 +47,16 @@ function SalesOrder() {
 
         let resData = getResponseHandler(response, notify);
 
-        if (resData) {
-          resData = resData.map((item, i) => ({
+        if (resData && resData.list) {
+          const resDataList = resData.list.map((item, i) => ({
             no: i + 1,
             ...item,
           }));
-          setDatas(resData);
-          setTotalItems(resData.length);
+          setDatas(resDataList);
+          setTotalItems(resData.total_items);
           setTableKeys(
-            Array.isArray(resData) && resData.length > 0
-              ? Object.keys(resData[0]).filter(
+            Array.isArray(resDataList) && resData.total_items > 0
+              ? Object.keys(resDataList[0]).filter(
                   (item) => !["item", "so_number"].includes(item.toLowerCase())
                 )
               : []
@@ -76,7 +71,6 @@ function SalesOrder() {
 
     fetchData();
   }, [page, limit, pathname, dateRange]);
-
 
   const aliases = productReportAliases;
 

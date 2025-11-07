@@ -4,7 +4,7 @@ import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import Layout from "@/components/salesIndoor/Layout";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
-import { Button, Divider, Dropdown, Modal, Table, Tag } from "antd";
+import { Button, Checkbox, Divider, Dropdown, Modal, Table, Tag } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
 import {
@@ -28,46 +28,105 @@ import dayjs from "dayjs";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { deliveryOrderAliases } from "@/utils/aliases";
 
-function TableCustom({ data, keys, aliases, onEdit }) {
+function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
   const columns = [
     ...keys.map((key) => {
-      if (key == "isfree") {
+      if (key === "apply") {
         return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "right",
-          render: (text) => <p>{text ? "Yes" : "No"}</p>,
-        };
-      } else {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "right",
+          title: "Apply",
+          key,
+          align: "center",
+          render: (_, record) => (
+            <Checkbox
+              checked={record.apply}
+              disabled={record.isfree}
+              onChange={(e) => onChecked(record.lineid, e.target.checked)}
+            />
+          ),
         };
       }
+
+      if (key === "isfree") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "center",
+          render: (text) => (text ? "Yes" : "No"),
+        };
+      }
+
+      return {
+        title: aliases?.[key] || key,
+        dataIndex: key,
+        key,
+        align: ["quantity1", "quantity2"].includes(key) ? "right" : "left",
+      };
     }),
     {
       title: "Action",
       key: "action",
-      align: "right", // kolom action juga ke kanan
+      align: "center",
       render: (_, record) => (
-        <Button type="link" onClick={() => onEdit(record)}>
+        <Button
+          type="link"
+          onClick={() => onEdit(record)}
+          disabled={!record.apply}
+        >
           Edit
         </Button>
       ),
     },
   ];
 
+  // Hitung total quantity
+  const totalQuantity1 = data.reduce((sum, r) => sum + (r.quantity1 || 0), 0);
+  const totalQuantity2 = data.reduce((sum, r) => sum + (r.quantity2 || 0), 0);
+
   return (
     <Table
       columns={columns}
       dataSource={data}
-      rowKey="id"
+      rowKey={(r) => r.id || r.lineid}
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      summary={() => (
+        <Table.Summary.Row>
+          {keys.map((key, i) => {
+            // tampilkan label "Total" di kolom pertama
+            if (i === 0) {
+              return (
+                <Table.Summary.Cell key={key} index={i} align="center">
+                  <b>Total</b>
+                </Table.Summary.Cell>
+              );
+            }
+
+            // total quantity1 dan quantity2 di kolom yang tepat
+            if (key === "quantity1") {
+              return (
+                <Table.Summary.Cell key={key} index={i} align="right">
+                  <b>{totalQuantity1.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+            if (key === "quantity2") {
+              return (
+                <Table.Summary.Cell key={key} index={i} align="right">
+                  <b>{totalQuantity2.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+
+            // kolom lain kosong
+            return <Table.Summary.Cell key={key} index={i} />;
+          })}
+
+          {/* Kolom action kosong di paling kanan */}
+          <Table.Summary.Cell key="action" index={keys.length} align="center" />
+        </Table.Summary.Row>
+      )}
     />
   );
 }
@@ -81,6 +140,7 @@ export default function Page() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [customerSelected, setCustomerSelected] = useState({});
+  const [soItem, setSoItem] = useState([]);
 
   const initialState = {
     payloadPrimary: {
@@ -128,14 +188,17 @@ export default function Page() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
   const keyTableItem = [
+    "apply",
+    "itemid",
     "displayname",
     "isfree",
     "quantity1",
     "unit1",
     "quantity2",
     "unit2",
-    "memo",
     "quantityremaining",
+    "onhand",
+    "memo",
   ];
 
   useEffect(() => {
@@ -200,10 +263,12 @@ export default function Page() {
       },
     });
 
-    const dataTable =
+    let dataTable =
       data.fulfillment_items.map((item) => {
         const updateItem = {
           ...item,
+          lineid: crypto.randomUUID(),
+          apply: true,
           itemid: item?.itemid || "-",
           displayname: item?.displayname || "-",
           quantity1: item.quantity,
@@ -218,12 +283,55 @@ export default function Page() {
         return updateItem;
       }) || [];
 
-    setDataTableItem(dataTable);
-
     const getCustomer = await fetchCustomerById(data.entity);
 
     setCustomerSelected(getCustomer);
+
+    const fetchSoItem = (await getSoItem(data.salesorderid)) || [];
+
+    if (fetchSoItem.length > 0) {
+      const dataTableSoItem = fetchSoItem.map((item) => {
+        const updateItem = {
+          ...item,
+          lineid: crypto.randomUUID(),
+          apply: item.isfree ? true : false,
+          itemid: item?.itemid || "",
+          item: item?.id || "",
+          displayname: item?.displayname || "",
+          quantity1: item.quantity,
+          unit1: item.units,
+          unit2: item.units2,
+          location: "General Warehouse",
+        };
+
+        delete updateItem.quantity;
+        delete updateItem.units;
+        delete updateItem.units2;
+
+        return updateItem;
+      });
+
+      const filteredDataTableSoItem = dataTableSoItem.filter(
+        (soItem) =>
+          !dataTable.some((fulfillItem) => fulfillItem.item === soItem.item)
+      );
+
+      dataTable = [...dataTable, ...filteredDataTableSoItem];
+    }
+
+    setDataTableItem(dataTable);
   };
+
+  async function getSoItem(id) {
+    try {
+      const response = await FullfillmentFetch.getSoItem(id);
+      const resData = getResponseHandler(response);
+      return resData;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -236,7 +344,11 @@ export default function Page() {
 
       delete payloadToInsert.customer;
 
-      const fulfillment_items = dataTableItem.map((data) => {
+      let fulfillment_items = dataTableItem.filter(
+        (item) => item.apply == true
+      );
+
+      fulfillment_items = fulfillment_items.map((data) => {
         return {
           item: data.item,
           memo: data.memo,
@@ -247,6 +359,7 @@ export default function Page() {
           quantity2: data.quantity2,
           units2: data.unit2,
           isfree: data.isfree,
+          onhand: data.onhand,
         };
       });
 
@@ -266,8 +379,18 @@ export default function Page() {
 
       const resData = updateResponseHandler(response, notify);
 
+      if (payloadToInsert.shipstatus.toLowerCase() == "open") {
+        notify(
+          "info",
+          "Info",
+          "This Delivery Order is still in draft. Stock will be deducted once status is set to Shipped."
+        );
+      }
+
       if (resData) {
-        router.push(`/sales-indoor/transaction/${title}/${resData}`);
+        setTimeout(() => {
+          router.push(`/sales-indoor/transaction/${title}/${resData}`);
+        }, 3000);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -424,6 +547,17 @@ export default function Page() {
                         data={dataTableItem}
                         keys={keyTableItem}
                         aliases={deliveryOrderAliases.item}
+                        onChecked={(lineid, isChecked) => {
+                          let updateDataTable = dataTableItem;
+
+                          updateDataTable = updateDataTable.map((item) => ({
+                            ...item,
+                            apply:
+                              item.lineid == lineid ? isChecked : item.apply,
+                          }));
+
+                          setDataTableItem(updateDataTable);
+                        }}
                       />
                     </div>
                   </div>
@@ -445,15 +579,6 @@ export default function Page() {
       <Modal
         open={isEditItem}
         onOk={() => {
-          if (editItem.quantity1 > editItem.quantityremaining) {
-            notify(
-              "error",
-              "Failed",
-              "Quantity 1 cannot be more than the Remaining Quantity"
-            );
-            return;
-          }
-
           const updatedDataTableItem = dataTableItem.map((item) => {
             if (item.id == editItem.id) {
               return editItem;
@@ -546,6 +671,13 @@ export default function Page() {
                   disabled: true,
                   //   hidden: true,
                 },
+                {
+                  key: "onhand",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                  //   hidden: true,
+                },
               ]}
               aliases={deliveryOrderAliases.item}
               onChange={(type, payload, key) => {
@@ -561,7 +693,7 @@ export default function Page() {
                 } else {
                   setEditItem((prev) => ({
                     ...prev,
-                    [key]: payload[key]
+                    [key]: payload[key],
                   }));
                 }
               }}

@@ -39,7 +39,6 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -97,7 +96,7 @@ function SalesOrder() {
       try {
         setIsloading(true);
         const response = await ReportSo.getSo(
-          offset,
+          page,
           limit || "",
           filters.searchName,
           filters.dateRange[0],
@@ -184,7 +183,7 @@ function SalesOrder() {
   }, []);
 
   const handleEdit = (record) => {
-    router.push(`/sales-indoor/transaction/${title}/${record.id}/edit`);
+    router.push(`/sales-indoor/report/${title}/${record.id}/edit`);
   };
 
   const aliases = soReportAliases;

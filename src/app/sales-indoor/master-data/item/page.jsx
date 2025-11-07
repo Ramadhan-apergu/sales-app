@@ -25,7 +25,6 @@ function Item() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1) * limit;
   const [searchName, setSearchName] = useState("");
   const [searchCode, setSearchCode] = useState();
 
@@ -42,7 +41,7 @@ function Item() {
       try {
         setIsloading(true);
 
-        const response = await ItemFetch.get(offset, limit);
+        const response = await ItemFetch.get(page, limit);
 
         const resData = getResponseHandler(response, notify);
 
@@ -66,7 +65,7 @@ function Item() {
     try {
       setIsloading(true);
       const response = await ItemFetch.get(
-        offset,
+        page,
         limit,
         searchName == "" ? null : searchName,
         !searchCode || searchCode == "" ? null : searchCode
@@ -182,7 +181,7 @@ function Item() {
           </p>
           <div className="flex gap-2">
             <Button
-              icon={<UploadOutlined/>}
+              icon={<UploadOutlined />}
               onClick={() =>
                 router.push(`/sales-indoor/master-data/${title}/bulk-update`)
               }
@@ -255,7 +254,7 @@ function Item() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/master-date/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/master-data/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

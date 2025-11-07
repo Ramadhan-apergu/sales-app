@@ -46,7 +46,6 @@ function SalesOrder() {
   const startdate = searchParams.get("startdate");
   const enddate = searchParams.get("enddate");
   const so_numb = searchParams.get("so_numb");
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataDetail, setDataDetail] = useState({});
@@ -82,10 +81,9 @@ function SalesOrder() {
         const startdate = searchParams.get("startdate");
         const enddate = searchParams.get("enddate");
         const so_numb = searchParams.get("so_numb");
-        const offset = page - 1;
 
         const response = await DeliveryStatusFetch.get(
-          offset,
+          page,
           limit,
           customer,
           startdate,
