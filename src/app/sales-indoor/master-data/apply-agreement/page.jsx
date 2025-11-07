@@ -1,6 +1,6 @@
 "use client";
 
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -27,7 +27,6 @@ function Agreement() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -44,7 +43,7 @@ function Agreement() {
       try {
         setIsloading(true);
 
-        const response = await AgreementFetch.getAgreementApply(offset, limit);
+        const response = await AgreementFetch.getAgreementApply(page, limit);
 
         const resData = getResponseHandler(response, notify);
 

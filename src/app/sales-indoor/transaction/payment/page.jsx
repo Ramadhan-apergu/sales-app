@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   CheckSquareOutlined,
   EditOutlined,
@@ -43,7 +43,6 @@ function List() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -64,7 +63,7 @@ function List() {
         setIsloading(true);
 
         const response = await PaymentFetch.get(
-          offset,
+          page,
           limit,
           statusFilter,
           searchName,
@@ -163,7 +162,7 @@ function List() {
       title: "Total Payment",
       dataIndex: "payment",
       key: "payment",
-      align: 'right',
+      align: "right",
       render: (text) => <p>{formatRupiah(text) || ""}</p>,
     },
     {
@@ -201,7 +200,11 @@ function List() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-            disabled={(record?.paymentoption.toLowerCase() == 'giro' && record.status.toLowerCase() == 'deposited') || record.status.toLowerCase() == 'payment received'}
+            disabled={
+              (record?.paymentoption.toLowerCase() == "giro" &&
+                record.status.toLowerCase() == "deposited") ||
+              record.status.toLowerCase() == "payment received"
+            }
           >
             {isLargeScreen ? "Edit" : ""}
           </Button>

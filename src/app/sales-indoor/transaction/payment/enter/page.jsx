@@ -16,7 +16,7 @@ import {
   Table,
   Tooltip,
 } from "antd";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
   InfoCircleOutlined,
@@ -97,7 +97,7 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
                     <span>Rp</span>
                     <InputNumber
                       maxLength={
-                        String(record?.total)
+                        String(record?.due)
                           .replace(/[^\d]/g, "")
                           .replace(/\B(?=(\d{3})+(?!\d))/g, ".").length
                       }
@@ -112,17 +112,17 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
                       parser={(val) => (val ? val.replace(/[^\d]/g, "") : "")}
                       onChange={(value) => {
                         const rawValue = String(value).replace(/[^\d]/g, "");
-                        const rawTotal = String(record.total).replace(
+                        const rawDue = String(record.due).replace(
                           /[^\d]/g,
                           ""
                         );
                         if (
-                          rawValue.length <= rawTotal.length &&
-                          Number(rawValue) < Number(rawTotal)
+                          rawValue.length <= rawDue.length &&
+                          Number(rawValue) < Number(rawDue)
                         ) {
                           onChangeAmount(record.invoiceid, Number(rawValue));
                         } else {
-                          onChangeAmount(record.invoiceid, Number(rawTotal));
+                          onChangeAmount(record.invoiceid, Number(rawDue));
                         }
                       }}
                     />
@@ -314,8 +314,8 @@ export default function Enter() {
               refnum: item.tranid,
               applydate: item.trandate,
               total: item.amount,
-              due: 0,
-              amount: item.amount,
+              due: item.amountdue,
+              amount: 0,
             })) || [],
         });
       } catch (error) {
@@ -354,19 +354,21 @@ export default function Enter() {
     if (data === "all") {
       // ✅ Jika checkbox header (Select All) ditekan
       const updatedItems = state.dataTableItem.map((item) => {
-        const updatedAmount = item.amount || 0;
-        const updatedDue = (Number(item.total) || 0) - updatedAmount;
+        const updatedAmount = isChecked ? Number(item.due) || 0 : 0;
 
         return {
           ...item,
           ischecked: isChecked,
-          due: updatedDue,
+          amount: updatedAmount, // ubah amount berdasarkan checkbox
         };
       });
 
       // update semua apply items jika checked
       const updatedApplies = isChecked
-        ? updatedItems.map((item) => ({ ...item, amount: item.amount || 0 }))
+        ? updatedItems.map((item) => ({
+            ...item,
+            amount: Number(item.due) || 0,
+          }))
         : [];
 
       dispatch({ type: "SET_ITEMS", payload: updatedItems });
@@ -376,7 +378,10 @@ export default function Enter() {
       let updatedData = state.payloadPaymentApplies;
 
       if (isChecked) {
-        updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
+        updatedData = [
+          ...updatedData,
+          { ...data, amount: Number(data.due) || 0 },
+        ];
       } else {
         updatedData = updatedData.filter(
           (item) => item.invoiceid !== data.invoiceid
@@ -392,13 +397,11 @@ export default function Enter() {
         type: "SET_ITEMS",
         payload: state.dataTableItem.map((item) => {
           if (item.invoiceid === data.invoiceid) {
-            const updatedAmount = item.amount || 0;
-            const updatedDue = (Number(item.total) || 0) - updatedAmount;
-
+            const updatedAmount = isChecked ? Number(item.due) || 0 : 0;
             return {
               ...item,
               ischecked: isChecked,
-              due: updatedDue,
+              amount: updatedAmount, // ubah amount
             };
           } else {
             return item;
@@ -414,12 +417,10 @@ export default function Enter() {
         if (!item.ischecked) return item; // prevent editing if not checked
 
         const updatedAmount = Number(amount) || 0;
-        const updatedDue = (Number(item.total) || 0) - updatedAmount;
 
         return {
           ...item,
           amount: updatedAmount,
-          due: updatedDue,
         };
       }
       return item;

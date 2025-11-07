@@ -1,5 +1,5 @@
 "use client";
-import LayoutAdmin from "@/components/salesIndoor/Layout";
+import LayoutAdmin from "@/components/superAdmin/Layout";
 import useNotification from "@/hooks/useNotification";
 import DashboardCrmFetch from "@/modules/salesApi/crm/dashboardCrm";
 import LeadsFetch from "@/modules/salesApi/crm/leads";

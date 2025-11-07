@@ -16,7 +16,7 @@ import {
   Table,
   Tooltip,
 } from "antd";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
   InfoCircleOutlined,

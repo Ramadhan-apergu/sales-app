@@ -1,6 +1,7 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
+  CheckOutlined,
   CloseOutlined,
   EditOutlined,
   FilterOutlined,
@@ -47,7 +48,6 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -69,7 +69,7 @@ function SalesOrder() {
         setIsloading(true);
 
         const response = await SalesOrderFetch.get(
-          offset,
+          page,
           limit,
           statusFilter,
           searchName,
@@ -146,6 +146,22 @@ function SalesOrder() {
       cancelText: "Cancel",
       onOk: () => {
         updateHandleStatus(record.id, "Closed");
+      },
+    });
+  };
+
+  const approveModal = (record) => {
+    modal.confirm({
+      title: `Approve ${title} "${record.tranid}"?`,
+      content: "Are you sure you want to approve this item?",
+      okText: "Approve",
+      cancelText: "Cancel",
+      okButtonProps: {
+        type: "primary",
+        style: { backgroundColor: "green", borderColor: "green" },
+      },
+      onOk: () => {
+        updateHandleStatus(record.id, "Open");
       },
     });
   };
@@ -269,6 +285,7 @@ function SalesOrder() {
             ),
           });
         }
+
         if (record.status?.toLowerCase() != "closed") {
           menuItems.push({
             key: "closed",
@@ -282,6 +299,24 @@ function SalesOrder() {
                 className="w-full text-left"
               >
                 Closed
+              </Button>
+            ),
+          });
+        }
+
+        if (record.status?.toLowerCase() === "pending approval") {
+          menuItems.push({
+            key: "approve",
+            label: (
+              <Button
+                variant="link"
+                size="small"
+                icon={<CheckOutlined />}
+                color="green"
+                onClick={() => approveModal(record)}
+                className="w-full text-left"
+              >
+                Approve
               </Button>
             ),
           });

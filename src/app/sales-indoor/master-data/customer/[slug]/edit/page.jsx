@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Tag } from "antd";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import { CloseOutlined, SaveOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";

@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   DownloadOutlined,
   EditOutlined,
@@ -52,7 +52,6 @@ function SalesOrder() {
   const enddate = searchParams.get("enddate");
   const doc_numb = searchParams.get("doc_numb");
   const status = searchParams.get("status");
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -87,10 +86,9 @@ function SalesOrder() {
         const enddate = searchParams.get("enddate");
         const doc_numb = searchParams.get("doc_numb");
         const status = searchParams.get("status");
-        const offset = page - 1;
 
         const response = await InvoiceStatusFetch.get(
-          offset,
+          page,
           limit,
           customer,
           startdate,

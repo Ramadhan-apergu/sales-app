@@ -17,7 +17,7 @@ import {
   Tag,
   Tooltip,
 } from "antd";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
   EditOutlined,
@@ -61,13 +61,13 @@ function formatRupiah(number) {
   }
 }
 
-function TableCustom({ data, keys, aliases, onDelete }) {
+function TableCustom({ data, keys, aliases }) {
   const columns = [
     {
       title: "No",
       key: "no",
       align: "center",
-      render: (text, record, index) => index + 1, // nomor urut mulai dari 1
+      render: (text, record, index) => index + 1,
     },
     ...keys.map((key) => {
       if (
@@ -85,20 +85,37 @@ function TableCustom({ data, keys, aliases, onDelete }) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
-          align: "right", // semua kolom di-align ke kanan
+          key,
+          align: "right",
           render: (text) => <p>{formatRupiah(text)}</p>,
+        };
+      } else if (key === "quantity") {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "right",
+          render: (text) => <p>{Number(text) || 0}</p>,
         };
       } else {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
-          key: key,
-          align: "right", // semua kolom di-align ke kanan
+          key,
+          align: "right",
         };
       }
     }),
   ];
+
+  // Perhitungan total untuk kolom tertentu
+  const totalQuantity = data.reduce((sum, r) => sum + (r.quantity || 0), 0);
+  const totalSubtotal = data.reduce((sum, r) => sum + (r.subtotal || 0), 0);
+  const totalAmount = data.reduce((sum, r) => sum + (r.totalamount || 0), 0);
+  const totalDiscount = data.reduce(
+    (sum, r) => sum + (r.totaldiscount || 0),
+    0
+  );
 
   return (
     <Table
@@ -108,6 +125,45 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      summary={() => (
+        <Table.Summary.Row>
+          {/* Kolom pertama: label Total */}
+          <Table.Summary.Cell index={0} align="center">
+            <b>Total</b>
+          </Table.Summary.Cell>
+
+          {/* Loop semua kolom agar posisi total sesuai urutan kolom */}
+          {keys.map((key, i) => {
+            if (key === "quantity")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{totalQuantity}</b>
+                </Table.Summary.Cell>
+              );
+            if (key === "subtotal")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{formatRupiah(totalSubtotal)}</b>
+                </Table.Summary.Cell>
+              );
+            if (key === "totalamount")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{formatRupiah(totalAmount)}</b>
+                </Table.Summary.Cell>
+              );
+            if (key === "totaldiscount")
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{formatRupiah(totalDiscount)}</b>
+                </Table.Summary.Cell>
+              );
+
+            // Kolom lainnya dikosongkan
+            return <Table.Summary.Cell key={key} index={i + 1} />;
+          })}
+        </Table.Summary.Row>
+      )}
     />
   );
 }

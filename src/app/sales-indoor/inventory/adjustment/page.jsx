@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   EditOutlined,
   FilterOutlined,
@@ -43,7 +43,6 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -64,7 +63,7 @@ function SalesOrder() {
         setIsloading(true);
 
         const response = await StockAdjustmentFetch.get(
-          offset,
+          page,
           limit,
           statusFilter
         );
@@ -248,7 +247,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/inventory/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

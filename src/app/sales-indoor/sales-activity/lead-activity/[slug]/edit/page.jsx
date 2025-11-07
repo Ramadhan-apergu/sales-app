@@ -18,7 +18,7 @@ import {
   Tooltip,
   Upload,
 } from "antd";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
   CloseOutlined,

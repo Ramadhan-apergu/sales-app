@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -48,7 +48,6 @@ function Activity() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = (page - 1) * limit;
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -66,7 +65,7 @@ function Activity() {
         setIsloading(true);
 
         const response = await LogActivityFetch.get(
-          offset,
+          page,
           limit,
           leadName,
           logType

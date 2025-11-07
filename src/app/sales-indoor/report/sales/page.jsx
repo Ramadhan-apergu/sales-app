@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { Modal, Pagination, Table, Select, DatePicker, Input } from "antd";
@@ -29,7 +29,6 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -43,7 +42,7 @@ function SalesOrder() {
     itemprocessfamily: "",
   });
   const [tableKeys, setTableKeys] = useState([]);
-  const title = "sales-order";
+  const title = "sales";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -60,7 +59,7 @@ function SalesOrder() {
         setIsloading(true);
 
         const response = await ReportSo.getSales(
-          offset,
+          page,
           limit,
           filters.searchName,
           filters.dateRange[0],
@@ -121,7 +120,7 @@ function SalesOrder() {
   }, []);
 
   const handleEdit = (record) => {
-    router.push(`/sales-indoor/transaction/${title}/${record.id}/edit`);
+    router.push(`/sales-indoor/report/${title}/${record.id}/edit`);
   };
 
   const aliases = salesReportAliases;
@@ -189,9 +188,9 @@ function SalesOrder() {
               </label>
               <RangePicker
                 format="YYYY-MM-DD"
-                onChange={(_, dateString) =>
-                  handleFilter("dateRange", dateString)
-                }
+                onChange={(dates, dateStrings) => {
+                  handleFilter("dateRange", dateStrings);
+                }}
                 style={{ width: "100%" }}
               />
             </div>

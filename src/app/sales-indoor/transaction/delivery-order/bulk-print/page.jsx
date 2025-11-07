@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import {
   DeliveredProcedureOutlined,
   EditOutlined,
@@ -52,7 +52,6 @@ function DeliveryOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [doDetailDatas, setDoDetailDatas] = useState([]);
@@ -74,7 +73,7 @@ function DeliveryOrder() {
         setIsloading(true);
 
         const response = await FullfillmentFetch.get(
-          offset,
+          page,
           limit,
           statusFilter,
           searchName

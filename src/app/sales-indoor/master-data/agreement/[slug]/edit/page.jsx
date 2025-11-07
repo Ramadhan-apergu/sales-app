@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Divider, Table, Modal, Input, Pagination, Switch } from "antd";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
@@ -25,7 +25,6 @@ import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 function SelectItem({ onselect }) {
   const isLargeScreen = useBreakpoint("lg");
   const [page, setPage] = useState(1);
-  const offset = (page - 1) * 50;
   const [searchName, setSearchName] = useState("");
   const [searchFamily, setSearchFamily] = useState("");
   const [searchCode, setSearchCode] = useState();
@@ -41,7 +40,7 @@ function SelectItem({ onselect }) {
     try {
       setIsloading(true);
       const response = await ItemFetch.get(
-        offset,
+        page,
         50,
         searchName === "" ? null : searchName,
         !searchCode || searchCode === "" ? null : searchCode,
@@ -191,7 +190,6 @@ function SelectItem({ onselect }) {
 function GroupItemList({ category }) {
   const isLargeScreen = useBreakpoint("lg");
   const [page, setPage] = useState(1);
-  const offset = (page - 1) * 50;
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
@@ -202,7 +200,7 @@ function GroupItemList({ category }) {
   const fetchData = async () => {
     try {
       setIsloading(true);
-      const response = await ItemFetch.get(offset, 50, null, null, category);
+      const response = await ItemFetch.get(page, 50, null, null, category);
       const resData = getResponseHandler(response, notify);
       if (resData) {
         setDatas(resData.list);
