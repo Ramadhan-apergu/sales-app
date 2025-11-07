@@ -77,7 +77,7 @@ export default function InvoicePrint({ data, dataTable }) {
                 Alamat :
               </p>
               <p className="w-8/12 border-x border-b break-words whitespace-normal">
-                {data?.billingaddress || "-"}
+                {data?.shippingaddress || "-"}
               </p>
             </div>
             <br />
@@ -136,26 +136,27 @@ export default function InvoicePrint({ data, dataTable }) {
       </section>
       <section className="w-full">
         <div className="w-full flex border table-padding font-semibold">
-          <p className="border-r break-words whitespace-normal w-[8%]">No</p>
-          <p className="border-r break-words whitespace-normal w-[36%]">
+          <p className="border-r break-words whitespace-normal w-[7%]">No</p>
+          <p className="border-r break-words whitespace-normal w-[28%]">
             Nama Barang
           </p>
-          <p className="border-r break-words whitespace-normal w-[13%] text-right">
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
             Qty
           </p>
-          <p className="border-r break-words whitespace-normal w-[13%] text-right">
+          <p className="border-r break-words whitespace-normal w-[10%] text-right">
             Unit
           </p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
+          <p className="border-r break-words whitespace-normal w-[14%] text-right">
             Harga
           </p>
-          <p className="border-r break-words whitespace-normal w-[10%] text-right">
+          <p className="border-r break-words whitespace-normal w-[14%] text-right">
             Diskon
           </p>
-          <p className=" break-words whitespace-normal w-[15%] text-right">
+          <p className="break-words whitespace-normal w-[17%] text-right">
             Jumlah
           </p>
         </div>
+
         {dataTable &&
           dataTable.length > 0 &&
           dataTable.map((item, i) => (
@@ -163,107 +164,31 @@ export default function InvoicePrint({ data, dataTable }) {
               key={i}
               className="w-full flex border-x border-b table-padding"
             >
-              <p className="border-r break-words whitespace-normal w-[8%] text-right">
+              <p className="border-r break-words whitespace-normal w-[7%] text-right">
                 {i + 1}
               </p>
-              <p className="border-r break-words whitespace-normal w-[36%]">
+              <p className="border-r break-words whitespace-normal w-[28%]">
                 {item.displayname || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[13%] text-right">
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
                 {item.quantity || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[13%] text-right">
+              <p className="border-r break-words whitespace-normal w-[10%] text-right">
                 {item.units || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[15%] text-right">
+              <p className="border-r break-words whitespace-normal w-[14%] text-right">
                 {formatRupiah(item.rate) || "-"}
               </p>
-              <p className="border-r break-words whitespace-normal w-[10%] text-right">
+              <p className="border-r break-words whitespace-normal w-[14%] text-right">
                 {formatRupiah(item.discountsatuan) || "-"}
               </p>
-              <p className=" break-words whitespace-normal w-[15%] text-right">
+              <p className="break-words whitespace-normal w-[17%] text-right">
                 {formatRupiah(item.subtotal) || "-"}
               </p>
             </div>
           ))}
-
-        <div className="w-full flex table-padding">
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[36%]"></p>
-          <p className="border-b border-x break-words whitespace-normal w-[13%] text-right">
-            {count.quantity}
-          </p>
-          <p className="break-words whitespace-normal w-[13%] text-right border-b border-r">
-            KG
-          </p>
-          <p className="break-words whitespace-normal w-[15%] text-right"></p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="break-words whitespace-normal w-[15%] text-right">
-            {/* {formatRupiah(count.amount)} */}
-          </p>
-        </div>
-
-        <div className="w-full flex border-r table-padding">
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[36%]"></p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
-            Diskon
-          </p>
-          <p className="break-words border-b border-t whitespace-normal w-[15%] text-right">
-            {formatRupiah(count.totaldiscount)}
-          </p>
-        </div>
-
-        <div className="w-full flex border-r table-padding">
-          <p className="break-words whitespace-normal w-[8%] text-right"></p>
-          <p className="break-words whitespace-normal w-[36%]"></p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
-            DPP
-          </p>
-          <p className="break-words border-b whitespace-normal w-[15%] text-right">
-            {formatRupiah(count.dpp)}
-          </p>
-        </div>
-
-        <div className="w-full flex border-r table-padding">
-          <p className="break-words whitespace-normal w-[44%] border">
-            Pembayaran Transfer Ke:
-          </p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
-            PPN
-          </p>
-          <p className="break-words border-b whitespace-normal w-[15%] text-right">
-            {formatRupiah(count.taxvalue)}
-          </p>
-        </div>
-
-        <div className="w-full flex border-r table-padding">
-          <p className="break-words whitespace-normal w-[44%] border-x border-b">
-            Bank BCA: 383-148-7788 a.n CV Sukses Mandiri
-          </p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-          <p className="break-words whitespace-normal w-[13%] text-right"></p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[15%] text-right">
-            Total
-          </p>
-          <p className="break-words border-b whitespace-normal w-[15%] text-right">
-            {formatRupiah(count.subtotal)}
-          </p>
-        </div>
       </section>
+
       <section className="w-full flex flex-col items-end gap-4">
         <div className="w-full flex gap-8">
           <div className="w-[75%] flex gap-8">

@@ -354,50 +354,6 @@ export default function Edit() {
                     />
 
                     <InputForm
-                      type="pricing"
-                      payload={pricing}
-                      data={[
-                        {
-                          key: "price",
-                          input: "number",
-                          isAlias: false,
-                          accounting: true,
-                          rules: [
-                            { required: true, message: `Price is required` },
-                          ],
-                        },
-                        {
-                          key: "addons",
-                          input: "number",
-                          isAlias: false,
-                          accounting: true,
-                        },
-                        {
-                          key: "discount",
-                          input: "number",
-                          isAlias: false,
-                          accounting: true,
-                          rules: [],
-                          hidden: true,
-                        },
-                        {
-                          key: "iseditable",
-                          input: "select",
-                          options: editableOptions,
-                          isAlias: true,
-                          rules: [
-                            {
-                              required: true,
-                              message: `${itemAliases["iseditable"]} is required`,
-                            },
-                          ],
-                        },
-                      ]}
-                      aliases={itemAliases}
-                      onChange={handleChangePayload}
-                    />
-
-                    <InputForm
                       type="conversion"
                       payload={conversions}
                       data={[
@@ -438,6 +394,52 @@ export default function Edit() {
                           ],
                           note: `
                     Isi Conversion untuk menentukan berapa Base Unit yang setara dengan Unit 2.`,
+                        },
+                      ]}
+                      aliases={itemAliases}
+                      onChange={handleChangePayload}
+                    />
+
+                    <InputForm
+                      type="pricing"
+                      payload={pricing}
+                      data={[
+                        {
+                          key: "price",
+                          input: "number",
+                          isAlias: false,
+                          accounting: true,
+                          rules: [
+                            { required: true, message: `Price is required` },
+                          ],
+                          hidden: true,
+                        },
+                        {
+                          key: "addons",
+                          input: "number",
+                          isAlias: false,
+                          accounting: true,
+                          hidden: true,
+                        },
+                        {
+                          key: "discount",
+                          input: "number",
+                          isAlias: false,
+                          accounting: true,
+                          rules: [],
+                          hidden: true,
+                        },
+                        {
+                          key: "iseditable",
+                          input: "select",
+                          options: editableOptions,
+                          isAlias: true,
+                          rules: [
+                            {
+                              required: true,
+                              message: `${itemAliases["iseditable"]} is required`,
+                            },
+                          ],
                         },
                       ]}
                       aliases={itemAliases}

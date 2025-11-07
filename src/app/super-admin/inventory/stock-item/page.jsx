@@ -45,7 +45,7 @@ function StockItem() {
   const [searchItemTemp, setSearchItemTemp] = useState("");
   const [searchItemProcess, setSearchItemProcess] = useState("");
   const [searchItemProcessTemp, setSearchItemProcessTemp] = useState("");
-  const title = "user";
+  const title = "stock-item";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -221,7 +221,7 @@ function StockItem() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/access-control/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/inventory/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

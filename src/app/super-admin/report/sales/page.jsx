@@ -42,7 +42,7 @@ function SalesOrder() {
     itemprocessfamily: "",
   });
   const [tableKeys, setTableKeys] = useState([]);
-  const title = "sales-order";
+  const title = "sales";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -120,7 +120,7 @@ function SalesOrder() {
   }, []);
 
   const handleEdit = (record) => {
-    router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
+    router.push(`/super-admin/report/${title}/${record.id}/edit`);
   };
 
   const aliases = salesReportAliases;
