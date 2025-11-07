@@ -100,35 +100,29 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
                     <span>Rp</span>
                     <InputNumber
                       maxLength={
-                        String(record?.total)
+                        String(record?.due)
                           .replace(/[^\d]/g, "")
                           .replace(/\B(?=(\d{3})+(?!\d))/g, ".").length
                       }
-                      // max={Number(String(record?.total).replace(/[^\d]/g, ""))}
                       size="small"
                       style={{ width: "100%" }}
                       value={Number(String(text).replace(/[^\d]/g, ""))}
                       formatter={(val) => {
-                        if (val === undefined || val === null || val === "")
-                          return "";
+                        if (!val) return "";
                         const num = String(val).replace(/[^\d]/g, "");
                         return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                       }}
                       parser={(val) => (val ? val.replace(/[^\d]/g, "") : "")}
                       onChange={(value) => {
-                        const rawValue = String(value).replace(/[^\d]/g, ""); // angka murni
-                        const rawTotal = String(record.total).replace(
-                          /[^\d]/g,
-                          ""
-                        ); // angka murni
-
+                        const rawValue = String(value).replace(/[^\d]/g, "");
+                        const rawDue = String(record.due).replace(/[^\d]/g, "");
                         if (
-                          rawValue.length <= rawTotal.length &&
-                          Number(rawValue) < Number(rawTotal)
+                          rawValue.length <= rawDue.length &&
+                          Number(rawValue) < Number(rawDue)
                         ) {
                           onChangeAmount(record.invoiceid, Number(rawValue));
                         } else {
-                          onChangeAmount(record.invoiceid, Number(rawTotal));
+                          onChangeAmount(record.invoiceid, Number(rawDue));
                         }
                       }}
                     />
@@ -448,31 +442,36 @@ export default function Details() {
 
   const handleChecked = (data, isChecked) => {
     if (data === "all") {
-      // ✅ Jika checkbox header (Select All) ditekan
+      // ✅ Checkbox header (Select All)
       const updatedItems = state.dataTableItem.map((item) => {
-        const updatedAmount = item.amount || 0;
-        const updatedDue = (Number(item.total) || 0) - updatedAmount;
+        const updatedAmount = isChecked ? Number(item.due) || 0 : 0;
 
         return {
           ...item,
           ischecked: isChecked,
-          due: updatedDue,
+          amount: updatedAmount, // ubah amount
         };
       });
 
       // update semua apply items jika checked
       const updatedApplies = isChecked
-        ? updatedItems.map((item) => ({ ...item, amount: item.amount || 0 }))
+        ? updatedItems.map((item) => ({
+            ...item,
+            amount: Number(item.due) || 0,
+          }))
         : [];
 
       dispatch({ type: "SET_ITEMS", payload: updatedItems });
       dispatch({ type: "SET_PAYMENTAPPLY", payload: updatedApplies });
     } else {
-      // ✅ Jika checkbox individual ditekan
+      // ✅ Checkbox individual
       let updatedData = state.payloadPaymentApplies;
 
       if (isChecked) {
-        updatedData = [...updatedData, { ...data, amount: data.amount || 0 }];
+        updatedData = [
+          ...updatedData,
+          { ...data, amount: Number(data.total) || 0 },
+        ];
       } else {
         updatedData = updatedData.filter(
           (item) => item.invoiceid !== data.invoiceid
@@ -488,13 +487,12 @@ export default function Details() {
         type: "SET_ITEMS",
         payload: state.dataTableItem.map((item) => {
           if (item.invoiceid === data.invoiceid) {
-            const updatedAmount = item.amount || 0;
-            const updatedDue = (Number(item.total) || 0) - updatedAmount;
+            const updatedAmount = isChecked ? Number(item.due) || 0 : 0;
 
             return {
               ...item,
               ischecked: isChecked,
-              due: updatedDue,
+              amount: updatedAmount, // hanya ubah amount
             };
           } else {
             return item;
@@ -510,12 +508,10 @@ export default function Details() {
         if (!item.ischecked) return item; // prevent editing if not checked
 
         const updatedAmount = Number(amount) || 0;
-        const updatedDue = (Number(item.total) || 0) - updatedAmount;
 
         return {
           ...item,
           amount: updatedAmount,
-          due: updatedDue,
         };
       }
       return item;

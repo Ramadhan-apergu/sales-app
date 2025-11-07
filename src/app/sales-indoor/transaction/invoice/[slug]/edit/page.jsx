@@ -68,7 +68,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       title: "No",
       key: "no",
       align: "center",
-      render: (text, record, index) => index + 1, // nomor urut mulai dari 1
+      render: (text, record, index) => index + 1,
     },
     ...keys.map((key) => {
       if (
@@ -87,7 +87,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           dataIndex: key,
           key: key,
           align: "right",
-          render: (text, record) => <p>{formatRupiah(text)}</p>,
+          render: (text) => <p>{formatRupiah(text)}</p>,
         };
       } else {
         return {
@@ -98,16 +98,6 @@ function TableCustom({ data, keys, aliases, onDelete }) {
         };
       }
     }),
-    // {
-    //   title: "Action",
-    //   key: "action",
-    //   align: "right", // kolom action juga ke kanan
-    //   render: (_, record) => (
-    //     <Button type="link" onClick={() => onDelete(record)}>
-    //       Delete
-    //     </Button>
-    //   ),
-    // },
   ];
 
   return (
@@ -118,6 +108,51 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      summary={(pageData) => {
+        const totals = {
+          quantity: 0,
+          quantity2: 0,
+          totaldiscount: 0,
+          subtotal: 0,
+          dpp: 0,
+          amount: 0,
+          taxvalue: 0,
+        };
+
+        pageData.forEach((item) => {
+          Object.keys(totals).forEach((key) => {
+            totals[key] += Number(item[key] || 0);
+          });
+        });
+
+        return (
+          <Table.Summary.Row>
+            <Table.Summary.Cell index={0} colSpan={1}>
+              <b>Total</b>
+            </Table.Summary.Cell>
+
+            {keys.map((key, idx) => {
+              if (Object.keys(totals).includes(key)) {
+                const value = totals[key];
+                const isCurrency = [
+                  "totaldiscount",
+                  "subtotal",
+                  "dpp",
+                  "amount",
+                  "taxvalue",
+                ].includes(key);
+
+                return (
+                  <Table.Summary.Cell key={idx} align="right">
+                    <b>{isCurrency ? formatRupiah(value) : value}</b>
+                  </Table.Summary.Cell>
+                );
+              }
+              return <Table.Summary.Cell key={idx} />;
+            })}
+          </Table.Summary.Row>
+        );
+      }}
     />
   );
 }

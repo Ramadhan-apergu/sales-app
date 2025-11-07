@@ -1,12 +1,7 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import {
-  Modal,
-  Pagination,
-  Table,
-  DatePicker,
-} from "antd";
+import { Modal, Pagination, Table, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -28,14 +23,13 @@ function SalesOrder() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [dateRange, setDateRange] = useState(["", ""]);
   const [tableKeys, setTableKeys] = useState([]);
-  const title = "sales-order";
+  const title = "production";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -45,7 +39,7 @@ function SalesOrder() {
         setIsloading(true);
 
         const response = await ReportSo.getProduct(
-          offset,
+          page,
           limit,
           dateRange[0],
           dateRange[1]
@@ -53,16 +47,16 @@ function SalesOrder() {
 
         let resData = getResponseHandler(response, notify);
 
-        if (resData) {
-          resData = resData.map((item, i) => ({
+        if (resData && resData.list) {
+          const resDataList = resData.list.map((item, i) => ({
             no: i + 1,
             ...item,
           }));
-          setDatas(resData);
-          setTotalItems(resData.length);
+          setDatas(resDataList);
+          setTotalItems(resData.total_items);
           setTableKeys(
-            Array.isArray(resData) && resData.length > 0
-              ? Object.keys(resData[0]).filter(
+            Array.isArray(resDataList) && resData.total_items > 0
+              ? Object.keys(resDataList[0]).filter(
                   (item) => !["item", "so_number"].includes(item.toLowerCase())
                 )
               : []
@@ -77,7 +71,6 @@ function SalesOrder() {
 
     fetchData();
   }, [page, limit, pathname, dateRange]);
-
 
   const aliases = productReportAliases;
 
@@ -137,7 +130,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/report/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

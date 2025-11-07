@@ -27,7 +27,6 @@ function Agreement() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -44,7 +43,7 @@ function Agreement() {
       try {
         setIsloading(true);
 
-        const response = await AgreementFetch.get(offset, limit, statusFilter);
+        const response = await AgreementFetch.get(page, limit, statusFilter);
 
         const resData = getResponseHandler(response, notify);
 
@@ -129,7 +128,7 @@ function Agreement() {
       onCell: () => ({
         style: { minWidth: 100 },
       }),
-      render: (text) => formOptions.find(form => form.value == text).label,
+      render: (text) => formOptions.find((form) => form.value == text).label,
     },
     {
       title: "Status",

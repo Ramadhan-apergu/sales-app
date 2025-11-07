@@ -35,7 +35,6 @@ function StockItem() {
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
-  const offset = page - 1;
 
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -46,7 +45,7 @@ function StockItem() {
   const [searchItemTemp, setSearchItemTemp] = useState("");
   const [searchItemProcess, setSearchItemProcess] = useState("");
   const [searchItemProcessTemp, setSearchItemProcessTemp] = useState("");
-  const title = "user";
+  const title = "stock-item";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -56,7 +55,7 @@ function StockItem() {
         setIsloading(true);
 
         const response = await StockAdjustmentFetch.getStockStatus(
-          offset,
+          page,
           limit,
           searchItem,
           null,
@@ -222,7 +221,7 @@ function StockItem() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/access-control/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/inventory/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"
