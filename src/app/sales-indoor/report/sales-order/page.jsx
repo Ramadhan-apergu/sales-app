@@ -392,7 +392,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/report/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

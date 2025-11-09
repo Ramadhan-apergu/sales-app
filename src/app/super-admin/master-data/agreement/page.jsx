@@ -6,7 +6,7 @@ import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useContainerHeight from "@/hooks/useContainerHeight";
 import AgreementFetch from "@/modules/salesApi/agreement";
-import { Button, Dropdown, Modal, Pagination, Table, Tag } from "antd";
+import { Button, Dropdown, Input, Modal, Pagination, Table, Tag } from "antd";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { formatDateToShort } from "@/utils/formatDate";
@@ -24,6 +24,7 @@ function Agreement() {
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
   const { containerRef, containerHeight } = useContainerHeight();
+  const { Search } = Input;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
@@ -32,6 +33,7 @@ function Agreement() {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [searchAggr, setSearchAggr] = useState("");
   const [modal, contextHolder] = Modal.useModal();
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -43,7 +45,12 @@ function Agreement() {
       try {
         setIsloading(true);
 
-        const response = await AgreementFetch.get(page, limit, statusFilter);
+        const response = await AgreementFetch.get(
+          page,
+          limit,
+          statusFilter,
+          searchAggr
+        );
 
         const resData = getResponseHandler(response, notify);
 
@@ -59,7 +66,7 @@ function Agreement() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter]);
+  }, [page, limit, pathname, statusFilter, searchAggr]);
 
   const dropdownItems = [
     { key: "1", label: "All Status" },
@@ -224,6 +231,19 @@ function Agreement() {
         <div className="w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2"></div>
           <div className="flex gap-2">
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className="hidden lg:block text-sm font-semibold leading-none">
+                Agreement Name
+              </label>
+              <Search
+                placeholder="Search agreement"
+                allowClear
+                onSearch={(val) => {
+                  setSearchAggr(val);
+                }}
+                style={{ width: 200 }}
+              />
+            </div>
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
                 Status
