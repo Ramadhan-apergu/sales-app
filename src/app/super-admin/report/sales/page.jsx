@@ -268,7 +268,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/report/${title}?page=${newPage}&limit=${newLimit}`
                   );
                 }}
                 size="small"

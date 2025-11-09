@@ -91,7 +91,7 @@ function SalesOrder() {
           </p>
         </div>
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-end p-2 bg-gray-2 border border-gray-4 rounded-lg">
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
                 Date
@@ -106,7 +106,7 @@ function SalesOrder() {
                 />
               </div>
             </div>
-          </div>
+          </div> */}
           <ExportProductionReport />
         </div>
         {!isLoading ? (

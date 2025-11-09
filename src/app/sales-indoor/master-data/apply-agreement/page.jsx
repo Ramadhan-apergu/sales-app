@@ -14,6 +14,7 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -35,6 +36,7 @@ function Agreement() {
   const [modal, contextHolder] = Modal.useModal();
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
+  const [searchCust, setSearchCust] = useState("");
 
   const title = "apply-agreement";
 
@@ -43,7 +45,11 @@ function Agreement() {
       try {
         setIsloading(true);
 
-        const response = await AgreementFetch.getAgreementApply(page, limit);
+        const response = await AgreementFetch.getAgreementApply(
+          page,
+          limit,
+          searchCust
+        );
 
         const resData = getResponseHandler(response, notify);
 
@@ -59,7 +65,7 @@ function Agreement() {
     };
 
     fetchData();
-  }, [page, limit, pathname]);
+  }, [page, limit, pathname, searchCust]);
 
   const dropdownItems = [
     { key: "1", label: "All Status" },
@@ -160,23 +166,17 @@ function Agreement() {
             {isLargeScreen ? `New` : ""}
           </Button>
         </div>
-        {/* <div className='w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg'>
-                        <div className='flex gap-2'>
-                        </div>
-                        <div className='flex gap-2'>
-                            <div className='flex flex-col justify-start items-start gap-1'>
-                                <label className='hidden lg:block text-sm font-semibold leading-none'>Status</label>
-                                <Dropdown
-                                    menu={{ items: dropdownItems, onClick: handleStatusChange, style: { textAlign: "right" } }}
-                                    placement="bottomRight"
-                                >
-                                    <Button icon={<FilterOutlined />} style={{ textTransform: "capitalize" }}>
-                                        {isLargeScreen ? (statusFilter == "all" ? "all status" : statusFilter) : ""}
-                                    </Button>
-                                </Dropdown>
-                            </div>  
-                        </div>
-                    </div> */}
+        <div className="w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
+          <div className="flex gap-2"></div>
+          <div className="flex gap-2">
+            <FilterCustomer
+              value={searchCust}
+              onChange={(value, option) => {
+                setSearchCust(option?.value || "");
+              }}
+            />
+          </div>
+        </div>
         {!isLoading ? (
           <>
             <div>

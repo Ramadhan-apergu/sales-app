@@ -1,10 +1,10 @@
 import ProcessFetch from "./processFetch"
 
 export default class CustomerFetch extends ProcessFetch {
-  static async get(offset = 0, limit = 10, status = '') {
+  static async get(offset = 0, limit = 10, status = '', customerid="") {
     try {
       const response = await this.axios.get('/master/customers', {
-        params: { offset, limit, status },
+        params: { offset, limit, status, customerid },
       })
       return new this().processResponse(response)
     } catch (error) {

@@ -290,13 +290,23 @@ export default function Detail() {
                     aliases={itemAliases}
                   />
 
-                  {/* <InputForm
+                  <InputForm
                     isReadOnly={true}
                     type="pricing"
                     payload={pricing}
                     data={[
-                      { key: "price", input: "input", isAlias: false },
-                      { key: "addons", input: "input", isAlias: false },
+                      {
+                        key: "price",
+                        input: "input",
+                        isAlias: false,
+                        hidden: true,
+                      },
+                      {
+                        key: "addons",
+                        input: "input",
+                        isAlias: false,
+                        hidden: true,
+                      },
                       {
                         key: "discount",
                         input: "input",
@@ -306,9 +316,15 @@ export default function Detail() {
                       { key: "iseditable", input: "input", isAlias: true },
                     ]}
                     aliases={itemAliases}
-                  /> */}
+                  />
+                  <PriceTable
+                    data={dataPrice}
+                    notify={notify}
+                    title={title}
+                    slug={slug}
+                  />
 
-                  <div className="w-full flex flex-col gap-4">
+                  {/* <div className="w-full flex flex-col gap-4">
                     <Divider
                       style={{
                         margin: "0",
@@ -325,7 +341,7 @@ export default function Detail() {
                       title={title}
                       slug={slug}
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ) : (
@@ -413,10 +429,6 @@ function PriceTable({ data, title, notify, slug }) {
         );
         return;
       }
-      if (!pricefamily) {
-        notify("error", "Failed", `${itemAliases["pricefamily"]} is required`);
-        return;
-      }
 
       const response = await ItemFetch.updatePrice(id, isdefault, {
         pricefamily,
@@ -500,7 +512,6 @@ function PriceTable({ data, title, notify, slug }) {
               input: "number",
               isAlias: true,
               accounting: true,
-              rules: [{ required: true, message: "Price is required" }],
             },
             {
               key: "addons",
