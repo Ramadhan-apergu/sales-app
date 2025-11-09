@@ -217,11 +217,6 @@ export default function Edit() {
         return;
       }
 
-      if (!price && itemcategory == "Plastik") {
-        notify("error", "Failed", `price is required`);
-        return;
-      }
-
       if (!unitstype) {
         notify("error", "Failed", `${itemAliases["unitstype"]} is required`);
         return;
@@ -409,9 +404,7 @@ export default function Edit() {
                           input: "number",
                           isAlias: false,
                           accounting: true,
-                          rules: [
-                            { required: true, message: `Price is required` },
-                          ],
+
                           hidden: true,
                         },
                         {

@@ -223,26 +223,26 @@ function SalesOrder() {
       dataIndex: "salesrep",
       key: "salesrep",
     },
-    {
-      title: "Actions",
-      key: "actions",
-      fixed: "right",
-      align: "right",
-      width: isLargeScreen ? 87 : 30,
-      render: (_, record) => (
-        <div className="flex justify-center items-center gap-2">
-          <Button
-            type={"link"}
-            size="small"
-            icon={<DownloadOutlined />}
-            onClick={() => {}}
-          >
-            {isLargeScreen ? "Download" : ""}
-          </Button>
-          {contextHolder}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Actions",
+    //   key: "actions",
+    //   fixed: "right",
+    //   align: "right",
+    //   width: isLargeScreen ? 87 : 30,
+    //   render: (_, record) => (
+    //     <div className="flex justify-center items-center gap-2">
+    //       <Button
+    //         type={"link"}
+    //         size="small"
+    //         icon={<DownloadOutlined />}
+    //         onClick={() => {}}
+    //       >
+    //         {isLargeScreen ? "Download" : ""}
+    //       </Button>
+    //       {contextHolder}
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (
