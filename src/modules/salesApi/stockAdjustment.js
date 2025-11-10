@@ -64,4 +64,13 @@ export default class StockAdjustmentFetch extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async getById(id) {
+    try {
+      const response = await this.axios.get(`/trx/adjust-stock/${id}`);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }

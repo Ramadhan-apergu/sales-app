@@ -260,6 +260,7 @@ export default function Enter() {
       itemid: "",
       agreementcode: "",
       iseditable: 0,
+      iseditline: false,
     },
     tax: {
       taxable: true,
@@ -610,6 +611,7 @@ export default function Enter() {
         itemcode: item.itemid,
         iseditable: item.iseditable,
         quantity: record.quantity,
+        iseditline: true,
       },
     });
 
@@ -979,6 +981,7 @@ export default function Enter() {
                       showSearch
                       placeholder="Select an item"
                       optionFilterProp="label"
+                      disabled={stateItemTable.item.iseditline}
                       onChange={(_, item) => {
                         const isDuplicate = dataTableItem.some(
                           (tableItem) => tableItem.item === item.value
@@ -996,15 +999,16 @@ export default function Enter() {
                           payload: {
                             item: item.id,
                             units: item.unitstype,
-                            rate: item.price,
+                            rate: item.rate,
                             displayname: item.displayname,
                             itemprocessfamily: item.itemprocessfamily,
                             itemid: item.itemid,
                             iseditable: item.iseditable,
+                            iseditline: false,
                           },
                         });
                       }}
-                      onSearch={{}}
+                      
                       options={dataItem.filter(
                         (data) =>
                           !dataTableItem
@@ -1069,6 +1073,12 @@ export default function Enter() {
                 },
                 {
                   key: "iseditable",
+                  input: "input",
+                  isAlias: true,
+                  hidden: true,
+                },
+                {
+                  key: "iseditline",
                   input: "input",
                   isAlias: true,
                   hidden: true,

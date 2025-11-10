@@ -364,7 +364,6 @@ export default function AgreementApplyDetail() {
                         setAgreementSelectedTemp(null);
                       }
                     }}
-                    onSearch={{}}
                     options={dataAgreement}
                     style={{ width: "100%" }}
                   />
