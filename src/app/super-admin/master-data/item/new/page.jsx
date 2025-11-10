@@ -139,11 +139,6 @@ export default function CustomerNew() {
         return;
       }
 
-      if (!price && itemcategory == "Plastik") {
-        notify("error", "Failed", `price is required`);
-        return;
-      }
-
       if (!unitstype) {
         notify("error", "Failed", `${itemAliases["unitstype"]} is required`);
         return;

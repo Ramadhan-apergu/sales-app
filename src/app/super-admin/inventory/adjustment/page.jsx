@@ -130,6 +130,11 @@ function SalesOrder() {
       dataIndex: "tranid",
       key: "tranid",
       fixed: isLargeScreen ? "left" : "",
+      render: (text, record) => (
+        <Link href={`/super-admin/inventory/${title}/${record.id}`}>
+          {text || "-"}
+        </Link>
+      ),
     },
     {
       title: "Memo",
