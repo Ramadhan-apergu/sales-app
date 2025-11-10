@@ -37,6 +37,8 @@ export default function InputForm({
 
   // 🧠 Convert string date -> dayjs agar DatePicker bisa menampilkan nilai
   useEffect(() => {
+    if (!payload || typeof payload !== "object") return;
+
     const convertedPayload = Object.fromEntries(
       Object.entries(payload).map(([key, value]) => {
         const field = data.find((f) => f.key === key);
@@ -50,6 +52,7 @@ export default function InputForm({
         return [key, value];
       })
     );
+
     form.setFieldsValue(convertedPayload);
   }, [payload, data, form]);
 
@@ -179,6 +182,7 @@ export default function InputForm({
                       style={{ width: "100%" }}
                       readOnly={isReadOnly || isRead}
                       placeholder={placeholder}
+                      disabled={cursorDisable}
                     />
                   );
                   break;

@@ -273,36 +273,44 @@ function GroupItemList({ category }) {
 }
 
 function TableCustom({ data, keys, aliases, onDelete, agreementtype }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 25;
+
+  // Slice data untuk pagination
+  const paginatedData = data.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Generate kolom dinamis + kolom aksi
   const columns = [
     ...keys.map((key) => {
-      if (agreementtype != "addons" && key == "addons") {
-        return null;
-      } else if (agreementtype != "diskon" && key == "discountnominal") {
-        return null;
-      } else {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "right", // semua kolom di-align ke kanan
-        };
-      }
+      if (agreementtype !== "addons" && key === "addons") return null;
+      if (agreementtype !== "diskon" && key === "discountnominal") return null;
+
+      return {
+        title: aliases?.[key] || key,
+        dataIndex: key,
+        key,
+        align: "right",
+      };
     }),
     {
       title: "Action",
       key: "action",
-      align: "right", // kolom action juga ke kanan
+      align: "right",
       render: (_, record) => (
-        <Button type="link" onClick={() => onDelete(record)}>
+        <Button type="link" danger onClick={() => onDelete(record)}>
           Delete
         </Button>
       ),
     },
   ].filter(Boolean);
 
-  const dataWithKey = data.map((item, idx) => ({
+  // Tambahkan _key unik untuk rowKey
+  const dataWithKey = paginatedData.map((item, idx) => ({
     ...item,
-    _key: `row-${idx}`,
+    _key: `row-${(currentPage - 1) * pageSize + idx}`,
   }));
 
   return (
@@ -311,7 +319,16 @@ function TableCustom({ data, keys, aliases, onDelete, agreementtype }) {
       dataSource={dataWithKey}
       rowKey="_key"
       bordered
-      pagination={false}
+      pagination={{
+        size: "small",
+        current: currentPage,
+        pageSize,
+        total: data.length,
+        onChange: (page) => setCurrentPage(page),
+        showSizeChanger: false,
+        showTotal: (total, range) =>
+          `${range[0]}–${range[1]} of ${total} items`,
+      }}
       scroll={{ x: "max-content" }}
     />
   );
@@ -359,56 +376,23 @@ export default function AgreementEdit() {
           mapingGroup(resData);
 
           if (resData.agreement_lines && resData.agreement_lines.length > 0) {
-            const promises = resData.agreement_lines.map(async (agreement) => {
-              let item = {
-                id: "",
-                itemid: "",
-                displayname: "",
-                price: 0,
-                unitstype: "",
-                addons: 0,
-              };
-
-              const getItem = await getItemById(agreement.itemid);
-              if (getItem) {
-                item = {
-                  id: getItem.id,
-                  itemid: getItem.itemid,
-                  displayname: getItem.displayname,
-                  price: getItem.price,
-                  unitstype: getItem.unitstype,
-                  addons: getItem.addons,
-                };
-              }
-
-              const {
-                qtymin,
-                qtyminunit,
-                qtymax,
-                qtymaxunit,
-                discountpercent,
-                discountnominal,
-                paymenttype,
-                qtyfree,
-                perunit,
-              } = agreement;
-
-              return {
-                qtymin,
-                qtyminunit,
-                qtymax,
-                qtymaxunit,
-                discountpercent,
-                discountnominal,
-                paymenttype,
-                qtyfree,
-                perunit,
-                ...item,
-              };
-            });
-
-            const result = await Promise.all(promises);
-            setPayloadDetail(result);
+            const mappedData = resData.agreement_lines.map((item) => ({
+              displayname: item.displayname,
+              itemid: item.itemid,
+              baseprice: item.baseprice,
+              basepriceunit: item.basepriceunit,
+              qtymin: item.qtymin,
+              qtyminunit: item.qtyminunit,
+              qtymax: item.qtymax,
+              qtymaxunit: item.qtymaxunit,
+              discountnominal: item.discountnominal,
+              discountpercent: item.discountpercent,
+              paymenttype: item.paymenttype,
+              qtyfree: item.qtyfree,
+              perunit: item.perunit,
+              addons: item.addons,
+            }));
+            setPayloadDetail(mappedData);
           }
 
           if (resData.agreement_groups) {
@@ -551,11 +535,10 @@ export default function AgreementEdit() {
   };
   const keys = [
     [
-      "itemid",
       "displayname",
-      "price",
+      "baseprice",
       "addons",
-      "unitstype",
+      "basepriceunit",
       "qtymin",
       "qtyminunit",
       "qtymax",
@@ -564,11 +547,10 @@ export default function AgreementEdit() {
       "perunit",
     ],
     [
-      "itemid",
       "displayname",
-      "price",
+      "baseprice",
       "addons",
-      "unitstype",
+      "basepriceunit",
       "qtymin",
       "qtyminunit",
       "qtymax",
@@ -577,11 +559,10 @@ export default function AgreementEdit() {
       "perunit",
     ],
     [
-      "itemid",
       "displayname",
-      "price",
+      "baseprice",
       "addons",
-      "unitstype",
+      "basepriceunit",
       "qtymin",
       "qtyminunit",
       "qtymax",
@@ -591,11 +572,10 @@ export default function AgreementEdit() {
       "perunit",
     ],
     [
-      "itemid",
       "displayname",
-      "price",
+      "baseprice",
       "addons",
-      "unitstype",
+      "basepriceunit",
       "qtymin",
       "qtyminunit",
       "qtymax",
@@ -603,7 +583,7 @@ export default function AgreementEdit() {
       "qtyfree",
       "perunit",
     ],
-    ["itemid", "displayname"],
+    ["displayname"],
   ];
 
   const statusOptions = [
@@ -632,13 +612,6 @@ export default function AgreementEdit() {
   const dataInput = [
     [
       {
-        key: "id",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
         key: "itemid",
         input: "input",
         isAlias: false,
@@ -653,7 +626,7 @@ export default function AgreementEdit() {
         disabled: true,
       },
       {
-        key: "price",
+        key: "baseprice",
         input: "number",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -667,7 +640,7 @@ export default function AgreementEdit() {
         hidden: payloadGeneral.agreementtype != "addons",
       },
       {
-        key: "unitstype",
+        key: "basepriceunit",
         input: "input",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -712,15 +685,29 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
       },
-    ],
-    [
       {
-        key: "id",
+        key: "discountnominal",
         input: "input",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
-        disabled: true,
+        hidden: true,
       },
+      {
+        key: "paymenttype",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+      {
+        key: "qtyfree",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+    ],
+    [
       {
         key: "itemid",
         input: "input",
@@ -736,7 +723,7 @@ export default function AgreementEdit() {
         disabled: true,
       },
       {
-        key: "price",
+        key: "baseprice",
         input: "number",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -750,7 +737,7 @@ export default function AgreementEdit() {
         hidden: payloadGeneral.agreementtype != "addons",
       },
       {
-        key: "unitstype",
+        key: "basepriceunit",
         input: "input",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -796,15 +783,29 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
       },
-    ],
-    [
       {
-        key: "id",
+        key: "discountpercent",
         input: "input",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
-        disabled: true,
+        hidden: true,
       },
+      {
+        key: "paymenttype",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+      {
+        key: "qtyfree",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+    ],
+    [
       {
         key: "itemid",
         input: "input",
@@ -820,7 +821,7 @@ export default function AgreementEdit() {
         disabled: true,
       },
       {
-        key: "price",
+        key: "baseprice",
         input: "number",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -834,7 +835,7 @@ export default function AgreementEdit() {
         hidden: payloadGeneral.agreementtype != "addons",
       },
       {
-        key: "unitstype",
+        key: "basepriceunit",
         input: "input",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -886,15 +887,29 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
       },
-    ],
-    [
       {
-        key: "id",
+        key: "discountpercent",
         input: "input",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
-        disabled: true,
+        hidden: true,
       },
+      {
+        key: "paymenttype",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+      {
+        key: "qtyfree",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+    ],
+    [
       {
         key: "itemid",
         input: "input",
@@ -910,7 +925,7 @@ export default function AgreementEdit() {
         disabled: true,
       },
       {
-        key: "price",
+        key: "baseprice",
         input: "number",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -924,7 +939,7 @@ export default function AgreementEdit() {
         hidden: payloadGeneral.agreementtype != "addons",
       },
       {
-        key: "unitstype",
+        key: "basepriceunit",
         input: "input",
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
@@ -969,6 +984,34 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
       },
+      {
+        key: "discountnominal",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+      {
+        key: "discountpercent",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+      {
+        key: "paymenttype",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
+      {
+        key: "qtyfree",
+        input: "input",
+        isAlias: true,
+        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
+      },
     ],
   ];
 
@@ -1003,9 +1046,9 @@ export default function AgreementEdit() {
         customform: parseInt(payloadCustomForm.customform),
         agreement_lines: payloadDetail.map((line) => {
           return {
-            itemid: line.id,
+            itemid: line.itemid,
             baseprice: line.price,
-            basepriceunit: line.unitstype,
+            basepriceunit: line.basepriceunit,
             qtymin: line.qtymin,
             qtyminunit: line.qtyminunit,
             qtymax: line.qtymax,
@@ -1086,11 +1129,13 @@ export default function AgreementEdit() {
   function handleSelectItem(record) {
     const mapped = {
       ...payloadDetailInit,
-      id: record.id,
-      itemid: record.itemid,
-      price: record.price,
-      unitstype: record.unitstype,
+      itemid: record.id,
+      baseprice: record.price,
+      basepriceunit: record.unitstype,
       displayname: record.displayname,
+      discountpercent: "",
+      paymenttype: "",
+      qtyfree: "",
     };
 
     payloadDetailInitRef.current = mapped;
@@ -1148,6 +1193,10 @@ export default function AgreementEdit() {
         <div className="w-full flex flex-col gap-4 justify-end">
           <SelectItem
             onselect={(record) => {
+              if (payloadDetail.some((item) => item.itemid === record.id)) {
+                notify("error", "Failed", "Data has already been added");
+                return;
+              }
               handleSelectItem(record);
               instance.destroy();
               handleAddModalForm();
@@ -1182,9 +1231,22 @@ export default function AgreementEdit() {
         : currentPayload.discountnominal,
     };
 
-    const isAnyEmpty = Object.values(currentPayload).some(
-      (value) => value === "" || value === null || value === undefined
-    );
+    const excludedKeys = [
+      "addons",
+      "discountnominal",
+      "paymenttype",
+      "qtyfree",
+      "discountpercent",
+    ];
+
+    const isAnyEmpty = Object.entries(currentPayload).some(([key, value]) => {
+      if (excludedKeys.includes(key)) return false;
+      return (
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "")
+      );
+    });
 
     if (isAnyEmpty) {
       notify("error", "Error", "All fields are required");
@@ -1272,6 +1334,7 @@ export default function AgreementEdit() {
                           key: "customform",
                           input: "select",
                           options: formOptions,
+                          cursorDisable: true,
                           isAlias: true,
                           rules: [
                             {

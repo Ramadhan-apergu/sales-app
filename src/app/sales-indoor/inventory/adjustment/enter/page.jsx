@@ -435,7 +435,6 @@ export default function Enter() {
                         price: item.price,
                       }));
                     }}
-                    onSearch={{}}
                     options={dataItem}
                     style={{ width: "100%" }}
                   />

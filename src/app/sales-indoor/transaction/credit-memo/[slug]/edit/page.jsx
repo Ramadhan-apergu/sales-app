@@ -1230,7 +1230,6 @@ export default function Enter() {
                         },
                       });
                     }}
-                    onSearch={{}}
                     options={dataItem}
                     style={{ width: "100%" }}
                   />

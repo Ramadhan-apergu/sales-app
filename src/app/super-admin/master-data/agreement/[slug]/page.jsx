@@ -30,27 +30,48 @@ import ItemFetch from "@/modules/salesApi/item";
 import UserManageFetch from "@/modules/salesApi/userManagement";
 
 function TableCustom({ data, keys, aliases, agreementtype }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 25;
+
+  // Hitung data yang akan ditampilkan di halaman aktif
+  const paginatedData = data.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Buat columns secara dinamis
   const columns = keys
     .map((key) => {
-      if (agreementtype != "addons" && key == "addons") {
+      if (
+        (agreementtype !== "addons" && key === "addons") ||
+        (agreementtype !== "diskon" && key === "discountnominal")
+      ) {
         return null;
-      } else {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-        };
       }
+      return {
+        title: aliases?.[key] || key,
+        dataIndex: key,
+        key: key,
+      };
     })
     .filter(Boolean);
 
   return (
     <Table
       columns={columns}
-      dataSource={data}
+      dataSource={paginatedData}
       rowKey="id"
       bordered
-      pagination={false}
+      pagination={{
+        size: "small",
+        current: currentPage,
+        pageSize: pageSize,
+        total: data.length,
+        onChange: (page) => setCurrentPage(page),
+        showSizeChanger: false,
+        showTotal: (total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`,
+      }}
       scroll={{ x: "max-content" }}
     />
   );
@@ -217,25 +238,27 @@ export default function Detail() {
           Array.isArray(agreementLines.agreement_lines) &&
           agreementLines.agreement_lines.length > 0
         ) {
-          const promises = agreementLines.agreement_lines.map(
-            async (agreement) => {
-              let item = { displayname: "", price: "", unitstype: "" };
+          //   const promises = agreementLines.agreement_lines.map(
+          //     async (agreement) => {
+          //       let item = { displayname: "", price: "", unitstype: "" };
 
-              const getItem = await getItemById(agreement.itemid);
-              if (getItem) {
-                item = {
-                  displayname: getItem.displayname,
-                  price: getItem.price,
-                  unitstype: getItem.unitstype,
-                };
-              }
+          //       const getItem = await getItemById(agreement.itemid);
+          //       if (getItem) {
+          //         item = {
+          //           displayname: getItem.displayname,
+          //           price: getItem.price,
+          //           unitstype: getItem.unitstype,
+          //         };
+          //       }
 
-              return { ...agreement, ...item };
-            }
-          );
+          //       return { ...agreement, ...item };
+          //     }
+          //   );
 
-          const result = await Promise.all(promises);
-          setAgreementLinesWithItem(result);
+          //   const result = await Promise.all(promises);
+          //   setAgreementLinesWithItem(result);
+
+          setAgreementLinesWithItem(agreementLines.agreement_lines);
         }
       } catch (error) {
         notify("error", "Failed", "Fetch data item");
@@ -323,7 +346,7 @@ export default function Detail() {
   const keys = [
     [
       "displayname",
-      "price",
+      "baseprice",
       "addons",
       "unitstype",
       "qtymin",
@@ -331,11 +354,11 @@ export default function Detail() {
       "qtymax",
       "qtymaxunit",
       "discountpercent",
-      "perunit",
+      "basepriceunit",
     ],
     [
       "displayname",
-      "price",
+      "baseprice",
       "addons",
       "unitstype",
       "qtymin",
@@ -343,11 +366,11 @@ export default function Detail() {
       "qtymax",
       "qtymaxunit",
       "discountnominal",
-      "perunit",
+      "basepriceunit",
     ],
     [
       "displayname",
-      "price",
+      "baseprice",
       "addons",
       "unitstype",
       "qtymin",
@@ -356,11 +379,11 @@ export default function Detail() {
       "qtymaxunit",
       "paymenttype",
       "discountnominal",
-      "perunit",
+      "basepriceunit",
     ],
     [
       "displayname",
-      "price",
+      "baseprice",
       "addons",
       "unitstype",
       "qtymin",
@@ -368,7 +391,7 @@ export default function Detail() {
       "qtymax",
       "qtymaxunit",
       "qtyfree",
-      "perunit",
+      "basepriceunit",
     ],
     ["itemid", "displayname"],
   ];
