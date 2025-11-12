@@ -76,4 +76,29 @@ export default class ReportSo extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async exportSo(
+    customerid = "",
+    startdate = "",
+    enddate = "",
+    status = "",
+    itemprocessfamily = "",
+    salesrep = "",
+    displayname = ""
+  ) {
+    try {
+      const response = await this.axios.post("/report/sales-order/export", {
+        customerid,
+        startdate,
+        enddate,
+        status,
+        itemprocessfamily,
+        salesrep,
+        displayname,
+      });
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }
