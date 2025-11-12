@@ -11,6 +11,7 @@ import {
   Select,
   DatePicker,
   Input,
+  Flex,
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
@@ -23,7 +24,7 @@ import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { soReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
-import { ExportOutlined } from "@ant-design/icons";
+import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 import { exportJSONToExcel } from "@/utils/export";
 
 const DEFAULT_PAGE = 1;
@@ -247,13 +248,11 @@ function SalesOrder() {
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
             Sales Order Report
           </p>
-          <Button
-            onClick={handleExport}
+          <ExportButton
             disabled={!datas || datas.length == 0}
-            icon={<ExportOutlined />}
-          >
-            Export
-          </Button>
+            filters={filters}
+            notify={notify}
+          />
         </div>
         <div className="w-full p-3 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="w-full flex flex-wrap gap-2">
@@ -416,5 +415,56 @@ export default function SalesOrderPage() {
     <Suspense fallback={<LoadingSpinProcessing />}>
       <SalesOrder />
     </Suspense>
+  );
+}
+
+function ExportButton({ disabled = true, filters = {}, notify = null }) {
+  const [isloading, setIsloading] = useState(false);
+  const [linkdownload, setLinkdownload] = useState(null);
+  useEffect(() => {
+    setLinkdownload(null);
+  }, [filters]);
+  async function handleExport() {
+    try {
+      setIsloading(true);
+      const response = await ReportSo.exportSo(
+        filters.searchName,
+        filters.dateRange[0],
+        filters.dateRange[1],
+        filters.statusFilter.length == 0 ? "" : filters.statusFilter.join(","),
+        filters.itemprocessfamily,
+        filters.salesrep,
+        filters.displayname
+      );
+
+      const resData = getResponseHandler(response, notify);
+      if (resData) {
+        setLinkdownload(resData.url);
+      }
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+  return (
+    <Button
+      onClick={() => {
+        if (linkdownload) {
+          window.open(linkdownload);
+        } else {
+          handleExport();
+        }
+      }}
+      type={linkdownload ? "primary" : ""}
+      disabled={disabled}
+      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
+      loading={isloading}
+    >
+      {linkdownload ? "Download" : "Export"}
+    </Button>
   );
 }
