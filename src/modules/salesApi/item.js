@@ -2,16 +2,39 @@ import ProcessFetch from "./processFetch";
 
 export default class ItemFetch extends ProcessFetch {
   static async get(
-    offset = 0,
-    limit = 10,
+    offset,
+    limit,
     displayname = "",
     itemid = "",
     itemprocessfamily = ""
   ) {
     try {
-      const response = await this.axios.get("/master/items", {
-        params: { offset, limit, displayname, itemid, itemprocessfamily },
-      });
+      const params = {};
+
+      // helper untuk validasi angka string/number yang >= 0
+      const parseIfValidNumber = (value) => {
+        if (value === null || value === undefined || value === "") return null;
+
+        const num = Number(value); // bisa convert "10" ke 10
+        if (isNaN(num)) return null; // reject "abc"
+        if (num < 0) return null; // reject negative
+
+        return num;
+      };
+
+      const parsedOffset = parseIfValidNumber(offset);
+      const parsedLimit = parseIfValidNumber(limit);
+
+      if (parsedOffset !== null) params.offset = parsedOffset;
+      if (parsedLimit !== null) params.limit = parsedLimit;
+
+      // string params
+      if (displayname) params.displayname = displayname;
+      if (itemid) params.itemid = itemid;
+      if (itemprocessfamily) params.itemprocessfamily = itemprocessfamily;
+
+      const response = await this.axios.get("/master/items", { params });
+
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

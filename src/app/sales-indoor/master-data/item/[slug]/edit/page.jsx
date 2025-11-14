@@ -157,6 +157,7 @@ export default function Edit() {
     { label: "KG", value: "KG" },
     { label: "Bal", value: "Bal" },
     { label: "Kotak", value: "Kotak" },
+    { label: "Bks", value: "Bks" },
   ];
 
   const categoryOptions = [

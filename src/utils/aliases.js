@@ -89,6 +89,7 @@ export const salesOrderAliases = {
     trandate: "Date",
     salesrep: "Sales Rep",
     otherrefnum: "No. PO",
+    isdropship: "Dropship",
   },
   shipping: {
     shippingoption: "Shipping Option",

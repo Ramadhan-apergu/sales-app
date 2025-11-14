@@ -88,10 +88,10 @@ export default function Detail() {
     "displayname",
     "itemcode",
     "price",
-    "qty",
-    "units",
-    "stockreal",
     "onhand",
+    "qty",
+    "stockreal",
+    "units",
   ];
 
   return (
@@ -99,7 +99,7 @@ export default function Detail() {
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            Customer Details
+            Stock Adjustment Details
           </p>
           <Button
             icon={<UnorderedListOutlined />}
