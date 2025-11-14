@@ -20,7 +20,14 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { notify, contextHolder } = useNotification();
 
+  async function logout() {
+    await Cookies.remove("x_atkn", { path: "/" });
+    await Cookies.remove("u_ctx", { path: "/" });
+    await Cookies.remove("role", { path: "/" });
+  }
+
   const handleSubmit = async () => {
+    await logout();
     if (!username || !password) {
       notify("error", "Error", "Email and Password are required!");
       return;

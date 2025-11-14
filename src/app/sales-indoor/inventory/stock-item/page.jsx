@@ -131,6 +131,17 @@ function StockItem() {
         </p>
       ),
     },
+    {
+      title: "Unit",
+      dataIndex: "unitstype",
+      key: "unitstype",
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
+    },
   ];
   return (
     <Layout>
