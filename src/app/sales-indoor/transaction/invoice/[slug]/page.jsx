@@ -34,6 +34,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
 import {
   createResponseHandler,
+  deleteResponseHandler,
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
@@ -435,6 +436,11 @@ export default function EnterPage() {
       key: "1",
       label: "Print",
     },
+    {
+      key: "2",
+      label: "Delete",
+      danger: true,
+    },
   ];
 
   const handleClickAction = ({ key }) => {
@@ -460,6 +466,23 @@ export default function EnterPage() {
         handleDelete(data.id);
       },
     });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      setIsLoading(true);
+      const response = await InvoiceFetch.delete(id);
+
+      const resData = deleteResponseHandler(response, notify);
+
+      if (resData) {
+        router.push(`/sales-indoor/transaction/${title}`);
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

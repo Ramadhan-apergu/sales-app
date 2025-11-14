@@ -215,6 +215,7 @@ export default function Detail() {
         trandate: formatDateToShort(data.trandate),
         salesrep: data.salesrep,
         otherrefnum: data.otherrefnum,
+        isdropship: data.isdropship ? "Yes" : "No",
       },
     });
 
@@ -266,6 +267,7 @@ export default function Detail() {
       trandate: dayjs(new Date()),
       salesrep: "sales_indoor",
       otherrefnum: "",
+      isdropship: "",
     },
     payloadSummary: {
       subtotalbruto: 0,
@@ -556,6 +558,12 @@ export default function Detail() {
                         isAlias: true,
                         isRead: true,
                         hidden: true,
+                      },
+                      {
+                        key: "isdropship",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
                       },
                       {
                         key: "trandate",

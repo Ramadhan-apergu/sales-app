@@ -47,6 +47,7 @@ export default function CustomerNew() {
     { label: "KG", value: "KG" },
     { label: "Bal", value: "Bal" },
     { label: "Kotak", value: "Kotak" },
+    { label: "Bks", value: "Bks" },
   ];
 
   const editableOptions = [
