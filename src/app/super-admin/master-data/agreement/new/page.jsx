@@ -171,6 +171,7 @@ function SelectItem({ onselect, dataExist }) {
               onChange={(e) => setSearchCode(e.target.value)}
               onKeyDown={handleEnter}
               placeholder={isLargeScreen ? "" : "Code"}
+              allowClear
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -182,6 +183,7 @@ function SelectItem({ onselect, dataExist }) {
               onChange={(e) => setSearchName(e.target.value)}
               onSearch={fetchData}
               onKeyDown={handleEnter}
+              allowClear
               placeholder={isLargeScreen ? "" : "Name"}
             />
           </div>
@@ -194,6 +196,7 @@ function SelectItem({ onselect, dataExist }) {
               onChange={(e) => setSearchFamily(e.target.value)}
               onSearch={fetchData}
               onKeyDown={handleEnter}
+              allowClear
               placeholder={isLargeScreen ? "" : "Process family"}
             />
           </div>
@@ -583,7 +586,6 @@ export default function AgreementNew() {
         key: "qtymin",
         input: "number",
         isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
       },
       {
         key: "qtyminunit",
@@ -597,7 +599,6 @@ export default function AgreementNew() {
         key: "qtymax",
         input: "number",
         isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
       },
       {
         key: "qtymaxunit",
@@ -839,7 +840,7 @@ export default function AgreementNew() {
   function handleAddModalForm() {
     const instance = modal.confirm({
       icon: null,
-      width: 850,
+      width: 1200,
       footer: null,
       content: (
         <div className="w-full flex flex-col gap-4 justify-end">
@@ -854,35 +855,16 @@ export default function AgreementNew() {
             onChange={handleChangePayload}
             aliases={agreementAliases}
           />
-          <div className="flex gap-2 justify-end">
-            <Button
-              onClick={() => {
-                const reset = toInitialObject(
-                  keys[parseInt(payloadCustomForm.customform) - 1]
-                );
-                setPayloadDetailInit(reset);
-                instance.destroy();
-              }}
-              variant="outlined"
-            >
-              Cancel
-            </Button>
-            <Button type="primary" onClick={() => handleAddDetail(instance)}>
-              OK
-            </Button>
-          </div>
-        </div>
-      ),
-    });
-  }
-
-  function handleAddModalItem() {
-    const instance = modal.confirm({
-      icon: null,
-      footer: null,
-      width: 1100,
-      content: (
-        <div className="w-full flex flex-col gap-4 justify-end">
+          <Divider
+            style={{
+              margin: "0",
+              textTransform: "capitalize",
+              borderColor: "#1677ff",
+            }}
+            orientation="left"
+          >
+            Select Item
+          </Divider>
           <SelectItem
             onselect={(records) => {
               applyDetail.current = records;
@@ -903,7 +885,7 @@ export default function AgreementNew() {
             >
               Cancel
             </Button>
-            <Button type="primary" onClick={() => handleSelectItem(instance)}>
+            <Button type="primary" onClick={() => handleAddDetail(instance)}>
               OK
             </Button>
           </div>
@@ -930,17 +912,31 @@ export default function AgreementNew() {
       }
     }
 
-    if (
-      !currentPayload.qtymin ||
-      !currentPayload.qtymax ||
-      !currentPayload.perunit
-    ) {
-      notify("error", "Error", "Qty min, qty max and per unit is required");
+    if (!currentPayload.perunit) {
+      notify("error", "Error", "per unit is required");
       return;
     }
 
+    if (
+      payloadCustomForm.customform == "3" ||
+      payloadCustomForm.customform == 3
+    ) {
+      if (!currentPayload.paymenttype) {
+        notify("error", "Error", "Payment type is required");
+        return;
+      }
+    }
+
+    currentPayload = {
+      ...currentPayload,
+      qtymin: !currentPayload.qtymin ? 0 : currentPayload.qtymin,
+      qtymax: !currentPayload.qtymax ? 0 : currentPayload.qtymax,
+    };
+
+    payloadDetailInitRef.current = currentPayload;
+
     instance.destroy();
-    handleAddModalItem();
+    handleSelectItem(instance);
   }
 
   function handleDeleteDetail(record) {
@@ -1084,6 +1080,7 @@ export default function AgreementNew() {
                           qtyminunit: "",
                           qtymaxunit: "",
                           discountnominal: 0,
+                          paymenttype: "",
                         };
                         payloadDetailInitRef.current = mapped;
                         setPayloadDetailInit(mapped);

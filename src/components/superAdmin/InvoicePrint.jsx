@@ -13,6 +13,7 @@ export default function InvoicePrint({ data, dataTable }) {
     totaldiscount: 0,
     subtotal: 0,
   });
+  const [mergeDataTable, setMergeDataTable] = useState([]);
 
   useEffect(() => {
     const date = new Date().toLocaleString("id-ID", {
@@ -20,7 +21,39 @@ export default function InvoicePrint({ data, dataTable }) {
     });
     setCurrentDate(date);
 
-    const total = dataTable.reduce(
+    const mergedData = Object.values(
+      dataTable.reduce((acc, curr) => {
+        const key = curr.item;
+
+        if (!acc[key]) {
+          acc[key] = { ...curr };
+        } else {
+          // pastikan default 0
+          acc[key].quantity = (acc[key].quantity || 0) + (curr.quantity || 0);
+          acc[key].quantity2 =
+            (acc[key].quantity2 || 0) + (curr.quantity2 || 0);
+
+          // kalau curr.isfree === 1 → tambah 0
+          const subtotalToAdd = curr.isfree ? 0 : curr.subtotal || 0;
+          acc[key].subtotal = (acc[key].subtotal || 0) + subtotalToAdd;
+
+          // gabungkan memo dengan koma, hindari koma dobel
+          const existingMemo = acc[key].memo?.trim();
+          const newMemo = curr.memo?.trim();
+          if (newMemo) {
+            acc[key].memo = existingMemo
+              ? `${existingMemo}, ${newMemo}`
+              : newMemo;
+          }
+        }
+
+        return acc;
+      }, {})
+    );
+
+    setMergeDataTable(mergedData);
+
+    const total = mergedData.reduce(
       (acc, item) => ({
         amount: acc.amount + (Number(item.amount) || 0),
         quantity: acc.quantity + (Number(item.quantity) || 0),
@@ -47,8 +80,6 @@ export default function InvoicePrint({ data, dataTable }) {
 
     setCount(total);
   }, [dataTable]);
-
-  console.log(data);
 
   return (
     <div id="print-invoice" className="w-full flex flex-col gap-8">
@@ -157,9 +188,9 @@ export default function InvoicePrint({ data, dataTable }) {
           </p>
         </div>
 
-        {dataTable &&
-          dataTable.length > 0 &&
-          dataTable.map((item, i) => (
+        {mergeDataTable &&
+          mergeDataTable.length > 0 &&
+          mergeDataTable.map((item, i) => (
             <div
               key={i}
               className="w-full flex border-x border-b table-padding"
