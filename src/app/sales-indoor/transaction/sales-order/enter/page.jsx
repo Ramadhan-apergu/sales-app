@@ -68,6 +68,7 @@ export default function Enter() {
       trandate: dayjs(new Date()),
       salesrep: "",
       otherrefnum: "",
+      isdropship: 0,
     },
     payloadBilling: {
       term: "7",
@@ -227,6 +228,11 @@ export default function Enter() {
     { label: "7 Days", value: "7" },
     { label: "14 Days", value: "14" },
     { label: "30 Days", value: "30" },
+  ];
+
+  const dropshipOption = [
+    { label: "No", value: 0 },
+    { label: "Yes", value: 1 },
   ];
 
   const paymentOptions = [
@@ -426,6 +432,7 @@ export default function Enter() {
         payment_type: payment_type_params
           ? payment_type_params
           : state.payloadBilling.paymentoption,
+        isdropship: state.payloadPrimary.isdropship,
         sales_order_items: itemTable.map((item) => ({
           item_id: item.item,
           itemprocessfamily: item.itemprocessfamily,
@@ -439,8 +446,6 @@ export default function Enter() {
       const resData = getResponseHandler(response);
 
       setDataDiscount(resData);
-
-      console.log(resData);
 
       if (resData.diskon_group && resData.diskon_group.length > 0) {
         const discountFreeItem = resData.diskon_group.map((discount) => ({
@@ -730,6 +735,12 @@ export default function Enter() {
                 hidden: true,
               },
               {
+                key: "isdropship",
+                input: "select",
+                options: dropshipOption,
+                isAlias: true,
+              },
+              {
                 key: "trandate",
                 input: "date",
                 isAlias: true,
@@ -751,6 +762,14 @@ export default function Enter() {
             aliases={salesOrderAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
+
+              if (
+                payload.isdropship != state.payloadPrimary.isdropship &&
+                customerSelected.id
+              ) {
+                setDataTableItem([]);
+                setDataItemFree([]);
+              }
             }}
           />
 
@@ -1008,7 +1027,6 @@ export default function Enter() {
                           },
                         });
                       }}
-                      
                       options={dataItem.filter(
                         (data) =>
                           !dataTableItem
@@ -1054,13 +1072,16 @@ export default function Enter() {
                 {
                   key: "rate",
                   labeled: `Rate (${
-                    stateItemTable.item.iseditable == 1
+                    stateItemTable.item.iseditable == 1 ||
+                    state.payloadPrimary.isdropship == 1
                       ? "Editable"
                       : "Non Editable"
                   })`,
                   input: "number",
                   isAlias: true,
-                  isRead: stateItemTable.item.iseditable == 0,
+                  isRead:
+                    stateItemTable.item.iseditable == 0 &&
+                    state.payloadPrimary.isdropship == 0,
                   cursorDisable: true,
                   accounting: true,
                   note: "Base rate item",
