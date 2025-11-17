@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Divider, Table, Modal, Input, Pagination, Switch } from "antd";
+import {
+  Button,
+  Divider,
+  Table,
+  Modal,
+  Input,
+  Pagination,
+  Switch,
+  Checkbox,
+} from "antd";
 import Layout from "@/components/salesIndoor/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
@@ -22,29 +31,40 @@ import AgreementFetch from "@/modules/salesApi/agreement";
 import dayjs from "dayjs";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 
-function SelectItem({ onselect }) {
+function SelectItem({ onselect, dataExist }) {
   const isLargeScreen = useBreakpoint("lg");
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50);
   const [searchName, setSearchName] = useState("");
   const [searchFamily, setSearchFamily] = useState("");
-  const [searchCode, setSearchCode] = useState();
+  const [searchCode, setSearchCode] = useState("");
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsloading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
-  const title = "item";
 
   const fetchData = async () => {
     try {
-      setIsloading(true);
+      setIsLoading(true);
+      const isFilter = searchName || searchFamily || searchCode;
+      if (isFilter) {
+        setPage(null);
+        setLimit(null);
+      } else {
+        if (page == null || limit == null) {
+          setPage(1);
+          setLimit(50);
+        }
+      }
       const response = await ItemFetch.get(
-        page,
-        50,
-        searchName === "" ? null : searchName,
-        !searchCode || searchCode === "" ? null : searchCode,
-        searchFamily === "" ? null : searchFamily
+        isFilter ? null : page == null ? 1 : page,
+        isFilter ? null : limit == null ? 50 : limit,
+        searchName || null,
+        searchCode || null,
+        searchFamily || null
       );
       const resData = getResponseHandler(response, notify);
       if (resData) {
@@ -54,7 +74,9 @@ function SelectItem({ onselect }) {
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");
     } finally {
-      setIsloading(false);
+      setIsLoading(false);
+      setSelectedItems([]);
+      onselect([]);
     }
   };
 
@@ -62,7 +84,7 @@ function SelectItem({ onselect }) {
     if (!searchCode && searchName === "" && searchFamily === "") {
       fetchData();
     }
-  }, [page]);
+  }, [page, limit]);
 
   const handleEnter = (e) => {
     if (e.key === "Enter") {
@@ -70,20 +92,54 @@ function SelectItem({ onselect }) {
     }
   };
 
+  const toggleSelect = (item) => {
+    if (dataExist.some((data) => data.itemid === item.id)) {
+      notify("error", "Failed", "Data has already been added");
+      return;
+    }
+    setSelectedItems((prev) => {
+      const exists = prev.find((i) => i.id === item.id);
+      const updated = exists
+        ? prev.filter((i) => i.id !== item.id)
+        : [...prev, item];
+      onselect(updated);
+      return updated;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const allSelected = selectedItems.length === datas.length;
+    const updated = allSelected ? [] : datas;
+    setSelectedItems(updated);
+    onselect(updated);
+  };
+
   const columns = [
-    //   {
-    //     title: 'Internal ID',
-    //     dataIndex: 'id',
-    //     key: 'id',
-    //     onHeaderCell: () => ({ style: { minWidth: 200 } }),
-    //     onCell: () => ({ style: { minWidth: 200 } }),
-    //   },
+    {
+      title: (
+        <Checkbox
+          checked={selectedItems.length === datas.length && datas.length > 0}
+          indeterminate={
+            selectedItems.length > 0 && selectedItems.length < datas.length
+          }
+          onChange={toggleSelectAll}
+        />
+      ),
+      dataIndex: "checkbox",
+      key: "checkbox",
+      width: 50,
+      render: (_, record) => (
+        <Checkbox
+          checked={selectedItems.some((i) => i.id === record.id)}
+          onChange={() => toggleSelect(record)}
+        />
+      ),
+    },
     {
       title: "Item Name/Number",
       dataIndex: "displayname",
       key: "displayname",
       fixed: isLargeScreen ? "left" : "",
-      render: (text) => <span>{text}</span>,
       onHeaderCell: () => ({ style: { minWidth: 200 } }),
       onCell: () => ({ style: { minWidth: 200 } }),
     },
@@ -108,7 +164,7 @@ function SelectItem({ onselect }) {
       {notificationContextHolder}
       <div className="w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
         <div className="flex gap-2">
-          <div className="flex flex-col justify-start items-start gap-1">
+          <div className="flex flex-col gap-1">
             <label className="hidden lg:block text-sm font-semibold leading-none">
               Item Name/Number
             </label>
@@ -120,39 +176,34 @@ function SelectItem({ onselect }) {
               allowClear
             />
           </div>
-          <div className="flex flex-col justify-start items-start gap-1">
+          <div className="flex flex-col gap-1">
             <label className="hidden lg:block text-sm font-semibold leading-none">
               Display Name/Code
             </label>
             <Search
-              placeholder={isLargeScreen ? "" : "Name"}
-              allowClear
               value={searchName}
-              onChange={(e) => {
-                setSearchName(e.target.value);
-              }}
+              onChange={(e) => setSearchName(e.target.value)}
               onSearch={fetchData}
-              onKeyDown={(e) => handleEnter(e)}
+              onKeyDown={handleEnter}
+              allowClear
+              placeholder={isLargeScreen ? "" : "Name"}
             />
           </div>
-          <div className="flex flex-col justify-start items-start gap-1">
+          <div className="flex flex-col gap-1">
             <label className="hidden lg:block text-sm font-semibold leading-none">
               Item P.Family
             </label>
             <Search
-              placeholder={isLargeScreen ? "" : "Process family"}
-              allowClear
               value={searchFamily}
-              onChange={(e) => {
-                setSearchFamily(e.target.value);
-              }}
+              onChange={(e) => setSearchFamily(e.target.value)}
               onSearch={fetchData}
-              onKeyDown={(e) => handleEnter(e)}
+              onKeyDown={handleEnter}
+              allowClear
+              placeholder={isLargeScreen ? "" : "Process family"}
             />
           </div>
         </div>
       </div>
-
       {!isLoading ? (
         <>
           <Table
@@ -164,19 +215,22 @@ function SelectItem({ onselect }) {
             scroll={{ x: "max-content" }}
             bordered
             tableLayout="auto"
-            onRow={(record) => ({
-              onClick: () => onselect(record),
-            })}
           />
-          <div className="mt-2 flex justify-end">
-            <Pagination
-              total={totalItems}
-              pageSize={50}
-              current={page}
-              onChange={(newPage) => setPage(newPage)}
-              size="small"
-            />
-          </div>
+          {page && limit && (
+            <div className="mt-2 flex justify-end">
+              <Pagination
+                total={totalItems}
+                pageSize={limit}
+                current={page}
+                onChange={(newPage) => setPage(newPage)}
+                size="small"
+                onShowSizeChange={(current, size) => {
+                  setLimit(size);
+                }}
+                pageSizeOptions={["50", "100"]}
+              />
+            </div>
+          )}
         </>
       ) : (
         <div className="w-full h-96">
@@ -192,14 +246,14 @@ function GroupItemList({ category }) {
   const [page, setPage] = useState(1);
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
   const fetchData = async () => {
     try {
-      setIsloading(true);
+      setIsLoading(true);
       const response = await ItemFetch.get(page, 50, null, null, category);
       const resData = getResponseHandler(response, notify);
       if (resData) {
@@ -209,7 +263,7 @@ function GroupItemList({ category }) {
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");
     } finally {
-      setIsloading(false);
+      setIsLoading(false);
     }
   };
 
@@ -276,18 +330,15 @@ function TableCustom({ data, keys, aliases, onDelete, agreementtype }) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
-  // Slice data untuk pagination
   const paginatedData = data.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
 
-  // Generate kolom dinamis + kolom aksi
   const columns = [
     ...keys.map((key) => {
       if (agreementtype !== "addons" && key === "addons") return null;
       if (agreementtype !== "diskon" && key === "discountnominal") return null;
-
       return {
         title: aliases?.[key] || key,
         dataIndex: key,
@@ -307,7 +358,6 @@ function TableCustom({ data, keys, aliases, onDelete, agreementtype }) {
     },
   ].filter(Boolean);
 
-  // Tambahkan _key unik untuk rowKey
   const dataWithKey = paginatedData.map((item, idx) => ({
     ...item,
     _key: `row-${(currentPage - 1) * pageSize + idx}`,
@@ -343,18 +393,38 @@ export default function AgreementEdit() {
   const title = "agreement";
   const [data, setData] = useState(null);
   const [dataItem, setDataItem] = useState(null);
-
   const [itemprocessfamilyOptions, setItemprocessfamilyOptions] = useState([]);
+  const [payloadCustomForm, setPayloadCustomForm] = useState({
+    customform: "2",
+  });
+  const [payloadGeneral, setPayloadGeneral] = useState({
+    agreementcode: "",
+    agreementname: "",
+    agreementtype: "",
+    effectivedate: "",
+    enddate: "",
+    status: "active",
+    description: "",
+  });
+  const [isPayloadGroupItem, setIsPayloadGroupItem] = useState(false);
+  const [payloadGroup, setPayloadGroup] = useState({
+    itemcategory: "",
+    qtymin: 0,
+    qtymax: 0,
+    discountnominal: 0,
+    qtyfree: 0,
+  });
+  const [payloadDetail, setPayloadDetail] = useState([]);
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchItemFamily = async () => {
     try {
       const response = await ItemFetch.getItemFamily();
       const resData = getResponseHandler(response, notify);
-
       if (resData && resData.list && resData.list.length > 0) {
         const listActive =
           resData.list.filter((item) => item.isdeleted == 0) || [];
-
         setItemprocessfamilyOptions(
           listActive.map((item) => ({ label: item.name, value: item.name }))
         );
@@ -397,7 +467,6 @@ export default function AgreementEdit() {
 
           if (resData.agreement_groups) {
             let items = [];
-
             if (resData.agreement_groups.itemcategory) {
               const getItem = await getItemByCategory(
                 resData.agreement_groups.itemcategory
@@ -406,7 +475,6 @@ export default function AgreementEdit() {
                 items = getItem.list;
               }
             }
-
             setPayloadDetail(items);
           }
 
@@ -437,15 +505,12 @@ export default function AgreementEdit() {
       try {
         const response = await ItemFetch.get(0, 10000, null, null, null);
         const resData = getResponseHandler(response);
-
         if (resData) {
-          const dataWithLabel = resData.list.map((item) => {
-            return {
-              ...item,
-              label: item.displayname,
-              value: item.id,
-            };
-          });
+          const dataWithLabel = resData.list.map((item) => ({
+            ...item,
+            label: item.displayname,
+            value: item.id,
+          }));
           setDataItem(dataWithLabel);
         }
       } catch (error) {
@@ -456,35 +521,6 @@ export default function AgreementEdit() {
     fetchDataItem();
     fetchItemFamily();
   }, []);
-
-  const [payloadCustomForm, setPayloadCustomForm] = useState({
-    customform: "1",
-  });
-
-  const [payloadGeneral, setPayloadGeneral] = useState({
-    agreementcode: "",
-    agreementname: "",
-    agreementtype: "",
-    effectivedate: "",
-    enddate: "",
-    status: "active",
-    description: "",
-  });
-
-  const [isPayloadGroupItem, setIsPayloadGroupItem] = useState(false);
-
-  const [payloadGroup, setPayloadGroup] = useState({
-    itemcategory: "",
-    qtymin: 0,
-    qtymax: 0,
-    discountnominal: 0,
-    qtyfree: 0,
-  });
-
-  const [payloadDetail, setPayloadDetail] = useState([]);
-
-  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   async function getItemById(id) {
     try {
@@ -533,6 +569,7 @@ export default function AgreementEdit() {
         break;
     }
   };
+
   const keys = [
     [
       "displayname",
@@ -593,15 +630,15 @@ export default function AgreementEdit() {
     { label: "Pending Approval", value: "pending approval" },
   ];
 
+  const agreementtypeOptions = [
+    { label: "Diskon", value: "diskon" },
+    { label: "Addons", value: "addons" },
+  ];
+
   const unitOptions = [
     { label: "KG", value: "kg" },
     { label: "Bal", value: "bal" },
     { label: "Kotak", value: "kotak" },
-  ];
-
-  const agreementtypeOptions = [
-    { label: "Diskon", value: "diskon" },
-    { label: "Addons", value: "addons" },
   ];
 
   const paymentOptions = [
@@ -609,14 +646,15 @@ export default function AgreementEdit() {
     { label: "Credit", value: "credit" },
   ];
 
-  const dataInput = [
-    [
+  const generateDataInput = (customform, agreementtype) => {
+    const baseFields = [
       {
         key: "itemid",
         input: "input",
         isAlias: false,
         rules: [{ required: true, message: "is required!" }],
         disabled: true,
+        hidden: true,
       },
       {
         key: "displayname",
@@ -624,6 +662,7 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
         disabled: true,
+        hidden: true,
       },
       {
         key: "baseprice",
@@ -631,13 +670,14 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
         disabled: true,
+        hidden: true,
       },
       {
         key: "addons",
         input: "number",
         isAlias: true,
         accounting: true,
-        hidden: payloadGeneral.agreementtype != "addons",
+        hidden: agreementtype != "addons",
       },
       {
         key: "basepriceunit",
@@ -645,12 +685,12 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
         disabled: true,
+        hidden: true,
       },
       {
         key: "qtymin",
         input: "number",
         isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
       },
       {
         key: "qtyminunit",
@@ -658,12 +698,12 @@ export default function AgreementEdit() {
         options: unitOptions,
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
+        hidden: true,
       },
       {
         key: "qtymax",
         input: "number",
         isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
       },
       {
         key: "qtymaxunit",
@@ -671,12 +711,7 @@ export default function AgreementEdit() {
         options: unitOptions,
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "discountpercent",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
+        hidden: true,
       },
       {
         key: "perunit",
@@ -685,335 +720,53 @@ export default function AgreementEdit() {
         isAlias: true,
         rules: [{ required: true, message: "is required!" }],
       },
-      {
-        key: "discountnominal",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "paymenttype",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "qtyfree",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-    ],
-    [
-      {
-        key: "itemid",
-        input: "input",
-        isAlias: false,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "displayname",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "baseprice",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "addons",
-        input: "number",
-        isAlias: true,
-        accounting: true,
-        hidden: payloadGeneral.agreementtype != "addons",
-      },
-      {
-        key: "basepriceunit",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "qtymin",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtyminunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtymax",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtymaxunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "discountnominal",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: payloadGeneral.agreementtype != "diskon",
-      },
-      {
-        key: "perunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "discountpercent",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "paymenttype",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "qtyfree",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-    ],
-    [
-      {
-        key: "itemid",
-        input: "input",
-        isAlias: false,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "displayname",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "baseprice",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "addons",
-        input: "number",
-        isAlias: true,
-        accounting: true,
-        hidden: payloadGeneral.agreementtype != "addons",
-      },
-      {
-        key: "basepriceunit",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "qtymin",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtyminunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtymax",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtymaxunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "paymenttype",
-        input: "select",
-        options: paymentOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "discountnominal",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "perunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "discountpercent",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "paymenttype",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "qtyfree",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-    ],
-    [
-      {
-        key: "itemid",
-        input: "input",
-        isAlias: false,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "displayname",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "baseprice",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "addons",
-        input: "number",
-        isAlias: true,
-        accounting: true,
-        hidden: payloadGeneral.agreementtype != "addons",
-      },
-      {
-        key: "basepriceunit",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        disabled: true,
-      },
-      {
-        key: "qtymin",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtyminunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtymax",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtymaxunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "qtyfree",
-        input: "number",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "perunit",
-        input: "select",
-        options: unitOptions,
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-      },
-      {
-        key: "discountnominal",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "discountpercent",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "paymenttype",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-      {
-        key: "qtyfree",
-        input: "input",
-        isAlias: true,
-        rules: [{ required: true, message: "is required!" }],
-        hidden: true,
-      },
-    ],
-  ];
+    ];
+    const specificFields = {
+      1: [
+        {
+          key: "discountpercent",
+          input: "number",
+          isAlias: true,
+          rules: [{ required: true, message: "is required!" }],
+        },
+      ],
+      2: [
+        {
+          key: "discountnominal",
+          input: "number",
+          isAlias: true,
+          rules: [{ required: true, message: "is required!" }],
+          hidden: agreementtype != "diskon",
+          accounting: true,
+        },
+      ],
+      3: [
+        {
+          key: "paymenttype",
+          input: "select",
+          options: paymentOptions,
+          isAlias: true,
+          rules: [{ required: true, message: "is required!" }],
+        },
+        {
+          key: "discountnominal",
+          input: "number",
+          isAlias: true,
+          rules: [{ required: true, message: "is required!" }],
+          accounting: true,
+        },
+      ],
+      4: [
+        {
+          key: "qtyfree",
+          input: "number",
+          isAlias: true,
+          rules: [{ required: true, message: "is required!" }],
+        },
+      ],
+    };
+    return baseFields.concat(specificFields[customform] || []);
+  };
 
   function toInitialObject(keys) {
     return Object.fromEntries(keys.map((key) => [key, ""]));
@@ -1024,6 +777,8 @@ export default function AgreementEdit() {
   );
 
   const payloadDetailInitRef = useRef(payloadDetailInit);
+
+  const applyDetail = useRef([]);
 
   useEffect(() => {
     const customForm = parseInt(payloadCustomForm.customform);
@@ -1044,26 +799,22 @@ export default function AgreementEdit() {
       const payload = {
         ...payloadGeneral,
         customform: parseInt(payloadCustomForm.customform),
-        agreement_lines: payloadDetail.map((line) => {
-          return {
-            itemid: line.itemid,
-            baseprice: line.price,
-            basepriceunit: line.basepriceunit,
-            qtymin: line.qtymin,
-            qtyminunit: line.qtyminunit,
-            qtymax: line.qtymax,
-            qtymaxunit: line.qtymaxunit,
-            discountnominal: line?.discountnominal || 0,
-            discountpercent: line?.discountpercent || 0,
-            paymenttype: line?.paymenttype || "",
-            qtyfree: line?.qtyfree || 0,
-            perunit: line?.perunit,
-            addons:
-              payloadGeneral.agreementtype != "addons"
-                ? null
-                : line?.addons || 0,
-          };
-        }),
+        agreement_lines: payloadDetail.map((line) => ({
+          itemid: line.itemid,
+          baseprice: line.baseprice,
+          basepriceunit: line.basepriceunit,
+          qtymin: line.qtymin,
+          qtyminunit: line.qtyminunit,
+          qtymax: line.qtymax,
+          qtymaxunit: line.qtymaxunit,
+          discountnominal: line?.discountnominal || 0,
+          discountpercent: line?.discountpercent || 0,
+          paymenttype: line?.paymenttype || "",
+          qtyfree: line?.qtyfree || 0,
+          perunit: line?.perunit,
+          addons:
+            payloadGeneral.agreementtype != "addons" ? null : line?.addons || 0,
+        })),
         agreement_groups: {
           ...payloadGroup,
           qtyfree: payloadGroup?.qtyfree || 0,
@@ -1081,33 +832,27 @@ export default function AgreementEdit() {
 
       if (!customform) {
         notify("error", "Error", "Customer Form is required");
-        return null;
+        return;
       }
-
       if (!agreementcode) {
         notify("error", "Error", "Agreement Code required");
-        return null;
+        return;
       }
-
       if (!agreementname) {
         notify("error", "Error", "Agreement Name required");
-        return null;
+        return;
       }
-
       if (!agreementtype) {
         notify("error", "Error", "Agreement Type required");
-        return null;
+        return;
       }
-
       if (!status) {
         notify("error", "Error", "Status required");
-        return null;
+        return;
       }
 
       const response = await AgreementFetch.update(slug, payload);
-
       const resData = updateResponseHandler(response, notify);
-
       if (resData) {
         router.push(`/sales-indoor/master-data/${title}/${resData}`);
       }
@@ -1119,33 +864,47 @@ export default function AgreementEdit() {
   };
 
   const formOptions = [
-    // { label: "Discount Percentage (%)", value: "1" },
+    { label: "Discount Percentage (%)", value: "1" },
     { label: "Special Price (Rp)", value: "2" },
     { label: "Payment Method", value: "3" },
-    // { label: "Free Item", value: "4" },
+    { label: "Free Item", value: "4" },
     { label: "Free Item", value: "5" },
   ];
 
-  function handleSelectItem(record) {
-    const mapped = {
-      ...payloadDetailInit,
+  function handleSelectItem(instance) {
+    let currentPayload = payloadDetailInitRef.current;
+    let currentApplyDetail = applyDetail.current;
+
+    if (currentApplyDetail.length == 0) {
+      notify("error", "Error", "No items selected.");
+      return;
+    }
+
+    const updatePayloadDetail = currentApplyDetail.map((record) => ({
+      ...currentPayload,
       itemid: record.id,
       baseprice: record.price,
       basepriceunit: record.unitstype,
       displayname: record.displayname,
-      discountpercent: "",
-      paymenttype: "",
-      qtyfree: "",
-    };
+      qtyminunit: record.unitstype,
+      qtymaxunit: record.unitstype,
+    }));
 
-    payloadDetailInitRef.current = mapped;
-    setPayloadDetailInit(mapped);
+    setPayloadDetail((prev) => [...prev, ...updatePayloadDetail]);
+
+    const reset = toInitialObject(
+      keys[parseInt(payloadCustomForm.customform) - 1]
+    );
+    setPayloadDetailInit(reset);
+    payloadDetailInitRef.current = reset;
+    applyDetail.current = [];
+    instance.destroy();
   }
 
   function handleAddModalForm() {
     const instance = modal.confirm({
       icon: null,
-      width: 850,
+      width: 1200,
       footer: null,
       content: (
         <div className="w-full flex flex-col gap-4 justify-end">
@@ -1153,54 +912,28 @@ export default function AgreementEdit() {
             type="detailinit"
             title="Add Detail"
             payload={payloadDetailInitRef.current}
-            data={dataInput[parseInt(payloadCustomForm.customform - 1)]}
+            data={generateDataInput(
+              parseInt(payloadCustomForm.customform),
+              payloadGeneral.agreementtype
+            )}
             onChange={handleChangePayload}
             aliases={agreementAliases}
           />
-          <div className="flex gap-2 justify-end">
-            <Button
-              onClick={() => {
-                const reset = toInitialObject(
-                  keys[parseInt(payloadCustomForm.customform) - 1]
-                );
-                setPayloadDetailInit(reset);
-                instance.destroy();
-              }}
-              variant="outlined"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => {
-                handleAddDetail(instance);
-              }}
-            >
-              OK
-            </Button>
-          </div>
-        </div>
-      ),
-    });
-  }
-
-  function handleAddModalItem() {
-    const instance = modal.confirm({
-      icon: null,
-      footer: null,
-      width: 850,
-      content: (
-        <div className="w-full flex flex-col gap-4 justify-end">
-          <SelectItem
-            onselect={(record) => {
-              if (payloadDetail.some((item) => item.itemid === record.id)) {
-                notify("error", "Failed", "Data has already been added");
-                return;
-              }
-              handleSelectItem(record);
-              instance.destroy();
-              handleAddModalForm();
+          <Divider
+            style={{
+              margin: "0",
+              textTransform: "capitalize",
+              borderColor: "#1677ff",
             }}
+            orientation="left"
+          >
+            Select Item
+          </Divider>{" "}
+          <SelectItem
+            onselect={(records) => {
+              applyDetail.current = records;
+            }}
+            dataExist={payloadDetail}
           />
           <div className="flex gap-2 justify-end">
             <Button
@@ -1209,11 +942,15 @@ export default function AgreementEdit() {
                   keys[parseInt(payloadCustomForm.customform) - 1]
                 );
                 setPayloadDetailInit(reset);
+                applyDetail.current = [];
                 instance.destroy();
               }}
               variant="outlined"
             >
               Cancel
+            </Button>
+            <Button type="primary" onClick={() => handleAddDetail(instance)}>
+              OK
             </Button>
           </div>
         </div>
@@ -1224,43 +961,46 @@ export default function AgreementEdit() {
   function handleAddDetail(instance) {
     let currentPayload = payloadDetailInitRef.current;
 
-    currentPayload = {
-      ...currentPayload,
-      discountnominal: !currentPayload.discountnominal
-        ? 0
-        : currentPayload.discountnominal,
-    };
+    if (payloadGeneral.agreementtype.toLowerCase() === "addons") {
+      if (!currentPayload?.addons || currentPayload.addons.length === 0) {
+        notify("error", "Error", "Addons is required");
+        return;
+      }
+    } else {
+      if (
+        !currentPayload?.discountnominal ||
+        currentPayload.discountnominal.length === 0
+      ) {
+        notify("error", "Error", "Discount is required");
+        return;
+      }
+    }
 
-    const excludedKeys = [
-      "addons",
-      "discountnominal",
-      "paymenttype",
-      "qtyfree",
-      "discountpercent",
-    ];
-
-    const isAnyEmpty = Object.entries(currentPayload).some(([key, value]) => {
-      if (excludedKeys.includes(key)) return false;
-      return (
-        value === null ||
-        value === undefined ||
-        (typeof value === "string" && value.trim() === "")
-      );
-    });
-
-    if (isAnyEmpty) {
-      notify("error", "Error", "All fields are required");
+    if (!currentPayload.perunit) {
+      notify("error", "Error", "per unit is required");
       return;
     }
 
-    setPayloadDetail((prev) => [...prev, currentPayload]);
+    if (
+      payloadCustomForm.customform == "3" ||
+      payloadCustomForm.customform == 3
+    ) {
+      if (!currentPayload.paymenttype) {
+        notify("error", "Error", "Payment type is required");
+        return;
+      }
+    }
 
-    const reset = toInitialObject(
-      keys[parseInt(payloadCustomForm.customform) - 1]
-    );
-    setPayloadDetailInit(reset);
-    payloadDetailInitRef.current = reset;
+    currentPayload = {
+      ...currentPayload,
+      qtymin: !currentPayload.qtymin ? 0 : currentPayload.qtymin,
+      qtymax: !currentPayload.qtymax ? 0 : currentPayload.qtymax,
+    };
+
+    payloadDetailInitRef.current = currentPayload;
+
     instance.destroy();
+    handleSelectItem(instance);
   }
 
   function handleDeleteDetail(record) {
@@ -1289,7 +1029,6 @@ export default function AgreementEdit() {
     setPayloadCustomForm(customformData);
     setPayloadGeneral(generalData);
     setPayloadGroup(data.agreement_groups);
-    //   setPayloadDetail(data.agreement_lines)
   };
 
   return (
@@ -1427,7 +1166,26 @@ export default function AgreementEdit() {
                           Detail
                         </Divider>
                         <div className="flex justify-end">
-                          <Button type="primary" onClick={handleAddModalItem}>
+                          <Button
+                            type="primary"
+                            onClick={() => {
+                              const mapped = {
+                                ...payloadDetailInit,
+                                itemid: "",
+                                baseprice: 0,
+                                addons: 0,
+                                basepriceunit: "",
+                                displayname: "",
+                                qtyminunit: "",
+                                qtymaxunit: "",
+                                discountnominal: 0,
+                                paymenttype: "",
+                              };
+                              payloadDetailInitRef.current = mapped;
+                              setPayloadDetailInit(mapped);
+                              handleAddModalForm();
+                            }}
+                          >
                             Add
                           </Button>
                         </div>
@@ -1443,138 +1201,48 @@ export default function AgreementEdit() {
                       </div>
                     ) : (
                       <div className="w-full flex flex-col gap-4">
-                        {/* <div className="flex justify-end gap-2 items-center">
-                          <Switch
-                            size="small"
-                            checked={isPayloadGroupItem}
-                            onChange={() => {
-                              setIsPayloadGroupItem(!isPayloadGroupItem);
-                              setPayloadGroup((prev) => ({
-                                ...prev,
-                                discountnominal: 0,
-                                qtyfree: 0,
-                                unitfree: "",
-                                itemfree: "",
-                              }));
-                            }}
-                          />
-                          <p className="font-semibold">Free Item Type</p>
-                        </div> */}
-                        {!isPayloadGroupItem ? (
-                          <InputForm
-                            title="agreement groups (Price)"
-                            type="group"
-                            payload={payloadGroup}
-                            data={[
-                              {
-                                key: "id",
-                                input: "input",
-                                isAlias: false,
-                                isRead: true,
-                                hidden: true,
-                              },
-                              {
-                                key: "agreementid",
-                                input: "input",
-                                isAlias: false,
-                                isRead: true,
-                                hidden: true,
-                              },
-                              {
-                                key: "itemcategory",
-                                input: "select",
-                                options: itemprocessfamilyOptions,
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                              {
-                                key: "qtymin",
-                                input: "number",
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                              {
-                                key: "qtymax",
-                                input: "number",
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                              {
-                                key: "discountnominal",
-                                input: "number",
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                            ]}
-                            aliases={agreementAliases}
-                            onChange={handleChangePayload}
-                          />
-                        ) : (
-                          <InputForm
-                            title="agreement groups (Items)"
-                            type="group"
-                            payload={payloadGroup}
-                            data={[
-                              {
-                                key: "id",
-                                input: "input",
-                                isAlias: false,
-                                isRead: true,
-                                hidden: true,
-                              },
-                              {
-                                key: "agreementid",
-                                input: "input",
-                                isAlias: false,
-                                isRead: true,
-                                hidden: true,
-                              },
-                              {
-                                key: "itemcategory",
-                                input: "select",
-                                options: itemprocessfamilyOptions,
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                              {
-                                key: "qtymin",
-                                input: "number",
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                              {
-                                key: "qtymax",
-                                input: "number",
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                              {
-                                key: "qtyfree",
-                                input: "number",
-                                isAlias: true,
-                                rules: [
-                                  { required: true, message: "is required!" },
-                                ],
-                              },
-                            ]}
-                            aliases={agreementAliases}
-                            onChange={handleChangePayload}
-                          />
-                        )}
+                        <InputForm
+                          title="Free Items"
+                          type="group"
+                          payload={payloadGroup}
+                          data={[
+                            {
+                              key: "itemcategory",
+                              input: "select",
+                              options: itemprocessfamilyOptions,
+                              isAlias: true,
+                              rules: [
+                                { required: true, message: "is required!" },
+                              ],
+                            },
+                            {
+                              key: "qtymin",
+                              input: "number",
+                              isAlias: true,
+                              rules: [
+                                { required: true, message: "is required!" },
+                              ],
+                            },
+                            {
+                              key: "qtymax",
+                              input: "number",
+                              isAlias: true,
+                              rules: [
+                                { required: true, message: "is required!" },
+                              ],
+                            },
+                            {
+                              key: "qtyfree",
+                              input: "number",
+                              isAlias: true,
+                              rules: [
+                                { required: true, message: "is required!" },
+                              ],
+                            },
+                          ]}
+                          aliases={agreementAliases}
+                          onChange={handleChangePayload}
+                        />
                         <GroupItemList category={payloadGroup.itemcategory} />
                       </div>
                     )}

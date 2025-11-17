@@ -73,6 +73,7 @@ export default function Enter() {
       trandate: dayjs(new Date()),
       salesrep: "",
       otherrefnum: "",
+      isdropship: 0,
     },
     payloadBilling: {
       term: "7",
@@ -209,6 +210,7 @@ export default function Enter() {
         trandate: dayjs(data.trandate),
         salesrep: data.salesrep,
         otherrefnum: data.otherrefnum,
+        isdropship: data.isdropship,
       },
     });
 
@@ -518,6 +520,7 @@ export default function Enter() {
         payment_type: payment_type_params
           ? payment_type_params
           : state.payloadBilling.paymentoption,
+        isdropship: state.payloadPrimary.isdropship,
         sales_order_items: itemTable.map((item) => ({
           item_id: item.item,
           itemprocessfamily: item.itemprocessfamily,
@@ -716,6 +719,10 @@ export default function Enter() {
     setIsModalItemOpen(true);
   }
 
+  const dropshipOption = [
+    { label: "No", value: 0 },
+    { label: "Yes", value: 1 },
+  ];
   return (
     <>
       <Layout>
@@ -829,6 +836,12 @@ export default function Enter() {
                 hidden: true,
               },
               {
+                key: "isdropship",
+                input: "select",
+                options: dropshipOption,
+                isAlias: true,
+              },
+              {
                 key: "trandate",
                 input: "date",
                 isAlias: true,
@@ -850,6 +863,13 @@ export default function Enter() {
             aliases={salesOrderAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
+              if (
+                payload.isdropship != state.payloadPrimary.isdropship &&
+                customerSelected.id
+              ) {
+                setDataTableItem([]);
+                setDataItemFree([]);
+              }
             }}
           />
 
