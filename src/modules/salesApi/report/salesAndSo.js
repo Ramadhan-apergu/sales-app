@@ -101,4 +101,13 @@ export default class ReportSo extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async exportProduct() {
+    try {
+      const response = await this.axios.post("/report/produksi/export");
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }
