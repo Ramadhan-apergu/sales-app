@@ -30,7 +30,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 10;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -192,6 +192,11 @@ function SalesOrder() {
       title: "Customer",
       dataIndex: "customer",
       key: "customer",
+    },
+    {
+      title: "No. Po",
+      dataIndex: "otherrefnum",
+      key: "otherrefnum",
     },
     {
       title: "Status",

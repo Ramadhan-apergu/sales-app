@@ -28,19 +28,37 @@ import dayjs from "dayjs";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { deliveryOrderAliases } from "@/utils/aliases";
 
-function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
+function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
+  const allCheckableItems = data;
+  const isAllChecked =
+    allCheckableItems.length > 0 &&
+    allCheckableItems.every((item) => item.apply);
+  const isIndeterminate =
+    allCheckableItems.some((item) => item.apply) && !isAllChecked;
+
   const columns = [
     ...keys.map((key) => {
       if (key === "apply") {
         return {
-          title: "Apply",
+          title: (
+            <Checkbox
+              indeterminate={isIndeterminate}
+              checked={isAllChecked}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                // lempar ke parent untuk handle check all
+                onCheckAll?.(checked);
+              }}
+            />
+          ),
           key,
           align: "center",
           render: (_, record) => (
             <Checkbox
               checked={record.apply}
-              disabled={record.isfree}
-              onChange={(e) => onChecked(record.lineid, e.target.checked)}
+              onChange={(e) => {
+                onChecked(record.lineid, e.target.checked);
+              }}
             />
           ),
         };
@@ -94,7 +112,6 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
       summary={() => (
         <Table.Summary.Row>
           {keys.map((key, i) => {
-            // tampilkan label "Total" di kolom pertama
             if (i === 0) {
               return (
                 <Table.Summary.Cell key={key} index={i} align="center">
@@ -103,7 +120,6 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
               );
             }
 
-            // total quantity1 dan quantity2 di kolom yang tepat
             if (key === "quantity1") {
               return (
                 <Table.Summary.Cell key={key} index={i} align="right">
@@ -119,11 +135,9 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
               );
             }
 
-            // kolom lain kosong
             return <Table.Summary.Cell key={key} index={i} />;
           })}
 
-          {/* Kolom action kosong di paling kanan */}
           <Table.Summary.Cell key="action" index={keys.length} align="center" />
         </Table.Summary.Row>
       )}
@@ -548,12 +562,18 @@ export default function Page() {
                         keys={keyTableItem}
                         aliases={deliveryOrderAliases.item}
                         onChecked={(lineid, isChecked) => {
-                          let updateDataTable = dataTableItem;
-
-                          updateDataTable = updateDataTable.map((item) => ({
+                          const updateDataTable = dataTableItem.map((item) => ({
                             ...item,
                             apply:
                               item.lineid == lineid ? isChecked : item.apply,
+                          }));
+
+                          setDataTableItem(updateDataTable);
+                        }}
+                        onCheckAll={(isChecked) => {
+                          const updateDataTable = dataTableItem.map((item) => ({
+                            ...item,
+                            apply: isChecked,
                           }));
 
                           setDataTableItem(updateDataTable);

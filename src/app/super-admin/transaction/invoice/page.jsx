@@ -153,6 +153,7 @@ function SalesOrder() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      align: 'center',
       render: (text, record) => (
         <Tag
           color={
@@ -169,26 +170,26 @@ function SalesOrder() {
         </Tag>
       ),
     },
-    {
-      title: "Actions",
-      key: "actions",
-      fixed: "right",
-      align: "right",
-      width: isLargeScreen ? 87 : 30,
-      render: (_, record) => (
-        <div className="flex justify-center items-center gap-2">
-          <Button
-            type={"link"}
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            {isLargeScreen ? "Edit" : ""}
-          </Button>
-          {contextHolder}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Actions",
+    //   key: "actions",
+    //   fixed: "right",
+    //   align: "right",
+    //   width: isLargeScreen ? 87 : 30,
+    //   render: (_, record) => (
+    //     <div className="flex justify-center items-center gap-2">
+    //       <Button
+    //         type={"link"}
+    //         size="small"
+    //         icon={<EditOutlined />}
+    //         onClick={() => handleEdit(record)}
+    //       >
+    //         {isLargeScreen ? "Edit" : ""}
+    //       </Button>
+    //       {contextHolder}
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (

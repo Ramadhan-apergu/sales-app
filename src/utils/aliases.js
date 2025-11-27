@@ -364,6 +364,8 @@ export const productReportAliases = {
   qty_stock: "Qty Stok",
   satuan: "Satuan",
   no: "No",
+  tranid: "Tranid",
+  unitstype: "Unit Type",
 };
 
 export const userAliases = {

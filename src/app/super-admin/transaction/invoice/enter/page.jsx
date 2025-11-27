@@ -313,10 +313,10 @@ function Enter({ fulfillmentId }) {
               const subtotal = amount - totaldiscount;
               const taxrate = findItemSo.taxrate;
               const taxvalue = findItemSo.taxable
-                ? Math.ceil((amount / (1 + taxrate / 100)) * (taxrate / 100))
+                ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
                 : 0;
 
-              const dpp = amount - taxvalue;
+              const dpp = subtotal - taxvalue;
               const discountsatuan = itemSo?.discountsatuan || 0;
               return {
                 item: fulfillment.item,
