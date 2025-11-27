@@ -6,9 +6,11 @@ import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import useNotification from "@/hooks/useNotification";
 import * as XLSX from "xlsx"; // kalau mau export Excel
+import { useState } from "react";
 
 export default function ExportProductionReport() {
   const { notify, contextHolder } = useNotification();
+  const [loading, setLoading] = useState(false);
 
   // Mapping field ke nama header
   const fieldLabels = {
@@ -20,9 +22,12 @@ export default function ExportProductionReport() {
     qty_sisa: "Qty Sisa",
     so_number: "SO Number",
     satuan: "Satuan",
+    tranid: "Tranid",
+    unitstype: "Unit Type",
   };
 
   const handleExport = async () => {
+    setLoading(true);
     try {
       const resData = await fetchData();
 
@@ -48,13 +53,17 @@ export default function ExportProductionReport() {
     } catch (error) {
       notify("error", "Export Failed.");
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchData = async () => {
     try {
       const response = await ReportSo.getProduct(null, 10000);
-      let resData = getResponseHandler(response, notify);
+      const resultData = getResponseHandler(response, notify);
+
+      let resData = resultData.list;
 
       if (resData) {
         resData = resData.map((item, i) => ({
@@ -81,7 +90,7 @@ export default function ExportProductionReport() {
   };
 
   return (
-    <Button onClick={handleExport} icon={<ExportOutlined />}>
+    <Button loading={loading} onClick={handleExport} icon={<ExportOutlined />}>
       {contextHolder}
       Export
     </Button>

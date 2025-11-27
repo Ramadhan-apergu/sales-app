@@ -263,7 +263,7 @@ export default function InvoicePrint({ data, dataTable }) {
             DPP
           </p>
           <p className="break-words border-b whitespace-normal w-[17%] text-right">
-            {formatRupiah(count.totaldiscount)}
+            {formatRupiah(count.dpp)}
           </p>
         </div>
 
