@@ -757,7 +757,7 @@ export default function AgreementNew() {
         notify("error", "Error", "Agreement Name required");
         return;
       }
-      if (!agreementtype) {
+      if (!agreementtype && customform == 2) {
         notify("error", "Error", "Agreement Type required");
         return;
       }

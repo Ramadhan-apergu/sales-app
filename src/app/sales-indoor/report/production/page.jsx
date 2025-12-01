@@ -1,7 +1,7 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { Modal, Pagination, Table, DatePicker } from "antd";
+import { Modal, Pagination, Table, DatePicker, Button } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -11,6 +11,7 @@ import { getResponseHandler } from "@/utils/responseHandlers";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { productReportAliases } from "@/utils/aliases";
 import ExportProductionReport from "@/components/superAdmin/ExportProductionReport.jsx";
+import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -107,7 +108,7 @@ function SalesOrder() {
               </div>
             </div>
           </div> */}
-          <ExportProductionReport />
+          <ExportButton disabled={!datas.length} notify={notify} />
         </div>
         {!isLoading ? (
           <>
@@ -154,5 +155,46 @@ export default function SalesOrderPage() {
     <Suspense fallback={<LoadingSpinProcessing />}>
       <SalesOrder />
     </Suspense>
+  );
+}
+
+function ExportButton({ disabled = true, notify = null }) {
+  const [isloading, setIsloading] = useState(false);
+  const [linkdownload, setLinkdownload] = useState(null);
+
+  async function handleExport() {
+    try {
+      setIsloading(true);
+      const response = await ReportSo.exportProduct();
+
+      const resData = getResponseHandler(response, notify);
+      if (resData) {
+        setLinkdownload(resData.url);
+      }
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+  return (
+    <Button
+      onClick={() => {
+        if (linkdownload) {
+          window.open(linkdownload);
+        } else {
+          handleExport();
+        }
+      }}
+      type={linkdownload ? "primary" : ""}
+      disabled={disabled}
+      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
+      loading={isloading}
+    >
+      {linkdownload ? "Download" : "Export"}
+    </Button>
   );
 }
