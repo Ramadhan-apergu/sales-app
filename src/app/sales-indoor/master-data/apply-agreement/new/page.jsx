@@ -20,6 +20,7 @@ import Search from "antd/es/input/Search";
 import AgreementFetch from "@/modules/salesApi/agreement";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { formatDateToShort } from "@/utils/formatDate";
+import InputCustomer from "@/components/input/InputCustomer";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -66,41 +67,17 @@ export default function AgreementApplyNew() {
   const title = "apply-agreement";
   const [payloadCustomer, setPayloadCustomer] = useState({
     customer: "",
+    customerid: "",
   });
   const [payloadAgreementList, setpayloadAgreementList] = useState([]);
   const [isModal, setIsModal] = useState(false);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [dataAgreement, setDataAgreement] = useState([]);
   const [agreementSelectedTemp, setAgreementSelectedTemp] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchDataCusomer = async () => {
-      try {
-        const response = await CustomerFetch.get(0, 10000, "active");
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          setDataCustomer(
-            resData.list.map((customer) => ({
-              ...customer,
-              label: customer.companyname,
-              value: customer.id,
-            }))
-          );
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDataCusomer();
-
     const fetchDataAgreement = async () => {
       try {
         const response = await AgreementFetch.get(0, 10000, "active");
@@ -125,14 +102,6 @@ export default function AgreementApplyNew() {
 
     fetchDataAgreement();
   }, []);
-
-  const handleChangePayload = (type, payload) => {
-    switch (type) {
-      case "customer":
-        setPayloadCustomer(payload);
-        break;
-    }
-  };
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -212,28 +181,21 @@ export default function AgreementApplyNew() {
                 </Button>
               </div>
             </div>
-            <div className="w-full flex flex-col gap-8">
-              <InputForm
-                type="customer"
-                title="Customer"
-                payload={payloadCustomer}
-                data={[
-                  {
-                    key: "customer",
-                    input: "select",
-                    options: dataCustomer,
-                    isAlias: true,
-                    rules: [
-                      {
-                        required: true,
-                        message: `${agreementAliases["customform"]} is required`,
-                      },
-                    ],
-                  },
-                ]}
-                onChange={handleChangePayload}
-                aliases={applyAgreementAliases.customer}
-              />
+            <div className="w-full flex flex-col lg:flex-row gap-8">
+              <div className="w-full lg:w-1/2">
+                <InputCustomer
+                  value={payloadCustomer.customerid || undefined}
+                  onChange={(val, opt) => {
+                    setPayloadCustomer(() => ({
+                      customer: opt.id,
+                      customerid: opt.value,
+                    }));
+                  }}
+                  isRequired
+                  label="Customer ID"
+                />
+              </div>
+              <span className="hidden lg:static"> </span>
             </div>
             <div className="w-full flex flex-col gap-4">
               <Divider
