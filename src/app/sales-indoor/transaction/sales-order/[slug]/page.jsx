@@ -439,6 +439,14 @@ export default function Detail() {
     }
   };
 
+  const status = data?.status?.toLowerCase() ?? "";
+
+  const isEnabled =
+    data &&
+    data.remaining != null &&
+    data.remaining > 0 &&
+    (status === "open" || status === "partially fulfilled");
+
   return (
     <>
       <Layout pageTitle="">
@@ -495,6 +503,7 @@ export default function Detail() {
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
                         icon={<FileAddOutlined />}
+                        disabled={!isEnabled}
                         type={"primary"}
                         onClick={() => {
                           router.push(

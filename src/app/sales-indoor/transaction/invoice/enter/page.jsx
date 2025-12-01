@@ -313,10 +313,10 @@ function Enter({ fulfillmentId }) {
               const subtotal = amount - totaldiscount;
               const taxrate = findItemSo.taxrate;
               const taxvalue = findItemSo.taxable
-                ? Math.ceil((amount / (1 + taxrate / 100)) * (taxrate / 100))
+                ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
                 : 0;
 
-              const dpp = amount - taxvalue;
+              const dpp = subtotal - taxvalue;
               const discountsatuan = itemSo?.discountsatuan || 0;
               return {
                 item: fulfillment.item,
@@ -518,15 +518,29 @@ function Enter({ fulfillmentId }) {
     summary.subtotal = summary.totalamount - summary.discounttotal;
     summary.amount = summary.subtotal;
 
+    const roundedSummary = {
+      totalamount: roundValue(summary.totalamount),
+      discounttotal: roundValue(summary.discounttotal),
+      subtotal: roundValue(summary.subtotal),
+      taxtotal: roundValue(summary.taxtotal),
+      amount: roundValue(summary.amount),
+    };
+
     dispatch({
       type: "SET_SUMMARY",
-      payload: summary,
+      payload: roundedSummary,
     });
   }, [JSON.stringify(dataTableItem)]);
 
   function formatRupiah(number) {
     return number.toLocaleString("id-ID") + ",-";
   }
+
+  function roundValue(value) {
+    const decimal = value - Math.floor(value);
+    return decimal >= 0.5 ? Math.ceil(value) : Math.floor(value);
+  }
+
   return (
     <>
       <div className="w-full flex flex-col gap-4">

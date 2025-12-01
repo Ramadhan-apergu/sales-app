@@ -48,21 +48,37 @@ import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import SalesOrderSelect from "./SalesOrderSelect";
 import { deliveryOrderAliases } from "@/utils/aliases";
 
-function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
+function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
+  const allCheckableItems = data;
+  const isAllChecked =
+    allCheckableItems.length > 0 &&
+    allCheckableItems.every((item) => item.apply);
+
   const columns = [
     ...keys.map((key) => {
       if (key === "apply") {
         return {
-          title: "Apply",
+          title: (
+            <Checkbox
+              indeterminate={
+                // ada yg checked tapi belum semua → indeterminate
+                allCheckableItems.some((item) => item.apply) && !isAllChecked
+              }
+              checked={isAllChecked}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                // lempar ke parent
+                onCheckAll?.(checked);
+              }}
+            />
+          ),
           key: "apply",
           align: "center",
           render: (_, record) => (
             <Checkbox
               checked={record.apply}
               onChange={(e) => {
-                if (!record.isfree) {
-                  onChecked(record.lineid, e.target.checked);
-                }
+                onChecked(record.lineid, e.target.checked);
               }}
             />
           ),
@@ -112,43 +128,38 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked }) {
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
-      summary={() => {
-        return (
-          <Table.Summary.Row>
-            {columns.map((col, index) => {
-              // Kolom pertama: tampilkan label "Total"
-              if (index === 0) {
-                return (
-                  <Table.Summary.Cell key={col.key || index} align="center">
-                    <b>Total</b>
-                  </Table.Summary.Cell>
-                );
-              }
-
-              // Cek apakah kolom ini quantity1 atau quantity2
-              if (col.dataIndex === "quantity1") {
-                return (
-                  <Table.Summary.Cell key={col.key || index} align="right">
-                    <b>{totalQuantity1.toLocaleString()}</b>
-                  </Table.Summary.Cell>
-                );
-              }
-              if (col.dataIndex === "quantity2") {
-                return (
-                  <Table.Summary.Cell key={col.key || index} align="right">
-                    <b>{totalQuantity2.toLocaleString()}</b>
-                  </Table.Summary.Cell>
-                );
-              }
-
-              // Kolom lainnya kosong
+      summary={() => (
+        <Table.Summary.Row>
+          {columns.map((col, index) => {
+            if (index === 0) {
               return (
-                <Table.Summary.Cell key={col.key || index}></Table.Summary.Cell>
+                <Table.Summary.Cell key={col.key || index} align="center">
+                  <b>Total</b>
+                </Table.Summary.Cell>
               );
-            })}
-          </Table.Summary.Row>
-        );
-      }}
+            }
+
+            if (col.dataIndex === "quantity1") {
+              return (
+                <Table.Summary.Cell key={col.key || index} align="right">
+                  <b>{totalQuantity1.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+            if (col.dataIndex === "quantity2") {
+              return (
+                <Table.Summary.Cell key={col.key || index} align="right">
+                  <b>{totalQuantity2.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+
+            return (
+              <Table.Summary.Cell key={col.key || index}></Table.Summary.Cell>
+            );
+          })}
+        </Table.Summary.Row>
+      )}
     />
   );
 }
@@ -232,7 +243,7 @@ function Enter({ salesOrderId }) {
         setDataSalesOrderItemRetrieve(soItemData);
         setDataTableItem(
           soItemData.map((item) => ({
-            apply: item.isfree ? true : false,
+            apply: false,
             displayname: item.displayname,
             id: item.id,
             itemid: item.itemid,
@@ -516,11 +527,17 @@ function Enter({ salesOrderId }) {
                 keys={keyTableItem}
                 aliases={deliveryOrderAliases.item}
                 onChecked={(lineid, isChecked) => {
-                  let updateDataTable = dataTableItem;
-
-                  updateDataTable = updateDataTable.map((item) => ({
+                  const updateDataTable = dataTableItem.map((item) => ({
                     ...item,
-                    apply: item.lineid == lineid ? isChecked : item.apply,
+                    apply: item.lineid === lineid ? isChecked : item.apply,
+                  }));
+
+                  setDataTableItem(updateDataTable);
+                }}
+                onCheckAll={(isChecked) => {
+                  const updateDataTable = dataTableItem.map((item) => ({
+                    ...item,
+                    apply: isChecked,
                   }));
 
                   setDataTableItem(updateDataTable);

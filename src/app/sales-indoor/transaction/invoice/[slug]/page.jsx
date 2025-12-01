@@ -322,11 +322,11 @@ export default function EnterPage() {
     dispatch({
       type: "SET_SUMMARY",
       payload: {
-        totalamount: data.totalamount,
-        discounttotal: data.discounttotal,
-        subtotal: data.subtotal,
-        taxtotal: data.taxtotal,
-        amount: data.amount,
+        totalamount: roundValue(data.totalamount),
+        discounttotal: roundValue(data.discounttotal),
+        subtotal: roundValue(data.subtotal),
+        taxtotal: roundValue(data.taxtotal),
+        amount: roundValue(data.amount),
       },
     });
 
@@ -344,6 +344,11 @@ export default function EnterPage() {
     );
 
     setDataTableItem(updatedInvoiceItems);
+  }
+
+  function roundValue(value) {
+    const decimal = value - Math.floor(value);
+    return decimal >= 0.5 ? Math.ceil(value) : Math.floor(value);
   }
 
   const shipAddressOptions = [
@@ -534,7 +539,7 @@ export default function EnterPage() {
                     </div>
                   </div>
                   <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
-                    <Button
+                    {/* <Button
                       icon={<EditOutlined />}
                       type={"primary"}
                       onClick={() => {
@@ -544,7 +549,7 @@ export default function EnterPage() {
                       }}
                     >
                       {isLargeScreen ? "Edit" : ""}
-                    </Button>
+                    </Button> */}
 
                     {contextHolder}
                     <Dropdown
