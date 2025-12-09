@@ -1,16 +1,19 @@
-import withPWA from '@ducanh2912/next-pwa';
+import withPWA from "@ducanh2912/next-pwa";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  // Kalau kamu ada config lain, taruh di sini juga
+  output: "standalone",
+
+  webpack(config) {
+    return config;
+  },
 };
 
 const pwaConfig = withPWA({
-  dest: 'public',
+  dest: "public",
   register: true,
   skipWaiting: true,
-  disable: false
+  disable: false,
 });
 
 export default pwaConfig(nextConfig);

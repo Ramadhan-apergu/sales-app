@@ -110,4 +110,16 @@ export default class ReportSo extends ProcessFetch {
       return new this().processError(error);
     }
   }
+
+  static async exportSales(payload) {
+    try {
+      const response = await this.axios.post(
+        "/report/penjualan/export",
+        payload
+      );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
 }
