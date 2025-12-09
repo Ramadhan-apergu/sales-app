@@ -2,7 +2,15 @@
 import Layout from "@/components/superAdmin/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { Modal, Pagination, Table, Select, DatePicker, Input } from "antd";
+import {
+  Modal,
+  Pagination,
+  Table,
+  Select,
+  DatePicker,
+  Input,
+  Button,
+} from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -15,6 +23,7 @@ import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { salesReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
 import ExportSalesReport from "@/components/superAdmin/ExportSalesReport";
+import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 50;
@@ -72,7 +81,7 @@ function SalesOrder() {
         const resData = getResponseHandler(response, notify);
 
         if (resData) {
-          setDatas(resData.list);
+          setDatas(resData?.list || []);
           setTotalItems(resData.total_items);
           setTableKeys(
             Array.isArray(resData.list) && resData.list.length > 0
@@ -159,8 +168,15 @@ function SalesOrder() {
             Sales Report
           </p>
         </div>
+        <div className="w-full flex justify-end">
+          <ExportButton
+            // disabled={!datas.length}
+            notify={notify}
+            filters={filters}
+          />
+        </div>
         <div className="w-full p-3 bg-gray-2 border border-gray-4 rounded-lg">
-          <div className="w-full flex flex-wrap gap-2">
+          <div className="w-full flex flex-wrap gap-2 justify-between">
             {/* Customer ID */}
             <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
               <label className="text-sm font-semibold text-gray-700">
@@ -247,6 +263,7 @@ function SalesOrder() {
             </div>
           </div>
         </div>
+
         {!isLoading ? (
           <>
             <div>
@@ -292,5 +309,58 @@ export default function SalesOrderPage() {
     <Suspense fallback={<LoadingSpinProcessing />}>
       <SalesOrder />
     </Suspense>
+  );
+}
+
+function ExportButton({ disabled = false, notify = null, filters = {} }) {
+  const [isloading, setIsloading] = useState(false);
+  const [linkdownload, setLinkdownload] = useState(null);
+
+  //   useEffect(() => {
+  //     setLinkdownload(null);
+  //   }, [filters]);
+
+  async function handleExport() {
+    try {
+      setIsloading(true);
+      const payload = {
+        // startdate: filters?.dateRange[0] || "",
+        // enddate: filters?.dateRange[1] || "",
+        // customerid: filters?.searchName || "",
+        // itemprocessfamily: filters?.itemprocessfamily || "",
+        // salesrep: filters?.salesrep || "",
+        // displayname: filters?.displayname || "",
+      };
+      const response = await ReportSo.exportSales(payload);
+
+      const resData = getResponseHandler(response, notify);
+      if (resData) {
+        setLinkdownload(resData.url);
+      }
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+  return (
+    <Button
+      onClick={() => {
+        if (linkdownload) {
+          window.open(linkdownload);
+        } else {
+          handleExport();
+        }
+      }}
+      type={linkdownload ? "primary" : ""}
+      disabled={disabled}
+      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
+      loading={isloading}
+    >
+      {linkdownload ? "Download" : "Export All"}
+    </Button>
   );
 }

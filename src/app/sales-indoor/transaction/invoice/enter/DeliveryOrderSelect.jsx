@@ -69,11 +69,13 @@ function DeliveryOrder() {
         );
 
         const resData = getResponseHandler(response, notify);
-        console.log(resData);
 
         if (resData) {
           setDatas(resData);
           setTotalItems(resData.length);
+        } else {
+          setDatas([]);
+          setTotalItems(0);
         }
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
