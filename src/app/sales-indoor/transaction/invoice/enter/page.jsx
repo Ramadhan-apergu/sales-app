@@ -492,16 +492,20 @@ function Enter({ fulfillmentId }) {
 
   useEffect(() => {
     if (!Array.isArray(dataTableItem)) return;
+    console.log(dataTableItem);
 
     const summary = dataTableItem.reduce(
       (acc, item) => {
         const amount = Number(item.amount) || 0;
         const subtotal = Number(item.subtotal) || 0;
+        const taxvalue = Number(item.taxvalue) || 0;
 
-        acc.totalamount += amount;
+        acc.totalamount += subtotal;
+        acc.subtotal += subtotal;
         if (item.isfree) {
           acc.discounttotal += subtotal;
         }
+        acc.taxtotal += taxvalue;
 
         return acc;
       },
@@ -515,9 +519,10 @@ function Enter({ fulfillmentId }) {
     );
 
     // Hitung subtotal & amount setelah looping
-    summary.subtotal = summary.totalamount - summary.discounttotal;
-    summary.amount = summary.subtotal;
+    summary.subtotal = summary.subtotal - summary.discounttotal;
+    summary.amount = summary.subtotal - summary.discounttotal;
 
+    console.log(summary);
     const roundedSummary = {
       totalamount: roundValue(summary.totalamount),
       discounttotal: roundValue(summary.discounttotal),
@@ -701,6 +706,7 @@ function Enter({ fulfillmentId }) {
                       >
                         Summary
                       </Divider>
+
                       <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
                         <div className="flex w-full">
                           <p className="w-1/2">Subtotal</p>
@@ -731,7 +737,7 @@ function Enter({ fulfillmentId }) {
                         <div className="flex w-full font-semibold">
                           <p className="w-1/2">Total</p>
                           <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.amount)}
+                            {formatRupiah(state.payloadSummary.subtotal)}
                           </p>
                         </div>
                       </div>
