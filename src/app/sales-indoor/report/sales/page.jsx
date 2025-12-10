@@ -170,7 +170,7 @@ function SalesOrder() {
         </div>
         <div className="w-full flex justify-end">
           <ExportButton
-            // disabled={!datas.length}
+            disabled={!datas.length}
             notify={notify}
             filters={filters}
           />
@@ -316,20 +316,20 @@ function ExportButton({ disabled = false, notify = null, filters = {} }) {
   const [isloading, setIsloading] = useState(false);
   const [linkdownload, setLinkdownload] = useState(null);
 
-  //   useEffect(() => {
-  //     setLinkdownload(null);
-  //   }, [filters]);
+    useEffect(() => {
+      setLinkdownload(null);
+    }, [filters]);
 
   async function handleExport() {
     try {
       setIsloading(true);
       const payload = {
-        // startdate: filters?.dateRange[0] || "",
-        // enddate: filters?.dateRange[1] || "",
-        // customerid: filters?.searchName || "",
-        // itemprocessfamily: filters?.itemprocessfamily || "",
-        // salesrep: filters?.salesrep || "",
-        // displayname: filters?.displayname || "",
+        startdate: filters?.dateRange[0] || "",
+        enddate: filters?.dateRange[1] || "",
+        customerid: filters?.searchName || "",
+        itemprocessfamily: filters?.itemprocessfamily || "",
+        salesrep: filters?.salesrep || "",
+        displayname: filters?.displayname || "",
       };
       const response = await ReportSo.exportSales(payload);
 
