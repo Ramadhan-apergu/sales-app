@@ -327,7 +327,11 @@ export default function Page() {
 
       const filteredDataTableSoItem = dataTableSoItem.filter(
         (soItem) =>
-          !dataTable.some((fulfillItem) => fulfillItem.item === soItem.item)
+          !dataTable.some(
+            (fulfillItem) =>
+              fulfillItem.item === soItem.item &&
+              fulfillItem.isfree === soItem.isfree
+          )
       );
 
       dataTable = [...dataTable, ...filteredDataTableSoItem];
