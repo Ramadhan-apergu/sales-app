@@ -36,8 +36,12 @@ function SalesOrder() {
   const pathname = usePathname();
   const { RangePicker } = DatePicker;
 
-  const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
-  const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
+  const [page, setPage] = useState(
+    parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10)
+  );
+  const [limit, setLimit] = useState(
+    parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10)
+  );
 
   const [datas, setDatas] = useState([]);
   const [dataCustomer, setDataCustomer] = useState([]);
@@ -56,6 +60,7 @@ function SalesOrder() {
     useNotification();
 
   function handleFilter(type, value) {
+    setPage(1);
     setFilters((prev) => ({
       ...prev,
       [type]: value,
@@ -316,9 +321,9 @@ function ExportButton({ disabled = false, notify = null, filters = {} }) {
   const [isloading, setIsloading] = useState(false);
   const [linkdownload, setLinkdownload] = useState(null);
 
-    useEffect(() => {
-      setLinkdownload(null);
-    }, [filters]);
+  useEffect(() => {
+    setLinkdownload(null);
+  }, [filters]);
 
   async function handleExport() {
     try {
