@@ -278,6 +278,7 @@ function Enter({ fulfillmentId }) {
         const soItemRes = await InvoiceFetch.getdOItemInv(fulfillmentData.id);
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch sales order items");
+        console.log(soItemData);
 
         setDataFulfillment(fulfillmentData);
         setDataSalesOrder(salesOrderData);
@@ -294,10 +295,6 @@ function Enter({ fulfillmentId }) {
         setDataSalesOrderItemRetrieve(soItemData);
         setDataTableItem(
           fulfillmentData.fulfillment_items.map((fulfillment) => {
-            const findItemSo = salesOrderData.sales_order_items.find(
-              (soItem) => soItem.item === fulfillment.item
-            );
-
             const itemSo = soItemData.find(
               (item) => item.item === fulfillment.item
             );
@@ -305,14 +302,14 @@ function Enter({ fulfillmentId }) {
             const displayname = itemSo?.displayname || "";
             const location = fulfillment?.location || "";
 
-            if (findItemSo) {
+            if (itemSo) {
               const quantity = fulfillment.quantity;
-              const rate = findItemSo.rate;
+              const rate = itemSo.rate;
               const amount = quantity * rate;
-              const totaldiscount = findItemSo.totaldiscount;
+              const totaldiscount = itemSo.totaldiscount;
               const subtotal = amount - totaldiscount;
-              const taxrate = findItemSo.taxrate;
-              const taxvalue = findItemSo.taxable
+              const taxrate = itemSo.taxrate;
+              const taxvalue = itemSo.taxable
                 ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
                 : 0;
 
