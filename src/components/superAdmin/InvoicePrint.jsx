@@ -285,7 +285,7 @@ export default function InvoicePrint({ data, dataTable }) {
 
         <div className="w-full flex border-r table-padding">
           <p className="break-words whitespace-normal w-[44%] border-x border-b">
-            Bank BCA: 383-148-7788 a.n CV Sukses Mandiri
+            Bank BCA: 383-250-8877 a.n SJAFRUDIN HARIS EFFENDI
           </p>
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
           <p className="break-words whitespace-normal w-[8%] text-right"></p>
