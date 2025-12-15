@@ -304,8 +304,14 @@ export default function Details() {
   ];
 
   const bankOptions = [
-    { label: "Bank BCA", value: "Bank BCA" },
-    { label: "Bank CIMB Niaga", value: "Bank CIMB Niaga" },
+    {
+      label: "Bank BCA - CV SUKSES MANDIRI - 3831487788",
+      value: "Bank BCA/CV SUKSES MANDIRI/3831487788",
+    },
+    {
+      label: "Bank BCA - SJAFRUDIN HARIS EFFENDI - 3832508877",
+      value: "Bank BCA/SJAFRUDIN HARIS EFFENDI/3832508877",
+    },
   ];
 
   const keyTableItem = [

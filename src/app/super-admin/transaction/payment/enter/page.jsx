@@ -112,10 +112,7 @@ function TableCustom({ data, keys, aliases, onChange, onChangeAmount }) {
                       parser={(val) => (val ? val.replace(/[^\d]/g, "") : "")}
                       onChange={(value) => {
                         const rawValue = String(value).replace(/[^\d]/g, "");
-                        const rawDue = String(record.due).replace(
-                          /[^\d]/g,
-                          ""
-                        );
+                        const rawDue = String(record.due).replace(/[^\d]/g, "");
                         if (
                           rawValue.length <= rawDue.length &&
                           Number(rawValue) < Number(rawDue)
@@ -219,7 +216,7 @@ export default function Enter() {
       gironumber: "",
       payment: 0,
       depositedate: "",
-      bankaccount: "Bank BCA",
+      bankaccount: "Bank BCA/CV SUKSES MANDIRI/3831487788",
     },
     payloadPaymentApplies: [],
     dataTableItem: [],
@@ -277,8 +274,14 @@ export default function Enter() {
   ];
 
   const bankOptions = [
-    { label: "Bank BCA", value: "Bank BCA" },
-    { label: "Bank CIMB Niaga", value: "Bank CIMB Niaga" },
+    {
+      label: "Bank BCA - CV SUKSES MANDIRI - 3831487788",
+      value: "Bank BCA/CV SUKSES MANDIRI/3831487788",
+    },
+    {
+      label: "Bank BCA - SJAFRUDIN HARIS EFFENDI - 3832508877",
+      value: "Bank BCA/SJAFRUDIN HARIS EFFENDI/3832508877",
+    },
   ];
 
   const keyTableItem = [

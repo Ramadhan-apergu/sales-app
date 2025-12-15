@@ -296,7 +296,9 @@ function Enter({ fulfillmentId }) {
         setDataTableItem(
           fulfillmentData.fulfillment_items.map((fulfillment) => {
             const itemSo = soItemData.find(
-              (item) => item.item === fulfillment.item
+              (item) =>
+                item.item === fulfillment.item &&
+                item.isfree == fulfillment.isfree
             );
 
             const displayname = itemSo?.displayname || "";

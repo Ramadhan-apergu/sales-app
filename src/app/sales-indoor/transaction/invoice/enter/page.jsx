@@ -278,6 +278,7 @@ function Enter({ fulfillmentId }) {
         const soItemRes = await InvoiceFetch.getdOItemInv(fulfillmentData.id);
         let soItemData = getResponseHandler(soItemRes);
         if (!soItemData) throw new Error("Failed to fetch sales order items");
+        console.log(soItemData);
 
         setDataFulfillment(fulfillmentData);
         setDataSalesOrder(salesOrderData);
@@ -295,7 +296,9 @@ function Enter({ fulfillmentId }) {
         setDataTableItem(
           fulfillmentData.fulfillment_items.map((fulfillment) => {
             const itemSo = soItemData.find(
-              (item) => item.item === fulfillment.item
+              (item) =>
+                item.item === fulfillment.item &&
+                item.isfree == fulfillment.isfree
             );
 
             const displayname = itemSo?.displayname || "";
