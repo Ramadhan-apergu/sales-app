@@ -308,7 +308,7 @@ export default function Page() {
         const updateItem = {
           ...item,
           lineid: crypto.randomUUID(),
-          apply: item.isfree ? true : false,
+          apply: false,
           itemid: item?.itemid || "",
           item: item?.id || "",
           displayname: item?.displayname || "",
