@@ -517,7 +517,7 @@ export default function Enter() {
     setSummary({
       subtotalbruto: totalAmount,
       subtotal: subTotal,
-      discounttotal: totalDiscount,
+      discounttotal: 0,
       total: subTotal,
       taxtotal: 0,
     });
@@ -938,15 +938,15 @@ export default function Enter() {
                 <div className="flex w-full">
                   <p className="w-1/2">Subtotal</p>
                   <p className="w-1/2 text-end">
-                    {formatRupiah(summary.subtotalbruto)}
+                    {formatRupiah(summary.subtotal)}
                   </p>
                 </div>
-                <div className="flex w-full">
+                {/* <div className="flex w-full">
                   <p className="w-1/2">Discount Item</p>
                   <p className="w-1/2 text-end">
                     {formatRupiah(summary.discounttotal)}
                   </p>
-                </div>
+                </div> */}
                 <hr className="border-gray-5" />
                 <div className="flex w-full font-semibold">
                   <p className="w-1/2">Total Inc PPN</p>
