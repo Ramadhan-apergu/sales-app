@@ -718,15 +718,15 @@ export default function Detail() {
                         <div className="flex w-full">
                           <p className="w-1/2">Subtotal</p>
                           <p className="w-1/2 text-end">
-                            {formatRupiah(state.payloadSummary.subtotalbruto)}
+                            {formatRupiah(state.payloadSummary.subtotal)}
                           </p>
                         </div>
-                        <div className="flex w-full">
+                        {/* <div className="flex w-full">
                           <p className="w-1/2">Discount Item</p>
                           <p className="w-1/2 text-end">
                             {formatRupiah(state.payloadSummary.discounttotal)}
                           </p>
-                        </div>
+                        </div> */}
                         {/* <div className="flex w-full">
                           <p className="w-1/2">Subtotal (After Discount)</p>
                           <p className="w-1/2 text-end">
