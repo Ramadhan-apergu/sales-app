@@ -60,8 +60,6 @@ export default function InvoicePrint({ data, dataTable }) {
         quantity2: acc.quantity2 + (Number(item.quantity2) || 0),
         dpp: acc.dpp + (Number(item.dpp) || 0),
         taxvalue: acc.taxvalue + (Number(item.taxvalue) || 0),
-        totaldiscount:
-          acc.totaldiscount + (item.isfree ? Number(item.subtotal) || 0 : 0),
         subtotal: acc.subtotal + (Number(item.subtotal) || 0),
       }),
       {
@@ -70,15 +68,12 @@ export default function InvoicePrint({ data, dataTable }) {
         quantity2: 0,
         dpp: 0,
         taxvalue: 0,
-        totaldiscount: 0,
         subtotal: 0,
       }
     );
 
     // Hitung ulang subtotal dikurangi totaldiscount
-    total.subtotal = total.subtotal - total.totaldiscount;
-
-    setCount(total);
+    setCount({ ...total, totaldiscount: data?.discounttotal || 0 });
   }, [dataTable]);
 
   return (
@@ -219,7 +214,7 @@ export default function InvoicePrint({ data, dataTable }) {
             </div>
           ))}
 
-        <div className="w-full flex border-r table-padding">
+        <div className="w-full flex table-padding">
           <p className="break-words whitespace-normal w-[7%] text-right"></p>
           <p className="break-words whitespace-normal w-[28%]"></p>
           <p className="border-b border-x break-words whitespace-normal w-[10%] text-right">
@@ -229,12 +224,8 @@ export default function InvoicePrint({ data, dataTable }) {
             KG
           </p>
           <p className="break-words whitespace-normal w-[14%] text-right"></p>
-          <p className="border-r break-words whitespace-normal w-[14%] text-right">
-            Jumlah
-          </p>
-          <p className="break-words border-b whitespace-normal w-[17%] text-right">
-            {formatRupiah(count.amount)}
-          </p>
+          <p className="break-words whitespace-normal w-[14%] text-right"></p>
+          <p className="break-words whitespace-normal w-[17%] text-right"></p>
         </div>
 
         <div className="w-full flex border-r table-padding">
@@ -247,7 +238,7 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="border-r break-words whitespace-normal w-[14%] text-right">
             Diskon
           </p>
-          <p className="break-words border-b whitespace-normal w-[17%] text-right">
+          <p className="break-words border-b border-t whitespace-normal w-[17%] text-right">
             {formatRupiah(count.totaldiscount)}
           </p>
         </div>
