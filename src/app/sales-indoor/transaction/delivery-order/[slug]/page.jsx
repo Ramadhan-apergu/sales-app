@@ -257,9 +257,9 @@ export default function Page() {
       case "1":
         window.print();
         break;
-      //   case "2":
-      //     deleteModal();
-      //     break;
+      case "2":
+        deleteModal();
+        break;
       default:
         console.warn("Unhandled action:", key);
     }
@@ -269,31 +269,31 @@ export default function Page() {
     router.push(`/sales-indoor/transaction/${title}/${data.id}/edit`);
   };
 
-  //   const deleteModal = () => {
-  //     modal.confirm({
-  //       title: `Cancel ${title} "${data.customer}"?`,
-  //       content: "This action cannot be undone.",
-  //       okText: "Yes",
-  //       cancelText: "Cancel",
-  //       onOk: () => {
-  //         handleDelete(data.id);
-  //       },
-  //     });
-  //   };
+  const deleteModal = () => {
+    modal.confirm({
+      title: `Cancel ${title} "${data.customer}"?`,
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      cancelText: "Cancel",
+      onOk: () => {
+        handleDelete(data.id);
+      },
+    });
+  };
 
-  //   const handleDelete = async (id) => {
-  //     try {
-  //       const response = await FullfillmentFetch.delete(id);
+  const handleDelete = async (id) => {
+    try {
+      const response = await FullfillmentFetch.updateCancel(id);
 
-  //       const resData = deleteResponseHandler(response, notify);
+      const resData = deleteResponseHandler(response, notify);
 
-  //       if (resData) {
-  //         router.push(`/sales-indoor/master-data/${title}`);
-  //       }
-  //     } catch (error) {
-  //       notify("error", "Error", error?.message || "Internal Server error");
-  //     }
-  //   };
+      if (resData) {
+        router.refresh();
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    }
+  };
 
   const [modal, contextHolder] = Modal.useModal();
 
@@ -302,11 +302,14 @@ export default function Page() {
       key: "1",
       label: "Print",
     },
-    // {
-    //   key: "2",
-    //   label: "Delete",
-    //   danger: true,
-    // },
+    {
+      key: "2",
+      label: "Cancel",
+      danger: true,
+      disabled: ["canceled", "shiped"].includes(
+        data?.shipstatus?.toLocaleLowerCase() || ""
+      ),
+    },
   ];
 
   return (
