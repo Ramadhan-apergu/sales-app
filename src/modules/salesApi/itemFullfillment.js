@@ -52,7 +52,7 @@ export default class FullfillmentFetch extends ProcessFetch {
     }
   }
 
-    static async delete(id) {
+  static async delete(id) {
     try {
       const response = await this.axios.delete(
         `/trx/item-fulfillment/${id}`,
@@ -64,11 +64,22 @@ export default class FullfillmentFetch extends ProcessFetch {
     }
   }
 
-    static async bulkUpdateStatus(payload) {
+  static async bulkUpdateStatus(payload) {
     try {
       const response = await this.axios.put(
         `/trx/bulk-fulfillment-status`,
         payload
+      );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
+  static async updateCancel(id) {
+    try {
+      const response = await this.axios.put(
+        `/trx/item-fulfillment-cancel/${id}`
       );
       return new this().processResponse(response);
     } catch (error) {
