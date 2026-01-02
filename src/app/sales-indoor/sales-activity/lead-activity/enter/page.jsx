@@ -237,7 +237,7 @@ export default function Enter() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              Lead Activity Enter
+              Activity Enter
             </p>
             <Button
               icon={<UnorderedListOutlined />}

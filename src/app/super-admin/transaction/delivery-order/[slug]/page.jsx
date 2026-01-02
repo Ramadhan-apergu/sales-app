@@ -359,6 +359,7 @@ export default function Page() {
                     </div>
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
+                        disabled={data?.shipstatus?.toLowerCase() == "canceled"}
                         icon={<FileAddOutlined />}
                         type={"primary"}
                         onClick={() => {
@@ -371,7 +372,9 @@ export default function Page() {
                       </Button>
 
                       <Button
-                        disabled={data?.shipstatus?.toLowerCase() == "shipped"}
+                        disabled={["shipped", "canceled"].includes(
+                          data?.shipstatus?.toLowerCase()
+                        )}
                         icon={<EditOutlined />}
                         type={"primary"}
                         onClick={handleEdit}
