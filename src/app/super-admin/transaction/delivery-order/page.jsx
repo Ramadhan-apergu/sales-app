@@ -176,7 +176,9 @@ function DeliveryOrder() {
       render: (_, record) => (
         <div className="flex flex-col justify-center items-center gap-2">
           <Button
-            disabled={record?.shipstatus?.toLowerCase() == "shipped"}
+            disabled={["shipped", "canceled"].includes(
+              record?.shipstatus?.toLowerCase()
+            )}
             type={"link"}
             size="small"
             icon={<EditOutlined />}
