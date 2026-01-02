@@ -289,7 +289,10 @@ export default function Page() {
       const resData = updateResponseHandler(response, notify);
 
       if (resData) {
-        router.refresh();
+        setData((prev) => ({
+          ...prev,
+          shipstatus: "canceled",
+        }));
       }
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");
