@@ -21,56 +21,58 @@ export default function InvoicePrint({ data, dataTable }) {
     });
     setCurrentDate(date);
 
-    const mergedData = Object.values(
-      dataTable.reduce((acc, curr) => {
-        const key = curr.item;
+    // const mergedData = Object.values(
+    //   dataTable.reduce((acc, curr) => {
+    //     const key = curr.item;
 
-        if (!acc[key]) {
-          acc[key] = { ...curr };
-        } else {
-          // pastikan default 0
-          acc[key].quantity = (acc[key].quantity || 0) + (curr.quantity || 0);
-          acc[key].quantity2 =
-            (acc[key].quantity2 || 0) + (curr.quantity2 || 0);
+    //     if (!acc[key]) {
+    //       acc[key] = { ...curr };
+    //     } else {
+    //       // pastikan default 0
+    //       acc[key].quantity = (acc[key].quantity || 0) + (curr.quantity || 0);
+    //       acc[key].quantity2 =
+    //         (acc[key].quantity2 || 0) + (curr.quantity2 || 0);
 
-          // kalau curr.isfree === 1 → tambah 0
-          const subtotalToAdd = curr.isfree ? 0 : curr.subtotal || 0;
-          acc[key].subtotal = (acc[key].subtotal || 0) + subtotalToAdd;
+    //       // kalau curr.isfree === 1 → tambah 0
+    //       const subtotalToAdd = curr.isfree ? 0 : curr.subtotal || 0;
+    //       acc[key].subtotal = (acc[key].subtotal || 0) + subtotalToAdd;
 
-          // gabungkan memo dengan koma, hindari koma dobel
-          const existingMemo = acc[key].memo?.trim();
-          const newMemo = curr.memo?.trim();
-          if (newMemo) {
-            acc[key].memo = existingMemo
-              ? `${existingMemo}, ${newMemo}`
-              : newMemo;
-          }
+    //       // gabungkan memo dengan koma, hindari koma dobel
+    //       const existingMemo = acc[key].memo?.trim();
+    //       const newMemo = curr.memo?.trim();
+    //       if (newMemo) {
+    //         acc[key].memo = existingMemo
+    //           ? `${existingMemo}, ${newMemo}`
+    //           : newMemo;
+    //       }
+    //     }
+
+    //     return acc;
+    //   }, {})
+    // );
+
+    setMergeDataTable(dataTable);
+
+    const total = dataTable
+      .filter((item) => item.isfree == 0)
+      .reduce(
+        (acc, item) => ({
+          amount: acc.amount + (Number(item.amount) || 0),
+          quantity: acc.quantity + (Number(item.quantity) || 0),
+          quantity2: acc.quantity2 + (Number(item.quantity2) || 0),
+          dpp: acc.dpp + (Number(item.dpp) || 0),
+          taxvalue: acc.taxvalue + (Number(item.taxvalue) || 0),
+          subtotal: acc.subtotal + (Number(item.subtotal) || 0),
+        }),
+        {
+          amount: 0,
+          quantity: 0,
+          quantity2: 0,
+          dpp: 0,
+          taxvalue: 0,
+          subtotal: 0,
         }
-
-        return acc;
-      }, {})
-    );
-
-    setMergeDataTable(mergedData);
-
-    const total = mergedData.reduce(
-      (acc, item) => ({
-        amount: acc.amount + (Number(item.amount) || 0),
-        quantity: acc.quantity + (Number(item.quantity) || 0),
-        quantity2: acc.quantity2 + (Number(item.quantity2) || 0),
-        dpp: acc.dpp + (Number(item.dpp) || 0),
-        taxvalue: acc.taxvalue + (Number(item.taxvalue) || 0),
-        subtotal: acc.subtotal + (Number(item.subtotal) || 0),
-      }),
-      {
-        amount: 0,
-        quantity: 0,
-        quantity2: 0,
-        dpp: 0,
-        taxvalue: 0,
-        subtotal: 0,
-      }
-    );
+      );
 
     // Hitung ulang subtotal dikurangi totaldiscount
     setCount({ ...total, totaldiscount: data?.discounttotal || 0 });
@@ -176,7 +178,7 @@ export default function InvoicePrint({ data, dataTable }) {
             Harga
           </p>
           <p className="border-r break-words whitespace-normal w-[14%] text-right">
-            Diskon
+            Potongan
           </p>
           <p className="break-words whitespace-normal w-[17%] text-right">
             Jumlah
@@ -214,31 +216,20 @@ export default function InvoicePrint({ data, dataTable }) {
             </div>
           ))}
 
-        <div className="w-full flex table-padding">
+        <div className="w-full flex border-r table-padding">
           <p className="break-words whitespace-normal w-[7%] text-right"></p>
           <p className="break-words whitespace-normal w-[28%]"></p>
           <p className="border-b border-x break-words whitespace-normal w-[10%] text-right">
             {count.quantity}
           </p>
-          <p className="break-words whitespace-normal w-[10%] text-right border-b border-r">
+          <p className="break-words whitespace-normal w-[10%] text-right border-b">
             KG
           </p>
-          <p className="break-words whitespace-normal w-[14%] text-right"></p>
-          <p className="break-words whitespace-normal w-[14%] text-right"></p>
-          <p className="break-words whitespace-normal w-[17%] text-right"></p>
-        </div>
-
-        <div className="w-full flex border-r table-padding">
-          <p className="break-words whitespace-normal w-[7%] text-right"></p>
-          <p className="break-words whitespace-normal w-[28%]"></p>
-          <p className="break-words whitespace-normal w-[10%]"></p>
-          <p className="break-words whitespace-normal w-[10%] text-right"></p>
-
-          <p className="break-words whitespace-normal w-[14%] text-right"></p>
+          <p className="break-words whitespace-normal w-[14%] text-right border-l"></p>
           <p className="border-r break-words whitespace-normal w-[14%] text-right">
-            Diskon
+            ADD DISC
           </p>
-          <p className="break-words border-b border-t whitespace-normal w-[17%] text-right">
+          <p className="break-words border-b whitespace-normal w-[17%] text-right">
             {formatRupiah(count.totaldiscount)}
           </p>
         </div>

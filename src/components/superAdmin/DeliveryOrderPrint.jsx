@@ -192,7 +192,9 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         <div className="w-full flex table-padding border-r border-white font-semibold">
           <p className="break-words whitespace-normal w-[5%] text-right"></p>
           {/* <p className="break-words whitespace-normal w-[25%]"></p> */}
-          <p className="break-words whitespace-normal w-[25%] border-l border-b">Total Qty</p>
+          <p className="break-words whitespace-normal w-[25%] border-l border-b">
+            Total Qty
+          </p>
           <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
             {count.qty}
           </p>
@@ -200,7 +202,9 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
             {"-"}
           </p>
           <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
-            {count.qty2}
+            {Math.floor((count.qty2 * 100) % 100) >= 50
+              ? Math.ceil(count.qty2)
+              : Math.floor(count.qty2)}
           </p>
           <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
             {"-"}
