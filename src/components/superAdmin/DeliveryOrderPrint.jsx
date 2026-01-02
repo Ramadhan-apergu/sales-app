@@ -202,9 +202,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
             {"-"}
           </p>
           <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
-            {Math.floor((count.qty2 * 100) % 100) >= 50
-              ? Math.ceil(count.qty2)
-              : Math.floor(count.qty2)}
+            {(Math.round((count.qty2 + Number.EPSILON) * 100) / 100).toFixed(2)}
           </p>
           <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
             {"-"}
