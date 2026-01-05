@@ -86,11 +86,16 @@ function SalesOrder() {
         const resData = getResponseHandler(response, notify);
 
         if (resData) {
-          setDatas(resData?.list || []);
+          const updateData =
+            resData?.list.map((item, i) => ({
+              no: i + 1,
+              ...item,
+            })) || [];
+          setDatas(updateData);
           setTotalItems(resData.total_items);
           setTableKeys(
-            Array.isArray(resData.list) && resData.list.length > 0
-              ? Object.keys(resData.list[0]).filter((item) => item != "id")
+            Array.isArray(updateData) && updateData.length > 0
+              ? Object.keys(updateData[0]).filter((item) => item != "id")
               : []
           );
         }
