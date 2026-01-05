@@ -53,26 +53,28 @@ export default function InvoicePrint({ data, dataTable }) {
 
     setMergeDataTable(dataTable);
 
-    const total = dataTable
-      .filter((item) => item.isfree == 0)
-      .reduce(
-        (acc, item) => ({
-          amount: acc.amount + (Number(item.amount) || 0),
+    const total = dataTable.reduce(
+      (acc, item) => {
+        const isFree = item.isfree == 1;
+
+        return {
+          amount: acc.amount + (isFree ? 0 : Number(item.amount) || 0),
           quantity: acc.quantity + (Number(item.quantity) || 0),
           quantity2: acc.quantity2 + (Number(item.quantity2) || 0),
-          dpp: acc.dpp + (Number(item.dpp) || 0),
-          taxvalue: acc.taxvalue + (Number(item.taxvalue) || 0),
-          subtotal: acc.subtotal + (Number(item.subtotal) || 0),
-        }),
-        {
-          amount: 0,
-          quantity: 0,
-          quantity2: 0,
-          dpp: 0,
-          taxvalue: 0,
-          subtotal: 0,
-        }
-      );
+          dpp: acc.dpp + (isFree ? 0 : Number(item.dpp) || 0),
+          taxvalue: acc.taxvalue + (isFree ? 0 : Number(item.taxvalue) || 0),
+          subtotal: acc.subtotal + (isFree ? 0 : Number(item.subtotal) || 0),
+        };
+      },
+      {
+        amount: 0,
+        quantity: 0,
+        quantity2: 0,
+        dpp: 0,
+        taxvalue: 0,
+        subtotal: 0,
+      }
+    );
 
     // Hitung ulang subtotal dikurangi totaldiscount
     setCount({ ...total, totaldiscount: data?.discounttotal || 0 });
