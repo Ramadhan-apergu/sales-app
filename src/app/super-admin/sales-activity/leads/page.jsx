@@ -146,13 +146,13 @@ function Lead() {
       render: (text, record) => (
         <Tag
           color={
-            ["qualified"].includes(record.status.toLowerCase())
+            ["qualified"].includes((record.status || "").toLowerCase())
               ? "green"
               : ["engaged", "prospecting", "Negotiating"].includes(
-                  record.status.toLowerCase()
+                  (record.status || "").toLowerCase()
                 )
               ? "orange"
-              : ["closed"].includes(record.status.toLowerCase())
+              : ["closed"].includes((record.status || "").toLowerCase())
               ? "red"
               : "default"
           }
