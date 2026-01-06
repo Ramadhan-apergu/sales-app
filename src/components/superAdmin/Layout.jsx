@@ -253,6 +253,50 @@ const menuItems = [
     ],
   },
   {
+    key: "sub6",
+    icon: <UnlockOutlined />,
+    label: "Access Control",
+    children: [
+      {
+        key: `${prefix}/access-control/user`,
+        label: "User",
+        path: `${prefix}/access-control/user`,
+      },
+    ],
+  },
+  {
+    key: "sub7",
+    icon: <StockOutlined />,
+    label: "Sales Activity",
+    children: [
+      {
+        key: `${prefix}/sales-activity/dashboard`,
+        label: "Dashboard",
+        path: `${prefix}/sales-activity/dashboard`,
+      },
+      {
+        key: `${prefix}/sales-activity/target`,
+        label: "Target",
+        path: `${prefix}/sales-activity/target`,
+      },
+      {
+        key: `${prefix}/sales-activity/leads`,
+        label: "Leads",
+        path: `${prefix}/sales-activity/leads`,
+      },
+      {
+        key: `${prefix}/sales-activity/lead-activity`,
+        label: "Lead Activity",
+        path: `${prefix}/sales-activity/lead-activity`,
+      },
+      {
+        key: `${prefix}/sales-activity/log-activity`,
+        label: "Log Activity",
+        path: `${prefix}/sales-activity/log-activity`,
+      },
+    ],
+  },
+  {
     key: `logout`,
     icon: <LogoutOutlined />,
     label: "Logout",
@@ -415,9 +459,8 @@ const LayoutAdmin = ({ children }) => {
           >
             <Sider
               width={200}
-              className={`layout-sider ${
-                isLargeScreen ? "block-sider" : "hidden-sider"
-              }`}
+              className={`layout-sider ${isLargeScreen ? "block-sider" : "hidden-sider"
+                }`}
               style={{ background: colorBgContainer }}
             >
               <Menu
