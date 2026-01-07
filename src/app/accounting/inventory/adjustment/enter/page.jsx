@@ -14,7 +14,7 @@ import {
   Table,
   Tooltip,
 } from "antd";
-import Layout from "@/components/salesIndoor/Layout";
+import Layout from "@/components/accounting/Layout";
 import {
   CheckOutlined,
   InfoCircleOutlined,
@@ -276,7 +276,7 @@ export default function Enter() {
       const resData = createResponseHandler(response, notify);
 
       if (resData) {
-        router.push(`/sales-indoor/inventory/${title}`);
+        router.push(`/accounting/inventory/${title}`);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -297,7 +297,7 @@ export default function Enter() {
               icon={<UnorderedListOutlined />}
               type="link"
               onClick={() => {
-                router.push(`/sales-indoor/inventory/${title}`);
+                router.push(`/accounting/inventory/${title}`);
               }}
             >
               {isLargeScreen ? "List" : ""}
