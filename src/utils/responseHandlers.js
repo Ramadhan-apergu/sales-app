@@ -5,7 +5,12 @@ function handleUnauthorized(notifyFn) {
   //   Cookies.remove("u_ctx", { path: "/" });
   //   Cookies.remove("role", { path: "/" });
 
-  callNotify(notifyFn, "error", "Session Expired", "Please log in again.");
+  callNotify(
+    notifyFn,
+    "error",
+    "Unauthorized",
+    "Forbidden Access For This Role"
+  );
 
   //   window.location.href = "/auth/login";
 }

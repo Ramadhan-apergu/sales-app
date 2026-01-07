@@ -1,0 +1,302 @@
+"use client";
+import Layout from "@/components/accounting/Layout";
+import {
+  CheckOutlined,
+  DeliveredProcedureOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import useContainerHeight from "@/hooks/useContainerHeight";
+import {
+  Button,
+  Modal,
+  Pagination,
+  Table,
+  Tag,
+  Select,
+  DatePicker,
+  Checkbox,
+} from "antd";
+import { Suspense, useEffect, useState } from "react";
+
+import Link from "next/link";
+import useNotification from "@/hooks/useNotification";
+import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+import {
+  createResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
+import SalesOrderFetch from "@/modules/salesApi/salesOrder";
+import { formatDateToShort } from "@/utils/formatDate";
+import CustomerFetch from "@/modules/salesApi/customer";
+import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 50;
+
+function DeliveryOrder() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isLargeScreen = useBreakpoint("lg");
+  const { RangePicker } = DatePicker;
+
+  const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
+  const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
+  const offset = page - 1;
+
+  const [datas, setDatas] = useState([]);
+  const [dataCustomer, setDataCustomer] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isLoading, setIsloading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [modal, contextHolder] = Modal.useModal();
+  const [searchName, setSearchName] = useState("");
+  const [dateRange, setDateRange] = useState(["", ""]);
+  const title = "delivery-order";
+  const { notify, contextHolder: notificationContextHolder } =
+    useNotification();
+  const [isRefetch, setIsRefetch] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsloading(true);
+
+        const response = await FullfillmentFetch.get(0, 10000, "open");
+
+        const resData = getResponseHandler(response, notify);
+
+        if (resData) {
+          setDatas(resData.list);
+          setTotalItems(resData.total_items);
+        }
+      } catch (error) {
+        notify("error", "Error", error?.message || "Internal Server error");
+      } finally {
+        setIsloading(false);
+      }
+    };
+
+    fetchData();
+  }, [isRefetch]);
+
+  const handleEdit = (record) => {
+    router.push(`/accounting/transaction/${title}/${record.id}/edit`);
+  };
+
+  const [idsSelected, setIdsSelected] = useState([]);
+
+  const handleSelect = (id, checked) => {
+    setIdsSelected((prev) =>
+      checked ? [...prev, id] : prev.filter((item) => item !== id)
+    );
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const allIds = datas.map((item) => item.id);
+      setIdsSelected(allIds);
+    } else {
+      setIdsSelected([]);
+    }
+  };
+
+  const columns = [
+    {
+      title: (
+        <Checkbox
+          checked={idsSelected.length === datas.length && datas.length > 0}
+          indeterminate={
+            idsSelected.length > 0 && idsSelected.length < datas.length
+          }
+          onChange={(e) => handleSelectAll(e.target.checked)}
+        />
+      ),
+      dataIndex: "checkbox",
+      key: "checkbox",
+      width: 50,
+      render: (_, record) => (
+        <Checkbox
+          checked={idsSelected.includes(record.id)}
+          onChange={(e) => handleSelect(record.id, e.target.checked)}
+        />
+      ),
+    },
+    {
+      title: "No. DO",
+      dataIndex: "tranid",
+      key: "tranid",
+      fixed: isLargeScreen ? "left" : "",
+      render: (text, record) => (
+        <Link href={`/accounting/transaction/${title}/${record.id}`}>
+          {text || "-"}
+        </Link>
+      ),
+    },
+    {
+      title: "Date",
+      dataIndex: "trandate",
+      key: "trandate",
+      render: (text) => <p>{formatDateToShort(text)}</p>,
+    },
+    {
+      title: "Sales Rep",
+      dataIndex: "salesrep",
+      key: "salesrep",
+    },
+    {
+      title: "Customer",
+      dataIndex: "customer",
+      key: "customer",
+    },
+    {
+      title: "Status",
+      dataIndex: "shipstatus",
+      key: "shipstatus",
+      render: (text, record) => (
+        <Tag
+          className="capitalize"
+          color={
+            record.shipstatus.toLocaleLowerCase() == "shipped"
+              ? "green"
+              : "default"
+          }
+        >
+          {text}
+        </Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      fixed: "right",
+      align: "right",
+      width: isLargeScreen ? 87 : 30,
+      render: (_, record) => (
+        <div className="flex justify-center items-center gap-2">
+          <Button
+            type={"link"}
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            {isLargeScreen ? "Edit" : ""}
+          </Button>
+          {contextHolder}
+        </div>
+      ),
+    },
+  ];
+
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsLoadingSubmit(true);
+    try {
+      if (idsSelected.length === 0) {
+        throw new Error("Please select at least one item first.");
+      }
+
+      const payload = {
+        shipstatus: "Shipped",
+        id: idsSelected,
+      };
+
+      const response = await FullfillmentFetch.bulkUpdateStatus(payload);
+
+      const resData = createResponseHandler(response, notify);
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+      setIsLoadingSubmit(false);
+      setIsRefetch(!isRefetch);
+      setIdsSelected([]);
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex justify-between items-center">
+          <p className="text-xl lg:text-2xl font-semibold text-blue-6">
+            Delivery Order Bulk Ship
+          </p>
+          <Button
+            icon={<UnorderedListOutlined />}
+            type="link"
+            onClick={() => {
+              router.push(`/accounting/transaction/${title}`);
+            }}
+          >
+            {isLargeScreen ? "List" : ""}
+          </Button>
+        </div>
+        <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col lg:flex-row justify-between items-start">
+            <div className="w-full lg:w-1/2 flex gap-1"></div>
+            <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
+              <Button
+                type={"primary"}
+                icon={<CheckOutlined />}
+                onClick={handleSubmit}
+                disabled={datas.length == 0 || !datas}
+              >
+                {isLargeScreen ? "Submit" : ""}
+              </Button>
+            </div>
+          </div>
+        </div>
+        {!isLoading ? (
+          <>
+            <div>
+              <Table
+                rowKey={(record) => record.id}
+                size="small"
+                pagination={false}
+                columns={columns}
+                dataSource={datas}
+                scroll={{ x: "max-content" }}
+                bordered
+                tableLayout="auto"
+              />
+            </div>
+            <div>
+              <Pagination
+                total={totalItems}
+                defaultPageSize={limit}
+                defaultCurrent={page}
+                onChange={(newPage, newLimit) => {
+                  router.push(
+                    `/accounting/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                  );
+                }}
+                size="small"
+                align={"end"}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-96">
+            <LoadingSpin />
+          </div>
+        )}
+      </div>
+      {notificationContextHolder}
+      {isLoadingSubmit && <LoadingSpinProcessing />}
+    </Layout>
+  );
+}
+
+export default function DeliveryPage() {
+  return (
+    <Suspense fallback={<LoadingSpinProcessing />}>
+      <DeliveryOrder />
+    </Suspense>
+  );
+}
