@@ -1,5 +1,5 @@
 "use client";
-import Layout from "@/components/superAdmin/Layout";
+import Layout from "@/components/accounting/Layout";
 import SearchStatus from "@/components/superAdmin/SearchStatus";
 import useNotification from "@/hooks/useNotification";
 import DashboardFetch from "@/modules/salesApi/dashboard";
@@ -193,7 +193,7 @@ export default function Page() {
                         : "-"}
                     </p>
                   </Tooltipantd>
-                  <p className="text-sm text-blue-5">Kg</p>
+                  <p className="text-sm text-blue-5">Quantity</p>
                 </div>
               </div>
 
@@ -225,7 +225,7 @@ export default function Page() {
                         : "-"}
                     </p>
                   </Tooltipantd>
-                  <p className="text-sm text-blue-5">Kg</p>
+                  <p className="text-sm text-blue-5">Quantity</p>
                 </div>
               </div>
 
@@ -341,7 +341,7 @@ export default function Page() {
                         : "-"}
                     </p>
                   </Tooltipantd>
-                  <p className="text-sm text-blue-5">Kg</p>
+                  <p className="text-sm text-blue-5">Quantity</p>
                 </div>
               </div>
 

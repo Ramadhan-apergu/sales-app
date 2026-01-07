@@ -219,10 +219,10 @@ export default function Enter() {
       return;
     }
 
-    if (itemTableTemp.qty <= 0) {
+   /*if (itemTableTemp.qty <= 0) {
       notify("error", "Error", "Please enter a quantity greater than 0.");
       return;
-    }
+    }*/
 
     dispatch({
       type: "SET_STOCK",
