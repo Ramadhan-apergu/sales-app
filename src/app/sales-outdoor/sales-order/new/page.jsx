@@ -5,7 +5,9 @@ import {
   Checkbox,
   Collapse,
   Divider,
+  Flex,
   Form,
+  Input,
   List,
   Modal,
   Select,
@@ -17,6 +19,8 @@ import Layout from '@/components/salesOutdoor/Layout';
 import FixedHeaderBar from '@/components/salesOutdoor/FixedHeaderBar';
 import {
   CheckOutlined,
+  DeleteOutlined,
+  EditOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
@@ -35,57 +39,61 @@ import dayjs from "dayjs";
 import { truncate } from "lodash";
 
 const formatRupiah = (value) => {
-    const num = Number(value);
-    if (isNaN(num)) return 'Rp 0,-';
-    const numberCurrency = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(num);
-    return numberCurrency + ",-";
+  const num = Number(value);
+  if (isNaN(num)) return 'Rp 0,-';
+  const numberCurrency = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num);
+  return numberCurrency + ",-";
 };
 
 function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
   const keyTableItem = [
+    "itemid",
     "displayname",
     "quantity",
     "units",
     "rate",
-    "description",
-    "subtotal",
+    "taxrate",
     "totalamount",
     "totaldiscount",
-    "qtyfree",
-    "unitfree",
-    "taxable",
-    "taxrate",
-    "taxvalue",
-    "backordered",
+    "subtotal",
   ];
   const keTableName = [
-    "Item",
+    "Item Name/Number",
+    "Display Name",
     "Qty",
     "Unit",
     "Rate",
-    "Description",
-    "Total Amount (After Discount)",
+    "Tax Rate",
     "Total Amount",
     "Total Discount",
-    "Free Qty",
-    "Unit Free",
-    "Taxable",
-    "Tax Rate",
-    "Tax Value",
-    "Back Ordered"
-  ]
-  const columns = 
-  [
-      ...keyTableItem.map((key, index) => {
-      const title = keTableName[index]; 
+    "Total Amount (after discount)",
+  ];
+  const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      width: 50,
+      onHeaderCell: () => ({
+        className: 'text-sm text-center',
+        style: { textAlign: 'center' }
+      }),
+      onCell: () => ({
+        className: 'text-xs'
+      }),
+      render: (text, record, index) => index + 1,
+    },
+    ...keyTableItem.map((key, index) => {
+      const title = keTableName[index];
       const isDisplayName = key === 'displayname';
+      const isItemId = key === 'itemid';
       const column = {
-        title: title, 
+        title: title,
         dataIndex: key,
         key,
         align: [
@@ -94,24 +102,21 @@ function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
           'subtotal',
           'totalamount',
           'totaldiscount',
-          'qtyfree',
           'taxrate',
-          'taxvalue',
-          'backordered'
         ].includes(key) ? 'right' : 'left',
         onHeaderCell: () => ({
-          className: 'text-sm text-center', 
-          style: { textAlign: 'center' } 
+          className: 'text-sm text-center',
+          style: { textAlign: 'center' }
         }),
         onCell: () => ({
           className: 'text-xs'
         }),
         render: (text) => {
-          if (isDisplayName) {
+          if (isDisplayName || isItemId) {
             return (
               <Tooltip title={text}>
-                <div className="truncate" style={{ 
-                  maxWidth: '120px',
+                <div className="truncate" style={{
+                  maxWidth: '100px',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap'
@@ -123,23 +128,22 @@ function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
           }
           const shouldFormat = [
             'rate',
-            'value1',
-            'discountvalue1',
-            'value2',
-            'discountvalue2',
-            'value3',
-            'discountvalue3',
             'subtotal',
             'totalamount',
             'totaldiscount',
-            'taxvalue'
           ].includes(key);
           return shouldFormat ? formatRupiah(text) : text;
         }
       };
       if (isDisplayName) {
         column.fixed = 'left';
-        column.width = 120;
+        column.width = 100;
+        column.ellipsis = {
+          showTitle: false
+        };
+      }
+      if (isItemId) {
+        column.width = 100;
         column.ellipsis = {
           showTitle: false
         };
@@ -150,26 +154,35 @@ function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
       title: "Action",
       key: "action",
       align: "center",
+      fixed: 'right',
+      width: 80,
       render: (_, record) => (
-        <>
-          <Button type="link" onClick={() => onEdit(record)}>
-            Edit
-          </Button>
-          <Button type="link" onClick={() => onDelete(record)}>
-            Delete
-          </Button>
-        </>
+        <Flex gap={4} justify="center">
+          <Button
+            size="small"
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          />
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => onDelete(record)}
+          />
+        </Flex>
       ),
     }
-  ]
+  ];
   return (
     <Table
       columns={columns}
       dataSource={data}
-      rowKey="lineid"
+      rowKey="item"
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
+      size="small"
     />
   );
 }
@@ -197,7 +210,7 @@ export default function Enter() {
   useEffect(() => {
     async function fetchCustomer() {
       try {
-        const response = await CustomerFetch.get(0, 1000, "active");
+        const response = await CustomerFetch.get(0, 10000, "active");
         const resData = getResponseHandler(response);
         if (resData) {
           const addLabelCustomer = resData.list.map((customer) => {
@@ -216,7 +229,7 @@ export default function Enter() {
     fetchCustomer();
     async function fetchItem() {
       try {
-        const response = await ItemFetch.get(0, 1000);
+        const response = await ItemFetch.get(0, 10000);
         const resData = getResponseHandler(response);
         if (resData) {
           const addLabelItem = resData.list.map((item) => {
@@ -242,6 +255,7 @@ export default function Enter() {
       trandate: dayjs(new Date()),
       salesrep: "",
       otherrefnum: "",
+      isdropship: 0,
     },
     payloadSummary: {
       subtotalbruto: 0,
@@ -348,6 +362,11 @@ export default function Enter() {
     { label: "Credit", value: "credit" },
   ];
 
+  const dropshipOption = [
+    { label: "No", value: 0 },
+    { label: "Yes", value: 1 },
+  ];
+
   const keyTableItem = [
     "displayname",
     "quantity",
@@ -390,6 +409,8 @@ export default function Enter() {
       itemprocessfamily: "",
       stock: 0,
       itemid: "",
+      iseditable: 0,
+      iseditline: false,
     },
     discount1: {
       discount1: "",
@@ -514,10 +535,13 @@ export default function Enter() {
         payment_type: payment_type_params
           ? payment_type_params
           : state.payloadBilling.paymentoption,
+        isdropship: state.payloadPrimary.isdropship,
         sales_order_items: itemTable.map((item) => ({
           item_id: item.item,
           itemprocessfamily: item.itemprocessfamily,
           qty: item.quantity,
+          unit: item.units,
+          price: item.rate,
         })),
       };
       const response = await SalesOrderFetch.getCalDiscount(payload);
@@ -619,10 +643,10 @@ export default function Enter() {
     };
 
     // Hitung diskon sebelum menambahkan item
-    const currentItemTable = editItem ? 
-      dataTableItem.map(item => item.lineid === editItem ? dataItemNew : item) : 
+    const currentItemTable = editItem ?
+      dataTableItem.map(item => item.lineid === editItem ? dataItemNew : item) :
       [...dataTableItem, dataItemNew];
-    
+
     try {
       setIsModalOkLoading(true);
       const updateDiscountItem = await getDiscountItem(
@@ -630,7 +654,7 @@ export default function Enter() {
         state.payloadBilling.paymentoption,
         state.payloadPrimary.entity
       );
-      
+
       if (editItem) {
         // Update item yang sedang diedit
         setDataTableItem(updateDiscountItem);
@@ -638,7 +662,7 @@ export default function Enter() {
         // Tambah item baru
         setDataTableItem(updateDiscountItem);
       }
-      
+
       handleModalItemCancel();
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -791,7 +815,7 @@ export default function Enter() {
       };
       delete payloadToInsert.custName;
       delete payloadToInsert.salesrep;
-      
+
       if (!payloadToInsert.entity) {
         throw new Error("Customer is required");
       }
@@ -915,6 +939,7 @@ export default function Enter() {
                 payload={state.payloadPrimary}
                 data={[
                   { key: "custName", input: "input", isAlias: true, disabled: true, isRead: true, placeholder: "Auto-filled after selecting a customer" },
+                  { key: "isdropship", input: "select", options: dropshipOption, isAlias: true },
                   { key: "trandate", input: "date", isAlias: true, rules: [{ required: true, message: ` is required` }] },
                   { key: "salesrep", input: "input", isAlias: true, isRead: true, disabled: true },
                   { key: "otherrefnum", input: "input", isAlias: true, placeholder: "Entry No. PO customer" },
@@ -922,11 +947,20 @@ export default function Enter() {
                 aliases={{
                   entity: "Customer Entity",
                   custName: "Customer Name",
+                  isdropship: "Dropship",
                   trandate: "Transaction Date",
                   salesrep: "Sales Rep",
-                  otherrefnum: "Customer PO Number"
+                  otherrefnum: "No. PO"
                 }}
-                onChange={(type, payload) => dispatch({ type, payload })}
+                onChange={(type, payload) => {
+                  dispatch({ type, payload });
+
+                  // Reset items when isdropship changes
+                  if (payload.isdropship !== undefined && payload.isdropship !== state.payloadPrimary.isdropship && customerSelected.id) {
+                    setDataTableItem([]);
+                    setDataItemFree([]);
+                  }
+                }}
               />
               <InputForm
                 isSingleCol={true}
@@ -997,7 +1031,7 @@ export default function Enter() {
                   />
                 </div>
               </div>
-              
+
               {/* Tampilkan item free seperti di super admin */}
               {dataItemFree && dataItemFree.length > 0 && (
                 <div className="w-full flex flex-col gap-8">
@@ -1062,7 +1096,7 @@ export default function Enter() {
                   </div>
                 </div>
               )}
-              
+
               {/* Hapus bagian discount items karena sudah dihitung via API */}
               <div className="w-full flex flex-col gap-8">
                 <div className="w-full flex flex-col gap-2">
@@ -1083,8 +1117,8 @@ export default function Enter() {
                     </div>
                     <hr className="border-gray-5" />
                     <div className="flex w-full font-semibold">
-                      <p className="w-1/2 text-sm">Total</p>
-                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.total) } Incl. PPN</p>
+                      <p className="w-1/2 text-sm">Total Inc PPN</p>
+                      <p className="w-1/2 text-end text-sm">{formatRupiah(state.payloadSummary.total)}</p>
                     </div>
                   </div>
                 </div>
@@ -1093,7 +1127,7 @@ export default function Enter() {
           </div>
         </div>
       </Layout>
-      
+
       {/* Tambahkan FloatButton untuk customer info seperti di super admin */}
       {customerInfo.message.length > 0 && (
         <FloatButton
@@ -1105,7 +1139,7 @@ export default function Enter() {
           icon={<InfoCircleOutlined />}
         />
       )}
-      
+
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
       <Modal
@@ -1127,46 +1161,57 @@ export default function Enter() {
                 >
                   Item
                 </Divider>
-                <div className="w-full flex flex-col">
-                  <p>Display Name</p>
-                  <Select
-                    value={itemSelected}
-                    showSearch
-                    placeholder="Select an item"
-                    optionFilterProp="label"
-                    onChange={(_, item) => {
-                      const isDuplicate = dataTableItem.some(
-                        (tableItem) => tableItem.item === item.value
-                      );
-                      if (isDuplicate) {
-                        notify("error", "Error", "Item has been added.");
-                        return;
-                      }
-                      setItemSelected(item.value);
-                      dispatchItemTable({
-                        type: "SET_ITEM",
-                        payload: {
-                          item: item.id,
-                          units: item.unitstype,
-                          rate: item.price,
-                          discount: item.discount,
-                          displayname: item.displayname,
-                          itemprocessfamily: item.itemprocessfamily,
-                          stock: item.stock,
-                          itemid: item.itemid,
-                        },
-                      });
-                    }}
-                    onSearch={{}}
-                    options={dataItem.filter(
-                      (data) =>
-                        !dataTableItem
-                          .map((item) => item.item)
-                          .includes(data.value)
-                    )}
-                    style={{ width: "100%" }}
-                    disabled={!!editItem}
-                  />
+                <div className="w-full flex flex-col gap-4">
+                  <div className="w-full flex flex-col">
+                    <p>Item Name/Number</p>
+                    <Select
+                      value={itemSelected}
+                      showSearch
+                      placeholder="Select an item"
+                      optionFilterProp="label"
+                      onChange={(_, item) => {
+                        const isDuplicate = dataTableItem.some(
+                          (tableItem) => tableItem.item === item.value
+                        );
+                        if (isDuplicate) {
+                          notify("error", "Error", "Item has been added.");
+                          return;
+                        }
+                        setItemSelected(item.value);
+                        dispatchItemTable({
+                          type: "SET_ITEM",
+                          payload: {
+                            item: item.id,
+                            units: item.unitstype,
+                            rate: item.rate || item.price,
+                            discount: item.discount,
+                            displayname: item.displayname,
+                            itemprocessfamily: item.itemprocessfamily,
+                            stock: item.stock,
+                            itemid: item.itemid,
+                            iseditable: item.iseditable,
+                            iseditline: false,
+                          },
+                        });
+                      }}
+                      options={dataItem.map(item => ({
+                        ...item,
+                        label: item.itemid,
+                      })).filter(
+                        (data) =>
+                          !dataTableItem
+                            .map((item) => item.item)
+                            .filter((val) => val !== itemSelected)
+                            .includes(data.value)
+                      )}
+                      style={{ width: "100%" }}
+                      disabled={!!editItem}
+                    />
+                  </div>
+                  <div className="w-full flex flex-col">
+                    <p>Display Name</p>
+                    <Input disabled value={stateItemTable.item.displayname || ""} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1176,13 +1221,29 @@ export default function Enter() {
               type="SET_ITEM"
               payload={stateItemTable.item}
               data={[
-                { key: "item", input: "input", isAlias: true, isRead: true, hidden: true},
+                { key: "item", input: "input", isAlias: true, isRead: true, hidden: true },
                 { key: "quantity", input: "number", isAlias: true },
                 { key: "units", input: "input", isAlias: true, disabled: true, isRead: true },
-                { key: "rate", input: "input", isAlias: true, disabled: true, isRead: true },
+                {
+                  key: "rate",
+                  input: "number",
+                  isAlias: true,
+                  labeled: `Rate (${stateItemTable.item.iseditable == 1 || state.payloadPrimary.isdropship == 1 ? "Editable" : "Non Editable"})`,
+                  isRead: stateItemTable.item.iseditable == 0 && state.payloadPrimary.isdropship == 0,
+                  disabled: stateItemTable.item.iseditable == 0 && state.payloadPrimary.isdropship == 0,
+                  note: "Base rate item",
+                  accounting: true,
+                },
                 { key: "description", input: "text", isAlias: true },
+                { key: "iseditable", input: "input", isAlias: true, hidden: true },
+                { key: "iseditline", input: "input", isAlias: true, hidden: true },
               ]}
-              aliases={[]}
+              aliases={{
+                quantity: "Quantity",
+                units: "Unit",
+                rate: "Rate",
+                description: "Description",
+              }}
               onChange={(type, payload) => dispatchItemTable({ type, payload })}
             />
             <InputForm
@@ -1194,8 +1255,17 @@ export default function Enter() {
                 { key: "taxable", input: "select", options: [{ label: "Yes", value: true }, { label: "No", value: false }], isAlias: true },
                 { key: "taxrate", input: "number", isAlias: true, disabled: !stateItemTable.tax.taxable },
               ]}
-              aliases={[]}
-              onChange={(type, payload) => dispatchItemTable({ type, payload })}
+              aliases={{
+                taxable: "Taxable",
+                taxrate: "Tax Rate",
+              }}
+              onChange={(type, payload) => {
+                const updatePayload = {
+                  ...payload,
+                  taxrate: payload.taxable ? payload.taxrate : 0,
+                };
+                dispatchItemTable({ type, payload: updatePayload });
+              }}
             />
           </div>
         </div>

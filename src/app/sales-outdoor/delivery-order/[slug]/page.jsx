@@ -10,15 +10,100 @@ import { Button, Table, Spin, Empty, Divider, Tooltip } from 'antd';
 import { formatDateToShort } from '@/utils/formatDate';
 import { deliveryOrderAliases } from "@/utils/aliases";
 
-function TableCustom({ data, keys, aliases, onDelete }) {
-  const columns = [
-    ...keys.map((key) => ({
-      title: aliases?.[key] || key,
-      dataIndex: key,
-      key: key,
-      align: "right", // semua kolom di-align ke kanan
-    })),
+function TableCustom({ data, keys, aliases }) {
+  const keTableName = [
+    "Item",
+    "Display Name",
+    "Free",
+    "Qty 1",
+    "Unit 1",
+    "Qty 2",
+    "Unit 2",
+    "Keterangan",
+    "Remaining",
+    "On Hand"
   ];
+
+  const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      width: 40,
+      onHeaderCell: () => ({
+        className: 'text-sm text-center',
+        style: { textAlign: 'center' }
+      }),
+      onCell: () => ({
+        className: 'text-xs'
+      }),
+      render: (text, record, index) => index + 1,
+    },
+    ...keys.map((key, index) => {
+      const title = keTableName[index] || aliases?.[key] || key;
+      const isDisplayName = key === 'displayname';
+      const isItemId = key === 'itemid';
+      const isFree = key === 'isfree';
+
+      const column = {
+        title: title,
+        dataIndex: key,
+        key,
+        align: ["quantity1", "quantity2", "quantityremaining", "onhand"].includes(key) ? "right" :
+          isFree ? "center" : "left",
+        onHeaderCell: () => ({
+          className: 'text-sm text-center',
+          style: { textAlign: 'center' }
+        }),
+        onCell: () => ({
+          className: 'text-xs'
+        }),
+        render: (text) => {
+          if (isFree) {
+            return <span>{text ? "Yes" : "No"}</span>;
+          }
+          if (isDisplayName || isItemId) {
+            return (
+              <Tooltip title={text}>
+                <div className="truncate" style={{
+                  maxWidth: '100px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {text}
+                </div>
+              </Tooltip>
+            );
+          }
+          return text;
+        }
+      };
+
+      if (isDisplayName) {
+        column.fixed = 'left';
+        column.width = 100;
+        column.ellipsis = { showTitle: false };
+      }
+
+      if (isItemId) {
+        column.width = 100;
+        column.ellipsis = { showTitle: false };
+      }
+
+      return column;
+    }),
+  ];
+
+  // Hitung total quantity
+  const totalQuantity1 = data.reduce(
+    (sum, r) => sum + (Number(r.quantity1) || 0),
+    0
+  );
+  const totalQuantity2 = data.reduce(
+    (sum, r) => sum + (Number(r.quantity2) || 0),
+    0
+  );
 
   return (
     <Table
@@ -27,10 +112,37 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       rowKey="id"
       bordered
       pagination={false}
+      size="small"
       scroll={{ x: "max-content" }}
+      summary={() => (
+        <Table.Summary.Row>
+          {/* No column */}
+          <Table.Summary.Cell index={0} align="center">
+            <b>Total</b>
+          </Table.Summary.Cell>
+          {keys.map((key, i) => {
+            if (key === "quantity1") {
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{totalQuantity1.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+            if (key === "quantity2") {
+              return (
+                <Table.Summary.Cell key={key} index={i + 1} align="right">
+                  <b>{totalQuantity2.toLocaleString()}</b>
+                </Table.Summary.Cell>
+              );
+            }
+            return <Table.Summary.Cell key={key} index={i + 1} />;
+          })}
+        </Table.Summary.Row>
+      )}
     />
   );
 }
+
 
 export default function DeliveryOrderDetail() {
   const params = useParams();
@@ -42,16 +154,19 @@ export default function DeliveryOrderDetail() {
   const keyTableItem = [
     "itemid",
     "displayname",
-    "location",
-    "memo",
+    "isfree",
     "quantity1",
+    "unit1",
     "quantity2",
+    "unit2",
+    "memo",
     "quantityremaining",
+    "onhand",
   ];
 
   const itemColumns = keyTableItem.map((key) => {
     const isDisplayName = key === 'displayname';
-    
+
     const column = {
       title: key
         .replace(/([A-Z])/g, ' $1')
@@ -64,8 +179,8 @@ export default function DeliveryOrderDetail() {
         'quantityremaining'
       ].includes(key) ? 'right' : 'left',
       onHeaderCell: () => ({
-        className: 'text-sm text-center', 
-        style: { textAlign: 'center' } 
+        className: 'text-sm text-center',
+        style: { textAlign: 'center' }
       }),
       onCell: () => ({
         className: 'text-xs'
@@ -74,7 +189,7 @@ export default function DeliveryOrderDetail() {
         if (isDisplayName) {
           return (
             <Tooltip title={text}>
-              <div className="truncate" style={{ 
+              <div className="truncate" style={{
                 maxWidth: '120px',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -130,7 +245,7 @@ export default function DeliveryOrderDetail() {
           delete dataFulfillmentWithItem.units2;
 
           console.log("dataFulfillmentWithItem", dataFulfillmentWithItem);
-          
+
           setDeliveryItems(dataFulfillmentWithItem);
 
         } else {
@@ -173,7 +288,7 @@ export default function DeliveryOrderDetail() {
             {delivery && (
               <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
                 <Button onClick={handleBack} className="mb-2">← Kembali</Button>
-                
+
                 <div className="grid grid-cols-1 gap-4">
                   <div className="mb-2">
                     <h3 className="font-semibold text-gray-700 mb-2 text-center text-2xl">Delivery Order Details</h3>
@@ -181,26 +296,25 @@ export default function DeliveryOrderDetail() {
                       <div className="flex justify-between">
                         <span>{delivery.tranid} / {delivery.customer}</span>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        delivery.shipstatus === 'Shipped' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs ${delivery.shipstatus === 'Shipped'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                        }`}>
                         {delivery.shipstatus}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Divider
-                        style={{
+                      style={{
                         marginBottom: "8px",
                         textTransform: "capitalize",
                         borderColor: "#1677ff",
-                        }}
-                        orientation="left"
+                      }}
+                      orientation="left"
                     >
-                        Primary
+                      Primary
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between border rounded-lg p-2 border-gray-300">
@@ -223,19 +337,23 @@ export default function DeliveryOrderDetail() {
                         <span className="text-gray-500">Status:</span>
                         <span className="text-right">{delivery.shipstatus}</span>
                       </div>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">Sales Rep:</span>
+                        <span className="text-right">{delivery.salesrep || '-'}</span>
+                      </div>
                     </div>
                   </div>
 
                   <div>
                     <Divider
-                        style={{
+                      style={{
                         marginBottom: "8px",
                         textTransform: "capitalize",
                         borderColor: "#1677ff",
-                        }}
-                        orientation="left"
+                      }}
+                      orientation="left"
                     >
-                        Shipping
+                      Shipping
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between border rounded-lg p-2 border-gray-300">
