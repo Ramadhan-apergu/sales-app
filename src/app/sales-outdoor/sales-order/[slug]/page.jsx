@@ -9,16 +9,16 @@ import SalesOrderFetch from '@/modules/salesApi/salesOrder';
 import { Button, Table, Spin, Empty, Divider, Tooltip } from 'antd';
 
 const formatRupiah = (value) => {
-    const num = Number(value);
-    if (isNaN(num)) return 'Rp 0,-';
-    const numberCurrency = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(num);
+  const num = Number(value);
+  if (isNaN(num)) return 'Rp 0,-';
+  const numberCurrency = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num);
 
-    return numberCurrency + ",-";
+  return numberCurrency + ",-";
 };
 
 export default function SalesOrderDetail() {
@@ -28,109 +28,116 @@ export default function SalesOrderDetail() {
   const [error, setError] = useState(null);
 
   const keyTableItem = [
+    "itemcode",
     "displayname",
+    "rate",
     "quantity",
     "units",
-    "rate",
-    "description",
-    "subtotal",
     "totalamount",
     "totaldiscount",
-    "qtyfree",
-    "unitfree",
-    "taxable",
+    "subtotal",
     "taxrate",
-    "taxvalue",
     "backordered",
   ];
 
   const keTableName = [
-    "Item",
+    "Item Name/Number",
+    "Display Name",
+    "Rate",
     "Qty",
     "Unit",
-    "Rate",
-    "Description",
-    "Total Amount (After Discount)",
     "Total Amount",
     "Total Discount",
-    "Free Qty",
-    "Unit Free",
-    "Taxable",
+    "Total Amount (after discount)",
     "Tax Rate",
-    "Tax Value",
     "Back Ordered"
-  ]
+  ];
 
-  const itemColumns = keyTableItem.map((key, index) => {
-    const title = keTableName[index]; 
-    const isDisplayName = key === 'displayname';
-    
-    const column = {
-      title: title, 
-      dataIndex: key,
-      key,
-      align: [
-        'quantity',
-        'rate',
-        'subtotal',
-        'totalamount',
-        'totaldiscount',
-        'qtyfree',
-        'taxrate',
-        'taxvalue',
-        'backordered'
-      ].includes(key) ? 'right' : 'left',
+  const itemColumns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      width: 40,
       onHeaderCell: () => ({
-        className: 'text-sm text-center', 
-        style: { textAlign: 'center' } 
+        className: 'text-sm text-center',
+        style: { textAlign: 'center' }
       }),
       onCell: () => ({
         className: 'text-xs'
       }),
-      render: (text) => {
-        if (isDisplayName) {
-          return (
-            <Tooltip title={text}>
-              <div className="truncate" style={{ 
-                maxWidth: '120px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}>
-                {text}
-              </div>
-            </Tooltip>
-          );
-        }
-        
-        const shouldFormat = [
+      render: (text, record, index) => index + 1,
+    },
+    ...keyTableItem.map((key, index) => {
+      const title = keTableName[index];
+      const isDisplayName = key === 'displayname';
+      const isItemCode = key === 'itemcode';
+
+      const column = {
+        title: title,
+        dataIndex: key,
+        key,
+        align: [
+          'quantity',
           'rate',
-          'value1',
-          'discountvalue1',
-          'value2',
-          'discountvalue2',
-          'value3',
-          'discountvalue3',
           'subtotal',
           'totalamount',
           'totaldiscount',
-          'taxvalue'
-        ].includes(key);
-        
-        return shouldFormat ? formatRupiah(text) : text;
-      }
-    };
+          'taxrate',
+          'backordered'
+        ].includes(key) ? 'right' : 'left',
+        onHeaderCell: () => ({
+          className: 'text-sm text-center',
+          style: { textAlign: 'center' }
+        }),
+        onCell: () => ({
+          className: 'text-xs'
+        }),
+        render: (text) => {
+          if (isDisplayName || isItemCode) {
+            return (
+              <Tooltip title={text}>
+                <div className="truncate" style={{
+                  maxWidth: '100px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {text}
+                </div>
+              </Tooltip>
+            );
+          }
 
-    if (isDisplayName) {
-      column.fixed = 'left';
-      column.width = 120;
-      column.ellipsis = {
-        showTitle: false
+          const shouldFormat = [
+            'rate',
+            'subtotal',
+            'totalamount',
+            'totaldiscount',
+          ].includes(key);
+
+          return shouldFormat ? formatRupiah(text) : text;
+        }
       };
-    }
 
-    return column;
-  });
+      if (isDisplayName) {
+        column.fixed = 'left';
+        column.width = 100;
+        column.ellipsis = {
+          showTitle: false
+        };
+      }
+
+      if (isItemCode) {
+        column.width = 100;
+        column.ellipsis = {
+          showTitle: false
+        };
+      }
+
+      return column;
+    })
+  ];
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -181,7 +188,7 @@ export default function SalesOrderDetail() {
             {order && (
               <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
                 <Button onClick={handleBack} className="mb-2">← Kembali</Button>
-                
+
                 <div className="grid grid-cols-1 gap-4">
                   <div className="mb-2">
                     <h3 className="font-semibold text-gray-700 mb-2 text-center text-2xl">Sales Order Details</h3>
@@ -189,26 +196,25 @@ export default function SalesOrderDetail() {
                       <div className="flex justify-between">
                         <span>{order.tranid} / {order.customer}</span>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        order.status === 'Fulfilled' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs ${order.status === 'Fulfilled'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                        }`}>
                         {order.status}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Divider
-                        style={{
+                      style={{
                         marginBottom: "8px",
                         textTransform: "capitalize",
                         borderColor: "#1677ff",
-                        }}
-                        orientation="left"
+                      }}
+                      orientation="left"
                     >
-                        Primary
+                      Primary
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between border rounded-lg p-2 border-gray-300">
@@ -220,6 +226,10 @@ export default function SalesOrderDetail() {
                         <span className="text-right">{order.customer}</span>
                       </div>
                       <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                        <span className="text-gray-500">Dropship:</span>
+                        <span className="text-right">{order.isDropship ? "Yes" : "No"}</span>
+                      </div>
+                      <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                         <span className="text-gray-500">Transaction Date:</span>
                         <span className="text-right">{new Date(order.trandate).toLocaleDateString('id-ID')}</span>
                       </div>
@@ -228,7 +238,7 @@ export default function SalesOrderDetail() {
                         <span className="text-right">{order.salesrep}</span>
                       </div>
                       <div className="flex justify-between border rounded-lg p-2 border-gray-300">
-                        <span className="text-gray-500">Customer PO Number:</span>
+                        <span className="text-gray-500">No PO:</span>
                         <span className="text-right">{order.otherrefnum}</span>
                       </div>
                     </div>
@@ -236,14 +246,14 @@ export default function SalesOrderDetail() {
 
                   <div>
                     <Divider
-                        style={{
+                      style={{
                         marginBottom: "8px",
                         textTransform: "capitalize",
                         borderColor: "#1677ff",
-                        }}
-                        orientation="left"
+                      }}
+                      orientation="left"
                     >
-                        Shipping
+                      Shipping
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between border rounded-lg p-2 border-gray-300">
@@ -259,14 +269,14 @@ export default function SalesOrderDetail() {
 
                   <div>
                     <Divider
-                        style={{
+                      style={{
                         marginBottom: "8px",
                         textTransform: "capitalize",
                         borderColor: "#1677ff",
-                        }}
-                        orientation="left"
+                      }}
+                      orientation="left"
                     >
-                        Billing
+                      Billing
                     </Divider>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between border rounded-lg p-2 border-gray-300">
@@ -305,32 +315,68 @@ export default function SalesOrderDetail() {
                       bordered
                       size="small"
                       scroll={{ x: 'max-content' }}
-                      tableLayout="auto" // Gunakan auto layout
-                      className="sticky-table-container" // Tambahkan class untuk styling
+                      tableLayout="auto"
+                      className="sticky-table-container"
                     />
                   </div>
                 </div>
 
-                <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
-                  <div className="flex w-full  border rounded-lg p-2 border-gray-300">
-                    <p className="w-1/2 text-sm">Subtotal</p>
-                    <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(order.subtotalbruto)}
-                    </p>
+                {/* Item Free Section */}
+                {order.sales_order_item_free && order.sales_order_item_free.length > 0 && (
+                  <div>
+                    <Divider
+                      style={{
+                        marginBottom: "8px",
+                        textTransform: "capitalize",
+                        borderColor: "#1677ff",
+                      }}
+                      orientation="left"
+                    >
+                      Item Free
+                    </Divider>
+                    <div className="space-y-2">
+                      {order.sales_order_item_free.map((item, index) => (
+                        <div key={index} className="flex justify-between border rounded-lg p-2 border-gray-300 text-sm">
+                          <span className="text-gray-500">Free {item.qtyfree}</span>
+                          <span className="text-right">{item.itemcode || item.displayname || '-'}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex w-full border rounded-lg p-2 border-gray-300">
-                    <p className="w-1/2 text-sm">Discount Item</p>
-                    <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(order.discounttotal)}
-                    </p>
-                  </div>
-                  <hr className="" />
-                  <div className="flex w-full font-semibold border rounded-lg p-2 border-gray-300">
-                    <p className="w-1/2 text-sm">Total</p>
-                    <p className="w-1/2 text-end text-sm text-right">
-                      {formatRupiah(order.total)} Incl.
-                      PPN
-                    </p>
+                )}
+
+                {/* Summary Section */}
+                <div>
+                  <Divider
+                    style={{
+                      marginBottom: "8px",
+                      textTransform: "capitalize",
+                      borderColor: "#1677ff",
+                    }}
+                    orientation="left"
+                  >
+                    Summary
+                  </Divider>
+                  <div className="w-full p-4 border border-gray-5 gap-2 rounded-xl flex flex-col">
+                    <div className="flex w-full border rounded-lg p-2 border-gray-300">
+                      <p className="w-1/2 text-sm">Subtotal</p>
+                      <p className="w-1/2 text-end text-sm text-right">
+                        {formatRupiah(order.subtotalbruto)}
+                      </p>
+                    </div>
+                    <div className="flex w-full border rounded-lg p-2 border-gray-300">
+                      <p className="w-1/2 text-sm">Discount Item</p>
+                      <p className="w-1/2 text-end text-sm text-right">
+                        {formatRupiah(order.discounttotal)}
+                      </p>
+                    </div>
+                    <hr className="" />
+                    <div className="flex w-full font-semibold border rounded-lg p-2 border-gray-300">
+                      <p className="w-1/2 text-sm">Total Inc PPN</p>
+                      <p className="w-1/2 text-end text-sm text-right">
+                        {formatRupiah(order.total)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -345,7 +391,7 @@ export default function SalesOrderDetail() {
           </div>
         </div>
       </div>
-      
+
       {/* Tambahkan styling khusus untuk sticky header */}
       <style jsx global>{`
         .sticky-table-container .ant-table-thead > tr > th[colspan]:not([colspan="1"]) {
