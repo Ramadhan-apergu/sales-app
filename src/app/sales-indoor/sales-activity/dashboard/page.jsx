@@ -129,14 +129,15 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
             Dashboard Activity
           </p>
         </div>
-        <div className="w-full flex justify-end gap-2">
-          <div className="flex flex-col items-start">
+        <div className="w-full flex flex-wrap justify-end gap-2">
+          <div className="flex flex-col items-start w-full sm:w-auto">
             <p className="text-sm font-medium">Stage</p>
             <Select
               size="small"
               value={stageSelect}
               options={stageList}
-              style={{ minWidth: 120 }}
+              className="w-full sm:w-auto"
+              style={{ minWidth: 100 }}
               dropdownAlign={{ points: ["tr", "br"] }}
               styles={{ popup: { root: { minWidth: 120 } } }}
               onChange={(value) => {
@@ -144,25 +145,27 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
               }}
             />
           </div>
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start w-full sm:w-auto">
             <p className="text-sm font-medium">Owner</p>
             <Select
               size="small"
               value={ownserSelect}
               options={ownerList}
-              style={{ minWidth: 200 }}
+              className="w-full sm:w-auto"
+              style={{ minWidth: 120 }}
               dropdownAlign={{ points: ["tr", "br"] }}
-              styles={{ popup: { root: { minWidth: 200 } } }}
+              styles={{ popup: { root: { minWidth: 150 } } }}
               onChange={(value) => {
                 setOwnerSelect(value);
               }}
             />
           </div>
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start w-full sm:w-auto">
             <p className="text-sm font-medium">Dates</p>
             <RangePicker
               size="small"
               value={dates}
+              className="w-full sm:w-auto"
               onChange={(dates) => setDates(dates)}
             />
           </div>
@@ -240,8 +243,8 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
             </div>
           </div>
 
-          <div className="w-full flex gap-6">
-            <div className="w-1/2 h-80 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
+          <div className="w-full flex flex-col lg:flex-row gap-6">
+            <div className="w-full lg:w-1/2 h-80 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
               <div>
                 <p className="text-sm font-medium text-blue-6">
                   Target VS Actual Leads
@@ -267,6 +270,7 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
                     name="Number of Leads"
                   />
                   <Tooltip />
+                  <Legend />
                   <Bar
                     dataKey="total_target"
                     fill="#52c41a"
@@ -285,7 +289,7 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
               </ResponsiveContainer>
             </div>
 
-            <div className="w-1/2 h-80 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
+            <div className="w-full lg:w-1/2 h-80 bg-gradient-to-tr from-blue-1 to-white border border-blue-2 rounded-xl shadow-sm flex flex-col justify-between p-5">
               <div>
                 <p className="text-sm font-medium text-blue-6">
                   Lead to Customer Conversion
@@ -310,18 +314,18 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    innerRadius={60} // efek donut
-                    outerRadius={100}
+                    innerRadius={50}
+                    outerRadius={80}
                     paddingAngle={2}
-                    label
+                    label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
                   />
                   <Tooltip />
                   <Legend
                     layout="horizontal"
                     verticalAlign="bottom"
                     align="center"
+                    wrapperStyle={{ fontSize: "12px" }}
                     formatter={(value, entry) => {
-                      // ambil warna dari entry.payload.fill
                       return (
                         <span
                           style={{
@@ -390,26 +394,28 @@ function FunnelReport({ ownerList = [] }) {
       <div className="">
         <p className="text-sm font-medium text-blue-6">Funnel Report</p>
       </div>
-      <div className="w-full flex justify-end gap-2 mb-4">
-        <div className="flex flex-col items-start">
+      <div className="w-full flex flex-wrap justify-end gap-2 mb-4">
+        <div className="flex flex-col items-start w-full sm:w-auto">
           <p className="text-xs font-medium">Owner</p>
           <Select
             size="small"
             value={ownserSelect}
             options={ownerList}
-            style={{ minWidth: 200 }}
+            className="w-full sm:w-auto"
+            style={{ minWidth: 120 }}
             dropdownAlign={{ points: ["tr", "br"] }}
-            styles={{ popup: { root: { minWidth: 200 } } }}
+            styles={{ popup: { root: { minWidth: 150 } } }}
             onChange={(value) => {
               setOwnerSelect(value);
             }}
           />
         </div>
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start w-full sm:w-auto">
           <p className="text-xs font-medium">Dates</p>
           <RangePicker
             size="small"
             value={dates}
+            className="w-full sm:w-auto"
             onChange={(dates) => setDates(dates)}
           />
         </div>

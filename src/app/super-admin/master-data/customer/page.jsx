@@ -1,6 +1,11 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
@@ -11,7 +16,10 @@ import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
-import { getResponseHandler } from "@/utils/responseHandlers";
+import {
+  getResponseHandler,
+  updateResponseHandler,
+} from "@/utils/responseHandlers";
 import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
@@ -29,6 +37,7 @@ function Customer() {
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(true);
+  const [refetch, setRefetch] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchCust, setSearchCust] = useState("");
   const [modal, contextHolder] = Modal.useModal();
@@ -62,11 +71,26 @@ function Customer() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter, searchCust]);
+  }, [page, limit, pathname, statusFilter, searchCust, refetch]);
 
   const handleEdit = (record) => {
     router.push(`/super-admin/master-data/${title}/${record.id}/edit`);
   };
+
+  async function handleApproved(id) {
+    try {
+      const response = await CustomerFetch.approve(id);
+
+      const resData = updateResponseHandler(response, notify);
+
+      if (resData) {
+        setRefetch(!refetch);
+      }
+    } catch (error) {
+      notify("error", "Error", error.message || "Internal server error");
+    } finally {
+    }
+  }
 
   const handleStatusChange = ({ key }) => {
     dropdownItems.forEach((item) => {
@@ -78,7 +102,7 @@ function Customer() {
               setStatusFilter("all");
               break;
             case "pending approval":
-              setStatusFilter("pending");
+              setStatusFilter("pending approval");
               break;
             default:
               setStatusFilter(label);
@@ -99,7 +123,7 @@ function Customer() {
     },
     {
       key: "3",
-      label: "Pending",
+      label: "Pending Approval",
     },
     {
       key: "4",
@@ -155,7 +179,7 @@ function Customer() {
       align: "right",
       width: 87,
       render: (_, record) => (
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex flex-col justify-center items-center gap-2">
           <Button
             type={"link"}
             size="small"
@@ -163,6 +187,16 @@ function Customer() {
             onClick={() => handleEdit(record)}
           >
             {isLargeScreen ? "Edit" : ""}
+          </Button>
+
+          <Button
+            variant="link"
+            size="small"
+            icon={<CheckOutlined />}
+            color="green"
+            onClick={() => handleApproved(record.id)}
+          >
+            {isLargeScreen ? "Approve" : ""}
           </Button>
           {contextHolder}
         </div>
