@@ -131,6 +131,15 @@ export default function Enter() {
         throw new Error("Company is required.");
       }
 
+      if (!payloadToInsert.addedon) {
+        throw new Error("Addedon is required.");
+      }
+
+      payloadToInsert = {
+        ...payloadToInsert,
+        addedon: parseUTCDate(payloadToInsert.addedon),
+      };
+
       const response = await LeadsFetch.create(payloadToInsert);
 
       const resData = createResponseHandler(response, notify);
@@ -323,4 +332,39 @@ export default function Enter() {
       {contextNotify}
     </>
   );
+}
+
+function normalizeToUTC(dateString) {
+  if (typeof dateString !== "string") return null;
+
+  // already UTC
+  if (/Z$/.test(dateString)) {
+    return dateString;
+  }
+
+  // YYYY-MM-DDTHH:mm:ss
+  const isoNoTZ = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
+
+  if (isoNoTZ.test(dateString)) {
+    return `${dateString}Z`;
+  }
+
+  return null;
+}
+
+function parseUTCDate(value) {
+  // non-string → return as is
+  if (typeof value !== "string") return value;
+
+  const normalized = normalizeToUTC(value);
+
+  // invalid format → return original
+  if (!normalized) return value;
+
+  const date = new Date(normalized);
+
+  // invalid date → return original
+  if (isNaN(date.getTime())) return value;
+
+  return date;
 }

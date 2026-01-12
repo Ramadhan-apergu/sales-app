@@ -208,7 +208,7 @@ export default function Enter() {
       const resData = updateResponseHandler(response, notify);
 
       if (resData) {
-        router.push(`/super-admin/sales-activity/${title}/${resData}`);
+        router.push(`/super-admin/sales-activity/${title}/${slug}`);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -242,7 +242,10 @@ export default function Enter() {
                 <>
                   <div className="w-full flex flex-col lg:flex-row justify-between items-start">
                     <div className="w-full lg:w-1/2 flex gap-1 flex-col">
-                      <p className="w-full lg:text-lg">{data.leadid}</p>
+                      <p className="w-full lg:text-lg">
+                        {data.leadid} /{" "}
+                        {data?.iscovert === "1" ? "Convert" : "Not Convert"}
+                      </p>
                       <div>
                         <Tag
                           style={{
@@ -250,15 +253,19 @@ export default function Enter() {
                             fontSize: "16px",
                           }}
                           color={
-                            ["qualified"].includes(data?.status.toLowerCase())
+                            ["qualified"].includes(
+                              data?.status?.toLowerCase() || ""
+                            )
                               ? "green"
                               : [
                                   "engaged",
                                   "prospecting",
                                   "Negotiating",
-                                ].includes(data?.status.toLowerCase())
+                                ].includes(data?.status?.toLowerCase() || "")
                               ? "orange"
-                              : ["closed"].includes(data?.status.toLowerCase())
+                              : ["closed"].includes(
+                                  data?.status?.toLowerCase() || ""
+                                )
                               ? "red"
                               : "default"
                           }

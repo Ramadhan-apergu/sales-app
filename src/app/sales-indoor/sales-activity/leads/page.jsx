@@ -139,6 +139,13 @@ function Lead() {
       align: "center",
     },
     {
+      title: "Convert",
+      dataIndex: "isconvert",
+      key: "isconvert",
+      align: "center",
+      render: (text) => (text == 1 ? "Yes" : "No"),
+    },
+    {
       title: "Status",
       dataIndex: "status",
       key: "status",
