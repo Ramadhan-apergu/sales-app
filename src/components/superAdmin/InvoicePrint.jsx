@@ -20,37 +20,6 @@ export default function InvoicePrint({ data, dataTable }) {
       timeZone: "Asia/Jakarta",
     });
     setCurrentDate(date);
-
-    // const mergedData = Object.values(
-    //   dataTable.reduce((acc, curr) => {
-    //     const key = curr.item;
-
-    //     if (!acc[key]) {
-    //       acc[key] = { ...curr };
-    //     } else {
-    //       // pastikan default 0
-    //       acc[key].quantity = (acc[key].quantity || 0) + (curr.quantity || 0);
-    //       acc[key].quantity2 =
-    //         (acc[key].quantity2 || 0) + (curr.quantity2 || 0);
-
-    //       // kalau curr.isfree === 1 → tambah 0
-    //       const subtotalToAdd = curr.isfree ? 0 : curr.subtotal || 0;
-    //       acc[key].subtotal = (acc[key].subtotal || 0) + subtotalToAdd;
-
-    //       // gabungkan memo dengan koma, hindari koma dobel
-    //       const existingMemo = acc[key].memo?.trim();
-    //       const newMemo = curr.memo?.trim();
-    //       if (newMemo) {
-    //         acc[key].memo = existingMemo
-    //           ? `${existingMemo}, ${newMemo}`
-    //           : newMemo;
-    //       }
-    //     }
-
-    //     return acc;
-    //   }, {})
-    // );
-
     setMergeDataTable(dataTable);
 
     const total = dataTable.reduce(
@@ -187,7 +156,7 @@ export default function InvoicePrint({ data, dataTable }) {
           </p>
         </div>
 
-        {mergeDataTable &&
+        {/* {mergeDataTable &&
           mergeDataTable.length > 0 &&
           mergeDataTable.map((item, i) => (
             <div
@@ -216,7 +185,42 @@ export default function InvoicePrint({ data, dataTable }) {
                 {formatRupiah(item.subtotal) || "-"}
               </p>
             </div>
-          ))}
+          ))} */}
+
+        {mergeDataTable &&
+          mergeDataTable.length > 0 &&
+          [...mergeDataTable] // 🔹 clone agar tidak mutate state
+            .sort((a, b) =>
+              (a.displayname || "").localeCompare(b.displayname || "")
+            )
+            .map((item, i) => (
+              <div
+                key={i}
+                className="w-full flex border-x border-b table-padding"
+              >
+                <p className="border-r break-words whitespace-normal w-[7%] text-right">
+                  {i + 1}
+                </p>
+                <p className="border-r break-words whitespace-normal w-[28%]">
+                  {item.displayname || "-"}
+                </p>
+                <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                  {item.quantity || "-"}
+                </p>
+                <p className="border-r break-words whitespace-normal w-[10%] text-right">
+                  {item.units || "-"}
+                </p>
+                <p className="border-r break-words whitespace-normal w-[14%] text-right">
+                  {formatRupiah(item.rate) || "-"}
+                </p>
+                <p className="border-r break-words whitespace-normal w-[14%] text-right">
+                  {formatRupiah(item.discountsatuan) || "-"}
+                </p>
+                <p className="break-words whitespace-normal w-[17%] text-right">
+                  {formatRupiah(item.subtotal) || "-"}
+                </p>
+              </div>
+            ))}
 
         <div className="w-full flex border-r table-padding">
           <p className="break-words whitespace-normal w-[7%] text-right"></p>
