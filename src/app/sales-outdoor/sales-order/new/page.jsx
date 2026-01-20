@@ -178,7 +178,7 @@ function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
     <Table
       columns={columns}
       dataSource={data}
-      rowKey="item"
+      rowKey="lineid"
       bordered
       pagination={false}
       scroll={{ x: "max-content" }}
@@ -640,6 +640,8 @@ export default function Enter() {
       ...stateItemTable.discount3,
       ...stateItemTable.summary,
       ...stateItemTable.tax,
+      // Preserve lineid when editing, generate new one when adding
+      lineid: editItem ? editItem : Date.now(),
     };
 
     // Hitung diskon sebelum menambahkan item
