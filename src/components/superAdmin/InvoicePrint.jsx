@@ -42,7 +42,7 @@ export default function InvoicePrint({ data, dataTable }) {
         dpp: 0,
         taxvalue: 0,
         subtotal: 0,
-      }
+      },
     );
 
     // Hitung ulang subtotal dikurangi totaldiscount
@@ -191,7 +191,7 @@ export default function InvoicePrint({ data, dataTable }) {
           mergeDataTable.length > 0 &&
           [...mergeDataTable] // 🔹 clone agar tidak mutate state
             .sort((a, b) =>
-              (a.displayname || "").localeCompare(b.displayname || "")
+              (a.displayname || "").localeCompare(b.displayname || ""),
             )
             .map((item, i) => (
               <div
@@ -228,10 +228,8 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="border-b border-x break-words whitespace-normal w-[10%] text-right">
             {count.quantity}
           </p>
-          <p className="break-words whitespace-normal w-[10%] text-right border-b">
-            KG
-          </p>
-          <p className="break-words whitespace-normal w-[14%] text-right border-l"></p>
+          <p className="break-words whitespace-normal w-[10%] text-right"></p>
+          <p className="break-words whitespace-normal w-[14%] text-right"></p>
           <p className="border-r break-words whitespace-normal w-[14%] text-right">
             ADD DISC
           </p>

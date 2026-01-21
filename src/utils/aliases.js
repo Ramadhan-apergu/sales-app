@@ -198,6 +198,9 @@ export const invoiceAliases = {
     location: "Location",
     isfree: "Free",
     discountsatuan: "Disc @",
+    dppharga: "DPP Price",
+    dppdiskon: "DPP Discount",
+    dppnilailain: "DPP Other",
   },
   billing: {
     term: "Term",
