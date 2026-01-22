@@ -81,6 +81,9 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           "amount",
           "dpp",
           "taxvalue",
+          "dppharga",
+          "dppdiskon",
+          "dppnilailain",
         ].includes(key)
       ) {
         return {
@@ -182,7 +185,7 @@ export default function EnterPage() {
   const [dataSalesOrder, setDataSalesOrder] = useState({});
   const [dataCustomer, setDataCustomer] = useState({});
   const [dataSalesOrderItemRetrieve, setDataSalesOrderItemRetrieve] = useState(
-    {}
+    {},
   );
 
   const initialState = {
@@ -334,13 +337,30 @@ export default function EnterPage() {
       data.invoice_items.map(async (invoiceItem) => {
         const item = await getItem(invoiceItem.item);
 
+        const dppdiskon =
+          invoiceItem.totaldiscount > 0
+            ? Math.round(
+                invoiceItem.totaldiscount / (1 + invoiceItem.taxrate / 100),
+              )
+            : 0;
+
+        const dppharga =
+          invoiceItem.rate > 0
+            ? Math.round(invoiceItem.rate / (1 + invoiceItem.taxrate / 100))
+            : 0;
+
+        const dppnilailain = Math.round(invoiceItem.taxvalue / 0.12);
+
         return {
           ...invoiceItem,
           displayname: item ? item.displayname : "",
           lineid: crypto.randomUUID(),
           itemid: item.itemid,
+          dppdiskon,
+          dppharga,
+          dppnilailain,
         };
-      })
+      }),
     );
 
     setDataTableItem(updatedInvoiceItems);
@@ -369,9 +389,12 @@ export default function EnterPage() {
     "discountsatuan",
     "totaldiscount",
     "subtotal",
+    "dppdiskon",
     "taxrate",
+    "dppharga",
     "dpp",
     "taxvalue",
+    "dppnilailain",
     "location",
   ];
 
@@ -526,12 +549,12 @@ export default function EnterPage() {
                           ["paid in full"].includes(data.status.toLowerCase())
                             ? "green"
                             : ["partially paid"].includes(
-                                data.status.toLowerCase()
-                              )
-                            ? "orange"
-                            : ["duedate"].includes(data.status.toLowerCase())
-                            ? "red"
-                            : "default"
+                                  data.status.toLowerCase(),
+                                )
+                              ? "orange"
+                              : ["duedate"].includes(data.status.toLowerCase())
+                                ? "red"
+                                : "default"
                         }
                       >
                         {data.status}
