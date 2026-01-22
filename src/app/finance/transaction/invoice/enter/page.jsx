@@ -80,6 +80,9 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           "dpp",
           "taxvalue",
           "discountsatuan",
+          "dppharga",
+          "dppdiskon",
+          "dppnilailain",
         ].includes(key)
       ) {
         return {
@@ -178,7 +181,7 @@ function Enter({ fulfillmentId }) {
   const [dataSalesOrder, setDataSalesOrder] = useState({});
   const [dataCustomer, setDataCustomer] = useState({});
   const [dataSalesOrderItemRetrieve, setDataSalesOrderItemRetrieve] = useState(
-    {}
+    {},
   );
   const [termCustomer, setTermCustomer] = useState(0);
 
@@ -262,7 +265,7 @@ function Enter({ fulfillmentId }) {
           throw new Error("Failed to fetch item fulfillment");
 
         const salesOrderRes = await SalesOrderFetch.getById(
-          fulfillmentData.salesorderid
+          fulfillmentData.salesorderid,
         );
         const salesOrderData = getResponseHandler(salesOrderRes);
         if (!salesOrderData) throw new Error("Failed to fetch sales order");
@@ -298,7 +301,7 @@ function Enter({ fulfillmentId }) {
             const itemSo = soItemData.find(
               (item) =>
                 item.item === fulfillment.item &&
-                item.isfree == fulfillment.isfree
+                item.isfree == fulfillment.isfree,
             );
 
             const displayname = itemSo?.displayname || "";
@@ -311,12 +314,23 @@ function Enter({ fulfillmentId }) {
               const totaldiscount = itemSo.totaldiscount;
               const subtotal = amount - totaldiscount;
               const taxrate = itemSo.taxrate;
-              const taxvalue = itemSo.taxable
-                ? Math.ceil((subtotal / (1 + taxrate / 100)) * (taxrate / 100))
-                : 0;
 
-              const dpp = subtotal - taxvalue;
               const discountsatuan = itemSo?.discountsatuan || 0;
+
+              const dppdiskon =
+                totaldiscount > 0
+                  ? Math.round(totaldiscount / (1 + taxrate / 100))
+                  : 0;
+
+              const dppharga =
+                rate > 0 ? Math.round(rate / (1 + taxrate / 100)) : 0;
+
+              const dpp = Math.round(quantity * dppharga) - dppdiskon;
+
+              const taxvalue = itemSo.taxable ? subtotal - dpp : 0;
+
+              const dppnilailain = Math.round(taxvalue / 0.12);
+
               return {
                 item: fulfillment.item,
                 displayname,
@@ -336,6 +350,9 @@ function Enter({ fulfillmentId }) {
                 lineid: crypto.randomUUID(),
                 location,
                 isfree: fulfillment.isfree,
+                dppdiskon,
+                dppharga,
+                dppnilailain,
               };
             }
 
@@ -358,8 +375,11 @@ function Enter({ fulfillmentId }) {
               lineid: crypto.randomUUID(),
               location,
               isfree: fulfillment.isfree,
+              dppdiskon: 0,
+              dppharga: 0,
+              dppnilailain: 0,
             };
-          })
+          }),
         );
 
         dispatch({
@@ -421,9 +441,12 @@ function Enter({ fulfillmentId }) {
     "discountsatuan",
     "totaldiscount",
     "subtotal",
+    "dppdiskon",
     "taxrate",
+    "dppharga",
     "dpp",
     "taxvalue",
+    "dppnilailain",
   ];
 
   const [dataTableItem, setDataTableItem] = useState([]);
@@ -514,7 +537,7 @@ function Enter({ fulfillmentId }) {
         subtotal: 0,
         taxtotal: 0,
         amount: 0,
-      }
+      },
     );
 
     // Hitung subtotal & amount setelah looping
@@ -637,7 +660,7 @@ function Enter({ fulfillmentId }) {
                           ...payload,
                           duedate: dayjs(payload.trandate).add(
                             termCustomer,
-                            "day"
+                            "day",
                           ),
                         },
                       });

@@ -213,6 +213,7 @@ export default function Page() {
     "quantityremaining",
     "onhand",
     "memo",
+    "availability",
   ];
 
   useEffect(() => {
@@ -330,8 +331,8 @@ export default function Page() {
           !dataTable.some(
             (fulfillItem) =>
               fulfillItem.item === soItem.item &&
-              fulfillItem.isfree === soItem.isfree
-          )
+              fulfillItem.isfree === soItem.isfree,
+          ),
       );
 
       dataTable = [...dataTable, ...filteredDataTableSoItem];
@@ -363,7 +364,7 @@ export default function Page() {
       delete payloadToInsert.customer;
 
       let fulfillment_items = dataTableItem.filter(
-        (item) => item.apply == true
+        (item) => item.apply == true,
       );
 
       fulfillment_items = fulfillment_items.map((data) => {
@@ -378,6 +379,7 @@ export default function Page() {
           units2: data.unit2,
           isfree: data.isfree,
           onhand: data.onhand,
+          availability: data.availability,
         };
       });
 
@@ -401,7 +403,7 @@ export default function Page() {
         notify(
           "info",
           "Info",
-          "This Delivery Order is still in draft. Stock will be deducted once status is set to Shipped."
+          "This Delivery Order is still in draft. Stock will be deducted once status is set to Shipped.",
         );
       }
 
@@ -697,6 +699,13 @@ export default function Page() {
                 },
                 {
                   key: "onhand",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                  //   hidden: true,
+                },
+                {
+                  key: "availability",
                   input: "input",
                   isAlias: true,
                   disabled: true,

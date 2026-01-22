@@ -51,11 +51,11 @@ function TableCustom({ data, keys, aliases, onDelete }) {
   // Hitung total quantity
   const totalQuantity1 = data.reduce(
     (sum, r) => sum + (Number(r.quantity1) || 0),
-    0
+    0,
   );
   const totalQuantity2 = data.reduce(
     (sum, r) => sum + (Number(r.quantity2) || 0),
-    0
+    0,
   );
 
   return (
@@ -168,6 +168,7 @@ export default function Page() {
     "memo",
     "quantityremaining",
     "onhand",
+    "availability",
     // "itemprocessfamily",
     // "displayname",
     // "memo",
@@ -241,6 +242,7 @@ export default function Page() {
           unit1: item.units,
           unit2: item.units2,
           onhand: item.onhand,
+          availability: item.availability,
         };
 
         delete updateItem.quantity;
@@ -311,7 +313,7 @@ export default function Page() {
       label: "Cancel",
       danger: true,
       disabled: ["canceled", "shiped"].includes(
-        data?.shipstatus?.toLocaleLowerCase() || ""
+        data?.shipstatus?.toLocaleLowerCase() || "",
       ),
     },
   ];
@@ -367,7 +369,7 @@ export default function Page() {
                         type={"primary"}
                         onClick={() => {
                           router.push(
-                            `/accounting/transaction/invoice/enter?fulfillmentId=${data.id}`
+                            `/accounting/transaction/invoice/enter?fulfillmentId=${data.id}`,
                           );
                         }}
                       >
@@ -376,7 +378,7 @@ export default function Page() {
 
                       <Button
                         disabled={["shipped", "canceled"].includes(
-                          data?.shipstatus?.toLowerCase()
+                          data?.shipstatus?.toLowerCase(),
                         )}
                         icon={<EditOutlined />}
                         type={"primary"}
