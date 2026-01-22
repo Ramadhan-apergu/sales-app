@@ -175,7 +175,7 @@ function Enter({ salesOrderId }) {
   const [dataSalesOrder, setDataSalesOrder] = useState({});
   const [dataCustomer, setDataCustomer] = useState({});
   const [dataSalesOrderItemRetrieve, setDataSalesOrderItemRetrieve] = useState(
-    {}
+    {},
   );
 
   const [editItem, setEditItem] = useState(null);
@@ -258,8 +258,10 @@ function Enter({ salesOrderId }) {
             isfree: item.isfree,
             conversion: item.conversion,
             onhand: item.onhand,
-          }))
+            availability: item.availability,
+          })),
         );
+        console.log(soItemData);
 
         dispatch({
           type: "SET_PRIMARY",
@@ -303,6 +305,7 @@ function Enter({ salesOrderId }) {
     "quantityremaining",
     "onhand",
     "memo",
+    "availability",
   ];
 
   const [dataTableItem, setDataTableItem] = useState([]);
@@ -319,7 +322,7 @@ function Enter({ salesOrderId }) {
       delete payloadToInsert.customer;
 
       let fulfillment_items = dataTableItem.filter(
-        (item) => item.apply == true
+        (item) => item.apply == true,
       );
 
       fulfillment_items = fulfillment_items.map((data) => {
@@ -361,7 +364,7 @@ function Enter({ salesOrderId }) {
         notify(
           "info",
           "Info",
-          "This Delivery Order is still in draft. Stock will be deducted once status is set to Shipped."
+          "This Delivery Order is still in draft. Stock will be deducted once status is set to Shipped.",
         );
       }
 
@@ -645,6 +648,13 @@ function Enter({ salesOrderId }) {
                 },
                 {
                   key: "onhand",
+                  input: "input",
+                  isAlias: true,
+                  disabled: true,
+                  //   hidden: true,
+                },
+                {
+                  key: "availability",
                   input: "input",
                   isAlias: true,
                   disabled: true,

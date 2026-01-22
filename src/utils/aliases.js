@@ -158,6 +158,7 @@ export const deliveryOrderAliases = {
     unit2: "Unit 2",
     isfree: "Free",
     onhand: "Onhand",
+    availability: "Availability",
   },
   shipping: {
     shippingoption: "Shipping Option",
