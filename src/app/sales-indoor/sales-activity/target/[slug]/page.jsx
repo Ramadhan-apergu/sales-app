@@ -59,6 +59,7 @@ export default function Enter() {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userSelected, setUserSelected] = useState({});
 
   const initialState = {
     payloadPrimary: {
@@ -109,7 +110,6 @@ export default function Enter() {
       const resData = getResponseHandler(response);
       setData(resData);
       if (resData) {
-        console.log(resData);
         mappingDataPayload(resData);
       }
     } catch (error) {
@@ -141,6 +141,8 @@ export default function Enter() {
         totaltarget: data.totaltarget,
       },
     });
+
+    setUserSelected({ id: data.salesid, sales: data.sales, role: data.role });
   };
 
   //   const handleSubmit = async () => {
@@ -254,10 +256,12 @@ export default function Enter() {
                             ["open"].includes(data?.status.toLowerCase())
                               ? "green"
                               : ["pending"].includes(data?.status.toLowerCase())
-                              ? "orange"
-                              : ["closed"].includes(data?.status.toLowerCase())
-                              ? "red"
-                              : "default"
+                                ? "orange"
+                                : ["closed"].includes(
+                                      data?.status.toLowerCase(),
+                                    )
+                                  ? "red"
+                                  : "default"
                           }
                         >
                           {data.status || "-"}
@@ -272,7 +276,7 @@ export default function Enter() {
                           router.push(
                             `/sales-indoor/sales-activity/${title}/${
                               data?.id || ""
-                            }/edit`
+                            }/edit`,
                           );
                         }}
                       >
@@ -286,6 +290,30 @@ export default function Enter() {
                       </Dropdown>
                     </div>
                   </div>
+
+                  <Divider
+                    style={{
+                      margin: "0",
+                      textTransform: "capitalize",
+                      borderColor: "#1677ff",
+                    }}
+                    orientation="left"
+                  >
+                    User
+                  </Divider>
+
+                  <div className="w-full flex flex-col lg:flex-row gap-8">
+                    <div className="w-full lg:w-1/2 flex gap-2">
+                      <div className="w-1/3">
+                        <Input value={userSelected?.role} readOnly />
+                      </div>
+                      <div className="w-2/3">
+                        <Input value={userSelected?.sales} readOnly />
+                      </div>
+                    </div>
+                    <span className="hidden lg:static"> </span>
+                  </div>
+
                   <InputForm
                     title="primary"
                     type="SET_PRIMARY"

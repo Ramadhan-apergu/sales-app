@@ -50,6 +50,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import InputUser from "@/components/input/inputUser";
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -59,6 +60,7 @@ export default function Enter() {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userSelected, setUserSelected] = useState({});
 
   const initialState = {
     payloadPrimary: {
@@ -66,7 +68,6 @@ export default function Enter() {
       enddate: "",
       totaltarget: "",
       description: "",
-      roleid: "",
       notes: "",
     },
   };
@@ -104,7 +105,6 @@ export default function Enter() {
       const resData = getResponseHandler(response);
       setData(resData);
       if (resData) {
-        console.log(resData);
         mappingDataPayload(resData);
       }
     } catch (error) {
@@ -125,10 +125,21 @@ export default function Enter() {
         description: data.description,
         enddate: dayjs(data.enddate),
         notes: data.notes,
-        roleid: data.roleid,
         startdate: dayjs(data.startdate),
         totaltarget: data.totaltarget,
       },
+    });
+
+    setUserSelected({
+      value: data.salesid,
+      role: data?.role ? data.role.replaceAll(" ", "-") : "",
+      label: data.sales,
+    });
+
+    console.log({
+      value: data.salesid,
+      role: data?.role ? data.role.replaceAll(" ", "-") : "",
+      label: data.sales,
     });
   };
 
@@ -139,6 +150,12 @@ export default function Enter() {
         ...state.payloadPrimary,
       };
 
+      if (!userSelected.value) {
+        throw new Error("User is required.");
+      }
+
+      payloadToInsert = { ...payloadToInsert, salesid: userSelected.value };
+
       if (!payloadToInsert.startdate) {
         throw new Error("Start date is required.");
       }
@@ -148,11 +165,7 @@ export default function Enter() {
       }
 
       if (!payloadToInsert.totaltarget || payloadToInsert.totaltarget <= 0) {
-        throw new Error("otal target is required and must be greater than 0.");
-      }
-
-      if (!payloadToInsert.roleid) {
-        throw new Error("Role is required.");
+        throw new Error("Total target is required and must be greater than 0.");
       }
 
       const response = await TargetFetch.update(data.id, payloadToInsert);
@@ -204,6 +217,33 @@ export default function Enter() {
                       </div>
                     </div>
                   </div>
+
+                  <Divider
+                    style={{
+                      margin: "0",
+                      textTransform: "capitalize",
+                      borderColor: "#1677ff",
+                    }}
+                    orientation="left"
+                  >
+                    User
+                  </Divider>
+
+                  <div className="w-full flex flex-col lg:flex-row gap-8">
+                    <div className="w-full lg:w-1/2">
+                      <InputUser
+                        isRequired={true}
+                        value={userSelected.value || undefined}
+                        roleValue={userSelected.role || undefined}
+                        onChange={(val, opt) => {
+                          console.log(opt);
+                          setUserSelected(opt);
+                        }}
+                      />
+                    </div>
+                    <span className="hidden lg:static"> </span>
+                  </div>
+
                   <InputForm
                     title="primary"
                     type="SET_PRIMARY"
@@ -228,12 +268,6 @@ export default function Enter() {
                         key: "description",
                         input: "text",
                         isAlias: true,
-                      },
-                      {
-                        key: "roleid",
-                        input: "select",
-                        isAlias: true,
-                        options: roleOptions,
                       },
                       {
                         key: "notes",

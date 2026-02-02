@@ -37,10 +37,10 @@ function SalesOrder() {
   const { RangePicker } = DatePicker;
 
   const [page, setPage] = useState(
-    parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10)
+    parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10),
   );
   const [limit, setLimit] = useState(
-    parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10)
+    parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10),
   );
 
   const [datas, setDatas] = useState([]);
@@ -80,7 +80,7 @@ function SalesOrder() {
           filters.dateRange[1],
           filters.itemprocessfamily,
           filters.salesrep,
-          filters.displayname
+          filters.displayname,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -91,13 +91,18 @@ function SalesOrder() {
               no: i + 1,
               ...item,
             })) || [];
+
           setDatas(updateData);
           setTotalItems(resData.total_items);
           setTableKeys(
-            Array.isArray(updateData) && updateData.length > 0
-              ? Object.keys(updateData[0]).filter((item) => item != "id")
-              : []
+            updateData.length > 0
+              ? Object.keys(updateData[0]).filter((key) => key !== "id")
+              : [],
           );
+        } else {
+          setDatas([]);
+          setTotalItems(0);
+          setTableKeys([]);
         }
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
@@ -295,7 +300,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/report/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/report/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"
