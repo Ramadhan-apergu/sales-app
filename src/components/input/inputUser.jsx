@@ -15,6 +15,8 @@ export default function InputUser({
   allowClear = true,
   placeholder = "Select user",
   isRequired = false,
+  readOnly = false,
+  roleValue,
 }) {
   const { notify } = useNotification();
 
@@ -72,7 +74,6 @@ export default function InputUser({
   const fetchRoles = async () => {
     const response = await userManagement.getRoles();
     const resData = getResponseHandler(response, notify);
-    console.log(resData);
     if (resData && resData.list) {
       const mapped = resData.list.map((r) => ({
         label: r.name,
@@ -85,6 +86,9 @@ export default function InputUser({
 
   // initial load
   useEffect(() => {
+    if (roleValue) {
+      setSelectedRole(roleValue);
+    }
     fetchUsers(0);
     fetchRoles();
   }, []);
@@ -140,6 +144,7 @@ export default function InputUser({
           onChange={handleRoleChange}
           options={roles}
           style={{ width: "30%" }}
+          disabled={readOnly}
         />
 
         {/* User Select */}
@@ -156,6 +161,7 @@ export default function InputUser({
           loading={isLoading && options.length === 0}
           options={options}
           style={{ width: "70%", flex: 1 }}
+          disabled={readOnly}
           popupRender={(menu) => (
             <>
               {menu}

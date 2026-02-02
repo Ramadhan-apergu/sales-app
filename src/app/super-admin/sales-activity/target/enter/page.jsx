@@ -176,7 +176,7 @@ export default function Enter() {
                 isRequired={true}
                 value={userSelected.value || undefined}
                 onChange={(val, opt) => {
-                  console.log(val);
+                  console.log(opt);
                   setUserSelected(opt);
                 }}
               />
