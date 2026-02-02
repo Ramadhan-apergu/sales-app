@@ -159,7 +159,7 @@ export default function Enter() {
   const dropdownItems = [
     {
       key: "1",
-      label: "Covert",
+      label: "Convert",
     },
     {
       key: "2",
@@ -244,7 +244,7 @@ export default function Enter() {
                     <div className="w-full lg:w-1/2 flex gap-1 flex-col">
                       <p className="w-full lg:text-lg">
                         {data.leadid} /{" "}
-                        {data?.iscovert === "1" ? "Convert" : "Not Convert"}
+                        {data?.isconvert === "1" ? "Convert" : "Not Convert"}
                       </p>
                       <div>
                         <Tag

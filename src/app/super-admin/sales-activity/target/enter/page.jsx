@@ -44,6 +44,7 @@ import { paymentAliases, targetAliases } from "@/utils/aliases";
 import { formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
+import InputUser from "@/components/input/inputUser";
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -51,6 +52,7 @@ export default function Enter() {
   const isLargeScreen = useBreakpoint("lg");
   const title = "target";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [userSelected, setUserSelected] = useState({});
 
   const initialState = {
     payloadPrimary: {
@@ -58,15 +60,9 @@ export default function Enter() {
       enddate: dayjs(new Date()).add(1, "day"),
       totaltarget: 0,
       description: "",
-      roleid: "sales-outdoor",
       notes: "",
     },
   };
-
-  const roleOptions = [
-    { label: "Sales Indoor", value: "sales-indoor" },
-    { label: "Sales Outdoor", value: "sales-outdoor" },
-  ];
 
   function reducer(state, action) {
     switch (action.type) {
@@ -94,6 +90,12 @@ export default function Enter() {
         ...state.payloadPrimary,
       };
 
+      if (!userSelected.value) {
+        throw new Error("User is required.");
+      }
+
+      payloadToInsert = { ...payloadToInsert, salesid: userSelected.value };
+
       if (!payloadToInsert.startdate) {
         throw new Error("Start date is required.");
       }
@@ -102,12 +104,12 @@ export default function Enter() {
         throw new Error("End date is required.");
       }
 
-      if (!payloadToInsert.totaltarget || payloadToInsert.totaltarget <= 0) {
-        throw new Error("otal target is required and must be greater than 0.");
+      if (payloadToInsert.enddate <= payloadToInsert.startdate) {
+        throw new Error("End date must be later than start date.");
       }
 
-      if (!payloadToInsert.roleid) {
-        throw new Error("Role is required.");
+      if (!payloadToInsert.totaltarget || payloadToInsert.totaltarget <= 0) {
+        throw new Error("otal target is required and must be greater than 0.");
       }
 
       const response = await TargetFetch.create(payloadToInsert);
@@ -130,7 +132,7 @@ export default function Enter() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-             Target Enter
+              Target Enter
             </p>
             <Button
               icon={<UnorderedListOutlined />}
@@ -155,6 +157,31 @@ export default function Enter() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          <Divider
+            style={{
+              margin: "0",
+              textTransform: "capitalize",
+              borderColor: "#1677ff",
+            }}
+            orientation="left"
+          >
+            User
+          </Divider>
+
+          <div className="w-full flex flex-col lg:flex-row gap-8">
+            <div className="w-full lg:w-1/2">
+              <InputUser
+                isRequired={true}
+                value={userSelected.value || undefined}
+                onChange={(val, opt) => {
+                  console.log(opt);
+                  setUserSelected(opt);
+                }}
+              />
+            </div>
+            <span className="hidden lg:static"> </span>
           </div>
 
           <InputForm
@@ -186,13 +213,6 @@ export default function Enter() {
                 key: "description",
                 input: "text",
                 isAlias: true,
-              },
-              {
-                key: "roleid",
-                input: "select",
-                isAlias: true,
-                options: roleOptions,
-                rules: [{ required: true, message: `Role is required` }],
               },
               {
                 key: "notes",

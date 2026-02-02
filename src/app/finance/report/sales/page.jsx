@@ -85,20 +85,26 @@ function SalesOrder() {
 
         const resData = getResponseHandler(response, notify);
 
-        if (resData) {
-          const updateData =
-            resData?.list.map((item, i) => ({
-              no: i + 1,
-              ...item,
-            })) || [];
-          setDatas(updateData);
-          setTotalItems(resData.total_items);
-          setTableKeys(
-            Array.isArray(updateData) && updateData.length > 0
-              ? Object.keys(updateData[0]).filter((item) => item != "id")
-              : []
-          );
-        }
+if (resData) {
+  const updateData =
+    resData?.list.map((item, i) => ({
+      no: i + 1,
+      ...item,
+    })) || [];
+
+  setDatas(updateData);
+  setTotalItems(resData.total_items);
+  setTableKeys(
+    updateData.length > 0
+      ? Object.keys(updateData[0]).filter((key) => key !== "id")
+      : []
+  );
+} else {
+  setDatas([]);
+  setTotalItems(0);
+  setTableKeys([]);
+}
+
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
       } finally {
