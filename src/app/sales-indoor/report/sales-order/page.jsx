@@ -107,7 +107,7 @@ function SalesOrder() {
             : filters.statusFilter.join(","),
           filters.itemprocessfamily,
           filters.salesrep,
-          filters.displayname
+          filters.displayname,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -143,10 +143,14 @@ function SalesOrder() {
           setTableKeys(
             Array.isArray(data) && data.length > 0
               ? Object.keys(data[0]).filter(
-                  (item) => item.toLowerCase() != "id"
+                  (item) => item.toLowerCase() != "id",
                 )
-              : []
+              : [],
           );
+        } else {
+          setDatas([]);
+          setTotalItems(0);
+          setTableKeys([]);
         }
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
@@ -391,7 +395,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/report/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/report/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"
@@ -434,7 +438,7 @@ function ExportButton({ disabled = true, filters = {}, notify = null }) {
         filters.statusFilter.length == 0 ? "" : filters.statusFilter.join(","),
         filters.itemprocessfamily,
         filters.salesrep,
-        filters.displayname
+        filters.displayname,
       );
 
       const resData = getResponseHandler(response, notify);
