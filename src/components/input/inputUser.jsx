@@ -141,27 +141,29 @@ export default function InputUser({
         {/* Role Filter */}
         <Select
           value={selectedRole}
-          onChange={handleRoleChange}
+          onChange={readOnly ? undefined : handleRoleChange}
           options={roles}
           style={{ width: "30%" }}
-          disabled={readOnly}
+          open={readOnly ? false : undefined}
+          showSearch={!readOnly}
+          allowClear={!readOnly}
         />
 
         {/* User Select */}
         <Select
-          showSearch
-          allowClear={allowClear}
+          showSearch={!readOnly}
+          allowClear={allowClear && !readOnly}
           placeholder={placeholder}
           value={value}
-          onChange={onChange}
-          onSearch={handleSearch}
-          onPopupScroll={handleScroll}
+          onChange={readOnly ? undefined : onChange}
+          onSearch={readOnly ? undefined : handleSearch}
+          onPopupScroll={readOnly ? undefined : handleScroll}
           filterOption={false}
+          open={readOnly ? false : undefined}
           notFoundContent={isLoading ? <Spin size="small" /> : "No data"}
           loading={isLoading && options.length === 0}
           options={options}
           style={{ width: "70%", flex: 1 }}
-          disabled={readOnly}
           popupRender={(menu) => (
             <>
               {menu}

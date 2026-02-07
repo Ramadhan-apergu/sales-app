@@ -106,7 +106,7 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
         startdate,
         enddate,
         stage,
-        owner
+        owner,
       );
       const resData = getResponseHandler(response);
       if (resData) {
@@ -301,12 +301,12 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
                     data={[
                       {
                         name: "Total Convert",
-                        value: dataSource?.total_convert || 0,
+                        value: Math.round(dataSource?.total_convert) || 0,
                         fill: "#1677ff",
                       },
                       {
                         name: "Total Not Convert",
-                        value: dataSource?.total_not_convert || 0,
+                        value: Math.round(dataSource?.total_not_convert) || 0,
                         fill: "#52c41a",
                       },
                     ]}
@@ -317,7 +317,9 @@ function DashboardLead({ ownerList = [], stageList = [] }) {
                     innerRadius={50}
                     outerRadius={80}
                     paddingAngle={2}
-                    label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) =>
+                      `${(percent * 100).toFixed(0)}%`
+                    }
                   />
                   <Tooltip />
                   <Legend
@@ -370,7 +372,7 @@ function FunnelReport({ ownerList = [] }) {
         "",
         startdate,
         enddate,
-        owner
+        owner,
       );
       const resData = getResponseHandler(response);
       if (resData) {

@@ -47,6 +47,7 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
+import InputUser from "@/components/input/inputUser";
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -56,6 +57,7 @@ export default function Enter() {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [channelLabel, setChannelLabel] = useState("phone number");
   const [leadOptions, setLeadOptions] = useState([]);
+  const [userSelected, setUserSelected] = useState({});
 
   const initialState = {
     payloadPrimary: {
@@ -99,6 +101,15 @@ export default function Enter() {
     setIsLoadingSubmit(true);
     try {
       let payloadToInsert = { ...state.payloadPrimary };
+
+      if (payloadToInsert.channelname == 3 && userSelected) {
+        payloadToInsert = {
+          ...payloadToInsert,
+          channelreff: userSelected.role + "/" + userSelected.value,
+        };
+      } else {
+        payloadToInsert.channelreff = "";
+      }
 
       if (!payloadToInsert.channelname) {
         throw new Error("Channel name is required.");
@@ -213,7 +224,7 @@ export default function Enter() {
             ...lead,
             value: lead.id,
             label: lead.companyname,
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -293,17 +304,17 @@ export default function Enter() {
                   { required: true, message: `Channel Name is required` },
                 ],
               },
-              {
-                key: "channelreff",
-                input: state.payloadPrimary.channelname == 4 ? "text" : "input",
-                labeled: channelLabel,
-                rules: [
-                  {
-                    required: true,
-                    message: `Channel Reff is required`,
-                  },
-                ],
-              },
+              //   {
+              //     key: "channelreff",
+              //     input: state.payloadPrimary.channelname == 4 ? "text" : "input",
+              //     labeled: channelLabel,
+              //     rules: [
+              //       {
+              //         required: true,
+              //         message: `Channel Reff is required`,
+              //       },
+              //     ],
+              //   },
               {
                 key: "status",
                 input: "select",
@@ -380,7 +391,7 @@ export default function Enter() {
                             notify(
                               "error",
                               "Failed",
-                              "You can only upload image files!"
+                              "You can only upload image files!",
                             );
                             return Upload.LIST_IGNORE;
                           }
@@ -397,6 +408,35 @@ export default function Enter() {
                 </div>
               </div>
             </div>
+          )}
+
+          {state.payloadPrimary.channelname == 3 && (
+            <>
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                PIC
+              </Divider>
+
+              <div className="w-full flex flex-col lg:flex-row gap-8">
+                <div className="w-full lg:w-1/2">
+                  <InputUser
+                    isRequired={true}
+                    value={userSelected.value || undefined}
+                    onChange={(val, opt) => {
+                      console.log(opt);
+                      setUserSelected(opt);
+                    }}
+                  />
+                </div>
+                <span className="hidden lg:static"> </span>
+              </div>
+            </>
           )}
         </div>
       </Layout>
