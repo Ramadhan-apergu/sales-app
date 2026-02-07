@@ -51,6 +51,7 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import TargetFetch from "@/modules/salesApi/crm/target";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
+import InputUser from "@/components/input/inputUser";
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
@@ -60,6 +61,7 @@ export default function Enter() {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userSelected, setUserSelected] = useState({});
 
   const initialState = {
     payloadPrimary: {
@@ -113,7 +115,6 @@ export default function Enter() {
       const resData = getResponseHandler(response);
       setData(resData);
       if (resData) {
-        console.log(resData);
         mappingDataPayload(resData);
       }
     } catch (error) {
@@ -160,6 +161,11 @@ export default function Enter() {
       }
     };
     setChannelLabel(label);
+
+    setUserSelected({
+      role: data?.channelreff ? data.channelreff.split("/")[0] : "",
+      value: data?.channelreff ? data.channelreff.split("/")[1] : "",
+    });
   };
 
   const [modalDelete, setModalDelete] = useState(false);
@@ -235,7 +241,7 @@ export default function Enter() {
                           router.push(
                             `/super-admin/sales-activity/${title}/${
                               data?.id || ""
-                            }/edit`
+                            }/edit`,
                           );
                         }}
                       >
@@ -272,17 +278,17 @@ export default function Enter() {
                         isAlias: true,
                         isRead: true,
                       },
-                      {
-                        key: "channelreff",
-                        input:
-                          state.payloadPrimary.channelname == 4
-                            ? "text"
-                            : "input",
+                      //   {
+                      //     key: "channelreff",
+                      //     input:
+                      //       state.payloadPrimary.channelname == 4
+                      //         ? "text"
+                      //         : "input",
 
-                        labeled: channelLabel,
-                        isAlias: true,
-                        isRead: true,
-                      },
+                      //     labeled: channelLabel,
+                      //     isAlias: true,
+                      //     isRead: true,
+                      //   },
                       {
                         key: "status",
                         input: "input",
@@ -300,7 +306,7 @@ export default function Enter() {
                         input: "text",
                         isAlias: true,
                         isRead: true,
-                        hidden: state.payloadPrimary.channelname != 4
+                        hidden: state.payloadPrimary.channelname != 4,
                       },
                     ]}
                     aliases={leadActAliases}
@@ -340,6 +346,36 @@ export default function Enter() {
                         </div>
                       </div>
                     </div>
+                  )}
+
+                  {state.payloadPrimary.channelname == 3 && (
+                    <>
+                      <Divider
+                        style={{
+                          margin: "0",
+                          textTransform: "capitalize",
+                          borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                      >
+                        PIC
+                      </Divider>
+
+                      <div className="w-full flex flex-col lg:flex-row gap-8">
+                        <div className="w-full lg:w-1/2">
+                          <InputUser
+                            readOnly={true}
+                            isRequired={true}
+                            value={userSelected.value || undefined}
+                            onChange={(val, opt) => {
+                              setUserSelected(opt);
+                            }}
+                            roleValue={userSelected.role || undefined}
+                          />
+                        </div>
+                        <span className="hidden lg:static"> </span>
+                      </div>
+                    </>
                   )}
                 </>
               ) : (

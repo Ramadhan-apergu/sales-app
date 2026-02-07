@@ -16,6 +16,7 @@ import { EyeOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import idID from "antd/locale/id_ID";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import enUS from "antd/es/date-picker/locale/en_US";
 
 export default function InputForm({
   type,
@@ -50,7 +51,7 @@ export default function InputForm({
           return [key, dayjs(value)];
         }
         return [key, value];
-      })
+      }),
     );
 
     form.setFieldsValue(convertedPayload);
@@ -75,7 +76,7 @@ export default function InputForm({
           return [key, value.format("YYYY-MM-DDTHH:mm:ss")];
         }
         return [key, value];
-      })
+      }),
     );
 
     if (onChange) {
@@ -123,13 +124,13 @@ export default function InputForm({
                 number = false,
                 note = "",
               },
-              i
+              i,
             ) => {
               const label = labeled
                 ? labeled
                 : isAlias
-                ? aliases[key] || key
-                : key;
+                  ? aliases[key] || key
+                  : key;
 
               let inputComponent;
               switch (input) {
@@ -146,12 +147,12 @@ export default function InputForm({
                           if (!value) return "";
                           return `Rp ${String(value).replace(
                             /\B(?=(\d{3})+(?!\d))/g,
-                            "."
+                            ".",
                           )}`;
                         } else if (number) {
                           return `${value}`.replace(
                             /\B(?=(\d{3})+(?!\d))/g,
-                            "."
+                            ".",
                           );
                         } else {
                           return value;
@@ -165,7 +166,7 @@ export default function InputForm({
                         } else if (number) {
                           return `${value}`.replace(
                             /\B(?=(\d{3})+(?!\d))/g,
-                            "."
+                            ".",
                           );
                         } else {
                           return value;
@@ -206,6 +207,7 @@ export default function InputForm({
                       format={props?.format || "DD-MM-YYYY HH:mm"}
                       disabled={isReadOnly || disabled || isRead}
                       placeholder={placeholder}
+                      locale={enUS}
                     />
                   );
                   break;
@@ -248,7 +250,7 @@ export default function InputForm({
                         }
                         onClick={() => {
                           const elPassword = document.getElementById(
-                            `${type}${i}`
+                            `${type}${i}`,
                           );
                           if (
                             elPassword &&
@@ -307,7 +309,7 @@ export default function InputForm({
                   {inputComponent}
                 </Form.Item>
               );
-            }
+            },
           )}
         </Form>
       </ConfigProvider>

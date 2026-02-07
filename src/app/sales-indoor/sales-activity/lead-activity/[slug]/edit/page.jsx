@@ -54,6 +54,7 @@ import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
 import utc from "dayjs/plugin/utc";
+import InputUser from "@/components/input/inputUser";
 dayjs.extend(utc);
 
 export default function Enter() {
@@ -64,6 +65,7 @@ export default function Enter() {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userSelected, setUserSelected] = useState({});
 
   const initialState = {
     payloadPrimary: {
@@ -147,7 +149,7 @@ export default function Enter() {
             ...lead,
             value: lead.id,
             label: lead.companyname,
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -204,12 +206,26 @@ export default function Enter() {
         url: data.visitdoc,
       },
     ]);
+
+    setUserSelected({
+      role: data?.channelreff ? data.channelreff.split("/")[0] : "",
+      value: data?.channelreff ? data.channelreff.split("/")[1] : "",
+    });
   };
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
     try {
       let payloadToInsert = { ...state.payloadPrimary };
+
+      if (payloadToInsert.channelname == 3 && userSelected) {
+        payloadToInsert = {
+          ...payloadToInsert,
+          channelreff: userSelected.role + "/" + userSelected.value,
+        };
+      } else {
+        payloadToInsert.channelreff = "";
+      }
 
       if (!payloadToInsert.channelname) {
         throw new Error("Channel name is required.");
@@ -389,20 +405,20 @@ export default function Enter() {
                           },
                         ],
                       },
-                      {
-                        key: "channelreff",
-                        input:
-                          state.payloadPrimary.channelname == 4
-                            ? "text"
-                            : "input",
-                        labeled: channelLabel,
-                        rules: [
-                          {
-                            required: true,
-                            message: `Channel Reff is required`,
-                          },
-                        ],
-                      },
+                      //   {
+                      //     key: "channelreff",
+                      //     input:
+                      //       state.payloadPrimary.channelname == 4
+                      //         ? "text"
+                      //         : "input",
+                      //     labeled: channelLabel,
+                      //     rules: [
+                      //       {
+                      //         required: true,
+                      //         message: `Channel Reff is required`,
+                      //       },
+                      //     ],
+                      //   },
                       {
                         key: "status",
                         input: "select",
@@ -483,7 +499,7 @@ export default function Enter() {
                                     notify(
                                       "error",
                                       "Failed",
-                                      "You can only upload image files!"
+                                      "You can only upload image files!",
                                     );
                                     return Upload.LIST_IGNORE;
                                   }
@@ -502,6 +518,35 @@ export default function Enter() {
                         </div>
                       </div>
                     </div>
+                  )}
+
+                  {state.payloadPrimary.channelname == 3 && (
+                    <>
+                      <Divider
+                        style={{
+                          margin: "0",
+                          textTransform: "capitalize",
+                          borderColor: "#1677ff",
+                        }}
+                        orientation="left"
+                      >
+                        PIC
+                      </Divider>
+
+                      <div className="w-full flex flex-col lg:flex-row gap-8">
+                        <div className="w-full lg:w-1/2">
+                          <InputUser
+                            isRequired={true}
+                            value={userSelected.value || undefined}
+                            onChange={(val, opt) => {
+                              setUserSelected(opt);
+                            }}
+                            roleValue={userSelected.role || undefined}
+                          />
+                        </div>
+                        <span className="hidden lg:static"> </span>
+                      </div>
+                    </>
                   )}
                 </>
               ) : (
