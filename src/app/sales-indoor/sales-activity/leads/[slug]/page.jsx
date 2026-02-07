@@ -152,11 +152,16 @@ export default function Enter() {
         status: data.status,
       },
     });
+    if (data?.isconvert == 1) {
+      setDropdownItems(
+        (prev) => prev.filter((item) => item.key !== "1"), // hapus menu Convert
+      );
+    }
   };
 
   const [modalDelete, setModalDelete] = useState(false);
 
-  const dropdownItems = [
+  const [dropdownItems, setDropdownItems] = useState([
     {
       key: "1",
       label: "Convert",
@@ -166,7 +171,7 @@ export default function Enter() {
       label: "Delete",
       danger: true,
     },
-  ];
+  ]);
 
   function handleDropdown({ key }) {
     switch (key) {
@@ -244,7 +249,7 @@ export default function Enter() {
                     <div className="w-full lg:w-1/2 flex gap-1 flex-col">
                       <p className="w-full lg:text-lg">
                         {data.leadid} /{" "}
-                        {data?.isconvert === "1" ? "Convert" : "Not Convert"}
+                        {data?.isconvert == "1" ? "Convert" : "Not Convert"}
                       </p>
                       <div>
                         <Tag
@@ -254,20 +259,20 @@ export default function Enter() {
                           }}
                           color={
                             ["qualified"].includes(
-                              data?.status?.toLowerCase() || ""
+                              data?.status?.toLowerCase() || "",
                             )
                               ? "green"
                               : [
-                                  "engaged",
-                                  "prospecting",
-                                  "Negotiating",
-                                ].includes(data?.status?.toLowerCase() || "")
-                              ? "orange"
-                              : ["closed"].includes(
-                                  data?.status?.toLowerCase() || ""
-                                )
-                              ? "red"
-                              : "default"
+                                    "engaged",
+                                    "prospecting",
+                                    "Negotiating",
+                                  ].includes(data?.status?.toLowerCase() || "")
+                                ? "orange"
+                                : ["closed"].includes(
+                                      data?.status?.toLowerCase() || "",
+                                    )
+                                  ? "red"
+                                  : "default"
                           }
                         >
                           {data.status || "-"}
@@ -282,7 +287,7 @@ export default function Enter() {
                           router.push(
                             `/sales-indoor/sales-activity/${title}/${
                               data?.id || ""
-                            }/edit`
+                            }/edit`,
                           );
                         }}
                       >
