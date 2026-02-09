@@ -348,6 +348,14 @@ function EditLeadActivityPageContent({ params }) {
                                                         required: true,
                                                         message: `${channelLabel} is required`,
                                                     },
+                                                    state.payloadPrimary.channelname === 1 ? {
+                                                        pattern: /^[0-9]+$/,
+                                                        message: "Please enter a valid phone number",
+                                                    } : {},
+                                                    state.payloadPrimary.channelname === 2 ? {
+                                                        type: "email",
+                                                        message: "Please enter a valid email",
+                                                    } : {},
                                                 ],
                                             },
                                             {
@@ -366,22 +374,30 @@ function EditLeadActivityPageContent({ params }) {
                                         ]}
                                         aliases={leadActAliases}
                                         onChange={(type, payload) => {
-                                            dispatch({ type, payload });
+                                            let updatedPayload = { ...payload };
+
+                                            // Check if channelname has changed
+                                            if (payload.channelname && payload.channelname !== state.payloadPrimary.channelname) {
+                                                if (payload.channelname === 3) {
+                                                    // Auto-fill channelreff with profile name for Meetings
+                                                    if (profile?.data?.name) {
+                                                        updatedPayload.channelreff = profile.data.name;
+                                                    }
+                                                } else {
+                                                    // Clear channelreff for other channels
+                                                    updatedPayload.channelreff = "";
+                                                }
+                                            }
+
+                                            dispatch({ type, payload: updatedPayload });
 
                                             const label = () => {
-                                                switch (payload.channelname) {
+                                                switch (updatedPayload.channelname || state.payloadPrimary.channelname) {
                                                     case 1:
                                                         return "Phone Number";
                                                     case 2:
                                                         return "Email";
                                                     case 3:
-                                                        // Auto-fill channelreff with profile name for Meetings
-                                                        if (profile?.data?.name) {
-                                                            dispatch({
-                                                                type: "Primary",
-                                                                payload: { ...payload, channelreff: profile.data.name }
-                                                            });
-                                                        }
                                                         return "PIC";
                                                     case 4:
                                                         return "Lead Address";
