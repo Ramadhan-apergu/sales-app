@@ -9,9 +9,9 @@ import LeadsFetch from "@/modules/salesApi/crm/leads";
 import Link from 'next/link';
 import { EditOutlined, MoreOutlined } from '@ant-design/icons';
 import {
-  deleteResponseHandler,
-  getResponseHandler,
-  updateResponseHandler,
+    deleteResponseHandler,
+    getResponseHandler,
+    updateResponseHandler,
 } from "@/utils/responseHandlers";
 
 function LeadDetailPageContent({ params }) {
@@ -86,10 +86,10 @@ function LeadDetailPageContent({ params }) {
     };
 
     const dropdownItems = [
-        {
-            key: '1',
-            label: 'Convert',
-        },
+        // {
+        //     key: '1',
+        //     label: 'Convert',
+        // },
         {
             key: '2',
             label: 'Delete',
@@ -99,9 +99,9 @@ function LeadDetailPageContent({ params }) {
 
     const handleDropdown = ({ key }) => {
         switch (key) {
-            case '1':
-                handleConvert();
-                break;
+            // case '1':
+            //     handleConvert();
+            //     break;
             case '2':
                 setModalDelete(true);
                 break;
@@ -173,7 +173,7 @@ function LeadDetailPageContent({ params }) {
                                         </Dropdown>
                                     </div>
                                 </div>
-                                
+
                                 <div className="grid grid-cols-1 gap-4">
                                     <div className="mb-2">
                                         <h3 className="font-semibold text-gray-700 mb-2 text-center text-2xl">Lead Details</h3>
@@ -181,20 +181,25 @@ function LeadDetailPageContent({ params }) {
                                             <div className="flex justify-between">
                                                 <span>{lead.leadid} / {lead.name}</span>
                                             </div>
-                                            <span className={`px-2 py-1 rounded-full text-xs ${
-                                                ['open'].includes(lead?.status?.toLowerCase())
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : ['pending'].includes(lead?.status?.toLowerCase())
+                                            <div className={`px-2 py-1 rounded-full text-xs w-fit ${['open'].includes(lead?.status?.toLowerCase())
+                                                ? 'bg-green-100 text-green-800'
+                                                : ['pending'].includes(lead?.status?.toLowerCase())
                                                     ? 'bg-yellow-100 text-yellow-800'
                                                     : ['closed'].includes(lead?.status?.toLowerCase())
-                                                    ? 'bg-red-100 text-red-800'
-                                                    : 'bg-gray-100 text-gray-800'
-                                            }`}>
+                                                        ? 'bg-red-100 text-red-800'
+                                                        : 'bg-gray-100 text-gray-800'
+                                                }`}>
                                                 {lead.status}
-                                            </span>
+                                            </div>
+                                            <div className={`px-2 py-1 rounded-full text-xs w-fit ${lead.isconvert === 1
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {lead.isconvert === 1 ? "Convert" : "Not Convert"}
+                                            </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <Divider
                                             style={{
@@ -227,7 +232,7 @@ function LeadDetailPageContent({ params }) {
                                                 <span className="text-gray-500">Added On:</span>
                                                 <span className="text-right">{lead.addedon}</span>
                                             </div>
-                                             <div className="flex justify-between border rounded-lg p-2 border-gray-300">
+                                            <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                 <span className="text-gray-500">Address:</span>
                                                 <span className="text-right">{lead.addr1}</span>
                                             </div>
@@ -240,7 +245,7 @@ function LeadDetailPageContent({ params }) {
                                                 <span className="text-right">{lead.state}</span>
                                             </div>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>
