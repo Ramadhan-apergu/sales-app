@@ -268,6 +268,14 @@ function CreateLeadActivityPageContent() {
                                                         required: true,
                                                         message: `Channel Reff is required`,
                                                     },
+                                                    state.payloadPrimary.channelname === 1 ? {
+                                                        pattern: /^[0-9]+$/,
+                                                        message: "Please enter a valid phone number",
+                                                    } : {},
+                                                    state.payloadPrimary.channelname === 2 ? {
+                                                        type: "email",
+                                                        message: "Please enter a valid email",
+                                                    } : {},
                                                 ],
                                             },
                                             {
@@ -285,28 +293,35 @@ function CreateLeadActivityPageContent() {
                                         ]}
                                         aliases={leadActAliases}
                                         onChange={(type, payload) => {
-                                            dispatch({ type, payload });
+                                            let updatedPayload = { ...payload };
+
+                                            // Check if channelname has changed
+                                            if (payload.channelname && payload.channelname !== state.payloadPrimary.channelname) {
+                                                if (payload.channelname === 3) {
+                                                    // Auto-fill channelreff with profile name for Meetings
+                                                    if (profile?.data?.name) {
+                                                        updatedPayload.channelreff = profile.data.name;
+                                                    }
+                                                } else {
+                                                    // Clear channelreff for other channels
+                                                    updatedPayload.channelreff = "";
+                                                }
+                                            }
+
+                                            dispatch({ type, payload: updatedPayload });
 
                                             const label = () => {
-                                                switch (payload.channelname) {
+                                                switch (updatedPayload.channelname || state.payloadPrimary.channelname) {
                                                     case 1:
                                                         return "Phone Number";
                                                     case 2:
                                                         return "Email";
                                                     case 3:
-                                                        // Auto-fill channelreff with profile name for Meetings using the latest profile state
-                                                        // Note: We need access to profile state here. Since setChannelLabel is state update,
-                                                        // we should also update the payload if needed, but InputForm handles its own state for fields?
-                                                        // The dispatch updates the state. We should dispatch the auto-fill value.
-                                                        if (profile?.data?.name) {
-                                                            dispatch({
-                                                                type: "Primary",
-                                                                payload: { ...payload, channelreff: profile.data.name }
-                                                            });
-                                                        }
                                                         return "PIC";
                                                     case 4:
                                                         return "Lead Address";
+                                                    default:
+                                                        return "Channel Reference";
                                                 }
                                             };
                                             setChannelLabel(label());
