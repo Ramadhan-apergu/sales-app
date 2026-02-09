@@ -12,17 +12,19 @@ import { leadActAliases } from "@/utils/aliases";
 import dayjs from "dayjs";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
+import ProfilFetch from "@/modules/salesApi/getProfile";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
 function EditLeadActivityPageContent({ params }) {
-    const { slug } = use(params); 
+    const { slug } = use(params);
     const router = useRouter();
     const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
     const [channelLabel, setChannelLabel] = useState("Phone Number");
     const [leadOptions, setLeadOptions] = useState([]);
     const [fileList, setFileList] = useState([]);
     const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+    const [profile, setProfile] = useState({});
 
     const initialState = {
         payloadPrimary: {
@@ -75,7 +77,14 @@ function EditLeadActivityPageContent({ params }) {
             const formData = new FormData();
             formData.append("lead", payloadToInsert.lead);
             formData.append("channelname", payloadToInsert.channelname);
-            formData.append("channelreff", payloadToInsert.channelreff);
+
+            // For Meetings (channelname === 3), construct channelreff from profile data
+            if (payloadToInsert.channelname === 3 && profile?.data) {
+                formData.append("channelreff", `${profile.data.role_name}/${profile.data.id}`);
+            } else {
+                formData.append("channelreff", payloadToInsert.channelreff);
+            }
+
             formData.append("activitydate", payloadToInsert.activitydate.toISOString());
             formData.append("status", payloadToInsert.status || "");
             formData.append("summary", payloadToInsert.summary || "");
@@ -114,42 +123,42 @@ function EditLeadActivityPageContent({ params }) {
 
     const statusOptions = [
         [
-        {
-            value: "answered",
-            label: "Answered",
-        },
-        {
-            value: "no response",
-            label: "No Response",
-        },
+            {
+                value: "answered",
+                label: "Answered",
+            },
+            {
+                value: "no response",
+                label: "No Response",
+            },
         ],
         [
-        {
-            value: "sent",
-            label: "Sent",
-        },
-        {
-            value: "no response",
-            label: "No Response",
-        },
+            {
+                value: "sent",
+                label: "Sent",
+            },
+            {
+                value: "no response",
+                label: "No Response",
+            },
         ],
         [
-        {
-            value: "scheduled",
-            label: "Scheduled",
-        },
-        {
-            value: "rescheduled",
-            label: "Re-Scheduled",
-        },
-        {
-            value: "canceled",
-            label: "Canceled",
-        },
-        {
-            value: "done",
-            label: "Done",
-        },
+            {
+                value: "scheduled",
+                label: "Scheduled",
+            },
+            {
+                value: "rescheduled",
+                label: "Re-Scheduled",
+            },
+            {
+                value: "canceled",
+                label: "Canceled",
+            },
+            {
+                value: "done",
+                label: "Done",
+            },
         ],
     ];
 
@@ -174,7 +183,17 @@ function EditLeadActivityPageContent({ params }) {
     };
 
     useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const profileData = await ProfilFetch.get();
+                setProfile(profileData);
+            } catch (e) {
+                console.error('Error fetching profile', e);
+            }
+        };
+
         fetchDataLead();
+        fetchProfile();
     }, []);
 
     const fetchData = async () => {
@@ -184,12 +203,24 @@ function EditLeadActivityPageContent({ params }) {
 
             if (resData) {
                 // Set initial state with fetched data
+                let initialChannelReff = resData.channelreff;
+
+                // Logic for PIC (Meetings) display
+                if (resData.channelname === 3 && profile?.data) {
+                    const profileKey = `${profile.data.role_name}/${profile.data.id}`;
+                    if (resData.channelreff === profileKey) {
+                        initialChannelReff = profile.data.name;
+                    } else {
+                        initialChannelReff = "";
+                    }
+                }
+
                 dispatch({
                     type: "Primary",
                     payload: {
                         lead: resData.lead,
                         channelname: resData.channelname,
-                        channelreff: resData.channelreff,
+                        channelreff: initialChannelReff,
                         activitydate: dayjs.utc(resData.activitydate),
                         status: resData.status,
                         summary: resData.summary,
@@ -228,7 +259,7 @@ function EditLeadActivityPageContent({ params }) {
         if (slug) {
             fetchData();
         }
-    }, [slug]);
+    }, [slug, profile]);
 
     const handleChangeFile = ({ fileList: newFileList }) => {
         setFileList(newFileList);
@@ -263,7 +294,7 @@ function EditLeadActivityPageContent({ params }) {
                             <div className="flex justify-between items-center mb-2">
                                 <Button onClick={handleBack} icon={<CloseOutlined />}>Cancel</Button>
                             </div>
-                            
+
                             <h3 className="font-semibold text-gray-700 mb-3 text-center text-2xl">Edit Lead Activity</h3>
 
                             <div className="w-full flex flex-col gap-4">
@@ -276,7 +307,7 @@ function EditLeadActivityPageContent({ params }) {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="w-full flex flex-col gap-8">
                                 <div className="w-full flex flex-col gap-2">
                                     <InputForm
@@ -311,6 +342,7 @@ function EditLeadActivityPageContent({ params }) {
                                                 key: "channelreff",
                                                 input: state.payloadPrimary.channelname == 4 ? "text" : "input",
                                                 labeled: channelLabel,
+                                                disabled: state.payloadPrimary.channelname == 3,
                                                 rules: [
                                                     {
                                                         required: true,
@@ -323,7 +355,7 @@ function EditLeadActivityPageContent({ params }) {
                                                 input: "select",
                                                 isAlias: true,
                                                 options:
-                                                statusOptions[state.payloadPrimary.channelname - 1],
+                                                    statusOptions[state.payloadPrimary.channelname - 1],
                                                 hidden: state.payloadPrimary.channelname == 4,
                                             },
                                             {
@@ -343,6 +375,13 @@ function EditLeadActivityPageContent({ params }) {
                                                     case 2:
                                                         return "Email";
                                                     case 3:
+                                                        // Auto-fill channelreff with profile name for Meetings
+                                                        if (profile?.data?.name) {
+                                                            dispatch({
+                                                                type: "Primary",
+                                                                payload: { ...payload, channelreff: profile.data.name }
+                                                            });
+                                                        }
                                                         return "PIC";
                                                     case 4:
                                                         return "Lead Address";
@@ -389,8 +428,8 @@ function EditLeadActivityPageContent({ params }) {
                                                             return false;
                                                         }}
                                                         onChange={handleChangeFile}
-                                                        // Optionally, show existing file info if available from the fetched data
-                                                        // fileList={existingFileList} // You would need to fetch this separately if it exists
+                                                    // Optionally, show existing file info if available from the fetched data
+                                                    // fileList={existingFileList} // You would need to fetch this separately if it exists
                                                     >
                                                         <Button style={{ width: "100%" }} block>
                                                             Select Image
