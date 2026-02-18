@@ -102,13 +102,11 @@ export default function Enter() {
     try {
       let payloadToInsert = { ...state.payloadPrimary };
 
-      if (payloadToInsert.channelname == 3 && userSelected) {
+      if (payloadToInsert.channelname == 3 && userSelected.value) {
         payloadToInsert = {
           ...payloadToInsert,
           channelreff: userSelected.role + "/" + userSelected.value,
         };
-      } else {
-        payloadToInsert.channelreff = "";
       }
 
       if (!payloadToInsert.channelname) {
