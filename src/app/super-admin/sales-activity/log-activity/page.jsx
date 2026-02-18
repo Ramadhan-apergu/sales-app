@@ -124,6 +124,12 @@ function Activity() {
       dataIndex: "channelreff",
       key: "channelreff",
       align: "center",
+      render: (text, record) => {
+        if (record.channelnamestr?.toLowerCase() === "meetings") {
+          return text?.split("/")?.[0];
+        }
+        return text;
+      },
     },
     {
       title: "Actions",

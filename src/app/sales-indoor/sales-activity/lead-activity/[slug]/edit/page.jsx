@@ -405,20 +405,21 @@ export default function Enter() {
                           },
                         ],
                       },
-                      //   {
-                      //     key: "channelreff",
-                      //     input:
-                      //       state.payloadPrimary.channelname == 4
-                      //         ? "text"
-                      //         : "input",
-                      //     labeled: channelLabel,
-                      //     rules: [
-                      //       {
-                      //         required: true,
-                      //         message: `Channel Reff is required`,
-                      //       },
-                      //     ],
-                      //   },
+                        {
+                          key: "channelreff",
+                          input:
+                            state.payloadPrimary.channelname == 4
+                              ? "text"
+                              : "input",
+                          labeled: channelLabel,
+                          rules: [
+                            {
+                              required: true,
+                              message: `Channel Reff is required`,
+                            },
+                          ],
+                          hidden: state.payloadPrimary.channelname == 3
+                        },
                       {
                         key: "status",
                         input: "select",
