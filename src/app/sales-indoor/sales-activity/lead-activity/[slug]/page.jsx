@@ -278,17 +278,18 @@ export default function Enter() {
                         isAlias: true,
                         isRead: true,
                       },
-                      //   {
-                      //     key: "channelreff",
-                      //     input:
-                      //       state.payloadPrimary.channelname == 4
-                      //         ? "text"
-                      //         : "input",
+                      {
+                        key: "channelreff",
+                        input:
+                          state.payloadPrimary.channelname == 4
+                            ? "text"
+                            : "input",
 
-                      //     labeled: channelLabel,
-                      //     isAlias: true,
-                      //     isRead: true,
-                      //   },
+                        labeled: channelLabel,
+                        isAlias: true,
+                        isRead: true,
+                        hidden: state.payloadPrimary.channelname == 3,
+                      },
                       {
                         key: "status",
                         input: "input",
