@@ -31,6 +31,8 @@ import {
   StockOutlined,
   AimOutlined,
   CheckCircleOutlined,
+  RetweetOutlined,
+  UserSwitchOutlined,
 } from "@ant-design/icons";
 import { PiSpeedometer, PiSwap } from "react-icons/pi";
 import { HiOutlineFolder, HiOutlinePrinter } from "react-icons/hi";
@@ -78,6 +80,16 @@ const siderMenuPerPage = {
       key: "/transaction/credit-memo",
       label: "Credit Memo",
       icon: <CreditCardOutlined />,
+    },
+    {
+      key: "/transaction/rma",
+      label: "RMA",
+      icon: <RetweetOutlined />,
+    },
+    {
+      key: "/transaction/customer-refund",
+      label: "Customer Refund",
+      icon: <UserSwitchOutlined />,
     },
   ],
   "/master-data": [
@@ -211,6 +223,16 @@ const menuItems = [
         label: "Credit Memo",
         path: `${prefix}/transaction/credit-memo`,
       },
+      {
+        key: `${prefix}/transaction/rma`,
+        label: "RMA",
+        path: `${prefix}/transaction/rma`,
+      },
+      {
+        key: `${prefix}/transaction/customer-refund`,
+        label: "Customer Refund",
+        path: `${prefix}/transaction/customer-refund`,
+      },
     ],
   },
   {
@@ -340,7 +362,7 @@ const LayoutAdmin = ({ children }) => {
     }
 
     const partialMatch = siderItems.find((item) =>
-      removePrefixPath.includes(item.key)
+      removePrefixPath.includes(item.key),
     );
 
     return partialMatch ? partialMatch.key : "";
@@ -381,7 +403,7 @@ const LayoutAdmin = ({ children }) => {
 
   const flattenItems = (items) =>
     items.flatMap((item) =>
-      item.children ? [item, ...flattenItems(item.children)] : [item]
+      item.children ? [item, ...flattenItems(item.children)] : [item],
     );
 
   const allItems = flattenItems(menuItems);
@@ -459,8 +481,9 @@ const LayoutAdmin = ({ children }) => {
           >
             <Sider
               width={200}
-              className={`layout-sider ${isLargeScreen ? "block-sider" : "hidden-sider"
-                }`}
+              className={`layout-sider ${
+                isLargeScreen ? "block-sider" : "hidden-sider"
+              }`}
               style={{ background: colorBgContainer }}
             >
               <Menu

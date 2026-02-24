@@ -20,124 +20,24 @@ import dayjs from "dayjs";
 import { rmaAliases } from "@/utils/aliases";
 import { formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
-import RmaFetch from "@/modules/salesApi/rma";
-
-function TableCustom({
-  data,
-  keys,
-  aliases,
-  onChange,
-  checkbox,
-  keyRow,
-  onDelete = null,
-}) {
-  let columns = [
-    {
-      title: "Apply",
-      dataIndex: "apply",
-      key: "apply",
-      align: "center",
-      render: (_, record) => (
-        <Checkbox
-          checked={record.ischecked}
-          onChange={(e) => {
-            const isChecked = e.target.checked;
-            onChange?.(record, isChecked);
-          }}
-        />
-      ),
-    },
-    ...keys.map((key) => {
-      if (key == "isfree") {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "center",
-          render: (text) => <p>{text ? "Yes" : "No"}</p>,
-        };
-      } else if (key == "trandate") {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "center",
-          render: (text) => <p>{formatDateToShort(text)}</p>,
-        };
-      } else if (
-        [
-          "subtotal",
-          "amount",
-          "taxvalue",
-          "rate",
-          "dpp",
-          "totaldiscount",
-        ].includes(key)
-      ) {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "left",
-          render: (text) => <p>{formatRupiah(text)}</p>,
-        };
-      } else {
-        return {
-          title: aliases?.[key] || key,
-          dataIndex: key,
-          key: key,
-          align: "center",
-        };
-      }
-    }),
-  ];
-
-  if (!checkbox) {
-    columns = columns.filter((col) => col.title.toLowerCase() !== "apply");
-  }
-
-  if (onDelete) {
-    columns.push({
-      title: "Action",
-      key: "action",
-      align: "right", // kolom action juga ke kanan
-      render: (_, record) => (
-        <Button type="link" onClick={() => onDelete(record)}>
-          Delete
-        </Button>
-      ),
-    });
-  }
-
-  return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      rowKey={keyRow}
-      bordered
-      pagination={false}
-      scroll={{ x: "max-content" }}
-    />
-  );
-}
+import CustomerRefundFetch from "@/modules/salesApi/customerRefund";
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const title = "rma";
+  const title = "customer refund";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-
   const { slug } = useParams();
 
   const [form] = Form.useForm();
 
   const [dataCustomer, setDataCustomer] = useState([]);
+  const [data, setData] = useState({});
 
-  const [dataCustomerInv, setDataCustomerInv] = useState([]);
+  const [dataCustomerCredit, setDataCustomerCredit] = useState([]);
 
-  const [dataInvItem, setDataInvItem] = useState([]);
-  const [invItemSelected, setInvItemSelected] = useState({});
+  const [creditMemoSelected, setCreditMemoSelected] = useState({});
 
   async function fetchCustomer() {
     try {
@@ -159,109 +59,101 @@ export default function Enter() {
     }
   }
 
-  async function fetchCustomerInv(custId) {
+  async function fetchCustomercreditMemo(custId) {
     try {
-      const response = await RmaFetch.getInvoiceCustomer(custId);
+      const response = await CustomerRefundFetch.getCreditMemo(
+        0,
+        10000,
+        custId,
+      );
       const resData = getResponseHandler(response, notify);
+
       if (resData) {
-        return resData.map((inv) => ({
-          ...inv,
-          label: inv.tranid,
-          value: inv.id,
-        }));
+        return (
+          resData?.list.map((cred) => ({
+            ...cred,
+            label: cred.tranid,
+            value: cred.id,
+          })) || []
+        );
       } else {
         return [];
       }
     } catch (error) {
-      notify("error", "Error", "Failed get data customer invoice");
+      notify("error", "Error", "Failed get data customer");
       return [];
     }
   }
 
-  async function fetchCustomerInvItem(invId) {
+  async function fetchDataCustomerRefund(id) {
     try {
-      const response = await RmaFetch.getInvoiceCustomerItem(invId);
+      const response = await CustomerRefundFetch.getById(id);
       const resData = getResponseHandler(response, notify);
 
-      if (resData) {
-        return resData;
-      } else {
-        return [];
-      }
-    } catch (error) {
-      notify("error", "Error", "Failed get data customer invoice item");
-      return [];
-    }
-  }
-
-  async function fetchRma(id) {
-    try {
-      const response = await RmaFetch.getById(id);
-      const resData = getResponseHandler(response, notify);
       if (resData) {
         return resData;
       } else {
         return {};
       }
     } catch (error) {
-      notify("error", "Error", "Failed get data detail");
-      return {};
+      notify("error", "Error", "Failed get data customer");
+      return [];
     }
   }
 
   useEffect(() => {
     async function init() {
       const resDataCustomer = await fetchCustomer();
-      const resDataRma = await fetchRma(slug);
-
       setDataCustomer(resDataCustomer);
-      await mappingData(resDataRma);
+
+      const resData = await fetchDataCustomerRefund(slug);
+      setData(resData);
+
+      mappingData(resData);
     }
 
     init();
   }, []);
 
   async function mappingData(data) {
+    form.setFieldValue("customer", data.entity);
+    form.setFieldValue("creditmemo", data.creditmemonum);
+
     dispatch({
       type: "SET_PRIMARY",
       payload: {
         entity: data.entity,
         trandate: dayjs(data.trandate),
         memo: data.memo,
-        invoiceid: data.invoiceid,
-        total: data.total,
+        creditmemoid: data.creditmemoid,
+        creditmemonum: data.creditmemonum,
       },
     });
 
-    const resDataInv = await fetchCustomerInv(data.entity);
-    setDataCustomerInv(resDataInv);
-
-    const resDataItem = await fetchCustomerInvItem(data.invoiceid);
-
-    const updateDataItem = resDataItem.map((item) => ({
-      ...item,
-      ischecked: data.rma_items.some(
-        (selectedItem) =>
-          selectedItem.id === item.id && selectedItem.item === item.item,
-      ),
-    }));
-
-    setDataInvItem(updateDataItem);
-
-    form.setFieldsValue({
-      customer: data.entity,
-
-      invoice: data.invoiceid,
+    dispatch({
+      type: "SET_PAYMENT",
+      payload: {
+        refundmethod: data.refundmethod,
+        bankaccount: data.bankaccount
+          ? data.bankaccount
+          : "Bank BCA/CV SUKSES MANDIRI/3831487788",
+        amount: data.amount,
+      },
     });
   }
 
   const initialState = {
     payloadPrimary: {
       entity: "",
-      trandate: "",
+      trandate: dayjs(new Date()),
       memo: "",
-      invoiceid: "",
-      total: 0,
+      creditmemoid: "",
+      creditmemonum: "",
+    },
+    payloadPayment: {
+      refundmethod: "transfer",
+      bankaccount: "Bank BCA/CV SUKSES MANDIRI/3831487788",
+      amount: 0,
     },
   };
 
@@ -275,6 +167,14 @@ export default function Enter() {
             ...action.payload,
           },
         };
+      case "SET_PAYMENT":
+        return {
+          ...state,
+          payloadPayment: {
+            ...state.payloadPayment,
+            ...action.payload,
+          },
+        };
       case "RESET":
         return initialState;
       default:
@@ -284,63 +184,54 @@ export default function Enter() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const keyTableItem = [
-    // "item",
-    "displayname",
-    "quantity",
-    "units",
-    "rate",
-    "amount",
-    "totaldiscount",
-    "subtotal",
-    "dpp",
-    "taxrate",
-    "taxvalue",
-    "isfree",
-  ];
-
-  const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
-  const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
-
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
     try {
       let payloadToInsert = {
         ...state.payloadPrimary,
-        rma_items: [...dataInvItem.filter((inv) => inv.ischecked == true)].map(
-          (inv) => {
-            let updateInv = inv;
-            delete updateInv.ischecked;
-            return updateInv;
-          },
-        ),
+        ...state.payloadPayment,
       };
-
-      if (!payloadToInsert.rma_items.length) {
-        throw new Error("At least one item is required!");
-      }
 
       payloadToInsert = {
         ...payloadToInsert,
-        entity: form.getFieldValue("customer"),
-        invoiceid: form.getFieldValue("invoice"),
+        entity: data?.entity || "",
+        creditmemoid: data?.creditmemoid || "",
+        creditmemonum: data?.creditmemonum || "",
       };
 
       if (!payloadToInsert.entity) {
         throw new Error("Customer is required!");
       }
 
-      if (!payloadToInsert.invoiceid) {
-        throw new Error("Invoice is required!");
+      if (!payloadToInsert.creditmemoid || !payloadToInsert.creditmemonum) {
+        throw new Error("Credit memo is required!");
       }
 
-      const response = await RmaFetch.update(slug, payloadToInsert);
+      if (payloadToInsert.amount <= 0) {
+        throw new Error("Amount must be greater than 0.");
+      }
+
+      if (!payloadToInsert.refundmethod) {
+        throw new Error("Refund method is required");
+      }
+
+      if (payloadToInsert.refundmethod == "transfer") {
+        if (!payloadToInsert.bankaccount) {
+          throw new Error("Bank account is required.");
+        }
+      } else {
+        payloadToInsert = {
+          ...payloadToInsert,
+          bankaccount: "",
+        };
+      }
+
+      const response = await CustomerRefundFetch.update(slug, payloadToInsert);
 
       const resData = updateResponseHandler(response, notify);
 
       if (resData) {
-        router.push(`/super-admin/transaction/rma/${resData}`);
+        router.push(`/super-admin/transaction/customer-refund/${resData}`);
       }
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
@@ -349,25 +240,22 @@ export default function Enter() {
     }
   };
 
-  const handleChecked = (data, ischecked) => {
-    setDataInvItem((prev) => {
-      const updated = prev.map((inv) =>
-        inv.id === data.id ? { ...inv, ischecked } : inv,
-      );
+  const paymentOptions = [
+    { label: "Cash", value: "cash" },
+    { label: "Bank Transfer", value: "transfer" },
+    { label: "Giro", value: "giro" },
+  ];
 
-      const total = updated.reduce(
-        (sum, inv) => (inv.ischecked ? sum + Number(inv.subtotal || 0) : sum),
-        0,
-      );
-
-      dispatch({
-        type: "SET_PRIMARY",
-        payload: { total },
-      });
-
-      return updated;
-    });
-  };
+  const bankOptions = [
+    {
+      label: "Bank BCA - CV SUKSES MANDIRI - 3831487788",
+      value: "Bank BCA/CV SUKSES MANDIRI/3831487788",
+    },
+    {
+      label: "Bank BCA - SJAFRUDIN HARIS EFFENDI - 3832508877",
+      value: "Bank BCA/SJAFRUDIN HARIS EFFENDI/3832508877",
+    },
+  ];
 
   return (
     <>
@@ -429,17 +317,22 @@ export default function Enter() {
                     ]}
                   >
                     <Select
+                      disabled
                       showSearch
                       placeholder="Select a customer"
                       optionFilterProp="label"
                       onChange={async (value, customer) => {
-                        const resCustInv = await fetchCustomerInv(value);
-                        setDataCustomerInv(resCustInv);
+                        setCreditMemoSelected({});
+
+                        const creditMemo = await fetchCustomercreditMemo(
+                          customer.customerid,
+                        );
+
+                        setDataCustomerCredit(creditMemo);
 
                         form.setFieldsValue({
-                          invoice: null,
+                          creditmemo: null,
                         });
-                        setDataInvItem([]);
                       }}
                       options={dataCustomer}
                       style={{ width: "100%" }}
@@ -451,7 +344,7 @@ export default function Enter() {
             {/* end customer */}
 
             {/* invoice */}
-            <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-8 pt-4">
               <div className="w-full flex flex-col gap-2">
                 <Divider
                   style={{
@@ -461,28 +354,28 @@ export default function Enter() {
                   }}
                   orientation="left"
                 >
-                  Invoice
+                  Credit Memo
                 </Divider>
                 <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                   <Form.Item
-                    label={<span className="capitalize">Invoice ID</span>}
-                    name="invoice"
+                    label={<span className="capitalize">Credit Memo Num</span>}
+                    name="creditmemo"
                     style={{ margin: 0 }}
                     className="w-full"
                     labelCol={{ style: { padding: 0 } }}
-                    rules={[{ required: true, message: `invoice is required` }]}
+                    rules={[
+                      { required: true, message: `Credit memo is required` },
+                    ]}
                   >
                     <Select
+                      disabled
                       showSearch
-                      placeholder="Select invoice"
+                      placeholder="Select credit memo"
                       optionFilterProp="label"
-                      onChange={async (value, inv) => {
-                        const invItem = await fetchCustomerInvItem(value);
-                        setDataInvItem(
-                          invItem.map((inv) => ({ ...inv, ischecked: false })),
-                        );
+                      onChange={async (value, opt) => {
+                        setCreditMemoSelected(opt);
                       }}
-                      options={dataCustomerInv}
+                      options={dataCustomerCredit}
                       style={{ width: "100%" }}
                     />
                   </Form.Item>
@@ -506,16 +399,15 @@ export default function Enter() {
                 hidden: true,
               },
               {
-                key: "invoiceid",
-                input: "input",
-                isAlias: true,
-                isRead: true,
-                hidden: true,
-              },
-              {
                 key: "trandate",
                 input: "date",
                 isAlias: true,
+              },
+              {
+                key: "creditmemonum",
+                input: "input",
+                isAlias: true,
+                hidden: true,
               },
               {
                 key: "memo",
@@ -523,11 +415,10 @@ export default function Enter() {
                 isAlias: true,
               },
               {
-                key: "total",
-                input: "number",
+                key: "creditmemoid",
+                input: "input",
                 isAlias: true,
-                accounting: true,
-                isRead: true,
+                hidden: true,
               },
             ]}
             aliases={rmaAliases.primary}
@@ -537,28 +428,38 @@ export default function Enter() {
           />
           {/* end primary */}
 
-          <div className="w-full flex flex-col gap-8">
-            <div className="w-full flex flex-col gap-2">
-              <Divider
-                style={{
-                  margin: "0",
-                  textTransform: "capitalize",
-                  borderColor: "#1677ff",
-                }}
-                orientation="left"
-              >
-                Item
-              </Divider>
-              <TableCustom
-                onChange={handleChecked}
-                data={dataInvItem}
-                keys={keyTableItem}
-                aliases={rmaAliases.item}
-                keyRow={"id"}
-                checkbox={true}
-              />
-            </div>
-          </div>
+          {/* payment */}
+          <InputForm
+            title="payment"
+            type="SET_PAYMENT"
+            payload={state.payloadPayment}
+            data={[
+              {
+                key: "refundmethod",
+                input: "select",
+                isAlias: true,
+                options: paymentOptions,
+              },
+              {
+                key: "bankaccount",
+                input: "select",
+                isAlias: true,
+                option: bankOptions,
+                hidden: state.payloadPayment.refundmethod != "transfer",
+              },
+              {
+                key: "amount",
+                input: "number",
+                isAlias: true,
+                accounting: true,
+              },
+            ]}
+            aliases={rmaAliases.primary}
+            onChange={(type, payload) => {
+              dispatch({ type, payload });
+            }}
+          />
+          {/* end payment */}
         </div>
       </Layout>
       {isLoadingSubmit && <LoadingSpinProcessing />}
