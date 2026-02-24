@@ -3,7 +3,6 @@ import Layout from "@/components/superAdmin/Layout";
 import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
@@ -20,12 +19,10 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
-import PaymentFetch from "@/modules/salesApi/payment";
-import CreditMemoFetch from "@/modules/salesApi/creditMemo";
-import RmaFetch from "@/modules/salesApi/rma";
+import CustomerRefundFetch from "@/modules/salesApi/customerRefund";
+import Search from "antd/es/input/Search";
 import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
@@ -45,11 +42,10 @@ function List() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
-  const title = "rma";
+  const title = "customer-refund";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -58,22 +54,21 @@ function List() {
       try {
         setIsloading(true);
 
-        const response = await RmaFetch.get(
+        const response = await CustomerRefundFetch.get(
           page,
           limit,
-          statusFilter,
           searchName,
           dateRange[0],
           dateRange[1],
         );
 
         const resData = getResponseHandler(response, notify);
+        console.log(resData);
 
         if (resData) {
           setDatas(resData.list);
           setTotalItems(resData.total_items);
         }
-        console.log(resData);
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
       } finally {
@@ -82,7 +77,7 @@ function List() {
     };
 
     fetchData();
-  }, [page, limit, pathname, statusFilter, searchName, dateRange]);
+  }, [page, limit, pathname, searchName, dateRange]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,37 +136,12 @@ function List() {
       key: "customer",
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text, record) => (
-        <Tag
-          color={
-            ["open", "fulfilled", "closed"].includes(
-              record.status.toLowerCase(),
-            )
-              ? "green"
-              : ["partially fulfilled", "pending approval"].includes(
-                    record.status.toLowerCase(),
-                  )
-                ? "orange"
-                : ["credit hold", "canceled"].includes(
-                      record.status.toLowerCase(),
-                    )
-                  ? "red"
-                  : "default"
-          }
-        >
-          {text}
-        </Tag>
-      ),
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
+      render: (text) => formatRupiah(text)
     },
-    {
-      title: "Total",
-      dataIndex: "total",
-      key: "total",
-      render: (text) => formatRupiah(text),
-    },
+
     {
       title: "Actions",
       key: "actions",
@@ -185,7 +155,6 @@ function List() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-            disabled={record?.status?.toLowerCase() == "received"}
           >
             {isLargeScreen ? "Edit" : ""}
           </Button>
@@ -200,7 +169,7 @@ function List() {
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-            RMA List
+            Customer Refund List
           </p>
           <Button
             type="primary"
@@ -257,6 +226,12 @@ function List() {
                 />
               </div>
             </div>
+            {/* <div className="hidden lg:flex flex-col justify-start items-start gap-1">
+              <label className="text-sm font-semibold leading-none">
+                Invoice ID
+              </label>
+              <Search/>
+            </div> */}
           </div>
           <div className="flex gap-2">
             <div className="flex lg:hidden flex-col justify-start items-start gap-1">
@@ -281,38 +256,6 @@ function List() {
                   setSearchName(option?.companyname || "");
                 }}
                 allowClear
-                dropdownAlign={{ points: ["tr", "br"] }}
-              />
-            </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Status
-              </label>
-              <Select
-                defaultValue="all"
-                onChange={(e) => {
-                  setStatusFilter(e);
-                }}
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "fulfilled", label: "Fulfilled" },
-                  {
-                    value: "partially fulfilled",
-                    label: "Partially Fulfilled",
-                  },
-                  { value: "credit hold", label: "Credit Hold" },
-                  { value: "closed", label: "Closed" },
-                  { value: "pending approval", label: "Pending Approval" },
-                ]}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
                 dropdownAlign={{ points: ["tr", "br"] }}
               />
             </div>

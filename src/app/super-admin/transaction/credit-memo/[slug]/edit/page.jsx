@@ -154,6 +154,13 @@ export default function Enter() {
 
   const [data, setData] = useState(null);
 
+  const [sourceTypeSelected, setSourceTypeSelected] = useState("invoice");
+
+  const [dataSource, setDataSource] = useState([]);
+
+  const [formSource] = Form.useForm();
+  const [formUser] = Form.useForm();
+
   useEffect(() => {
     async function fetchCustomer() {
       try {
@@ -267,6 +274,13 @@ export default function Enter() {
       value: customerSelectedFetch.id,
     });
 
+    formUser.setFieldValue("customer", data.entity);
+
+    await fetchCustomerSource(data.sources, data.entity);
+    await fetchCustomerSourceItem(data.sources, data.sourceid);
+
+    formSource.setFieldValue("sourceid", data.sourceid);
+
     dispatch({
       type: "SET_PRIMARY",
       payload: {
@@ -281,15 +295,6 @@ export default function Enter() {
       payload: {
         unapplied: data.unapplied,
         applied: data.applied,
-      },
-    });
-
-    dispatch({
-      type: "SET_SUMMARY",
-      payload: {
-        subtotal: data.subtotal,
-        taxtotal: data.taxtotal,
-        total: data.total,
       },
     });
 
@@ -317,7 +322,7 @@ export default function Enter() {
             displayname: "",
           };
         }
-      })
+      }),
     );
 
     dispatch({
@@ -342,13 +347,14 @@ export default function Enter() {
             ischecked: true,
           };
         }
-      })
+      }),
     );
 
     const invCustomer = await fetchInvoiceCustmerInit(data.entity);
 
     const updateDataInvCustomer = invCustomer.map((inv) => {
       return {
+        id: crypto.randomUUID(),
         ...inv,
         ischecked: false,
       };
@@ -447,6 +453,8 @@ export default function Enter() {
         ...state.payloadPrimary,
         ...state.payloadSummary,
         ...state.payloadPayment,
+        sources: sourceTypeSelected,
+        sourceid: formSource.getFieldValue("sourceid"),
       };
 
       if (!payloadToInsert.entity) {
@@ -628,7 +636,7 @@ export default function Enter() {
 
   const [stateItemTable, dispatchItemTable] = useReducer(
     reducerItemTable,
-    initialStateItemTable
+    initialStateItemTable,
   );
 
   async function handleModalItemOk() {
@@ -644,7 +652,7 @@ export default function Enter() {
       notify(
         "error",
         "Error",
-        "Quantity must be between 1 and " + itemSelected.qty_invoice
+        "Quantity must be between 1 and " + itemSelected.qty_invoice,
       );
       return;
     }
@@ -739,12 +747,12 @@ export default function Enter() {
   function countSummary(newDataItem) {
     let total = newDataItem.reduce(
       (total, item) => total + (Number(item.amount) || 0),
-      0
+      0,
     );
 
     let taxtotal = newDataItem.reduce(
       (total, item) => total + (Number(item.taxamount) || 0),
-      0
+      0,
     );
 
     let subtotal = total - taxtotal;
@@ -768,12 +776,12 @@ export default function Enter() {
   useEffect(() => {
     const applied = state.credit_memo_applies.reduce(
       (total, item) => total + (Number(item.payment) || 0),
-      0
+      0,
     );
 
     let unapplied = state.credit_memo_items.reduce(
       (total, item) => total + (Number(item.amount) || 0),
-      0
+      0,
     );
 
     unapplied = unapplied - applied;
@@ -867,7 +875,7 @@ export default function Enter() {
         notify(
           "error",
           "Error",
-          "Cannot apply credit memo because unapplied amount is 0."
+          "Cannot apply credit memo because unapplied amount is 0.",
         );
       }
     } else {
@@ -920,7 +928,7 @@ export default function Enter() {
     dispatch({
       type: "SET_ITEMS",
       payload: state.credit_memo_items.filter(
-        (item) => item.item !== record.item
+        (item) => item.item !== record.item,
       ),
     });
 
@@ -934,8 +942,98 @@ export default function Enter() {
     });
 
     countSummary(
-      state.credit_memo_items.filter((item) => item.item !== record.item)
+      state.credit_memo_items.filter((item) => item.item !== record.item),
     );
+  }
+
+  function handleDeleteTableItem(record) {
+    dispatch({
+      type: "SET_ITEMS",
+      payload: state.credit_memo_items.filter(
+        (item) => item.item !== record.item,
+      ),
+    });
+
+    dispatch({
+      type: "SET_APPLIES",
+      payload: state.credit_memo_applies.map((apply) => ({
+        ...apply,
+        ischecked: false,
+        payment: 0,
+      })),
+    });
+
+    countSummary(
+      state.credit_memo_items.filter((item) => item.item !== record.item),
+    );
+  }
+
+  async function fetchCustomerSource(source, customerid) {
+    try {
+      const response = await CreditMemoFetch.getSourceByCustomer(
+        source,
+        customerid,
+      );
+      const resData = getResponseHandler(response);
+
+      if (resData) {
+        const addLabelItem = resData.map((item) => {
+          return {
+            ...item,
+            label: item.tranid,
+            value: item.id,
+          };
+        });
+        setDataSource(addLabelItem);
+      } else {
+        setDataSource([]);
+      }
+    } catch (error) {
+      console.log(error.message);
+      notify("error", "Error", "Failed get data item");
+    }
+  }
+
+  async function fetchCustomerSourceItem(source, id) {
+    try {
+      const response = await CreditMemoFetch.getSourceItemBySourceId(
+        source,
+        id,
+      );
+      const resData = getResponseHandler(response);
+
+      if (resData) {
+        const addLabelItem = resData.map((item) => {
+          return {
+            label: item.itemid,
+            value: item.id,
+            addons: 0,
+            conversion: 0,
+            createdby: "00000000-0000-0000-0000-000000000000",
+            createddate: "",
+            dimensi: "",
+            displayname: item.displayname,
+            id: item.id,
+            iseditable: 0,
+            itemcategory: "",
+            itemid: item.itemid,
+            itemprocessfamily: "",
+            price: item.rate,
+            qty_invoice: item.quantity,
+            unitstype: item.units,
+            unitstype2: "",
+          };
+        });
+        setDataItem(addLabelItem);
+        return addLabelItem;
+      } else {
+        setDataItem([]);
+        return [];
+      }
+    } catch (error) {
+      console.log(error.message);
+      notify("error", "Error", "Failed get data item");
+    }
   }
 
   return (
@@ -988,50 +1086,148 @@ export default function Enter() {
                 Customer
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                {customerSelected && customerSelected.id && (
-                  <Form
-                    layout="vertical"
-                    initialValues={{ customer: customerSelected?.id }}
+                <Form layout="vertical" form={formUser}>
+                  <Form.Item
+                    label={<span className="capitalize">Customer ID</span>}
+                    name="customer"
+                    style={{ margin: 0 }}
+                    className="w-full"
+                    labelCol={{ style: { padding: 0 } }}
+                    rules={[
+                      { required: true, message: `Customer is required` },
+                    ]}
                   >
-                    <Form.Item
-                      label={<span className="capitalize">Customer ID</span>}
-                      name="customer"
-                      style={{ margin: 0 }}
-                      className="w-full"
-                      labelCol={{ style: { padding: 0 } }}
-                      rules={[
-                        { required: true, message: `Customer is required` },
-                      ]}
-                    >
-                      <Select
-                        showSearch
-                        placeholder="Select a customer"
-                        optionFilterProp="label"
-                        value={customerSelected?.value || undefined}
-                        onChange={(_, customer) => {
-                          setCustomerSelected(customer);
-                          dispatch({
-                            type: "RESET",
-                          });
-                          dispatch({
-                            type: "SET_PRIMARY",
-                            payload: {
-                              entity: customer.id,
-                            },
-                          });
-                          fetchInvoiceCustmer(customer.id);
-                          fetchItemCustomerInv(customer.id);
-                        }}
-                        options={dataCustomer}
-                        style={{ width: "100%" }}
-                      />
-                    </Form.Item>
-                  </Form>
-                )}
+                    <Select
+                      showSearch
+                      placeholder="Select a customer"
+                      optionFilterProp="label"
+                      value={customerSelected?.value || undefined}
+                      onChange={(_, customer) => {
+                        setCustomerSelected(customer);
+                        dispatch({
+                          type: "RESET",
+                        });
+                        dispatch({
+                          type: "SET_PRIMARY",
+                          payload: {
+                            entity: customer.id,
+                          },
+                        });
+                        fetchInvoiceCustmer(customer.id);
+                        fetchCustomerSource(sourceTypeSelected, customer.id);
+
+                        formSource.setFieldValue("sourceid", null);
+                        dispatch({
+                          type: "SET_ITEMS",
+                          payload: [],
+                        });
+                      }}
+                      options={dataCustomer}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Form>
               </div>
             </div>
           </div>
           {/* end customer */}
+
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Source
+              </Divider>
+              <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                <Form layout="vertical">
+                  <Form.Item
+                    label={<span className="capitalize">Source Type</span>}
+                    initialValue={sourceTypeSelected}
+                    name="source"
+                    style={{ margin: 0 }}
+                    className="w-full"
+                    labelCol={{ style: { padding: 0 } }}
+                    rules={[
+                      { required: true, message: `Customer is required` },
+                    ]}
+                  >
+                    <Select
+                      showSearch
+                      placeholder="Select a source"
+                      optionFilterProp="label"
+                      value={sourceTypeSelected}
+                      onChange={(val) => {
+                        setSourceTypeSelected(val);
+                        fetchCustomerSource(val, customerSelected.id);
+
+                        formSource.setFieldValue("sourceid", null);
+                        dispatch({
+                          type: "SET_ITEMS",
+                          payload: [],
+                        });
+                      }}
+                      options={[
+                        { label: "Invoice", value: "invoice" },
+                        { label: "RMA", value: "rma" },
+                      ]}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                {sourceTypeSelected == "rma" ? "RMA" : "Invoice"}
+              </Divider>
+              <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                <Form layout="vertical" form={formSource}>
+                  <Form.Item
+                    label={<span className="capitalize">Source ID</span>}
+                    name="sourceid"
+                    style={{ margin: 0 }}
+                    className="w-full"
+                    labelCol={{ style: { padding: 0 } }}
+                    rules={[
+                      { required: true, message: `Source id is required` },
+                    ]}
+                  >
+                    <Select
+                      showSearch
+                      placeholder="Select a source id"
+                      optionFilterProp="label"
+                      onChange={(_, source) => {
+                        fetchCustomerSourceItem(sourceTypeSelected, source.id);
+
+                        dispatch({
+                          type: "SET_ITEMS",
+                          payload: [],
+                        });
+                      }}
+                      options={dataSource}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
+            </div>
+          </div>
 
           {/* primary */}
           <InputForm
@@ -1134,7 +1330,12 @@ export default function Enter() {
                 data={state.credit_memo_applies}
                 keys={keyTableItem}
                 aliases={creditMemoAliases.apply}
-                keyRow={"invoiceid"}
+                keyRow={(record) => {
+                  const invoiceid = record.invoiceid || "";
+                  const id = record.id || "";
+
+                  return `${invoiceid}-${id}`;
+                }}
                 checkbox={true}
               />
             </div>
@@ -1209,7 +1410,7 @@ export default function Enter() {
                     optionFilterProp="label"
                     onChange={(_, item) => {
                       const isDuplicate = state.credit_memo_items.some(
-                        (tableItem) => tableItem.item === item.value
+                        (tableItem) => tableItem.item === item.value,
                       );
 
                       if (isDuplicate) {
@@ -1246,6 +1447,7 @@ export default function Enter() {
                   input: "input",
                   isAlias: true,
                   isRead: true,
+                  hidden: true,
                 },
                 {
                   key: "quantity",
@@ -1270,7 +1472,7 @@ export default function Enter() {
                   isAlias: true,
                 },
               ]}
-              aliases={[]}
+              aliases={creditMemoAliases.item}
               onChange={(type, payload) => {
                 dispatchItemTable({ type, payload });
               }}
