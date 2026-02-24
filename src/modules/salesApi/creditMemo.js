@@ -7,7 +7,7 @@ export default class CreditMemoFetch extends ProcessFetch {
     status = "",
     customer = "",
     startdate = "",
-    enddate = ""
+    enddate = "",
   ) {
     try {
       const response = await this.axios.get("/trx/credit-memo", {
@@ -55,9 +55,29 @@ export default class CreditMemoFetch extends ProcessFetch {
     }
   }
 
-    static async getInvoiceCustomerItem(id) {
+  static async getInvoiceCustomerItem(id) {
     try {
       const response = await this.axios.get(`/glob/item-customer/${id}`);
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
+  static async getSourceByCustomer(source = "invoice", custid) {
+    try {
+      const response = await this.axios.get(
+        `/trx/sources-list/${source}/${custid}`,
+      );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
+  static async getSourceItemBySourceId(source, sourceid) {
+    try {
+      const response = await this.axios.get(`/trx/sources-item/${source}/${sourceid}`);
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

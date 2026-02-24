@@ -424,3 +424,30 @@ export const leadActAliases = {
   summary: "Summary",
   visitdoc: "Visit Doc",
 };
+
+export const rmaAliases = {
+  primary: {
+    entity: "Customer ID",
+    trandate: "Date",
+    memo: "Memo",
+  },
+  item: {
+    unapplied: "Unapplied",
+    applied: "Applied",
+    item: "Item ID",
+    displayname: "Display Name",
+    quantity: "Qty",
+    units: "Unit",
+    itemdescription: "Description",
+    rate: "Rate",
+    taxable: "Taxable",
+    amount: "Total Amount",
+    taxrate: "Tax Rate",
+    taxamount: "Tax Amount",
+    dpp: "DPP",
+    subtotal: "Total Amount (After Discount)",
+    totaldiscount: "Total Discount",
+    taxvalue: "Tax Value",
+    isfree: "Free",
+  },
+};
