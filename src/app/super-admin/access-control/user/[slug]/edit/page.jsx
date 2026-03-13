@@ -1,14 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button, Dropdown, Tag } from "antd";
+import { useEffect, useState } from "react";
+import { Button } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
-  CheckOutlined,
   CloseOutlined,
-  EditOutlined,
-  LeftOutlined,
-  MoreOutlined,
   SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -16,7 +12,6 @@ import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
-  createResponseHandler,
   getByIdResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
@@ -90,7 +85,7 @@ export default function UserDetails() {
           response.data.list.map((role) => ({
             value: role.id,
             label: role.name,
-          })) || []
+          })) || [],
         );
 
         setPayload((prev) => ({

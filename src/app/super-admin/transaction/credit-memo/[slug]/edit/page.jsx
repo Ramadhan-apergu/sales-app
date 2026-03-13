@@ -1,25 +1,10 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Checkbox, Divider, Form, Modal, Select, Table } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
-  CheckOutlined,
   CloseOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
   SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -34,10 +19,8 @@ import {
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import CreditMemoFetch from "@/modules/salesApi/creditMemo";
@@ -45,6 +28,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import { creditMemoAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 function TableCustom({
   data,
@@ -140,7 +124,6 @@ export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const [modal, contextHolder] = Modal.useModal();
   const title = "credit-memo";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
@@ -278,6 +261,7 @@ export default function Enter() {
 
     await fetchCustomerSource(data.sources, data.entity);
     await fetchCustomerSourceItem(data.sources, data.sourceid);
+    console.log(data);
 
     formSource.setFieldValue("sourceid", data.sourceid);
 
@@ -400,11 +384,6 @@ export default function Enter() {
       return {}; // supaya tetap aman dipakai
     }
   }
-
-  const paymentOptions = [
-    { label: "Cash", value: "cash" },
-    { label: "Credit", value: "credit" },
-  ];
 
   const keyTableItem = [
     // "invoiceid",
@@ -580,8 +559,6 @@ export default function Enter() {
 
     setIsModalItemOpen(true);
   }
-
-  const [dataTableItem, setDataTableItem] = useState([]);
 
   const initialStateItemTable = {
     item: {
@@ -1086,7 +1063,7 @@ export default function Enter() {
                 Customer
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                <Form layout="vertical" form={formUser}>
+                {/* <Form layout="vertical" form={formUser}>
                   <Form.Item
                     label={<span className="capitalize">Customer ID</span>}
                     name="customer"
@@ -1126,7 +1103,33 @@ export default function Enter() {
                       style={{ width: "100%" }}
                     />
                   </Form.Item>
-                </Form>
+                </Form> */}
+
+                <FilterCustomer
+                  disabled={data?.status.toLowerCase() != "unapplied"}
+                  allowClear={false}
+                  value={customerSelected?.value || undefined}
+                  onChange={(_, customer) => {
+                    setCustomerSelected(customer);
+                    dispatch({
+                      type: "RESET",
+                    });
+                    dispatch({
+                      type: "SET_PRIMARY",
+                      payload: {
+                        entity: customer?.id || "",
+                      },
+                    });
+                    fetchInvoiceCustmer(customer?.id || "");
+                    fetchCustomerSource(sourceTypeSelected, customer?.id || "");
+
+                    formSource.setFieldValue("sourceid", null);
+                    dispatch({
+                      type: "SET_ITEMS",
+                      payload: [],
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>

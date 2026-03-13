@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button, Flex, Table, Tag, Upload } from "antd";
+import { useState } from "react";
+import { Button, Table, Upload } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
   CheckOutlined,
@@ -15,10 +15,9 @@ import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { createResponseHandler } from "@/utils/responseHandlers";
-import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 import * as XLSX from "xlsx";
 import ItemFetch from "@/modules/salesApi/item";
-import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 function TableCustom({ data, aliases }) {
   if (!data?.length) return null;
@@ -97,7 +96,7 @@ export default function Enter() {
         notify(
           "error",
           "Invalid File",
-          "Only Excel (.xlsx) files are allowed."
+          "Only Excel (.xlsx) files are allowed.",
         );
         return Upload.LIST_IGNORE;
       }
@@ -125,7 +124,7 @@ export default function Enter() {
 
           // Map header yang valid
           const normalizedAllowed = allowedHeaders.map((h) =>
-            h.toLowerCase().trim()
+            h.toLowerCase().trim(),
           );
           const headerIndexMap = {};
           rawHeaders.forEach((h, idx) => {
@@ -139,13 +138,13 @@ export default function Enter() {
 
           // Validasi header
           const missing = allowedHeaders.filter(
-            (h) => headerIndexMap[h] === undefined
+            (h) => headerIndexMap[h] === undefined,
           );
           if (missing.length > 0) {
             notify(
               "error",
               "Invalid Header",
-              `Missing columns: ${missing.join(", ")}`
+              `Missing columns: ${missing.join(", ")}`,
             );
             return;
           }

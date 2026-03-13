@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Button, Checkbox, Divider, Form, Select, Table } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
@@ -134,7 +134,6 @@ export default function Enter() {
   const [dataCustomerInv, setDataCustomerInv] = useState([]);
 
   const [dataInvItem, setDataInvItem] = useState([]);
-  const [invItemSelected, setInvItemSelected] = useState({});
 
   async function fetchCustomer() {
     try {
@@ -243,10 +242,6 @@ export default function Enter() {
     "taxvalue",
     "isfree",
   ];
-
-  const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
-  const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);

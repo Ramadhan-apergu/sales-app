@@ -1,18 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Divider, Table, Modal, Select, Dropdown } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
 import {
-  CheckOutlined,
   EditOutlined,
-  LeftOutlined,
   MoreOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
-import { agreementAliases, applyAgreementAliases } from "@/utils/aliases";
+import { applyAgreementAliases } from "@/utils/aliases";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
@@ -22,10 +20,7 @@ import {
 } from "@/utils/responseHandlers";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import ItemFetch from "@/modules/salesApi/item";
-import Search from "antd/es/input/Search";
 import AgreementFetch from "@/modules/salesApi/agreement";
-import CustomerFetch from "@/modules/salesApi/customer";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 
@@ -37,16 +32,6 @@ function TableCustom({ data, keys, aliases, onDelete }) {
       key: key,
       align: "right",
     })),
-    // {
-    //   title: "Action",
-    //   key: "action",
-    //   align: "right",
-    //   render: (_, record) => (
-    //     <Button type="link" onClick={() => onDelete(record)}>
-    //       Delete
-    //     </Button>
-    //   ),
-    // },
   ];
 
   const dataWithKey = data.map((item, idx) => ({
@@ -81,7 +66,6 @@ export default function AgreementApplyDetail() {
   const [isModal, setIsModal] = useState(false);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [dataAgreement, setDataAgreement] = useState([]);
   const [agreementSelectedTemp, setAgreementSelectedTemp] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -91,7 +75,9 @@ export default function AgreementApplyDetail() {
   useEffect(() => {
     const fetchDataApplyAgreement = async () => {
       try {
-        const response = await AgreementFetch.getByCustCode(decodeURIComponent(slug) || '');
+        const response = await AgreementFetch.getByCustCode(
+          decodeURIComponent(slug) || "",
+        );
 
         const resData = getResponseHandler(response, notify);
 
@@ -307,7 +293,7 @@ export default function AgreementApplyDetail() {
                         type={"primary"}
                         onClick={() => {
                           router.push(
-                            `/sales-indoor/master-data/${title}/${encodeURIComponent(data.customercode) || ""}/edit`
+                            `/sales-indoor/master-data/${title}/${encodeURIComponent(data.customercode) || ""}/edit`,
                           );
                         }}
                       >
@@ -339,8 +325,8 @@ export default function AgreementApplyDetail() {
                       onDelete={(agreement) => {
                         setpayloadAgreementList((prev) =>
                           prev.filter(
-                            (prevAgreement) => prevAgreement.id != agreement.id
-                          )
+                            (prevAgreement) => prevAgreement.id != agreement.id,
+                          ),
                         );
                       }}
                       data={payloadAgreementList}
@@ -396,13 +382,13 @@ export default function AgreementApplyDetail() {
                     optionFilterProp="label"
                     onChange={(_, agreement) => {
                       const findAgreementExisting = payloadAgreementList.find(
-                        (itemAgreement) => itemAgreement.id == agreement.id
+                        (itemAgreement) => itemAgreement.id == agreement.id,
                       );
                       if (!findAgreementExisting) {
                         setAgreementSelectedTemp({
                           ...agreement,
                           effectivedate: formatDateToShort(
-                            agreement.effectivedate
+                            agreement.effectivedate,
                           ),
                           enddate: formatDateToShort(agreement.enddate),
                           form: formOptions[agreement.customform],

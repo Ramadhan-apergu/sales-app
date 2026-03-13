@@ -3,12 +3,10 @@ import Layout from "@/components/salesIndoor/Layout";
 import {
   CheckSquareOutlined,
   EditOutlined,
-  FilterOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
@@ -25,14 +23,13 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import PaymentFetch from "@/modules/salesApi/payment";
-import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function List() {
   const searchParams = useSearchParams();
@@ -69,7 +66,7 @@ function List() {
           searchName,
           dateRange[0],
           dateRange[1],
-          paymentFilter == "all" ? "" : paymentFilter
+          paymentFilter == "all" ? "" : paymentFilter,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -173,14 +170,14 @@ function List() {
         <Tag
           color={
             ["payment received", "deposited"].includes(
-              record.status.toLowerCase()
+              record.status.toLowerCase(),
             )
               ? "green"
               : ["undeposited"].includes(record.status.toLowerCase())
-              ? "orange"
-              : [""].includes(record.status.toLowerCase())
-              ? "red"
-              : "default"
+                ? "orange"
+                : [""].includes(record.status.toLowerCase())
+                  ? "red"
+                  : "default"
           }
         >
           {text}
@@ -380,7 +377,7 @@ function List() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

@@ -9,7 +9,7 @@ function handleUnauthorized(notifyFn) {
     notifyFn,
     "error",
     "Unauthorized",
-    "Forbidden Access For This Role"
+    "Forbidden Access For This Role",
   );
 
   //   window.location.href = "/auth/login";
@@ -33,10 +33,15 @@ export function createResponseHandler(response, notifyFn) {
     default:
       if (Array.isArray(response.errors)) {
         response.errors.forEach((err) =>
-          callNotify(notifyFn, "error", response.message, err)
+          callNotify(notifyFn, "error", response.message, err),
         );
       } else {
-        callNotify(notifyFn, "error", "Failed", "Please try again!");
+        callNotify(
+          notifyFn,
+          "error",
+          "Failed",
+          response?.message || "Please try again!",
+        );
       }
       return null;
   }
@@ -54,10 +59,15 @@ export function updateResponseHandler(response, notifyFn) {
     default:
       if (Array.isArray(response.errors)) {
         response.errors.forEach((err) =>
-          callNotify(notifyFn, "error", response.message, err)
+          callNotify(notifyFn, "error", response.message, err),
         );
       } else {
-        callNotify(notifyFn, "error", "Failed", "Please try again!");
+        callNotify(
+          notifyFn,
+          "error",
+          "Failed",
+          response?.message || "Please try again!",
+        );
       }
       return null;
   }
@@ -78,10 +88,15 @@ export function getByIdResponseHandler(response, notifyFn) {
     default:
       if (Array.isArray(response.errors)) {
         response.errors.forEach((err) =>
-          callNotify(notifyFn, "error", response.message, err)
+          callNotify(notifyFn, "error", response.message, err),
         );
       } else {
-        callNotify(notifyFn, "error", "Failed", "Please try again!");
+        callNotify(
+          notifyFn,
+          "error",
+          "Failed",
+          response?.message || "Please try again!",
+        );
       }
       return null;
   }
@@ -102,10 +117,15 @@ export function getResponseHandler(response, notifyFn) {
     default:
       if (Array.isArray(response.errors)) {
         response.errors.forEach((err) =>
-          callNotify(notifyFn, "error", response.message, err)
+          callNotify(notifyFn, "error", response.message, err),
         );
       } else {
-        callNotify(notifyFn, "error", "Failed", "Please try again!");
+        callNotify(
+          notifyFn,
+          "error",
+          "Failed",
+          response?.message || "Please try again!",
+        );
       }
       return null;
   }
@@ -122,10 +142,15 @@ export function deleteResponseHandler(response, notifyFn) {
     default:
       if (Array.isArray(response.errors)) {
         response.errors.forEach((err) =>
-          callNotify(notifyFn, "error", response.message, err)
+          callNotify(notifyFn, "error", response.message, err),
         );
       } else {
-        callNotify(notifyFn, "error", "Failed", "Please try again!");
+        callNotify(
+          notifyFn,
+          "error",
+          "Failed",
+          response?.message || "Please try again!",
+        );
       }
       return false;
   }

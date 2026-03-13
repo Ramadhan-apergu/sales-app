@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Dropdown, Tag, Modal } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
-  CheckOutlined,
   EditOutlined,
-  LeftOutlined,
   MoreOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -234,8 +232,8 @@ export default function UserDetails() {
                           data.status.toLowerCase() == "active"
                             ? "green"
                             : data?.status.toLowerCase() == "inactive"
-                            ? "red"
-                            : "default"
+                              ? "red"
+                              : "default"
                         }
                       >
                         {data.status}
@@ -249,7 +247,7 @@ export default function UserDetails() {
                     type={"primary"}
                     onClick={() => {
                       router.push(
-                        `/super-admin/access-control/user/${slug}/edit`
+                        `/super-admin/access-control/user/${slug}/edit`,
                       );
                     }}
                   >

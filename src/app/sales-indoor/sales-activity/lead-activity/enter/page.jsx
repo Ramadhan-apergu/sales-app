@@ -1,50 +1,22 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  Input,
-  InputNumber,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tooltip,
-  Upload,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Form, Upload } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
-import {
-  CheckOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import CustomerFetch from "@/modules/salesApi/customer";
 import {
   createResponseHandler,
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+
 import dayjs from "dayjs";
-import PaymentFetch from "@/modules/salesApi/payment";
-import { leadActAliases, paymentAliases, targetAliases } from "@/utils/aliases";
-import { formatDateToShort } from "@/utils/formatDate";
-import { formatRupiah } from "@/utils/formatRupiah";
-import TargetFetch from "@/modules/salesApi/crm/target";
+import { leadActAliases } from "@/utils/aliases";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
 import InputUser from "@/components/input/inputUser";
@@ -72,11 +44,6 @@ export default function Enter() {
       files: "",
     },
   };
-
-  const roleOptions = [
-    { label: "Sales Indoor", value: "sales-indoor" },
-    { label: "Sales Outdoor", value: "sales-outdoor" },
-  ];
 
   function reducer(state, action) {
     switch (action.type) {

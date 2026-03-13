@@ -1,12 +1,10 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import {  PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
-  Modal,
   Pagination,
   Table,
   Tag,
@@ -20,14 +18,13 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import InvoiceFetch from "@/modules/salesApi/invoice";
-import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -44,7 +41,6 @@ function SalesOrder() {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
   const title = "invoice";

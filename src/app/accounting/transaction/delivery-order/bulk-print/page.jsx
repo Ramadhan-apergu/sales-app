@@ -1,27 +1,9 @@
 "use client";
 import Layout from "@/components/accounting/Layout";
-import {
-  DeliveredProcedureOutlined,
-  EditOutlined,
-  FilterOutlined,
-  LoadingOutlined,
-  PlusOutlined,
-  PrinterOutlined,
-  TruckOutlined,
-} from "@ant-design/icons";
+import { LoadingOutlined, PrinterOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-  Checkbox,
-} from "antd";
+import { Button, Modal, Pagination, Table, Tag, Select, Checkbox } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -31,9 +13,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import {
   getByIdResponseHandler,
   getResponseHandler,
-  updateResponseHandler,
 } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
@@ -41,14 +21,13 @@ import DeliveryOrderPrintBulk from "@/components/superAdmin/DeliveryOrderPrintBu
 import ItemFetch from "@/modules/salesApi/item";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function DeliveryOrder() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
@@ -61,7 +40,6 @@ function DeliveryOrder() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
-  const [dateRange, setDateRange] = useState(["", ""]);
   const [toggleRefetch, setToggleRefetch] = useState(false);
   const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
@@ -76,7 +54,7 @@ function DeliveryOrder() {
           page,
           limit,
           statusFilter,
-          searchName
+          searchName,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -286,7 +264,7 @@ function DeliveryOrder() {
                 itemid: resDataItem.itemid,
                 displayname: resDataItem.displayname,
               };
-            }
+            },
           );
 
           const fulfillmentItems = await Promise.all(promisesItem);
@@ -327,7 +305,7 @@ function DeliveryOrder() {
                   itemid: resDataItem.itemid,
                   displayname: resDataItem.displayname,
                 };
-              }
+              },
             );
 
             const fulfillmentItems = await Promise.all(promisesItem);
@@ -456,7 +434,7 @@ function DeliveryOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/accounting/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/accounting/transaction/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

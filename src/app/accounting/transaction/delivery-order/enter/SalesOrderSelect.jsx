@@ -1,23 +1,8 @@
 "use client";
-import Layout from "@/components/accounting/Layout";
-import {
-  EditOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { UnorderedListOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-} from "antd";
+import { Button, Pagination, Table, Tag, Select, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -30,7 +15,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT = 20;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -47,7 +32,6 @@ function SalesOrder() {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [dateRange, setDateRange] = useState(["", ""]);
   const title = "delivery-order";
@@ -65,7 +49,7 @@ function SalesOrder() {
           statusFilter,
           searchName,
           dateRange[0],
-          dateRange[1]
+          dateRange[1],
         );
 
         const resData = getResponseHandler(response, notify);
@@ -208,12 +192,12 @@ function SalesOrder() {
             ["fulfilled", "closed"].includes(record.status.toLowerCase())
               ? "green"
               : ["partially fulfilled"].includes(record.status.toLowerCase())
-              ? "orange"
-              : ["credit hold", "canceled"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "red"
-              : "default"
+                ? "orange"
+                : ["credit hold", "canceled"].includes(
+                      record.status.toLowerCase(),
+                    )
+                  ? "red"
+                  : "default"
           }
         >
           {text}
@@ -376,7 +360,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/accounting/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/accounting/transaction/${title}/enter?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

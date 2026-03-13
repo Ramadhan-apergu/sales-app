@@ -1,56 +1,27 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  Input,
-  InputNumber,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tag,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
-import {
-  CheckOutlined,
-  CloseOutlined,
-  EditOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  SaveOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CloseOutlined, SaveOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import CustomerFetch from "@/modules/salesApi/customer";
 import {
-  createResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
+
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
-import PaymentFetch from "@/modules/salesApi/payment";
-import { paymentAliases, targetAliases } from "@/utils/aliases";
-import { formatDateToShort } from "@/utils/formatDate";
-import { formatRupiah } from "@/utils/formatRupiah";
+
 import TargetFetch from "@/modules/salesApi/crm/target";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import InputUser from "@/components/input/inputUser";
+import { targetAliases } from "@/utils/aliases";
 
 export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();

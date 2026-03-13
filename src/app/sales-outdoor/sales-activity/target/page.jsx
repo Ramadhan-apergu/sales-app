@@ -54,7 +54,7 @@ function OverviewButtons() {
     );
 }
 
-const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT = 20;
 
 function TargetPageContent() {
     const [targets, setTargets] = useState([]);

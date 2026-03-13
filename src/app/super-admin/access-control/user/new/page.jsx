@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
@@ -29,7 +29,6 @@ export default function UserNew() {
 
   const [roleoptions, setRoleoption] = useState([]);
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -83,7 +82,7 @@ export default function UserNew() {
           response.data.list.map((role) => ({
             value: role.id,
             label: role.name,
-          })) || []
+          })) || [],
         );
 
         setPayload((prev) => ({

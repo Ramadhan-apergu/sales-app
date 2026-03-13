@@ -4,7 +4,6 @@ import Layout from "@/components/superAdmin/Layout";
 import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import AgreementFetch from "@/modules/salesApi/agreement";
 import { Button, Dropdown, Input, Modal, Pagination, Table, Tag } from "antd";
 import { Suspense, useEffect, useState } from "react";
@@ -16,14 +15,13 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function Agreement() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { containerRef, containerHeight } = useContainerHeight();
   const { Search } = Input;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);

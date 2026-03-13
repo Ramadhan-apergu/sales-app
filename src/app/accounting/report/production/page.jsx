@@ -1,7 +1,7 @@
 "use client";
 import Layout from "@/components/accounting/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { Modal, Pagination, Table, DatePicker, Button } from "antd";
+import { Pagination, Table, Button } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -10,17 +10,15 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { productReportAliases } from "@/utils/aliases";
-import ExportProductionReport from "@/components/superAdmin/ExportProductionReport.jsx";
 import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
@@ -43,7 +41,7 @@ function SalesOrder() {
           page,
           limit,
           dateRange[0],
-          dateRange[1]
+          dateRange[1],
         );
 
         let resData = getResponseHandler(response, notify);
@@ -58,9 +56,9 @@ function SalesOrder() {
           setTableKeys(
             Array.isArray(resDataList) && resData.total_items > 0
               ? Object.keys(resDataList[0]).filter(
-                  (item) => !["item", "so_number"].includes(item.toLowerCase())
+                  (item) => !["item", "so_number"].includes(item.toLowerCase()),
                 )
-              : []
+              : [],
           );
         }
       } catch (error) {
@@ -131,7 +129,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/accounting/report/${title}?page=${newPage}&limit=${newLimit}`
+                    `/accounting/report/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

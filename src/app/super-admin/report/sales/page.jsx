@@ -1,16 +1,7 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
-import {
-  Modal,
-  Pagination,
-  Table,
-  Select,
-  DatePicker,
-  Input,
-  Button,
-} from "antd";
+import { Pagination, Table, Select, DatePicker, Input, Button } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -22,11 +13,10 @@ import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { salesReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
-import ExportSalesReport from "@/components/superAdmin/ExportSalesReport";
 import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 const { Search } = Input;
 

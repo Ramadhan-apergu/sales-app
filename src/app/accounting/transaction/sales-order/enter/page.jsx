@@ -314,7 +314,7 @@ export default function Enter() {
 
   const [stateItemTable, dispatchItemTable] = useReducer(
     reducerItemTable,
-    initialStateItemTable
+    initialStateItemTable,
   );
 
   const [isModalItemOpen, setIsModalItemOpen] = useState(false);
@@ -325,7 +325,7 @@ export default function Enter() {
       notify(
         "error",
         "Error",
-        "Select the customer first in the customer section"
+        "Select the customer first in the customer section",
       );
       return;
     }
@@ -334,7 +334,7 @@ export default function Enter() {
       notify(
         "error",
         "Error",
-        "Fill in the trandate first in the primary section"
+        "Fill in the trandate first in the primary section",
       );
       return;
     }
@@ -346,7 +346,7 @@ export default function Enter() {
       notify(
         "error",
         "Error",
-        "Select the payment option first in the billing section."
+        "Select the payment option first in the billing section.",
       );
       return;
     }
@@ -402,13 +402,13 @@ export default function Enter() {
   async function updateDataItemTable(
     updatedData = null,
     payment_type = null,
-    cust_id = null
+    cust_id = null,
   ) {
     try {
       const updateDiscountItem = await getDiscountItem(
         updatedData ? updatedData : dataTableItem,
         payment_type,
-        cust_id
+        cust_id,
       );
 
       if (dataTableItem != updateDataItemTable) {
@@ -463,7 +463,7 @@ export default function Enter() {
 
       const updateItemTable = itemTable.map((item) => {
         const findItemDiscount = discountItems.find(
-          (discount) => discount.item_id === item.item
+          (discount) => discount.item_id === item.item,
         );
 
         const rate = findItemDiscount?.price || item.rate;
@@ -511,7 +511,7 @@ export default function Enter() {
         totalDiscount: 0,
         totalAmount: 0,
         subTotal: 0,
-      }
+      },
     );
 
     setSummary({
@@ -525,7 +525,7 @@ export default function Enter() {
 
   function handleDeleteTableItem(record) {
     const updateData = dataTableItem.filter(
-      (item) => item.item !== record.item
+      (item) => item.item !== record.item,
     );
     setDataTableItem(updateData);
 
@@ -601,6 +601,8 @@ export default function Enter() {
   };
 
   function handleEdit(record) {
+    console.log("record", record);
+    console.log("record.rate", record.rate);
     const item = dataItem.find((item) => item.value == record.item);
 
     setItemSelected(item);
@@ -609,7 +611,7 @@ export default function Enter() {
       payload: {
         item: item.id,
         units: item.unitstype,
-        rate: record.rate,
+        rate: item.rate,
         displayname: item.displayname,
         itemprocessfamily: item.itemprocessfamily,
         itemid: item.itemid,
@@ -897,8 +899,8 @@ export default function Enter() {
                             onChange={(value) => {
                               setDataItemFree((prev) =>
                                 prev.map((it, idx) =>
-                                  idx === i ? { ...it, item: value } : it
-                                )
+                                  idx === i ? { ...it, item: value } : it,
+                                ),
                               );
                             }}
                             // options={dataItem}
@@ -1003,7 +1005,7 @@ export default function Enter() {
                       disabled={stateItemTable.item.iseditline}
                       onChange={(_, item) => {
                         const isDuplicate = dataTableItem.some(
-                          (tableItem) => tableItem.item === item.value
+                          (tableItem) => tableItem.item === item.value,
                         );
 
                         if (isDuplicate) {
@@ -1032,7 +1034,7 @@ export default function Enter() {
                           !dataTableItem
                             .map((item) => item.item)
                             .filter((val) => val !== itemSelected?.value)
-                            .includes(data.value)
+                            .includes(data.value),
                       )}
                       style={{ width: "100%" }}
                     />
@@ -1230,7 +1232,7 @@ function TableCustom({ data, keys, aliases, onDelete, onEdit }) {
   const totalAmount = data.reduce((sum, r) => sum + (r.totalamount || 0), 0);
   const totalDiscount = data.reduce(
     (sum, r) => sum + (r.totaldiscount || 0),
-    0
+    0,
   );
 
   return (
