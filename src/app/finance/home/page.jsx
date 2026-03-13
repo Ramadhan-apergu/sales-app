@@ -1,10 +1,9 @@
 "use client";
 import Layout from "@/components/finance/Layout";
-import SearchStatus from "@/components/superAdmin/SearchStatus";
 import useNotification from "@/hooks/useNotification";
 import DashboardFetch from "@/modules/salesApi/dashboard";
 import { formatDateStartDay } from "@/utils/formatDate";
-import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
+import { formatRupiah } from "@/utils/formatRupiah";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import { Button, DatePicker, Tooltip as Tooltipantd } from "antd";
 import dayjs from "dayjs";
@@ -53,7 +52,7 @@ export default function Page() {
           filterYear,
           dayjs(filterMonth[0]).format("YYYY-MM-DD"),
           dayjs(filterMonth[1]).format("YYYY-MM-DD"),
-          filterYearGrafik
+          filterYearGrafik,
         );
         const resData = getResponseHandler(response, notify);
         if (resData) {
@@ -178,7 +177,12 @@ export default function Page() {
                       yearData &&
                       yearData.kg !== undefined &&
                       yearData.kg !== null
-                        ? formatIndonesia(yearData.kg)
+                        ? formatIndonesia(
+                            (
+                              Math.round((yearData.kg + Number.EPSILON) * 100) /
+                              100
+                            ).toFixed(2),
+                          )
                         : "-"
                     }
                   >
@@ -189,7 +193,12 @@ export default function Page() {
                       {yearData &&
                       yearData.kg !== undefined &&
                       yearData.kg !== null
-                        ? formatIndonesia(yearData.kg)
+                        ? formatIndonesia(
+                            (
+                              Math.round((yearData.kg + Number.EPSILON) * 100) /
+                              100
+                            ).toFixed(2),
+                          )
                         : "-"}
                     </p>
                   </Tooltipantd>

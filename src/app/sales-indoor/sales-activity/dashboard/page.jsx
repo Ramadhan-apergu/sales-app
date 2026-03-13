@@ -5,7 +5,7 @@ import DashboardCrmFetch from "@/modules/salesApi/crm/dashboardCrm";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
 import UserManageFetch from "@/modules/salesApi/userManagement";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import { Select, Tooltip as Tooltipantd, Typography, DatePicker } from "antd";
+import { Select, Tooltip as Tooltipantd, DatePicker } from "antd";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -21,7 +21,6 @@ import {
   YAxis,
 } from "recharts";
 
-const { Text } = Typography;
 const { RangePicker } = DatePicker;
 
 export default function Page() {

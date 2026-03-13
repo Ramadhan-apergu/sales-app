@@ -1,29 +1,20 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import {
   Button,
-  Checkbox,
-  Collapse,
   Divider,
   Dropdown,
-  Empty,
   Form,
   Input,
-  List,
   Modal,
-  Select,
   Table,
   Tag,
-  Tooltip,
 } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
 import {
-  CheckOutlined,
   EditOutlined,
   FileAddOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
   MoreOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -32,20 +23,16 @@ import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import CustomerFetch from "@/modules/salesApi/customer";
 import {
-  createResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
+
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import { formatDateToShort } from "@/utils/formatDate";
-import AgreementFetch from "@/modules/salesApi/agreement";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { salesOrderAliases } from "@/utils/aliases";
 
@@ -114,7 +101,7 @@ function TableCustom({ data, keys, aliases }) {
   const totalAmount = data.reduce((sum, r) => sum + (r.totalamount || 0), 0);
   const totalDiscount = data.reduce(
     (sum, r) => sum + (r.totaldiscount || 0),
-    0
+    0,
   );
 
   return (
@@ -390,7 +377,7 @@ export default function Detail() {
       setIsLoadingSubmit(true);
       const response = await SalesOrderFetch.approveSoPending(
         data.id,
-        "approved"
+        "approved",
       );
       updateResponseHandler(response, notify);
       router.refresh();
@@ -482,18 +469,18 @@ export default function Detail() {
                           }}
                           color={
                             ["fulfilled", "closed"].includes(
-                              data.status.toLowerCase()
+                              data.status.toLowerCase(),
                             )
                               ? "green"
                               : ["partially fulfilled"].includes(
-                                  data.status.toLowerCase()
-                                )
-                              ? "orange"
-                              : ["credit hold", "canceled"].includes(
-                                  data.status.toLowerCase()
-                                )
-                              ? "red"
-                              : "default"
+                                    data.status.toLowerCase(),
+                                  )
+                                ? "orange"
+                                : ["credit hold", "canceled"].includes(
+                                      data.status.toLowerCase(),
+                                    )
+                                  ? "red"
+                                  : "default"
                           }
                         >
                           {data.status}
@@ -507,7 +494,7 @@ export default function Detail() {
                         type={"primary"}
                         onClick={() => {
                           router.push(
-                            `/sales-indoor/transaction/delivery-order/enter?salesOrderId=${data.id}`
+                            `/sales-indoor/transaction/delivery-order/enter?salesOrderId=${data.id}`,
                           );
                         }}
                       >
@@ -516,7 +503,7 @@ export default function Detail() {
 
                       <Button
                         disabled={["credit hold", "fulfilled"].includes(
-                          data.status.toLowerCase()
+                          data.status.toLowerCase(),
                         )}
                         icon={<EditOutlined />}
                         type={"primary"}

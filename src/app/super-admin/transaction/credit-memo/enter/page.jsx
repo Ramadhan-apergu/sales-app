@@ -1,26 +1,9 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Checkbox, Divider, Form, Modal, Select, Table } from "antd";
 import Layout from "@/components/superAdmin/Layout";
-import {
-  CheckOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
@@ -32,16 +15,13 @@ import {
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 import { creditMemoAliases } from "@/utils/aliases";
 import { formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 function TableCustom({
   data,
@@ -139,7 +119,6 @@ export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const [modal, contextHolder] = Modal.useModal();
   const title = "credit-memo";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
@@ -242,11 +221,6 @@ export default function Enter() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const paymentOptions = [
-    { label: "Cash", value: "cash" },
-    { label: "Credit", value: "credit" },
-  ];
-
   const keyTableItem = [
     // "invoiceid",
     "refnum",
@@ -259,29 +233,6 @@ export default function Enter() {
   const [isModalItemOpen, setIsModalItemOpen] = useState(false);
 
   const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
-
-  async function fetchItemCustomerInv(customerId) {
-    try {
-      const response = await CreditMemoFetch.getInvoiceCustomerItem(customerId);
-      const resData = getResponseHandler(response);
-
-      if (resData) {
-        const addLabelItem = resData.map((item) => {
-          return {
-            ...item,
-            label: item.itemid,
-            value: item.id,
-          };
-        });
-        setDataItem(addLabelItem);
-      } else {
-        setDataItem([]);
-      }
-    } catch (error) {
-      console.log(error.message);
-      notify("error", "Error", "Failed get data item");
-    }
-  }
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -417,8 +368,6 @@ export default function Enter() {
 
     setIsModalItemOpen(true);
   }
-
-  const [dataTableItem, setDataTableItem] = useState([]);
 
   const initialStateItemTable = {
     item: {
@@ -877,47 +826,34 @@ export default function Enter() {
                 Customer
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                <Form layout="vertical">
-                  <Form.Item
-                    label={<span className="capitalize">Customer ID</span>}
-                    name="customer"
-                    style={{ margin: 0 }}
-                    className="w-full"
-                    labelCol={{ style: { padding: 0 } }}
-                    rules={[
-                      { required: true, message: `Customer is required` },
-                    ]}
-                  >
-                    <Select
-                      showSearch
-                      placeholder="Select a customer"
-                      optionFilterProp="label"
-                      value={customerSelected?.value || undefined}
-                      onChange={(_, customer) => {
-                        setCustomerSelected(customer);
-                        dispatch({
-                          type: "RESET",
-                        });
-                        dispatch({
-                          type: "SET_PRIMARY",
-                          payload: {
-                            entity: customer.id,
-                          },
-                        });
-                        fetchInvoiceCustmer(customer.id);
-                        fetchCustomerSource(sourceTypeSelected, customer.id);
 
-                        formSource.setFieldValue("sourceid", null);
-                        dispatch({
-                          type: "SET_ITEMS",
-                          payload: [],
-                        });
-                      }}
-                      options={dataCustomer}
-                      style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                </Form>
+                <FilterCustomer
+                  allowClear={false}
+                  value={customerSelected?.value || undefined}
+                  onChange={(_, customer) => {
+                    setCustomerSelected(customer);
+                    dispatch({
+                      type: "RESET",
+                    });
+                    dispatch({
+                      type: "SET_PRIMARY",
+                      payload: {
+                        entity: customer?.value || "",
+                      },
+                    });
+                    fetchInvoiceCustmer(customer?.value || "");
+                    fetchCustomerSource(
+                      sourceTypeSelected,
+                      customer?.value || "",
+                    );
+
+                    formSource.setFieldValue("sourceid", "");
+                    dispatch({
+                      type: "SET_ITEMS",
+                      payload: [],
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>

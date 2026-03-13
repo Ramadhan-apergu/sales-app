@@ -4,13 +4,11 @@ import {
   CheckOutlined,
   CloseOutlined,
   EditOutlined,
-  FilterOutlined,
   PlusOutlined,
   UnlockOutlined,
 } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
@@ -33,11 +31,11 @@ import {
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
-import { Dropdown, Space } from "antd";
+import { Dropdown } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -61,8 +59,6 @@ function SalesOrder() {
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
-  const [toggleRefetch, setToggleRefetch] = useState(false);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,7 +70,7 @@ function SalesOrder() {
           statusFilter,
           searchName,
           dateRange[0],
-          dateRange[1]
+          dateRange[1],
         );
 
         const resData = getResponseHandler(response, notify);
@@ -229,12 +225,12 @@ function SalesOrder() {
             ["fulfilled", "closed"].includes(record.status.toLowerCase())
               ? "green"
               : ["partially fulfilled"].includes(record.status.toLowerCase())
-              ? "orange"
-              : ["credit hold", "canceled"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "red"
-              : "default"
+                ? "orange"
+                : ["credit hold", "canceled"].includes(
+                      record.status.toLowerCase(),
+                    )
+                  ? "red"
+                  : "default"
           }
         >
           {text}
@@ -257,9 +253,7 @@ function SalesOrder() {
                 size="small"
                 icon={<EditOutlined />}
                 onClick={() => handleEdit(record)}
-                disabled={["credit hold", "fulfilled"].includes(
-                  record.status.toLowerCase()
-                )}
+                disabled={record?.status.toLowerCase() != "open"}
                 className="w-full text-left"
               >
                 Edit
@@ -484,7 +478,7 @@ function SalesOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

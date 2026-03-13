@@ -1,24 +1,16 @@
 "use client";
 
-import React, { useEffect, useReducer, useState } from "react";
-import { Button, Checkbox, Divider, Form, Select, Table, Tag } from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Form, Select } from "antd";
 import Layout from "@/components/superAdmin/Layout";
-import {
-  CheckOutlined,
-  DeliveredProcedureOutlined,
-  EditOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
-import {
-  getResponseHandler,
-  updateResponseHandler,
-} from "@/utils/responseHandlers";
+import { getResponseHandler } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import dayjs from "dayjs";
 import { rmaAliases } from "@/utils/aliases";
@@ -119,8 +111,8 @@ export default function Enter() {
   }, []);
 
   async function mappingData(data) {
-    form.setFieldValue("customer", data.entity);
-    form.setFieldValue("creditmemo", data.creditmemonum);
+    form.setFieldValue("customer", data?.entity || "");
+    form.setFieldValue("creditmemo", data?.creditmemonum || "");
 
     dispatch({
       type: "SET_PRIMARY",
@@ -186,62 +178,6 @@ export default function Enter() {
   }
 
   const [state, dispatch] = useReducer(reducer, initialState);
-
-  const handleSubmit = async () => {
-    setIsLoadingSubmit(true);
-    try {
-      let payloadToInsert = {
-        ...state.payloadPrimary,
-        ...state.payloadPayment,
-      };
-
-      payloadToInsert = {
-        ...payloadToInsert,
-        entity: data?.entity || "",
-        creditmemoid: data?.creditmemoid || "",
-        creditmemonum: data?.creditmemonum || "",
-      };
-
-      if (!payloadToInsert.entity) {
-        throw new Error("Customer is required!");
-      }
-
-      if (!payloadToInsert.creditmemoid || !payloadToInsert.creditmemonum) {
-        throw new Error("Credit memo is required!");
-      }
-
-      if (payloadToInsert.amount <= 0) {
-        throw new Error("Amount must be greater than 0.");
-      }
-
-      if (!payloadToInsert.refundmethod) {
-        throw new Error("Refund method is required");
-      }
-
-      if (payloadToInsert.refundmethod == "transfer") {
-        if (!payloadToInsert.bankaccount) {
-          throw new Error("Bank account is required.");
-        }
-      } else {
-        payloadToInsert = {
-          ...payloadToInsert,
-          bankaccount: "",
-        };
-      }
-
-      const response = await CustomerRefundFetch.update(slug, payloadToInsert);
-
-      const resData = updateResponseHandler(response, notify);
-
-      if (resData) {
-        router.push(`/super-admin/transaction/customer-refund/${resData}`);
-      }
-    } catch (error) {
-      notify("error", "Error", error.message || "Internal server error");
-    } finally {
-      setIsLoadingSubmit(false);
-    }
-  };
 
   const paymentOptions = [
     { label: "Cash", value: "cash" },

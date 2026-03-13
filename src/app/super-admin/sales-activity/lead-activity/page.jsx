@@ -1,17 +1,14 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
   Pagination,
   Table,
-  Tag,
   Select,
-  DatePicker,
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
@@ -20,24 +17,18 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
-import CustomerFetch from "@/modules/salesApi/customer";
-import InvoiceFetch from "@/modules/salesApi/invoice";
-import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
-import TargetFetch from "@/modules/salesApi/crm/target";
+
+import { formatDateTimeToShort } from "@/utils/formatDate";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
-import LeadsFetch from "@/modules/salesApi/crm/leads";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function Activity() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);

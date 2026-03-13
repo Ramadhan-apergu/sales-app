@@ -1,49 +1,23 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Dropdown,
-  Empty,
-  Form,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tag,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Dropdown, Modal, Table, Tag } from "antd";
 import Layout from "@/components/accounting/Layout";
-import {
-  CheckOutlined,
-  EditOutlined,
-  FileAddOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  MoreOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { MoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import CustomerFetch from "@/modules/salesApi/customer";
 import {
   createResponseHandler,
   deleteResponseHandler,
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
-import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { formatDateToShort } from "@/utils/formatDate";
@@ -180,13 +154,6 @@ export default function EnterPage() {
   const { slug } = useParams();
 
   const [data, setData] = useState(null);
-
-  const [dataFulfillment, setDataFulfillment] = useState({});
-  const [dataSalesOrder, setDataSalesOrder] = useState({});
-  const [dataCustomer, setDataCustomer] = useState({});
-  const [dataSalesOrderItemRetrieve, setDataSalesOrderItemRetrieve] = useState(
-    {},
-  );
 
   const initialState = {
     payloadPrimary: {
@@ -504,7 +471,9 @@ export default function EnterPage() {
       const resData = deleteResponseHandler(response, notify);
 
       if (resData) {
-        router.push(`/accounting/transaction/${title}`);
+        setTimeout(() => {
+          router.push(`/accounting/transaction/${title}`);
+        }, 2000); // delay 2 detik
       }
     } catch (error) {
       notify("error", "Error", error?.message || "Internal Server error");

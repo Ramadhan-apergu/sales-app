@@ -1,26 +1,9 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Checkbox, Divider, Form, Modal, Select, Table } from "antd";
 import Layout from "@/components/accounting/Layout";
-import {
-  CheckOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
@@ -32,16 +15,13 @@ import {
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 import { creditMemoAliases } from "@/utils/aliases";
 import { formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 function TableCustom({
   data,
@@ -85,7 +65,9 @@ function TableCustom({
           align: "center",
           render: (text) => <p>{formatDateToShort(text)}</p>,
         };
-      } else if (["due", "amount", "payment", "rate", "taxamount"].includes(key)) {
+      } else if (
+        ["due", "amount", "payment", "rate", "taxamount"].includes(key)
+      ) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
@@ -137,7 +119,6 @@ export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const [modal, contextHolder] = Modal.useModal();
   const title = "credit-memo";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
@@ -146,6 +127,12 @@ export default function Enter() {
 
   const [dataItem, setDataItem] = useState([]);
   const [itemSelected, setItemSelected] = useState(null);
+
+  const [sourceTypeSelected, setSourceTypeSelected] = useState("invoice");
+
+  const [dataSource, setDataSource] = useState([]);
+
+  const [formSource] = Form.useForm();
 
   useEffect(() => {
     async function fetchCustomer() {
@@ -234,11 +221,6 @@ export default function Enter() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const paymentOptions = [
-    { label: "Cash", value: "cash" },
-    { label: "Credit", value: "credit" },
-  ];
-
   const keyTableItem = [
     // "invoiceid",
     "refnum",
@@ -252,29 +234,6 @@ export default function Enter() {
 
   const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
 
-  async function fetchItemCustomerInv(customerId) {
-    try {
-      const response = await CreditMemoFetch.getInvoiceCustomerItem(customerId);
-      const resData = getResponseHandler(response);
-
-      if (resData) {
-        const addLabelItem = resData.map((item) => {
-          return {
-            ...item,
-            label: item.itemid,
-            value: item.id,
-          };
-        });
-        setDataItem(addLabelItem);
-      } else {
-        setDataItem([]);
-      }
-    } catch (error) {
-      console.log(error.message);
-      notify("error", "Error", "Failed get data item");
-    }
-  }
-
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
     try {
@@ -282,6 +241,8 @@ export default function Enter() {
         ...state.payloadPrimary,
         ...state.payloadSummary,
         ...state.payloadPayment,
+        sources: sourceTypeSelected,
+        sourceid: formSource.getFieldValue("sourceid"),
       };
 
       if (!payloadToInsert.entity) {
@@ -408,8 +369,6 @@ export default function Enter() {
     setIsModalItemOpen(true);
   }
 
-  const [dataTableItem, setDataTableItem] = useState([]);
-
   const initialStateItemTable = {
     item: {
       item: "",
@@ -463,7 +422,7 @@ export default function Enter() {
 
   const [stateItemTable, dispatchItemTable] = useReducer(
     reducerItemTable,
-    initialStateItemTable
+    initialStateItemTable,
   );
 
   async function handleModalItemOk() {
@@ -479,7 +438,7 @@ export default function Enter() {
       notify(
         "error",
         "Error",
-        "Quantity must be between 1 and " + itemSelected.qty_invoice
+        "Quantity must be between 1 and " + itemSelected.qty_invoice,
       );
       return;
     }
@@ -574,12 +533,12 @@ export default function Enter() {
   function countSummary(newDataItem) {
     let total = newDataItem.reduce(
       (total, item) => total + (Number(item.amount) || 0),
-      0
+      0,
     );
 
     let taxtotal = newDataItem.reduce(
       (total, item) => total + (Number(item.taxamount) || 0),
-      0
+      0,
     );
 
     let subtotal = total - taxtotal;
@@ -603,12 +562,12 @@ export default function Enter() {
   useEffect(() => {
     const applied = state.credit_memo_applies.reduce(
       (total, item) => total + (Number(item.payment) || 0),
-      0
+      0,
     );
 
     let unapplied = state.credit_memo_items.reduce(
       (total, item) => total + (Number(item.amount) || 0),
-      0
+      0,
     );
 
     unapplied = unapplied - applied;
@@ -681,7 +640,7 @@ export default function Enter() {
         notify(
           "error",
           "Error",
-          "Cannot apply credit memo because unapplied amount is 0."
+          "Cannot apply credit memo because unapplied amount is 0.",
         );
       }
     } else {
@@ -734,7 +693,7 @@ export default function Enter() {
     dispatch({
       type: "SET_ITEMS",
       payload: state.credit_memo_items.filter(
-        (item) => item.item !== record.item
+        (item) => item.item !== record.item,
       ),
     });
 
@@ -748,8 +707,75 @@ export default function Enter() {
     });
 
     countSummary(
-      state.credit_memo_items.filter((item) => item.item !== record.item)
+      state.credit_memo_items.filter((item) => item.item !== record.item),
     );
+  }
+
+  async function fetchCustomerSource(source, customerid) {
+    try {
+      const response = await CreditMemoFetch.getSourceByCustomer(
+        source,
+        customerid,
+      );
+      const resData = getResponseHandler(response);
+
+      if (resData) {
+        const addLabelItem = resData.map((item) => {
+          return {
+            ...item,
+            label: item.tranid,
+            value: item.id,
+          };
+        });
+        setDataSource(addLabelItem);
+      } else {
+        setDataSource([]);
+      }
+    } catch (error) {
+      console.log(error.message);
+      notify("error", "Error", "Failed get data item");
+    }
+  }
+
+  async function fetchCustomerSourceItem(source, id) {
+    try {
+      const response = await CreditMemoFetch.getSourceItemBySourceId(
+        source,
+        id,
+      );
+      const resData = getResponseHandler(response);
+
+      console.log(resData);
+      if (resData) {
+        const addLabelItem = resData.map((item) => {
+          return {
+            label: item.itemid,
+            value: item.id,
+            addons: 0,
+            conversion: 0,
+            createdby: "00000000-0000-0000-0000-000000000000",
+            createddate: "",
+            dimensi: "",
+            displayname: item.displayname,
+            id: item.id,
+            iseditable: 0,
+            itemcategory: "",
+            itemid: item.itemid,
+            itemprocessfamily: "",
+            price: item.rate,
+            qty_invoice: item.quantity,
+            unitstype: item.units,
+            unitstype2: "",
+          };
+        });
+        setDataItem(addLabelItem);
+      } else {
+        setDataItem([]);
+      }
+    } catch (error) {
+      console.log(error.message);
+      notify("error", "Error", "Failed get data item");
+    }
   }
 
   return (
@@ -800,10 +826,57 @@ export default function Enter() {
                 Customer
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+
+                <FilterCustomer
+                  allowClear={false}
+                  value={customerSelected?.value || undefined}
+                  onChange={(_, customer) => {
+                    setCustomerSelected(customer);
+                    dispatch({
+                      type: "RESET",
+                    });
+                    dispatch({
+                      type: "SET_PRIMARY",
+                      payload: {
+                        entity: customer?.value || "",
+                      },
+                    });
+                    fetchInvoiceCustmer(customer?.value || "");
+                    fetchCustomerSource(
+                      sourceTypeSelected,
+                      customer?.value || "",
+                    );
+
+                    formSource.setFieldValue("sourceid", "");
+                    dispatch({
+                      type: "SET_ITEMS",
+                      payload: [],
+                    });
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          {/* end customer */}
+
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                Source
+              </Divider>
+              <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
                 <Form layout="vertical">
                   <Form.Item
-                    label={<span className="capitalize">Customer ID</span>}
-                    name="customer"
+                    label={<span className="capitalize">Source Type</span>}
+                    initialValue={sourceTypeSelected}
+                    name="source"
                     style={{ margin: 0 }}
                     className="w-full"
                     labelCol={{ style: { padding: 0 } }}
@@ -813,24 +886,23 @@ export default function Enter() {
                   >
                     <Select
                       showSearch
-                      placeholder="Select a customer"
+                      placeholder="Select a source"
                       optionFilterProp="label"
-                      value={customerSelected?.value || undefined}
-                      onChange={(_, customer) => {
-                        setCustomerSelected(customer);
+                      value={sourceTypeSelected}
+                      onChange={(val) => {
+                        setSourceTypeSelected(val);
+                        fetchCustomerSource(val, customerSelected.id);
+
+                        formSource.setFieldValue("sourceid", null);
                         dispatch({
-                          type: "RESET",
+                          type: "SET_ITEMS",
+                          payload: [],
                         });
-                        dispatch({
-                          type: "SET_PRIMARY",
-                          payload: {
-                            entity: customer.id,
-                          },
-                        });
-                        fetchInvoiceCustmer(customer.id);
-                        fetchItemCustomerInv(customer.id);
                       }}
-                      options={dataCustomer}
+                      options={[
+                        { label: "Invoice", value: "invoice" },
+                        { label: "RMA", value: "rma" },
+                      ]}
                       style={{ width: "100%" }}
                     />
                   </Form.Item>
@@ -838,7 +910,51 @@ export default function Enter() {
               </div>
             </div>
           </div>
-          {/* end customer */}
+
+          <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-2">
+              <Divider
+                style={{
+                  margin: "0",
+                  textTransform: "capitalize",
+                  borderColor: "#1677ff",
+                }}
+                orientation="left"
+              >
+                {sourceTypeSelected == "rma" ? "RMA" : "Invoice"}
+              </Divider>
+              <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                <Form layout="vertical" form={formSource}>
+                  <Form.Item
+                    label={<span className="capitalize">Source ID</span>}
+                    name="sourceid"
+                    style={{ margin: 0 }}
+                    className="w-full"
+                    labelCol={{ style: { padding: 0 } }}
+                    rules={[
+                      { required: true, message: `Source id is required` },
+                    ]}
+                  >
+                    <Select
+                      showSearch
+                      placeholder="Select a source id"
+                      optionFilterProp="label"
+                      onChange={(_, source) => {
+                        fetchCustomerSourceItem(sourceTypeSelected, source.id);
+
+                        dispatch({
+                          type: "SET_ITEMS",
+                          payload: [],
+                        });
+                      }}
+                      options={dataSource}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
+            </div>
+          </div>
 
           {/* primary */}
           <InputForm
@@ -882,14 +998,14 @@ export default function Enter() {
                 input: "number",
                 isAlias: true,
                 isRead: true,
-                accounting: true
+                accounting: true,
               },
               {
                 key: "applied",
                 input: "number",
                 isAlias: true,
                 isRead: true,
-                accounting: true
+                accounting: true,
               },
             ]}
             aliases={creditMemoAliases.item}
@@ -907,10 +1023,10 @@ export default function Enter() {
             onDelete={handleDeleteTableItem}
             data={state.credit_memo_items}
             keys={[
-            //   "item",
+              //   "item",
               "displayname",
               "quantity",
-            //   "units",
+              //   "units",
               "itemdescription",
               "rate",
               "taxable",
@@ -1016,7 +1132,7 @@ export default function Enter() {
                     optionFilterProp="label"
                     onChange={(_, item) => {
                       const isDuplicate = state.credit_memo_items.some(
-                        (tableItem) => tableItem.item === item.value
+                        (tableItem) => tableItem.item === item.value,
                       );
 
                       if (isDuplicate) {
@@ -1053,7 +1169,7 @@ export default function Enter() {
                   input: "input",
                   isAlias: true,
                   isRead: true,
-                  hidden: true
+                  hidden: true,
                 },
                 {
                   key: "quantity",
@@ -1071,7 +1187,7 @@ export default function Enter() {
                   input: "number",
                   isAlias: true,
                   isRead: true,
-                  accounting: true
+                  accounting: true,
                 },
                 {
                   key: "itemdescription",

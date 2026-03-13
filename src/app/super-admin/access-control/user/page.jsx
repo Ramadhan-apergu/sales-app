@@ -1,19 +1,9 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-  Input,
-} from "antd";
+import { Button, Modal, Pagination, Table, Tag, Select, Input } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -24,7 +14,7 @@ import { getResponseHandler } from "@/utils/responseHandlers";
 import UserManageFetch from "@/modules/salesApi/userManagement";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function UserRoles() {
   const searchParams = useSearchParams();
@@ -57,7 +47,7 @@ function UserRoles() {
           limit,
           statusFilter.toLowerCase() == "all" ? "" : statusFilter,
           roleFilter.toLowerCase() == "all" ? "" : roleFilter,
-          searchName
+          searchName,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -116,8 +106,8 @@ function UserRoles() {
             ["active"].includes(record.status.toLowerCase())
               ? "green"
               : ["inactive"].includes(record.status.toLowerCase())
-              ? "red"
-              : "default"
+                ? "red"
+                : "default"
           }
         >
           {text}
@@ -281,7 +271,7 @@ function UserRoles() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/access-control/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/access-control/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

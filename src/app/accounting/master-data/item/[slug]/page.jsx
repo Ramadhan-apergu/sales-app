@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button, Divider, Dropdown, Modal, Table } from "antd";
+import { useEffect, useState } from "react";
+import { Button, Dropdown, Modal, Table } from "antd";
 import Layout from "@/components/accounting/Layout";
 import {
   EditOutlined,
@@ -110,14 +110,14 @@ export default function Detail() {
   };
 
   const [general, setGeneral] = useState(
-    Object.fromEntries(fieldGroups.general.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.general.map((key) => [key, ""])),
   );
   const [pricing, setPricing] = useState(
-    Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""])),
   );
 
   const [conversion, setConversion] = useState(
-    Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.pricing.map((key) => [key, ""])),
   );
 
   async function mapingGroup(data) {
@@ -425,7 +425,7 @@ function PriceTable({ data, title, notify, slug }) {
         notify(
           "error",
           "Failed",
-          `${itemAliases["effectivedate"]} is required`
+          `${itemAliases["effectivedate"]} is required`,
         );
         return;
       }

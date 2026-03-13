@@ -1,20 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button, Divider, Table, Modal, Select, Dropdown } from "antd";
+import { useEffect, useState } from "react";
+import { Button, Divider, Table, Modal, Select } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
-import {
-  CheckOutlined,
-  CloseOutlined,
-  EditOutlined,
-  LeftOutlined,
-  MoreOutlined,
-  SaveOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CloseOutlined, SaveOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
-import { agreementAliases, applyAgreementAliases } from "@/utils/aliases";
+import { applyAgreementAliases } from "@/utils/aliases";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
@@ -23,10 +15,7 @@ import {
 } from "@/utils/responseHandlers";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import ItemFetch from "@/modules/salesApi/item";
-import Search from "antd/es/input/Search";
 import AgreementFetch from "@/modules/salesApi/agreement";
-import CustomerFetch from "@/modules/salesApi/customer";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 
@@ -82,7 +71,6 @@ export default function AgreementApplyDetail() {
   const [isModal, setIsModal] = useState(false);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [dataAgreement, setDataAgreement] = useState([]);
   const [agreementSelectedTemp, setAgreementSelectedTemp] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +80,9 @@ export default function AgreementApplyDetail() {
   useEffect(() => {
     const fetchDataApplyAgreement = async () => {
       try {
-        const response = await AgreementFetch.getByCustCode(decodeURIComponent(slug) || '');
+        const response = await AgreementFetch.getByCustCode(
+          decodeURIComponent(slug) || "",
+        );
 
         const resData = getResponseHandler(response, notify);
 
@@ -127,7 +117,7 @@ export default function AgreementApplyDetail() {
               ...agreement,
               label: agreement.agreementname,
               value: agreement.id,
-            }))
+            })),
           );
         }
       } catch (error) {
@@ -169,7 +159,7 @@ export default function AgreementApplyDetail() {
 
       const response = await AgreementFetch.updateApplyAgreement(
         data.customerid,
-        payloadToInsert
+        payloadToInsert,
       );
 
       const resData = createResponseHandler(response, notify);
@@ -291,8 +281,8 @@ export default function AgreementApplyDetail() {
                       onDelete={(agreement) => {
                         setpayloadAgreementList((prev) =>
                           prev.filter(
-                            (prevAgreement) => prevAgreement.id != agreement.id
-                          )
+                            (prevAgreement) => prevAgreement.id != agreement.id,
+                          ),
                         );
                       }}
                       data={payloadAgreementList}
@@ -348,13 +338,13 @@ export default function AgreementApplyDetail() {
                     optionFilterProp="label"
                     onChange={(_, agreement) => {
                       const findAgreementExisting = payloadAgreementList.find(
-                        (itemAgreement) => itemAgreement.id == agreement.id
+                        (itemAgreement) => itemAgreement.id == agreement.id,
                       );
                       if (!findAgreementExisting) {
                         setAgreementSelectedTemp({
                           ...agreement,
                           effectivedate: formatDateToShort(
-                            agreement.effectivedate
+                            agreement.effectivedate,
                           ),
                           enddate: formatDateToShort(agreement.enddate),
                           form: formOptions[agreement.customform],

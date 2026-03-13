@@ -19,7 +19,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         qty: acc.qty + (item.quantity1 || 0),
         qty2: acc.qty2 + (item.quantity2 || 0),
       }),
-      { qty: 0, qty2: 0 }
+      { qty: 0, qty2: 0 },
     );
     setCount(total);
 
@@ -45,7 +45,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
         }
 
         return acc;
-      }, {})
+      }, {}),
     );
 
     setUpdateData(mergedData);
@@ -196,7 +196,7 @@ export default function DeliveryOrderPrint({ data, dataTable }) {
             Total Qty
           </p>
           <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
-            {count.qty}
+            {(Math.round((count.qty + Number.EPSILON) * 100) / 100).toFixed(2)}
           </p>
           <p className="border-l border-b break-words whitespace-normal w-[10%] text-right">
             {"-"}

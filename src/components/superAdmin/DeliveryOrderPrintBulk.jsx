@@ -23,7 +23,7 @@ export default function DeliveryOrderPrintBulk({ datas }) {
             qty: acc.qty + (item.quantity || 0),
             qty2: acc.qty2 + (item.quantity2 || 0),
           }),
-          { qty: 0, qty2: 0 }
+          { qty: 0, qty2: 0 },
         );
 
         const mergedData = Object.values(
@@ -48,7 +48,7 @@ export default function DeliveryOrderPrintBulk({ datas }) {
             }
 
             return acc;
-          }, {})
+          }, {}),
         );
 
         return (
@@ -209,13 +209,17 @@ export default function DeliveryOrderPrintBulk({ datas }) {
                   Total Qty
                 </p>
                 <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
-                  {count.qty}
+                  {(
+                    Math.round((count.qty + Number.EPSILON) * 100) / 100
+                  ).toFixed(2)}
                 </p>
                 <p className="border-l border-b break-words whitespace-normal w-[10%] text-right">
                   {"-"}
                 </p>
                 <p className="border-l border-b break-words whitespace-normal w-[15%] text-right">
-                  {count.qty2}
+                  {(
+                    Math.round((count.qty2 + Number.EPSILON) * 100) / 100
+                  ).toFixed(2)}
                 </p>
                 <p className="border-x border-b break-words whitespace-normal w-[10%] text-right">
                   {"-"}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Button, Checkbox, Divider, Form, Select, Table } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
@@ -11,7 +11,6 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
 import {
-  createResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
@@ -137,7 +136,6 @@ export default function Enter() {
   const [dataCustomerInv, setDataCustomerInv] = useState([]);
 
   const [dataInvItem, setDataInvItem] = useState([]);
-  const [invItemSelected, setInvItemSelected] = useState({});
 
   async function fetchCustomer() {
     try {
@@ -181,7 +179,7 @@ export default function Enter() {
   async function fetchCustomerInvItem(invId) {
     try {
       const response = await RmaFetch.getInvoiceCustomerItem(invId);
-      const resData = getResponseHandler(response, notify);
+      const resData = getResponseHandler(response);
 
       if (resData) {
         return resData;
@@ -238,13 +236,20 @@ export default function Enter() {
 
     const resDataItem = await fetchCustomerInvItem(data.invoiceid);
 
-    const updateDataItem = resDataItem.map((item) => ({
-      ...item,
-      ischecked: data.rma_items.some(
-        (selectedItem) =>
-          selectedItem.id === item.id && selectedItem.item === item.item,
-      ),
-    }));
+    const rmaIds = new Set(data.rma_items?.map((i) => i.id));
+
+    const updateDataItem = [
+      ...(data.rma_items ?? []).map((item) => ({
+        ...item,
+        ischecked: true,
+      })),
+      ...resDataItem
+        .filter((item) => !rmaIds.has(item.id))
+        .map((item) => ({
+          ...item,
+          ischecked: false,
+        })),
+    ];
 
     setDataInvItem(updateDataItem);
 
@@ -298,10 +303,6 @@ export default function Enter() {
     "taxvalue",
     "isfree",
   ];
-
-  const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
-  const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -375,7 +376,7 @@ export default function Enter() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              RMA Enter
+              Edit RMA
             </p>
             <Button
               icon={<UnorderedListOutlined />}

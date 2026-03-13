@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Button,
   Divider,
@@ -8,7 +8,6 @@ import {
   Modal,
   Input,
   Pagination,
-  Switch,
   Checkbox,
 } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
@@ -62,7 +61,7 @@ function SelectItem({ onselect, dataExist }) {
         isFilter ? null : limit == null ? 50 : limit,
         searchName || null,
         searchCode || null,
-        searchFamily || null
+        searchFamily || null,
       );
       const resData = getResponseHandler(response, notify);
       if (resData) {
@@ -418,7 +417,7 @@ export default function AgreementNew() {
         const listActive =
           resData.list.filter((item) => item.isdeleted == 0) || [];
         setItemprocessfamilyOptions(
-          listActive.map((item) => ({ label: item.name, value: item.name }))
+          listActive.map((item) => ({ label: item.name, value: item.name })),
         );
       }
     } catch (error) {
@@ -668,7 +667,7 @@ export default function AgreementNew() {
   }
 
   const [payloadDetailInit, setPayloadDetailInit] = useState(
-    toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1])
+    toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1]),
   );
 
   const payloadDetailInitRef = useRef(payloadDetailInit);
@@ -769,7 +768,7 @@ export default function AgreementNew() {
         notify(
           "error",
           "Error",
-          "Both Effective Date and End Date must be filled together."
+          "Both Effective Date and End Date must be filled together.",
         );
         return;
       }
@@ -780,7 +779,7 @@ export default function AgreementNew() {
           notify(
             "error",
             "Error",
-            "End Date cannot be earlier than Effective Date."
+            "End Date cannot be earlier than Effective Date.",
           );
           return;
         }
@@ -829,7 +828,7 @@ export default function AgreementNew() {
     setPayloadDetail((prev) => [...prev, ...updatePayloadDetail]);
 
     const reset = toInitialObject(
-      keys[parseInt(payloadCustomForm.customform) - 1]
+      keys[parseInt(payloadCustomForm.customform) - 1],
     );
     setPayloadDetailInit(reset);
     payloadDetailInitRef.current = reset;
@@ -850,7 +849,7 @@ export default function AgreementNew() {
             payload={payloadDetailInitRef.current}
             data={generateDataInput(
               parseInt(payloadCustomForm.customform),
-              payloadGeneral.agreementtype
+              payloadGeneral.agreementtype,
             )}
             onChange={handleChangePayload}
             aliases={agreementAliases}
@@ -875,7 +874,7 @@ export default function AgreementNew() {
             <Button
               onClick={() => {
                 const reset = toInitialObject(
-                  keys[parseInt(payloadCustomForm.customform) - 1]
+                  keys[parseInt(payloadCustomForm.customform) - 1],
                 );
                 setPayloadDetailInit(reset);
                 applyDetail.current = [];
@@ -941,7 +940,7 @@ export default function AgreementNew() {
 
   function handleDeleteDetail(record) {
     setPayloadDetail((prev) =>
-      prev.filter((item) => item.itemid !== record.itemid)
+      prev.filter((item) => item.itemid !== record.itemid),
     );
   }
 
@@ -1061,7 +1060,7 @@ export default function AgreementNew() {
                     orientation="left"
                   >
                     {formOptions.find(
-                      (form) => form.value == payloadCustomForm.customform
+                      (form) => form.value == payloadCustomForm.customform,
                     )?.label || ""}{" "}
                     Detail
                   </Divider>

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button, Modal, Tag } from "antd";
+import { useEffect, useState } from "react";
+import { Button, Modal } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
 import { CloseOutlined, SaveOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
@@ -118,7 +118,7 @@ export default function Detail() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["companyname"]} is required`
+          `${customerAliases["companyname"]} is required`,
         );
         return;
       }
@@ -127,7 +127,7 @@ export default function Detail() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["customerid"]} is required`
+          `${customerAliases["customerid"]} is required`,
         );
         return;
       }
@@ -172,7 +172,7 @@ export default function Detail() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["resalenumber"]} cannot be empty`
+          `${customerAliases["resalenumber"]} cannot be empty`,
         );
         return;
       }
@@ -181,7 +181,7 @@ export default function Detail() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["resalenumber"]} must be exactly 16 characters long`
+          `${customerAliases["resalenumber"]} must be exactly 16 characters long`,
         );
         return;
       }
@@ -190,7 +190,7 @@ export default function Detail() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["creditlimit"]} must be zero or positive`
+          `${customerAliases["creditlimit"]} must be zero or positive`,
         );
         return;
       }
@@ -210,16 +210,16 @@ export default function Detail() {
   };
 
   const [general, setGeneral] = useState(
-    Object.fromEntries(fieldGroups.general.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.general.map((key) => [key, ""])),
   );
   const [contact, setContact] = useState(
-    Object.fromEntries(fieldGroups.contact.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.contact.map((key) => [key, ""])),
   );
   const [address, setAddress] = useState(
-    Object.fromEntries(fieldGroups.address.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.address.map((key) => [key, ""])),
   );
   const [financial, setFinancial] = useState(
-    Object.fromEntries(fieldGroups.financial.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.financial.map((key) => [key, ""])),
   );
 
   function mapingGroup(data) {

@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Divider, Table, Modal, Select } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
-import { agreementAliases, applyAgreementAliases } from "@/utils/aliases";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+import { applyAgreementAliases } from "@/utils/aliases";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
   createResponseHandler,
@@ -15,10 +14,7 @@ import {
 } from "@/utils/responseHandlers";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import ItemFetch from "@/modules/salesApi/item";
-import Search from "antd/es/input/Search";
 import AgreementFetch from "@/modules/salesApi/agreement";
-import CustomerFetch from "@/modules/salesApi/customer";
 import { formatDateToShort } from "@/utils/formatDate";
 import InputCustomer from "@/components/input/InputCustomer";
 
@@ -90,7 +86,7 @@ export default function AgreementApplyNew() {
               ...agreement,
               label: agreement.agreementname,
               value: agreement.id,
-            }))
+            })),
           );
         }
       } catch (error) {
@@ -222,8 +218,8 @@ export default function AgreementApplyNew() {
                 onDelete={(agreement) => {
                   setpayloadAgreementList((prev) =>
                     prev.filter(
-                      (prevAgreement) => prevAgreement.id != agreement.id
-                    )
+                      (prevAgreement) => prevAgreement.id != agreement.id,
+                    ),
                   );
                 }}
                 data={payloadAgreementList}
@@ -273,7 +269,7 @@ export default function AgreementApplyNew() {
                     optionFilterProp="label"
                     onChange={(_, agreement) => {
                       const findAgreementExisting = payloadAgreementList.find(
-                        (itemAgreement) => itemAgreement.id == agreement.id
+                        (itemAgreement) => itemAgreement.id == agreement.id,
                       );
                       if (!findAgreementExisting) {
                         setAgreementSelectedTemp({

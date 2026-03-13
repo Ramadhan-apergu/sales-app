@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "antd";
 import Layout from "@/components/accounting/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
@@ -73,7 +73,7 @@ export default function CustomerNew() {
           resData.list.filter((item) => item.isdeleted == 0) || [];
 
         setItemprocessfamilyOptions(
-          listActive.map((item) => ({ label: item.name, value: item.name }))
+          listActive.map((item) => ({ label: item.name, value: item.name })),
         );
       }
     } catch (error) {
@@ -86,7 +86,6 @@ export default function CustomerNew() {
   }, []);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChangePayload = (type, payload) => {
     switch (type) {
@@ -135,7 +134,7 @@ export default function CustomerNew() {
         notify(
           "error",
           "Failed",
-          `${itemAliases["itemprocessfamily"]} is required`
+          `${itemAliases["itemprocessfamily"]} is required`,
         );
         return;
       }

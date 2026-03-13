@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useReducer, useState } from "react";
-import { Button, Checkbox, Divider, Form, Select, Table } from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Form, Select } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
@@ -11,15 +11,13 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
 import {
-  createResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import dayjs from "dayjs";
 import { rmaAliases } from "@/utils/aliases";
-import { formatDateToShort } from "@/utils/formatDate";
-import { formatRupiah } from "@/utils/formatRupiah";
+
 import CustomerRefundFetch from "@/modules/salesApi/customerRefund";
 
 export default function Enter() {
@@ -116,8 +114,8 @@ export default function Enter() {
   }, []);
 
   async function mappingData(data) {
-    form.setFieldValue("customer", data.entity);
-    form.setFieldValue("creditmemo", data.creditmemonum);
+    form.setFieldValue("customer", data?.entity || "");
+    form.setFieldValue("creditmemo", data?.creditmemonum || "");
 
     dispatch({
       type: "SET_PRIMARY",

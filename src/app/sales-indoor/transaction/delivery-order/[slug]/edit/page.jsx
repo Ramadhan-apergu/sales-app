@@ -4,14 +4,11 @@ import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import Layout from "@/components/salesIndoor/Layout";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
-import { Button, Checkbox, Divider, Dropdown, Modal, Table, Tag } from "antd";
+import { Button, Checkbox, Divider, Modal, Table } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
 import {
   CloseOutlined,
-  EditOutlined,
-  FileAddOutlined,
-  MoreOutlined,
   SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -22,8 +19,6 @@ import {
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import { formatDateToShort } from "@/utils/formatDate";
-import ItemFetch from "@/modules/salesApi/item";
 import dayjs from "dayjs";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { deliveryOrderAliases } from "@/utils/aliases";
@@ -152,10 +147,6 @@ export default function Page() {
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
   const { notify, contextHolder: contextNotify } = useNotification();
-  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [customerSelected, setCustomerSelected] = useState({});
-  const [soItem, setSoItem] = useState([]);
-
   const initialState = {
     payloadPrimary: {
       createdfrom: "",
@@ -201,6 +192,7 @@ export default function Page() {
   const title = "delivery-order";
   const [state, dispatch] = useReducer(reducer, initialState);
   const [dataTableItem, setDataTableItem] = useState([]);
+  const [customerSelected, setCustomerSelected] = useState({});
   const keyTableItem = [
     "apply",
     "itemid",
@@ -234,16 +226,6 @@ export default function Page() {
     }
     fetchSalesOrder();
   }, []);
-
-  async function fetchItemById(id) {
-    try {
-      const response = await ItemFetch.getById(id);
-      const resData = getResponseHandler(response);
-      return resData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data item");
-    }
-  }
 
   async function fetchCustomerById(id) {
     try {

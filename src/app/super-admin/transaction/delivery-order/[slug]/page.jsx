@@ -16,7 +16,6 @@ import {
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useNotification from "@/hooks/useNotification";
 import {
-  deleteResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
@@ -194,16 +193,6 @@ export default function Page() {
     }
     fetchSalesOrder();
   }, []);
-
-  async function fetchItemById(id) {
-    try {
-      const response = await ItemFetch.getById(id);
-      const resData = getResponseHandler(response);
-      return resData;
-    } catch (error) {
-      notify("error", "Error", "Failed get data item");
-    }
-  }
 
   const mappingDataDeliveryOrder = async (data) => {
     dispatch({

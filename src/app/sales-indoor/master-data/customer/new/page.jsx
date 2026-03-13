@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
 import { CheckOutlined, LeftOutlined } from "@ant-design/icons";
@@ -47,16 +47,9 @@ export default function CustomerNew() {
     resalenumber: "",
   });
 
-  const termOptions = [
-    { label: "7 Days", value: "7" },
-    { label: "14 Days", value: "14" },
-    { label: "30 Days", value: "30" },
-  ];
-
   const [salesData, setSalesData] = useState([]);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchDataSales() {
@@ -72,7 +65,7 @@ export default function CustomerNew() {
                 value: data.id,
                 label: data.name,
               };
-            })
+            }),
           );
         }
       } catch (error) {
@@ -126,7 +119,7 @@ export default function CustomerNew() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["companyname"]} is required`
+          `${customerAliases["companyname"]} is required`,
         );
         return;
       }
@@ -135,7 +128,7 @@ export default function CustomerNew() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["customerid"]} is required`
+          `${customerAliases["customerid"]} is required`,
         );
         return;
       }
@@ -180,7 +173,7 @@ export default function CustomerNew() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["resalenumber"]} cannot be empty`
+          `${customerAliases["resalenumber"]} cannot be empty`,
         );
         return;
       }
@@ -189,7 +182,7 @@ export default function CustomerNew() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["resalenumber"]} must be exactly 16 characters long`
+          `${customerAliases["resalenumber"]} must be exactly 16 characters long`,
         );
         return;
       }
@@ -198,7 +191,7 @@ export default function CustomerNew() {
         notify(
           "error",
           "Failed",
-          `${customerAliases["creditlimit"]} must be zero or positive`
+          `${customerAliases["creditlimit"]} must be zero or positive`,
         );
         return;
       }
