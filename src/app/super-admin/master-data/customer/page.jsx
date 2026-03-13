@@ -9,7 +9,7 @@ import {
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
-import { Button, Dropdown, Modal, Pagination, Select, Table, Tag } from "antd";
+import { Button, Dropdown, Modal, Pagination, Table, Tag } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -23,7 +23,7 @@ import {
 import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function Customer() {
   const searchParams = useSearchParams();

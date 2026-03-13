@@ -1,25 +1,14 @@
 "use client";
 import Layout from "@/components/finance/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-  Input,
-  Flex,
-} from "antd";
+import { Button, Pagination, Table, Select, DatePicker, Input } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import { formatDateToShort, formatDateWithSepMinus } from "@/utils/formatDate";
+import { formatDateWithSepMinus } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { soReportAliases } from "@/utils/aliases";
@@ -28,7 +17,7 @@ import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 import { exportJSONToExcel } from "@/utils/export";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 const { Search } = Input;
 
@@ -45,7 +34,6 @@ function SalesOrder() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [modal, contextHolder] = Modal.useModal();
   const [tableKeys, setTableKeys] = useState([]);
   const title = "sales-order";
   const { notify, contextHolder: notificationContextHolder } =

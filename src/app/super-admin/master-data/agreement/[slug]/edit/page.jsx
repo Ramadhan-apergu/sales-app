@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Button,
   Divider,
@@ -8,7 +8,6 @@ import {
   Modal,
   Input,
   Pagination,
-  Switch,
   Checkbox,
 } from "antd";
 import Layout from "@/components/superAdmin/Layout";
@@ -64,7 +63,7 @@ function SelectItem({ onselect, dataExist }) {
         isFilter ? null : limit == null ? 50 : limit,
         searchName || null,
         searchCode || null,
-        searchFamily || null
+        searchFamily || null,
       );
       const resData = getResponseHandler(response, notify);
       if (resData) {
@@ -332,7 +331,7 @@ function TableCustom({ data, keys, aliases, onDelete, agreementtype }) {
 
   const paginatedData = data.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   );
 
   const columns = [
@@ -426,7 +425,7 @@ export default function AgreementEdit() {
         const listActive =
           resData.list.filter((item) => item.isdeleted == 0) || [];
         setItemprocessfamilyOptions(
-          listActive.map((item) => ({ label: item.name, value: item.name }))
+          listActive.map((item) => ({ label: item.name, value: item.name })),
         );
       }
     } catch (error) {
@@ -469,7 +468,7 @@ export default function AgreementEdit() {
             let items = [];
             if (resData.agreement_groups.itemcategory) {
               const getItem = await getItemByCategory(
-                resData.agreement_groups.itemcategory
+                resData.agreement_groups.itemcategory,
               );
               if (getItem) {
                 items = getItem.list;
@@ -773,7 +772,7 @@ export default function AgreementEdit() {
   }
 
   const [payloadDetailInit, setPayloadDetailInit] = useState(
-    toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1])
+    toInitialObject(keys[parseInt(payloadCustomForm.customform) - 1]),
   );
 
   const payloadDetailInitRef = useRef(payloadDetailInit);
@@ -893,7 +892,7 @@ export default function AgreementEdit() {
     setPayloadDetail((prev) => [...prev, ...updatePayloadDetail]);
 
     const reset = toInitialObject(
-      keys[parseInt(payloadCustomForm.customform) - 1]
+      keys[parseInt(payloadCustomForm.customform) - 1],
     );
     setPayloadDetailInit(reset);
     payloadDetailInitRef.current = reset;
@@ -914,7 +913,7 @@ export default function AgreementEdit() {
             payload={payloadDetailInitRef.current}
             data={generateDataInput(
               parseInt(payloadCustomForm.customform),
-              payloadGeneral.agreementtype
+              payloadGeneral.agreementtype,
             )}
             onChange={handleChangePayload}
             aliases={agreementAliases}
@@ -939,7 +938,7 @@ export default function AgreementEdit() {
             <Button
               onClick={() => {
                 const reset = toInitialObject(
-                  keys[parseInt(payloadCustomForm.customform) - 1]
+                  keys[parseInt(payloadCustomForm.customform) - 1],
                 );
                 setPayloadDetailInit(reset);
                 applyDetail.current = [];
@@ -1005,7 +1004,7 @@ export default function AgreementEdit() {
 
   function handleDeleteDetail(record) {
     setPayloadDetail((prev) =>
-      prev.filter((item) => item.itemid !== record.itemid)
+      prev.filter((item) => item.itemid !== record.itemid),
     );
   }
 

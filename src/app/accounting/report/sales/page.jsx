@@ -1,16 +1,7 @@
 "use client";
 import Layout from "@/components/accounting/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
-import {
-  Modal,
-  Pagination,
-  Table,
-  Select,
-  DatePicker,
-  Input,
-  Button,
-} from "antd";
+import { Pagination, Table, Select, DatePicker, Input, Button } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -22,11 +13,10 @@ import CustomerFetch from "@/modules/salesApi/customer";
 import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { salesReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
-import ExportSalesReport from "@/components/superAdmin/ExportSalesReport";
 import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 const { Search } = Input;
 
@@ -37,10 +27,10 @@ function SalesOrder() {
   const { RangePicker } = DatePicker;
 
   const [page, setPage] = useState(
-    parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10)
+    parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10),
   );
   const [limit, setLimit] = useState(
-    parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10)
+    parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10),
   );
 
   const [datas, setDatas] = useState([]);
@@ -80,31 +70,30 @@ function SalesOrder() {
           filters.dateRange[1],
           filters.itemprocessfamily,
           filters.salesrep,
-          filters.displayname
+          filters.displayname,
         );
 
         const resData = getResponseHandler(response, notify);
 
-if (resData) {
-  const updateData =
-    resData?.list.map((item, i) => ({
-      no: i + 1,
-      ...item,
-    })) || [];
+        if (resData) {
+          const updateData =
+            resData?.list.map((item, i) => ({
+              no: i + 1,
+              ...item,
+            })) || [];
 
-  setDatas(updateData);
-  setTotalItems(resData.total_items);
-  setTableKeys(
-    updateData.length > 0
-      ? Object.keys(updateData[0]).filter((key) => key !== "id")
-      : []
-  );
-} else {
-  setDatas([]);
-  setTotalItems(0);
-  setTableKeys([]);
-}
-
+          setDatas(updateData);
+          setTotalItems(resData.total_items);
+          setTableKeys(
+            updateData.length > 0
+              ? Object.keys(updateData[0]).filter((key) => key !== "id")
+              : [],
+          );
+        } else {
+          setDatas([]);
+          setTotalItems(0);
+          setTableKeys([]);
+        }
       } catch (error) {
         notify("error", "Error", error?.message || "Internal Server error");
       } finally {
@@ -301,7 +290,7 @@ if (resData) {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/accounting/report/${title}?page=${newPage}&limit=${newLimit}`
+                    `/accounting/report/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

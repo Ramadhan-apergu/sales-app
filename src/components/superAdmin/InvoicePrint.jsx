@@ -226,7 +226,9 @@ export default function InvoicePrint({ data, dataTable }) {
           <p className="break-words whitespace-normal w-[7%] text-right"></p>
           <p className="break-words whitespace-normal w-[28%]"></p>
           <p className="border-b border-x break-words whitespace-normal w-[10%] text-right">
-            {count.quantity}
+            {(
+              Math.round((count.quantity + Number.EPSILON) * 100) / 100
+            ).toFixed(2)}
           </p>
           <p className="break-words whitespace-normal w-[10%] text-right"></p>
           <p className="break-words whitespace-normal w-[14%] text-right"></p>

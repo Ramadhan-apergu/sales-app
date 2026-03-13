@@ -1,23 +1,8 @@
 "use client";
-import Layout from "@/components/salesIndoor/Layout";
-import {
-  EditOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { UnorderedListOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-} from "antd";
+import { Button, Pagination, Table, Tag, Select } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -25,21 +10,18 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
-import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import InvoiceFetch from "@/modules/salesApi/invoice";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function DeliveryOrder() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
@@ -49,9 +31,7 @@ function DeliveryOrder() {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
-  const [dateRange, setDateRange] = useState(["", ""]);
   const title = "invoice";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -65,7 +45,7 @@ function DeliveryOrder() {
           page,
           limit,
           statusFilter,
-          searchName
+          searchName,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -115,61 +95,6 @@ function DeliveryOrder() {
 
     fetchData();
   }, []);
-
-  const handleEdit = (record) => {
-    router.push(`/sales-indoor/transaction/${title}/${record.id}/edit`);
-  };
-
-  const handleStatusChange = ({ key }) => {
-    dropdownItems.forEach((item) => {
-      if (item.key == key) {
-        const label = item.label.toLocaleLowerCase();
-        if (label != statusFilter.toLocaleLowerCase()) {
-          switch (label) {
-            case "all status":
-              setStatusFilter("all");
-              break;
-            // case 'pending approval':
-            //     setStatusFilter('pending')
-            //     break;
-            default:
-              setStatusFilter(item.label);
-          }
-        }
-      }
-    });
-  };
-
-  const dropdownItems = [
-    {
-      key: "1",
-      label: "All Status",
-    },
-    {
-      key: "2",
-      label: "Open",
-    },
-    {
-      key: "3",
-      label: "Fulfilled ",
-    },
-    {
-      key: "4",
-      label: "Partially Fulfilled",
-    },
-    {
-      key: "5",
-      label: "Credit Hold",
-    },
-    {
-      key: "6",
-      label: "Closed",
-    },
-    {
-      key: "7",
-      label: "Pending Approval",
-    },
-  ];
 
   const columns = [
     {
@@ -310,7 +235,7 @@ function DeliveryOrder() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/transaction/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

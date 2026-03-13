@@ -3,7 +3,10 @@
 import { Select, Spin } from "antd";
 import { useEffect, useState, useCallback, useRef } from "react";
 import CustomerFetch from "@/modules/salesApi/customer";
-import { getResponseHandler } from "@/utils/responseHandlers";
+import {
+  getByIdResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
 import useNotification from "@/hooks/useNotification";
 import debounce from "lodash.debounce";
 
@@ -18,6 +21,7 @@ export default function FilterCustomer({
   showLabel = true,
   allowClear = true,
   placeholder = "Select a customer",
+  ...props
 }) {
   const { notify } = useNotification();
 
@@ -30,21 +34,25 @@ export default function FilterCustomer({
   const limit = 50;
   const isFetchingRef = useRef(false);
 
+  /**
+   * Fetch customer list
+   */
   const fetchCustomers = async (pageNum = 1, keyword = "", append = false) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
     try {
       setIsLoading(true);
+
       const response = await CustomerFetch.get(pageNum, limit, null, keyword);
       const resData = getResponseHandler(response, notify);
 
       if (resData) {
         const mapped = resData.list.map((data) => ({
-          value: data.customerid,
+          value: data.id, // primary key
           label: data.customerid || data.companyname,
+          customerid: data.customerid,
           companyname: data.companyname,
-          id: data.id,
         }));
 
         setOptions((prev) => (append ? [...prev, ...mapped] : mapped));
@@ -59,35 +67,85 @@ export default function FilterCustomer({
     }
   };
 
-  // Initial load
+  /**
+   * Fetch customer by id
+   */
+  const fetchCustomerById = async (id) => {
+    try {
+      const response = await CustomerFetch.getById(id);
+      const resData = getByIdResponseHandler(response, notify);
+
+      if (resData) {
+        const mapped = {
+          value: resData.id,
+          label: resData.customerid || resData.companyname,
+          customerid: resData.customerid,
+          companyname: resData.companyname,
+        };
+
+        setOptions((prev) => {
+          const exists = prev.some((opt) => opt.value === mapped.value);
+          if (exists) return prev;
+
+          return [mapped, ...prev];
+        });
+      }
+    } catch (err) {
+      notify("error", "Error", err?.message || "Failed to fetch customer");
+    }
+  };
+
+  /**
+   * Initial load
+   */
   useEffect(() => {
     fetchCustomers(1);
   }, []);
 
-  // Handle scroll to bottom for infinite load
+  /**
+   * Ensure selected value exists in options
+   */
+  useEffect(() => {
+    if (!value) return;
+
+    const exists = options.some((opt) => opt.value === value);
+
+    if (!exists) {
+      fetchCustomerById(value);
+    }
+  }, [value]);
+
+  /**
+   * Infinite scroll
+   */
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
+
     const isBottom = scrollTop + clientHeight >= scrollHeight - 10;
 
     if (isBottom && hasMore && !isLoading) {
       const nextPage = page + 1;
+
       setPage(nextPage);
+
       fetchCustomers(nextPage, searchTerm, true);
     }
   };
 
-  // Debounced search
+  /**
+   * Debounced search
+   */
   const debouncedSearch = useCallback(
     debounce((word) => {
       setPage(1);
       fetchCustomers(1, word, false);
     }, 500),
-    []
+    [],
   );
 
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    debouncedSearch(value);
+  const handleSearch = (val) => {
+    setSearchTerm(val);
+    debouncedSearch(val);
   };
 
   return (
@@ -106,14 +164,16 @@ export default function FilterCustomer({
         onChange={onChange}
         onSearch={handleSearch}
         onPopupScroll={handleScroll}
-        filterOption={false} // supaya tidak filter client-side
+        filterOption={false}
         notFoundContent={isLoading ? <Spin size="small" /> : "No data"}
         loading={isLoading && options.length === 0}
         options={options}
         style={{ minWidth: 250 }}
+        {...props}
         popupRender={(menu) => (
           <>
             {menu}
+
             {isLoading && options.length > 0 && (
               <div className="text-center py-2 text-gray-500 text-sm">
                 <Spin size="small" /> Loading more...

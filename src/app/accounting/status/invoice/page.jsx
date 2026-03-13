@@ -1,23 +1,9 @@
 "use client";
 import Layout from "@/components/accounting/Layout";
-import {
-  DownloadOutlined,
-  EditOutlined,
-  FilterOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-} from "antd";
+import { Modal, Pagination, Table, Tag, Select, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -25,18 +11,16 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import useNavigateWithParams from "@/hooks/useNavigateWithParams";
 import dayjs from "dayjs";
 import Search from "antd/es/input/Search";
-import DeliveryStatusFetch from "@/modules/salesApi/report/deliveryStatus";
 import InvoiceStatusFetch from "@/modules/salesApi/report/invoiceStatus";
 import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -58,11 +42,9 @@ function SalesOrder() {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [modal, contextHolder] = Modal.useModal();
   const [searchName, setSearchName] = useState("");
   const [searchDoc, setSearchDoc] = useState(doc_numb);
-  const [dateRange, setDateRange] = useState(["", ""]);
-  const title = "delivery-order";
+  const title = "invoice";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
 
@@ -75,11 +57,11 @@ function SalesOrder() {
 
         const page = parseInt(
           searchParams.get("page") || `${DEFAULT_PAGE}`,
-          10
+          10,
         );
         const limit = parseInt(
           searchParams.get("limit") || `${DEFAULT_LIMIT}`,
-          10
+          10,
         );
         const customer = searchParams.get("customer");
         const startdate = searchParams.get("startdate");
@@ -94,7 +76,7 @@ function SalesOrder() {
           startdate,
           enddate,
           doc_numb,
-          status
+          status,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -104,7 +86,7 @@ function SalesOrder() {
             resData.list.map((item, i) => ({
               ...item,
               key: i,
-            }))
+            })),
           );
           setTotalItems(resData.total_items);
         }
@@ -157,10 +139,6 @@ function SalesOrder() {
     fetchData();
   }, []);
 
-  const handleEdit = (record) => {
-    router.push(`/accounting/transaction/${title}/${record.id}/edit`);
-  };
-
   const baseUrl = "/accounting/status/invoice";
 
   const columns = [
@@ -175,11 +153,11 @@ function SalesOrder() {
       dataIndex: "doc_numb",
       key: "doc_numb",
       fixed: isLargeScreen ? "left" : "",
-      //   render: (text, record) => (
-      //     <Link href={`/accounting/status/${title}/${record.delivery_id}`}>
-      //       {text || "-"}
-      //     </Link>
-      //   ),
+      render: (text, record) => (
+        <Link href={`/accounting/transaction/${title}/${record.invoice_id}`}>
+          {text || "-"}
+        </Link>
+      ),
     },
     {
       title: "Customer Name",
@@ -190,16 +168,16 @@ function SalesOrder() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (text, record) => (
+      render: (text) => (
         <Tag
           color={
             ["paid in full"].includes(text ? text.toLowerCase() : "-")
               ? "green"
               : ["partially paid"].includes(text ? text.toLowerCase() : "-")
-              ? "orange"
-              : ["duedate"].includes(text ? text.toLowerCase() : "-")
-              ? "red"
-              : "default"
+                ? "orange"
+                : ["duedate"].includes(text ? text.toLowerCase() : "-")
+                  ? "red"
+                  : "default"
           }
         >
           {text}

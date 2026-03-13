@@ -1,33 +1,9 @@
 "use client";
 
-import React, {
-  memo,
-  Suspense,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tooltip,
-} from "antd";
+import { Suspense, useEffect, useReducer, useState } from "react";
+import { Button, Checkbox, Divider, Modal, Table } from "antd";
 import Layout from "@/components/accounting/Layout";
-import {
-  CheckOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -40,9 +16,7 @@ import {
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+
 import dayjs from "dayjs";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import SalesOrderSelect from "./SalesOrderSelect";
@@ -341,6 +315,18 @@ function Enter({ salesOrderId }) {
 
       if (fulfillment_items.length == 0) {
         notify("error", "Error", "Select at least one item.");
+        return;
+      }
+
+      if (
+        new Date(payloadToInsert.trandate).toDateString() <
+        new Date(dataSalesOrder.trandate).toDateString()
+      ) {
+        notify(
+          "error",
+          "Error",
+          "Delivery Order date cannot be earlier than the Sales Order date.",
+        );
         return;
       }
 

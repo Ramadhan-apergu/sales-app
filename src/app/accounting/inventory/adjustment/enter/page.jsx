@@ -1,43 +1,22 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Modal, Select, Table } from "antd";
 import Layout from "@/components/accounting/Layout";
-import {
-  CheckOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import CustomerFetch from "@/modules/salesApi/customer";
 import {
   createResponseHandler,
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
-import { salesOrderAliases, stockAdjustmentAliases } from "@/utils/aliases";
+import { stockAdjustmentAliases } from "@/utils/aliases";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 
 function formatRupiah(number) {
@@ -55,11 +34,7 @@ function formatRupiah(number) {
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
     ...keys.map((key) => {
-      if (
-        [
-            "price"
-        ].includes(key)
-      ) {
+      if (["price"].includes(key)) {
         return {
           title: aliases?.[key] || key,
           dataIndex: key,
@@ -104,7 +79,6 @@ export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const [modal, contextHolder] = Modal.useModal();
   const title = "adjustment";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
@@ -211,7 +185,7 @@ export default function Enter() {
     }
 
     const isDuplicate = state.stock_opname_det.some(
-      (tableItem) => tableItem.itemid === itemTableTemp.itemid
+      (tableItem) => tableItem.itemid === itemTableTemp.itemid,
     );
 
     if (isDuplicate) {
@@ -219,7 +193,7 @@ export default function Enter() {
       return;
     }
 
-   /*if (itemTableTemp.qty <= 0) {
+    /*if (itemTableTemp.qty <= 0) {
       notify("error", "Error", "Please enter a quantity greater than 0.");
       return;
     }*/
@@ -236,7 +210,7 @@ export default function Enter() {
     dispatch({
       type: "SET_STOCK",
       payload: state.stock_opname_det.filter(
-        (item) => item.itemid !== record.itemid
+        (item) => item.itemid !== record.itemid,
       ),
     });
   }
@@ -403,7 +377,7 @@ export default function Enter() {
                     optionFilterProp="label"
                     onChange={(_, item) => {
                       const isDuplicate = state.stock_opname_det.some(
-                        (tableItem) => tableItem.itemid === item.value
+                        (tableItem) => tableItem.itemid === item.value,
                       );
 
                       if (isDuplicate) {
@@ -498,7 +472,7 @@ export default function Enter() {
                     isAlias: true,
                     isRead: true,
                     disabled: true,
-                    accounting: true
+                    accounting: true,
                   },
                 ]}
                 aliases={stockAdjustmentAliases.adjustment}

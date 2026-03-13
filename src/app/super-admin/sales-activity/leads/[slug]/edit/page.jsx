@@ -1,54 +1,25 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Empty,
-  Form,
-  Input,
-  InputNumber,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tag,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Form, Select } from "antd";
 import Layout from "@/components/superAdmin/Layout";
-import {
-  CheckOutlined,
-  CloseOutlined,
-  EditOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  SaveOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CloseOutlined, SaveOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import CustomerFetch from "@/modules/salesApi/customer";
 import {
-  createResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
+
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
-import PaymentFetch from "@/modules/salesApi/payment";
-import { leadAliases, paymentAliases, targetAliases } from "@/utils/aliases";
-import { formatDateToShort } from "@/utils/formatDate";
-import { formatRupiah } from "@/utils/formatRupiah";
-import TargetFetch from "@/modules/salesApi/crm/target";
+
+import { leadAliases } from "@/utils/aliases";
+
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
 import UserManageFetch from "@/modules/salesApi/userManagement";
@@ -79,7 +50,6 @@ export default function Enter() {
       owner: "",
       phone: "",
       state: "",
-      name: "",
     },
     payloadUser: {
       owner: "",
@@ -163,7 +133,6 @@ export default function Enter() {
         stageid: data.stageid,
         state: data.state,
         status: data.status,
-        name: data.name,
       },
     });
     dispatch({
@@ -243,7 +212,7 @@ export default function Enter() {
         0,
         10000,
         "active",
-        roleSelected
+        roleSelected,
       );
       const resData = getResponseHandler(response);
       if (resData) {

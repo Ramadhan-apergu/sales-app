@@ -1,17 +1,9 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-} from "antd";
+import { Button, Modal, Pagination, Table, Select, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -22,11 +14,10 @@ import { getResponseHandler } from "@/utils/responseHandlers";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import CustomerRefundFetch from "@/modules/salesApi/customerRefund";
-import Search from "antd/es/input/Search";
 import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function List() {
   const searchParams = useSearchParams();
@@ -139,7 +130,7 @@ function List() {
       title: "Amount",
       dataIndex: "amount",
       key: "amount",
-      render: (text) => formatRupiah(text)
+      render: (text) => formatRupiah(text),
     },
 
     {

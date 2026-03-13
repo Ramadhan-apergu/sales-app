@@ -3,26 +3,12 @@ import Layout from "@/components/superAdmin/Layout";
 import {
   ArrowRightOutlined,
   CheckOutlined,
-  DeliveredProcedureOutlined,
   EditOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  RightOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-  Checkbox,
-} from "antd";
+import { Button, Modal, Pagination, Table, Tag, Select, Checkbox } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -30,39 +16,31 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import {
-  createResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
-import CustomerFetch from "@/modules/salesApi/customer";
-import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
+
 import PaymentFetch from "@/modules/salesApi/payment";
 import { formatRupiahAccounting } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function Payment() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { RangePicker } = DatePicker;
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
 
   const [datas, setDatas] = useState([]);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilterFrom, setStatusFilterFrom] = useState("Undeposited");
   const [statusFilterTo, setStatusFilterTo] = useState("Deposited");
   const [modal, contextHolder] = Modal.useModal();
-  const [searchName, setSearchName] = useState("");
-  const [dateRange, setDateRange] = useState(["", ""]);
   const title = "payment";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -99,7 +77,7 @@ function Payment() {
 
   const handleSelect = (id, checked) => {
     setIdsSelected((prev) =>
-      checked ? [...prev, id] : prev.filter((item) => item !== id)
+      checked ? [...prev, id] : prev.filter((item) => item !== id),
     );
   };
 
@@ -175,14 +153,14 @@ function Payment() {
         <Tag
           color={
             ["payment received", "deposited"].includes(
-              record.status.toLowerCase()
+              record.status.toLowerCase(),
             )
               ? "green"
               : ["undeposited"].includes(record.status.toLowerCase())
-              ? "orange"
-              : [""].includes(record.status.toLowerCase())
-              ? "red"
-              : "default"
+                ? "orange"
+                : [""].includes(record.status.toLowerCase())
+                  ? "red"
+                  : "default"
           }
         >
           {text}
@@ -242,7 +220,7 @@ function Payment() {
       const response = await PaymentFetch.bulkUpdateStatus(payload);
 
       const resData = updateResponseHandler(response, notify);
-      console.log(resData)
+      console.log(resData);
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
@@ -297,12 +275,10 @@ function Payment() {
                 onChange={(e) => {
                   setStatusFilterFrom(e);
                   setStatusFilterTo(
-                    e == "Undeposited" ? "Deposited" : "Undeposited"
+                    e == "Undeposited" ? "Deposited" : "Undeposited",
                   );
                 }}
-                options={[
-                  { value: "Undeposited", label: "Undeposited" },
-                ]}
+                options={[{ value: "Undeposited", label: "Undeposited" }]}
                 style={{ minWidth: "200px", whiteSpace: "nowrap" }}
                 // dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
                 dropdownAlign={{ points: ["tr", "br"] }}
@@ -319,12 +295,10 @@ function Payment() {
                   onChange={(e) => {
                     setStatusFilterTo(e);
                     setStatusFilterFrom(
-                      e == "Undeposited" ? "Deposited" : "Undeposited"
+                      e == "Undeposited" ? "Deposited" : "Undeposited",
                     );
                   }}
-                  options={[
-                    { value: "Deposited", label: "Deposited" },
-                  ]}
+                  options={[{ value: "Deposited", label: "Deposited" }]}
                   style={{ minWidth: "200px", whiteSpace: "nowrap" }}
                   // dropdownStyle={{ minWidth: "100px", whiteSpace: "nowrap" }}
                   dropdownAlign={{ points: ["tr", "br"] }}
@@ -353,7 +327,7 @@ function Payment() {
                   defaultCurrent={page}
                   onChange={(newPage, newLimit) => {
                     router.push(
-                      `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                      `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`,
                     );
                   }}
                   size="small"

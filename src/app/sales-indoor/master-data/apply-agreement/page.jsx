@@ -1,15 +1,13 @@
 "use client";
 
 import Layout from "@/components/salesIndoor/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import AgreementFetch from "@/modules/salesApi/agreement";
-import { Button, Dropdown, Modal, Pagination, Table, Tag } from "antd";
+import { Button, Modal, Pagination, Table } from "antd";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { formatDateToShort } from "@/utils/formatDate";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
@@ -17,14 +15,13 @@ import { getResponseHandler } from "@/utils/responseHandlers";
 import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function Agreement() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isLargeScreen = useBreakpoint("lg");
-  const { containerRef, containerHeight } = useContainerHeight();
 
   const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
@@ -32,7 +29,6 @@ function Agreement() {
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("all");
   const [modal, contextHolder] = Modal.useModal();
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -48,7 +44,7 @@ function Agreement() {
         const response = await AgreementFetch.getAgreementApply(
           page,
           limit,
-          searchCust
+          searchCust,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -67,27 +63,11 @@ function Agreement() {
     fetchData();
   }, [page, limit, pathname, searchCust]);
 
-  const dropdownItems = [
-    { key: "1", label: "All Status" },
-    { key: "2", label: "Active" },
-    { key: "3", label: "Inactive" },
-  ];
-
-  const handleStatusChange = ({ key }) => {
-    const selected = dropdownItems.find((item) => item.key === key);
-    if (selected) {
-      const label = selected.label.toLowerCase();
-      if (label !== statusFilter.toLowerCase()) {
-        setStatusFilter(label === "all status" ? "all" : label);
-      }
-    }
-  };
-
   const handleEdit = (record) => {
     router.push(
       `/sales-indoor/master-data/${title}/${
         encodeURIComponent(record.customercode) || ""
-      }/edit`
+      }/edit`,
     );
   };
 
@@ -198,7 +178,7 @@ function Agreement() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/master-data/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/master-data/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

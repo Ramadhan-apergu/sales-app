@@ -1,26 +1,14 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-} from "antd";
+import { Modal, Pagination, Table, Tag, Select, DatePicker } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
-import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import useNavigateWithParams from "@/hooks/useNavigateWithParams";
@@ -31,7 +19,7 @@ import InputForm from "@/components/superAdmin/InputForm";
 import { deliveryStatusAliases } from "@/utils/aliases";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function SalesOrder() {
   const searchParams = useSearchParams();
@@ -57,7 +45,6 @@ function SalesOrder() {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [searchName, setSearchName] = useState("");
   const [searchSoNumb, setSearchSoNumb] = useState(so_numb);
-  const [dateRange, setDateRange] = useState(["", ""]);
   const title = "delivery-order";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -71,11 +58,11 @@ function SalesOrder() {
 
         const page = parseInt(
           searchParams.get("page") || `${DEFAULT_PAGE}`,
-          10
+          10,
         );
         const limit = parseInt(
           searchParams.get("limit") || `${DEFAULT_LIMIT}`,
-          10
+          10,
         );
         const customer = searchParams.get("customer");
         const startdate = searchParams.get("startdate");
@@ -88,7 +75,7 @@ function SalesOrder() {
           customer,
           startdate,
           enddate,
-          so_numb
+          so_numb,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -98,7 +85,7 @@ function SalesOrder() {
             resData.list.map((item, i) => ({
               ...item,
               key: i,
-            }))
+            })),
           );
           setTotalItems(resData.total_items);
         }
@@ -167,10 +154,6 @@ function SalesOrder() {
     fetchData();
   }, []);
 
-  const handleEdit = (record) => {
-    router.push(`/sales-indoor/transaction/${title}/${record.id}/edit`);
-  };
-
   const baseUrl = "/sales-indoor/status/delivery";
 
   const columns = [
@@ -205,18 +188,18 @@ function SalesOrder() {
         <Tag
           color={
             ["open", "fulfilled", "closed"].includes(
-              record.so_status ? record.so_status.toLowerCase() : ""
+              record.so_status ? record.so_status.toLowerCase() : "",
             )
               ? "green"
               : ["partially fulfilled", "pending approval"].includes(
-                  record.so_status ? record.so_status.toLowerCase() : ""
-                )
-              ? "orange"
-              : ["credit hold", "canceled"].includes(
-                  record.so_status ? record.so_status.toLowerCase() : ""
-                )
-              ? "red"
-              : "default"
+                    record.so_status ? record.so_status.toLowerCase() : "",
+                  )
+                ? "orange"
+                : ["credit hold", "canceled"].includes(
+                      record.so_status ? record.so_status.toLowerCase() : "",
+                    )
+                  ? "red"
+                  : "default"
           }
         >
           {text}

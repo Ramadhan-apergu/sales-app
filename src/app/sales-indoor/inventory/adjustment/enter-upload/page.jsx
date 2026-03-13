@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import { useState } from "react";
 import { Button, Flex, Table, Tag } from "antd";
 import Layout from "@/components/salesIndoor/Layout";
 import {
@@ -30,7 +30,7 @@ function TableCustom({ data, aliases }) {
 
   // Ambil keys TANPA is_valid
   const filteredKeys = keys.filter(
-    (key) => key !== "is_valid" && key !== "messages"
+    (key) => key !== "is_valid" && key !== "messages",
   );
 
   // Kolom data normal
@@ -101,7 +101,7 @@ export default function Enter() {
         notify(
           "error",
           "Invalid File",
-          "Only Excel (.xlsx) files are allowed."
+          "Only Excel (.xlsx) files are allowed.",
         );
         return Upload.LIST_IGNORE;
       }
@@ -123,14 +123,14 @@ export default function Enter() {
           // Validasi header
           const fileHeaders = Object.keys(json[0]);
           const missingHeaders = allowedHeaders.filter(
-            (header) => !fileHeaders.includes(header)
+            (header) => !fileHeaders.includes(header),
           );
 
           if (missingHeaders.length > 0) {
             notify(
               "error",
               "Invalid Header",
-              `Please use the provided template.`
+              `Please use the provided template.`,
             );
             return;
           }
@@ -141,7 +141,7 @@ export default function Enter() {
 
           if (checkData) {
             const checkMap = new Map(
-              checkData.map((item) => [item.itemid, item])
+              checkData.map((item) => [item.itemid, item]),
             );
 
             updateJson = json.map((item, i) => {
@@ -219,7 +219,7 @@ export default function Enter() {
       notify(
         "error",
         "Invalid",
-        "Invalid or duplicate item found. Please check the table."
+        "Invalid or duplicate item found. Please check the table.",
       );
       return;
     }

@@ -1,9 +1,8 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
@@ -20,16 +19,13 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
-import PaymentFetch from "@/modules/salesApi/payment";
-import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 import RmaFetch from "@/modules/salesApi/rma";
 import { formatRupiah } from "@/utils/formatRupiah";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function List() {
   const searchParams = useSearchParams();

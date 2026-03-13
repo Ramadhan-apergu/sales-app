@@ -1,19 +1,9 @@
 "use client";
 
-import React, { useEffect, useReducer, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Divider,
-  Form,
-  Input,
-  Select,
-  Table,
-  Tag,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Form, Input, Table, Tag } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
-  CheckOutlined,
   DeliveredProcedureOutlined,
   EditOutlined,
   UnorderedListOutlined,
@@ -25,12 +15,10 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import CustomerFetch from "@/modules/salesApi/customer";
 import {
-  createResponseHandler,
   getResponseHandler,
   updateResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import dayjs from "dayjs";
 import { rmaAliases } from "@/utils/aliases";
 import { formatDateToShort } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
@@ -40,7 +28,6 @@ function TableCustom({
   data,
   keys,
   aliases,
-  onChange,
   checkbox,
   keyRow,
   onDelete = null,
@@ -136,7 +123,6 @@ export default function Enter() {
   const [dataCustomerInv, setDataCustomerInv] = useState([]);
 
   const [dataInvItem, setDataInvItem] = useState([]);
-  const [invItemSelected, setInvItemSelected] = useState({});
 
   const [data, setData] = useState([]);
 
@@ -179,22 +165,6 @@ export default function Enter() {
     }
   }
 
-  async function fetchCustomerInvItem(invId) {
-    try {
-      const response = await RmaFetch.getInvoiceCustomerItem(invId);
-      const resData = getResponseHandler(response, notify);
-
-      if (resData) {
-        return resData;
-      } else {
-        return [];
-      }
-    } catch (error) {
-      notify("error", "Error", "Failed get data customer invoice item");
-      return [];
-    }
-  }
-
   async function fetchRma(id) {
     try {
       const response = await RmaFetch.getById(id);
@@ -227,9 +197,9 @@ export default function Enter() {
     const resDataInv = await fetchCustomerInv(data.entity);
     setDataCustomerInv(resDataInv);
 
-    const resDataItem = await fetchCustomerInvItem(data.invoiceid);
+    // const resDataItem = await fetchCustomerInvItem(data.invoiceid);
 
-    setDataInvItem(resDataItem);
+    setDataInvItem(data.rma_items);
 
     const entity =
       dataCustomer.find((customer) => customer.id == data.entity)
@@ -299,56 +269,6 @@ export default function Enter() {
     "taxvalue",
     "isfree",
   ];
-
-  const [isModalItemOpen, setIsModalItemOpen] = useState(false);
-
-  const [dataInvoiceCustomer, setDataInvoiceCustomer] = useState([]);
-
-  const handleSubmit = async () => {
-    setIsLoadingSubmit(true);
-    try {
-      let payloadToInsert = {
-        ...state.payloadPrimary,
-        rma_items: [...dataInvItem.filter((inv) => inv.ischecked == true)].map(
-          (inv) => {
-            let updateInv = inv;
-            delete updateInv.ischecked;
-            return updateInv;
-          },
-        ),
-      };
-
-      if (!payloadToInsert.rma_items.length) {
-        throw new Error("At least one item is required!");
-      }
-
-      payloadToInsert = {
-        ...payloadToInsert,
-        entity: form.getFieldValue("customer"),
-        invoiceid: form.getFieldValue("invoice"),
-      };
-
-      if (!payloadToInsert.entity) {
-        throw new Error("Customer is required!");
-      }
-
-      if (!payloadToInsert.invoiceid) {
-        throw new Error("Invoice is required!");
-      }
-
-      const response = await RmaFetch.update(slug, payloadToInsert);
-
-      const resData = updateResponseHandler(response, notify);
-
-      if (resData) {
-        router.push(`/super-admin/transaction/rma/${resData}`);
-      }
-    } catch (error) {
-      notify("error", "Error", error.message || "Internal server error");
-    } finally {
-      setIsLoadingSubmit(false);
-    }
-  };
 
   const handleChecked = (data, ischecked) => {
     setDataInvItem((prev) => {
@@ -438,9 +358,7 @@ export default function Enter() {
                 type={"primary"}
                 onClick={() => {
                   router.push(
-                    `/super-admin/transaction/rma/${
-                      data?.id || ""
-                    }/edit`,
+                    `/super-admin/transaction/rma/${data?.id || ""}/edit`,
                   );
                 }}
                 disabled={data?.status?.toLowerCase() == "received"}

@@ -1,19 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button, Divider, Dropdown, Modal, Table, Tag } from "antd";
+import { useEffect, useState } from "react";
+import { Button, Divider, Table, Tag } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
-import { customerAliases, stockAdjustmentAliases } from "@/utils/aliases";
+import { stockAdjustmentAliases } from "@/utils/aliases";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import { getByIdResponseHandler } from "@/utils/responseHandlers";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
-import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 
 export default function Detail() {
@@ -24,7 +23,6 @@ export default function Detail() {
   const { slug } = useParams();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -67,7 +65,7 @@ export default function Detail() {
   };
 
   const [general, setGeneral] = useState(
-    Object.fromEntries(fieldGroups.general.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.general.map((key) => [key, ""])),
   );
 
   function mapingGroup(data) {
@@ -191,7 +189,7 @@ function TableCustom({ data, keys, aliases }) {
   // Hitung data yang akan ditampilkan di halaman aktif
   const paginatedData = data.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   );
 
   // Buat columns secara dinamis

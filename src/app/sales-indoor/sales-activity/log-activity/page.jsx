@@ -1,15 +1,12 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
   Pagination,
-  Table,
-  Tag,
   Select,
   DatePicker,
   List,
@@ -24,20 +21,13 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
-import CustomerFetch from "@/modules/salesApi/customer";
-import InvoiceFetch from "@/modules/salesApi/invoice";
-import { formatRupiah, formatRupiahAccounting } from "@/utils/formatRupiah";
-import TargetFetch from "@/modules/salesApi/crm/target";
-import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
+import { formatDateTimeToShort } from "@/utils/formatDate";
 import LogActivityFetch from "@/modules/salesApi/crm/logActivity";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 const { Text } = Typography;
-const { Search } = Input;
 
 function Activity() {
   const searchParams = useSearchParams();
@@ -68,7 +58,7 @@ function Activity() {
           page,
           limit,
           leadName,
-          logType
+          logType,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -216,7 +206,7 @@ function Activity() {
                           dangerouslySetInnerHTML={{
                             __html: item.activitylog.replace(
                               /\\u003cbr\\u003e/g,
-                              "<br/>"
+                              "<br/>",
                             ),
                           }}
                         />
@@ -241,7 +231,7 @@ function Activity() {
                 size="small"
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/sales-activity/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/sales-activity/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
               />

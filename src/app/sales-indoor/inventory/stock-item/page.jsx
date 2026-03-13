@@ -1,31 +1,18 @@
 "use client";
 import Layout from "@/components/salesIndoor/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Table,
-  Tag,
-  Select,
-  DatePicker,
-  Input,
-} from "antd";
+import { Pagination, Table, Input } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
-import Link from "next/link";
 import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import UserManageFetch from "@/modules/salesApi/userManagement";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function StockItem() {
   const searchParams = useSearchParams();
@@ -39,8 +26,6 @@ function StockItem() {
   const [datas, setDatas] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [modal, contextHolder] = Modal.useModal();
   const [searchItem, setSearchItem] = useState("");
   const [searchItemTemp, setSearchItemTemp] = useState("");
   const [searchItemProcess, setSearchItemProcess] = useState("");
@@ -59,7 +44,7 @@ function StockItem() {
           limit,
           searchItem,
           null,
-          searchItemProcess
+          searchItemProcess,
         );
 
         const resData = getResponseHandler(response, notify);
@@ -232,7 +217,7 @@ function StockItem() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/sales-indoor/inventory/${title}?page=${newPage}&limit=${newLimit}`
+                    `/sales-indoor/inventory/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

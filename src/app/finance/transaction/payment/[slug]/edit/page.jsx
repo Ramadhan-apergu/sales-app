@@ -1,27 +1,19 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import {
   Button,
   Checkbox,
-  Collapse,
   Divider,
-  Empty,
   Form,
   Input,
   InputNumber,
-  List,
-  Modal,
   Select,
   Table,
-  Tooltip,
 } from "antd";
 import Layout from "@/components/finance/Layout";
 import {
-  CheckOutlined,
   CloseOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
   SaveOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -36,9 +28,7 @@ import {
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
+
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
@@ -169,7 +159,6 @@ export default function Details() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const [modal, contextHolder] = Modal.useModal();
   const title = "payment";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const { slug } = useParams();
@@ -177,9 +166,6 @@ export default function Details() {
   const [dataCustomer, setDataCustomer] = useState([]);
   const [customerSelected, setCustomerSelected] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-
-  const [dataItem, setDataItem] = useState([]);
-  const [itemSelected, setItemSelected] = useState(null);
 
   const [data, setData] = useState(null);
 
@@ -218,7 +204,7 @@ export default function Details() {
           });
           setDataCustomer(addLabelCustomer);
           const findCustomer = addLabelCustomer.find(
-            (customer) => customer.id == data.customer
+            (customer) => customer.id == data.customer,
           );
           setCustomerSelected(findCustomer);
         }
@@ -410,7 +396,7 @@ export default function Details() {
     try {
       const invoiceApplied = data.payment_applies.map((item) => item.invoiceid);
       const response = await PaymentFetch.getInvoiceCustomer(
-        data.customer || ""
+        data.customer || "",
       );
       const resData = getResponseHandler(response);
 
@@ -428,7 +414,7 @@ export default function Details() {
         })) || [];
 
       mappedItems = mappedItems.filter(
-        (item) => !invoiceApplied.includes(item.invoiceid)
+        (item) => !invoiceApplied.includes(item.invoiceid),
       );
 
       dispatch({
@@ -480,7 +466,7 @@ export default function Details() {
         ];
       } else {
         updatedData = updatedData.filter(
-          (item) => item.invoiceid !== data.invoiceid
+          (item) => item.invoiceid !== data.invoiceid,
         );
       }
 
@@ -531,7 +517,7 @@ export default function Details() {
               amount: Number(amount) || 0,
               due: (Number(item.total) || 0) - (Number(amount) || 0),
             }
-          : item
+          : item,
     );
 
     dispatch({
@@ -582,6 +568,20 @@ export default function Details() {
         throw new Error("Payment Option is required!");
       }
 
+      if (
+        payloadToInsert.paymentoption == "giro" &&
+        !payloadToInsert.giroduedate
+      ) {
+        throw new Error("Giro Duedate is required!");
+      }
+
+      if (
+        payloadToInsert.paymentoption == "giro" &&
+        !payloadToInsert.gironumber
+      ) {
+        throw new Error("Giro Number is required!");
+      }
+
       const updatePaymentApplies = state.payloadPaymentApplies.map((item) => {
         let updateItem = item;
         delete updateItem.ischecked;
@@ -613,7 +613,7 @@ export default function Details() {
 
     const totalAmount = dataInvoiceApply.reduce(
       (sum, item) => sum + (Number(item.amount) || 0),
-      0
+      0,
     );
 
     dispatch({

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Divider, Dropdown, Modal, Table, Tag } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
@@ -10,12 +10,7 @@ import {
 } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
-import CustomerFetch from "@/modules/salesApi/customer";
-import {
-  agreementAliases,
-  customerAliases,
-  itemAliases,
-} from "@/utils/aliases";
+import { agreementAliases } from "@/utils/aliases";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import InputForm from "@/components/superAdmin/InputForm";
 import {
@@ -36,7 +31,7 @@ function TableCustom({ data, keys, aliases, agreementtype }) {
   // Hitung data yang akan ditampilkan di halaman aktif
   const paginatedData = data.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   );
 
   // Buat columns secara dinamis
@@ -199,13 +194,13 @@ export default function Detail() {
   };
 
   const [general, setGeneral] = useState(
-    Object.fromEntries(fieldGroups.general.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.general.map((key) => [key, ""])),
   );
   const [agreementGroups, setAgreementGroups] = useState(
-    Object.fromEntries(fieldGroups.agreement_groups.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.agreement_groups.map((key) => [key, ""])),
   );
   const [agreementLines, setAgreementLines] = useState(
-    Object.fromEntries(fieldGroups.agreement_lines.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.agreement_lines.map((key) => [key, ""])),
   );
   const [agreementGroupItems, setAgreementGroupItems] = useState([]);
   const [agreementLinesWithItem, setAgreementLinesWithItem] = useState([]);
@@ -223,7 +218,7 @@ export default function Detail() {
 
           if (agreementGroups.agreement_groups.itemcategory) {
             const getItem = await getItemByCategory(
-              agreementGroups.agreement_groups.itemcategory
+              agreementGroups.agreement_groups.itemcategory,
             );
             if (getItem) {
               items = getItem.list;
@@ -451,8 +446,8 @@ export default function Detail() {
                           data.status.toLowerCase() === "active"
                             ? "green"
                             : data.status.toLowerCase() === "pending approval"
-                            ? "orange"
-                            : "red"
+                              ? "orange"
+                              : "red"
                         }
                       >
                         {data.status}

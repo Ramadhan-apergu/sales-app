@@ -1,9 +1,8 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import useContainerHeight from "@/hooks/useContainerHeight";
 import {
   Button,
   Modal,
@@ -20,14 +19,12 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
-import PaymentFetch from "@/modules/salesApi/payment";
 import CreditMemoFetch from "@/modules/salesApi/creditMemo";
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
 
 function List() {
   const searchParams = useSearchParams();
@@ -62,7 +59,7 @@ function List() {
           statusFilter,
           searchName,
           dateRange[0],
-          dateRange[1]
+          dateRange[1],
         );
 
         const resData = getResponseHandler(response, notify);
@@ -145,18 +142,18 @@ function List() {
         <Tag
           color={
             ["open", "fulfilled", "closed"].includes(
-              record.status.toLowerCase()
+              record.status.toLowerCase(),
             )
               ? "green"
               : ["partially fulfilled", "pending approval"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "orange"
-              : ["credit hold", "canceled"].includes(
-                  record.status.toLowerCase()
-                )
-              ? "red"
-              : "default"
+                    record.status.toLowerCase(),
+                  )
+                ? "orange"
+                : ["credit hold", "canceled"].includes(
+                      record.status.toLowerCase(),
+                    )
+                  ? "red"
+                  : "default"
           }
         >
           {text}
@@ -285,15 +282,10 @@ function List() {
                 }}
                 options={[
                   { value: "all", label: "All" },
-                  { value: "open", label: "Open" },
-                  { value: "fulfilled", label: "Fulfilled" },
-                  {
-                    value: "partially fulfilled",
-                    label: "Partially Fulfilled",
-                  },
-                  { value: "credit hold", label: "Credit Hold" },
-                  { value: "closed", label: "Closed" },
-                  { value: "pending approval", label: "Pending Approval" },
+                  { value: "applied", label: "Applied" },
+                  { value: "unapplied", label: "Unapplied" },
+                  { value: "credited", label: "Credited" },
+                  { value: "refunded", label: "Refunded" },
                 ]}
                 styles={{
                   popup: {
@@ -329,7 +321,7 @@ function List() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/transaction/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

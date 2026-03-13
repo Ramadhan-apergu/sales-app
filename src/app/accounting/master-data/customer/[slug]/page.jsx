@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Dropdown, Modal, Tag } from "antd";
 import Layout from "@/components/accounting/Layout";
 import {
@@ -106,16 +106,16 @@ export default function Detail() {
   };
 
   const [general, setGeneral] = useState(
-    Object.fromEntries(fieldGroups.general.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.general.map((key) => [key, ""])),
   );
   const [contact, setContact] = useState(
-    Object.fromEntries(fieldGroups.contact.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.contact.map((key) => [key, ""])),
   );
   const [address, setAddress] = useState(
-    Object.fromEntries(fieldGroups.address.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.address.map((key) => [key, ""])),
   );
   const [financial, setFinancial] = useState(
-    Object.fromEntries(fieldGroups.financial.map((key) => [key, ""]))
+    Object.fromEntries(fieldGroups.financial.map((key) => [key, ""])),
   );
 
   function mapingGroup(data) {
@@ -282,7 +282,12 @@ export default function Detail() {
                     payload={financial}
                     data={[
                       { key: "creditlimit", input: "input", isAlias: true },
-                      { key: "currency", input: "input", isAlias: false, hidden: true },
+                      {
+                        key: "currency",
+                        input: "input",
+                        isAlias: false,
+                        hidden: true,
+                      },
                       { key: "resalenumber", input: "input", isAlias: true },
                       { key: "terms", input: "input", isAlias: true },
                     ]}

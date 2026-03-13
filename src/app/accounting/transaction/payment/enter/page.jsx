@@ -1,28 +1,18 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import {
   Button,
   Checkbox,
-  Collapse,
   Divider,
-  Empty,
   Form,
   Input,
   InputNumber,
-  List,
-  Modal,
   Select,
   Table,
-  Tooltip,
 } from "antd";
 import Layout from "@/components/accounting/Layout";
-import {
-  CheckOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
@@ -34,10 +24,7 @@ import {
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
-import LoadingSpin from "@/components/superAdmin/LoadingSpin";
+
 import dayjs from "dayjs";
 import PaymentFetch from "@/modules/salesApi/payment";
 import { paymentAliases } from "@/utils/aliases";
@@ -166,15 +153,11 @@ export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const [modal, contextHolder] = Modal.useModal();
   const title = "payment";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const [dataCustomer, setDataCustomer] = useState([]);
   const [customerSelected, setCustomerSelected] = useState({});
-
-  const [dataItem, setDataItem] = useState([]);
-  const [itemSelected, setItemSelected] = useState(null);
 
   useEffect(() => {
     async function fetchCustomer() {
@@ -301,7 +284,7 @@ export default function Enter() {
     async function fetchInvoiceCustmer() {
       try {
         const response = await PaymentFetch.getInvoiceCustomer(
-          customerSelected.id || ""
+          customerSelected.id || "",
         );
         const resData = getResponseHandler(response);
 
@@ -334,7 +317,7 @@ export default function Enter() {
 
     const totalAmount = dataInvoiceApply.reduce(
       (sum, item) => sum + (Number(item.amount) || 0),
-      0
+      0,
     );
 
     dispatch({
@@ -387,7 +370,7 @@ export default function Enter() {
         ];
       } else {
         updatedData = updatedData.filter(
-          (item) => item.invoiceid !== data.invoiceid
+          (item) => item.invoiceid !== data.invoiceid,
         );
       }
 
@@ -437,7 +420,7 @@ export default function Enter() {
               amount: Number(amount) || 0,
               due: (Number(item.total) || 0) - (Number(amount) || 0),
             }
-          : item
+          : item,
     );
 
     dispatch({
@@ -482,6 +465,20 @@ export default function Enter() {
 
       if (!payloadToInsert.paymentoption) {
         throw new Error("Payment Method is required!");
+      }
+
+      if (
+        payloadToInsert.paymentoption == "giro" &&
+        !payloadToInsert.giroduedate
+      ) {
+        throw new Error("Giro Duedate is required!");
+      }
+
+      if (
+        payloadToInsert.paymentoption == "giro" &&
+        !payloadToInsert.gironumber
+      ) {
+        throw new Error("Giro Number is required!");
       }
 
       const updatePaymentApplies = state.payloadPaymentApplies.map((item) => {

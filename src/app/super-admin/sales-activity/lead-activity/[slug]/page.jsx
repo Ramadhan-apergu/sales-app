@@ -1,29 +1,10 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Dropdown,
-  Empty,
-  Form,
-  Input,
-  InputNumber,
-  List,
-  Modal,
-  Select,
-  Table,
-  Tag,
-  Tooltip,
-} from "antd";
+import { useEffect, useReducer, useState } from "react";
+import { Button, Divider, Dropdown, Form, Modal } from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import {
-  CheckOutlined,
   EditOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
   MoreOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -32,23 +13,17 @@ import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import CustomerFetch from "@/modules/salesApi/customer";
 import {
-  createResponseHandler,
   deleteResponseHandler,
   getResponseHandler,
 } from "@/utils/responseHandlers";
 import InputForm from "@/components/superAdmin/InputForm";
-import SalesOrderFetch from "@/modules/salesApi/salesOrder";
-import ItemFetch from "@/modules/salesApi/item";
-import convertToLocalDate from "@/utils/convertToLocalDate";
+
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
-import dayjs from "dayjs";
-import PaymentFetch from "@/modules/salesApi/payment";
-import { leadActAliases, paymentAliases, targetAliases } from "@/utils/aliases";
-import { formatDateTimeToShort, formatDateToShort } from "@/utils/formatDate";
-import { formatRupiah } from "@/utils/formatRupiah";
-import TargetFetch from "@/modules/salesApi/crm/target";
+
+import { leadActAliases } from "@/utils/aliases";
+import { formatDateTimeToShort } from "@/utils/formatDate";
+
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import LeadActivityFetch from "@/modules/salesApi/crm/leadActivity";
 import InputUser from "@/components/input/inputUser";
@@ -80,11 +55,6 @@ export default function Enter() {
       status: "",
     },
   };
-
-  const roleOptions = [
-    { label: "Sales Indoor", value: "sales-indoor" },
-    { label: "Sales Outdoor", value: "sales-outdoor" },
-  ];
 
   function reducer(state, action) {
     switch (action.type) {
