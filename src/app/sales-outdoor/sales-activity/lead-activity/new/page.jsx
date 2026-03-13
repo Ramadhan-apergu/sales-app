@@ -12,6 +12,7 @@ import { leadActAliases } from "@/utils/aliases";
 import dayjs from "dayjs";
 import { CheckOutlined } from "@ant-design/icons";
 import LeadsFetch from "@/modules/salesApi/crm/leads";
+import ProfilFetch from "@/modules/salesApi/getProfile";
 
 function CreateLeadActivityPageContent() {
     const router = useRouter();
@@ -19,6 +20,7 @@ function CreateLeadActivityPageContent() {
     const [channelLabel, setChannelLabel] = useState("Phone Number");
     const [leadOptions, setLeadOptions] = useState([]);
     const [fileList, setFileList] = useState([]);
+    const [profile, setProfile] = useState({});
 
     const initialState = {
         payloadPrimary: {
@@ -71,7 +73,14 @@ function CreateLeadActivityPageContent() {
             const formData = new FormData();
             formData.append("lead", payloadToInsert.lead);
             formData.append("channelname", payloadToInsert.channelname);
-            formData.append("channelreff", payloadToInsert.channelreff);
+
+            // For Meetings (channelname === 3), construct channelreff from profile data
+            if (payloadToInsert.channelname === 3 && profile?.data) {
+                formData.append("channelreff", `${profile.data.role_name}/${profile.data.id}`);
+            } else {
+                formData.append("channelreff", payloadToInsert.channelreff);
+            }
+
             formData.append("activitydate", payloadToInsert.activitydate.toISOString());
             formData.append("status", payloadToInsert.status || "");
             formData.append("summary", payloadToInsert.summary || "");
@@ -113,45 +122,45 @@ function CreateLeadActivityPageContent() {
     ];
 
     const statusOptions = [
-    [
-      {
-        value: "answered",
-        label: "Answered",
-      },
-      {
-        value: "no response",
-        label: "No Response",
-      },
-    ],
-    [
-      {
-        value: "sent",
-        label: "Sent",
-      },
-      {
-        value: "no response",
-        label: "No Response",
-      },
-    ],
-    [
-      {
-        value: "scheduled",
-        label: "Scheduled",
-      },
-      {
-        value: "rescheduled",
-        label: "Re-Scheduled",
-      },
-      {
-        value: "canceled",
-        label: "Canceled",
-      },
-      {
-        value: "done",
-        label: "Done",
-      },
-    ],
-  ];
+        [
+            {
+                value: "answered",
+                label: "Answered",
+            },
+            {
+                value: "no response",
+                label: "No Response",
+            },
+        ],
+        [
+            {
+                value: "sent",
+                label: "Sent",
+            },
+            {
+                value: "no response",
+                label: "No Response",
+            },
+        ],
+        [
+            {
+                value: "scheduled",
+                label: "Scheduled",
+            },
+            {
+                value: "rescheduled",
+                label: "Re-Scheduled",
+            },
+            {
+                value: "canceled",
+                label: "Canceled",
+            },
+            {
+                value: "done",
+                label: "Done",
+            },
+        ],
+    ];
 
     const fetchDataLead = async () => {
         try {
@@ -174,7 +183,17 @@ function CreateLeadActivityPageContent() {
     };
 
     useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const profileData = await ProfilFetch.get();
+                setProfile(profileData);
+            } catch (e) {
+                console.error('Error fetching profile', e);
+            }
+        };
+
         fetchDataLead();
+        fetchProfile();
     }, []);
 
     const handleChangeFile = ({ fileList: newFileList }) => {
@@ -195,15 +214,15 @@ function CreateLeadActivityPageContent() {
                             <div className="flex justify-between items-center mb-2">
                                 <Button onClick={handleBack}>← Kembali</Button>
                             </div>
-                            
+
                             <h3 className="font-semibold text-gray-700 mb-3 text-center text-2xl">Create Lead Activity</h3>
-                            
+
                             <div className="w-full flex flex-col gap-4">
                                 <div className="w-full flex flex-col justify-between items-start">
                                     <div className="w-full flex gap-1"></div>
                                     <div className="w-full flex justify-end items-center gap-2">
                                         <Button type="primary" icon={<CheckOutlined />} onClick={handleSubmit} disabled={isLoadingSubmit}>
-                                        Submit
+                                            Submit
                                         </Button>
                                     </div>
                                 </div>
@@ -243,14 +262,23 @@ function CreateLeadActivityPageContent() {
                                                 key: "channelreff",
                                                 input: state.payloadPrimary.channelname == 4 ? "text" : "input",
                                                 labeled: channelLabel,
+                                                disabled: state.payloadPrimary.channelname == 3,
                                                 rules: [
                                                     {
                                                         required: true,
                                                         message: `Channel Reff is required`,
                                                     },
+                                                    state.payloadPrimary.channelname === 1 ? {
+                                                        pattern: /^[0-9]+$/,
+                                                        message: "Please enter a valid phone number",
+                                                    } : {},
+                                                    state.payloadPrimary.channelname === 2 ? {
+                                                        type: "email",
+                                                        message: "Please enter a valid email",
+                                                    } : {},
                                                 ],
                                             },
-                                             {
+                                            {
                                                 key: "status",
                                                 input: "select",
                                                 isAlias: true,
@@ -265,10 +293,25 @@ function CreateLeadActivityPageContent() {
                                         ]}
                                         aliases={leadActAliases}
                                         onChange={(type, payload) => {
-                                            dispatch({ type, payload });
+                                            let updatedPayload = { ...payload };
+
+                                            // Check if channelname has changed
+                                            if (payload.channelname && payload.channelname !== state.payloadPrimary.channelname) {
+                                                if (payload.channelname === 3) {
+                                                    // Auto-fill channelreff with profile name for Meetings
+                                                    if (profile?.data?.name) {
+                                                        updatedPayload.channelreff = profile.data.name;
+                                                    }
+                                                } else {
+                                                    // Clear channelreff for other channels
+                                                    updatedPayload.channelreff = "";
+                                                }
+                                            }
+
+                                            dispatch({ type, payload: updatedPayload });
 
                                             const label = () => {
-                                                switch (payload.channelname) {
+                                                switch (updatedPayload.channelname || state.payloadPrimary.channelname) {
                                                     case 1:
                                                         return "Phone Number";
                                                     case 2:
@@ -277,6 +320,8 @@ function CreateLeadActivityPageContent() {
                                                         return "PIC";
                                                     case 4:
                                                         return "Lead Address";
+                                                    default:
+                                                        return "Channel Reference";
                                                 }
                                             };
                                             setChannelLabel(label());

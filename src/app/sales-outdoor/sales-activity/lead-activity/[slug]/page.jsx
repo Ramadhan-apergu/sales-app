@@ -10,9 +10,10 @@ import Link from 'next/link';
 import { EditOutlined, MoreOutlined } from '@ant-design/icons';
 import { getResponseHandler, deleteResponseHandler } from "@/utils/responseHandlers";
 import { formatDateTimeToShort } from "@/utils/formatDate";
+import ProfilFetch from "@/modules/salesApi/getProfile";
 
 function LeadActivityDetailPageContent({ params }) {
-    const { slug } = use(params); 
+    const { slug } = use(params);
     const router = useRouter();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -20,6 +21,19 @@ function LeadActivityDetailPageContent({ params }) {
     const [modalDelete, setModalDelete] = useState(false);
     const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
     const [channelLabel, setChannelLabel] = useState("Phone Number");
+    const [profile, setProfile] = useState({});
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const profileData = await ProfilFetch.get();
+                setProfile(profileData);
+            } catch (e) {
+                console.error('Error fetching profile', e);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     useEffect(() => {
         const fetchActivity = async () => {
@@ -30,7 +44,7 @@ function LeadActivityDetailPageContent({ params }) {
 
                 if (resData) {
                     setActivity(resData);
-                    
+
                     // Set channel label based on channel name
                     const label = () => {
                         switch (resData.channelname) {
@@ -163,7 +177,7 @@ function LeadActivityDetailPageContent({ params }) {
                                         </Dropdown>
                                     </div>
                                 </div>
-                                
+
                                 <div className="grid grid-cols-1 gap-4">
                                     <div className="mb-2">
                                         <h3 className="font-semibold text-gray-700 mb-2 text-center text-2xl">Activity Details</h3>
@@ -173,7 +187,7 @@ function LeadActivityDetailPageContent({ params }) {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <Divider
                                             style={{
@@ -205,12 +219,23 @@ function LeadActivityDetailPageContent({ params }) {
                                                         <div className="text-right">
                                                             <p className="truncate max-w-xs">{activity.channelreff}</p>
                                                         </div>
+                                                    ) : activity.channelname === 3 ? (
+                                                        // Logic for PIC (Meetings) display
+                                                        (() => {
+                                                            if (profile?.data) {
+                                                                const profileKey = `${profile.data.role_name}/${profile.data.id}`;
+                                                                if (activity.channelreff === profileKey) {
+                                                                    return profile.data.name;
+                                                                }
+                                                            }
+                                                            return "-";
+                                                        })()
                                                     ) : (
                                                         activity.channelreff
                                                     )}
                                                 </span>
                                             </div>
-                                            {activity.channelname !== 4 && 
+                                            {activity.channelname !== 4 &&
                                                 <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                     <span className="text-gray-500">Status:</span>
                                                     <span className="text-right">{activity.status}</span>
@@ -220,14 +245,14 @@ function LeadActivityDetailPageContent({ params }) {
                                                 <span className="text-gray-500">Summary:</span>
                                                 <span className="text-right">{activity.summary}</span>
                                             </div>
-                                            {activity.channelname === 4 && 
+                                            {activity.channelname === 4 &&
                                                 <div className="flex justify-between border rounded-lg p-2 border-gray-300">
                                                     <span className="text-gray-500">Visit Document:</span>
                                                     <span className="text-right">
                                                         {activity.visitdoc ? (
-                                                            <a 
-                                                                href={activity.visitdoc} 
-                                                                target="_blank" 
+                                                            <a
+                                                                href={activity.visitdoc}
+                                                                target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="text-blue-600 hover:underline"
                                                             >
