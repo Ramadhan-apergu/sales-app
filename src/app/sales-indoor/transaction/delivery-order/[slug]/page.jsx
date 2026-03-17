@@ -24,6 +24,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import ItemFetch from "@/modules/salesApi/item";
 import { deliveryOrderAliases } from "@/utils/aliases";
 import DeliveryOrderPrint from "@/components/superAdmin/DeliveryOrderPrint";
+import { customRounded } from "@/utils/rounded";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -35,6 +36,14 @@ function TableCustom({ data, keys, aliases, onDelete }) {
           key,
           align: "right",
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
+      } else if (["onhand", "quantity1", "quantity2"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "right",
+          render: (text) => customRounded(text),
         };
       } else {
         return {
@@ -75,7 +84,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
                   key={col.key || col.dataIndex}
                   align="right"
                 >
-                  <b>{totalQuantity1.toLocaleString()}</b>
+                  <b>{customRounded(totalQuantity1).toLocaleString()}</b>
                 </Table.Summary.Cell>
               );
             }
@@ -85,7 +94,7 @@ function TableCustom({ data, keys, aliases, onDelete }) {
                   key={col.key || col.dataIndex}
                   align="right"
                 >
-                  <b>{totalQuantity2.toLocaleString()}</b>
+                  <b>{customRounded(totalQuantity2).toLocaleString()}</b>
                 </Table.Summary.Cell>
               );
             }

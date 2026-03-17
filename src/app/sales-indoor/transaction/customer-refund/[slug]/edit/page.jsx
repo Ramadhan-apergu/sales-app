@@ -261,7 +261,7 @@ export default function Enter() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              RMA Enter
+              Edit Customer Refund
             </p>
             <Button
               icon={<UnorderedListOutlined />}
@@ -442,7 +442,7 @@ export default function Enter() {
                 key: "bankaccount",
                 input: "select",
                 isAlias: true,
-                option: bankOptions,
+                options: bankOptions,
                 hidden: state.payloadPayment.refundmethod != "transfer",
               },
               {
@@ -450,6 +450,7 @@ export default function Enter() {
                 input: "number",
                 isAlias: true,
                 accounting: true,
+                isRead: true,
               },
             ]}
             aliases={rmaAliases.primary}
