@@ -1167,7 +1167,7 @@ export default function Enter() {
                       value={sourceTypeSelected}
                       onChange={(val) => {
                         setSourceTypeSelected(val);
-                        fetchCustomerSource(val, customerSelected.id);
+                        fetchCustomerSource(val, customerSelected.value);
 
                         formSource.setFieldValue("sourceid", null);
                         dispatch({

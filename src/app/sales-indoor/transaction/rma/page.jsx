@@ -292,14 +292,8 @@ function List() {
                 options={[
                   { value: "all", label: "All" },
                   { value: "open", label: "Open" },
-                  { value: "fulfilled", label: "Fulfilled" },
-                  {
-                    value: "partially fulfilled",
-                    label: "Partially Fulfilled",
-                  },
-                  { value: "credit hold", label: "Credit Hold" },
-                  { value: "closed", label: "Closed" },
-                  { value: "pending approval", label: "Pending Approval" },
+                  { value: "received", label: "Received" },
+                  { value: "credited", label: "Credited" },
                 ]}
                 styles={{
                   popup: {
