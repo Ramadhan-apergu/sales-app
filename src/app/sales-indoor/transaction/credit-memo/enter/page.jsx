@@ -826,7 +826,6 @@ export default function Enter() {
                 Customer
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-
                 <FilterCustomer
                   allowClear={false}
                   value={customerSelected?.value || undefined}
@@ -891,7 +890,7 @@ export default function Enter() {
                       value={sourceTypeSelected}
                       onChange={(val) => {
                         setSourceTypeSelected(val);
-                        fetchCustomerSource(val, customerSelected.id);
+                        fetchCustomerSource(val, customerSelected.value);
 
                         formSource.setFieldValue("sourceid", null);
                         dispatch({

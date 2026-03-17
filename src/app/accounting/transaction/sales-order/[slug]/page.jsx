@@ -502,9 +502,7 @@ export default function Detail() {
                       </Button>
 
                       <Button
-                        disabled={["credit hold", "fulfilled"].includes(
-                          data.status.toLowerCase(),
-                        )}
+                        disabled={data.status.toLowerCase() != "open"}
                         icon={<EditOutlined />}
                         type={"primary"}
                         onClick={handleEdit}

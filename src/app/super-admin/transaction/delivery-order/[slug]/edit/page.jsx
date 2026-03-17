@@ -22,6 +22,7 @@ import InputForm from "@/components/superAdmin/InputForm";
 import dayjs from "dayjs";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { deliveryOrderAliases } from "@/utils/aliases";
+import { customRounded } from "@/utils/rounded";
 
 function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
   const allCheckableItems = data;
@@ -66,6 +67,16 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
           key,
           align: "center",
           render: (text) => (text ? "Yes" : "No"),
+        };
+      }
+
+      if (["onhand", "quantity1", "quantity2"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "right",
+          render: (text) => customRounded(text),
         };
       }
 
@@ -118,14 +129,14 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
             if (key === "quantity1") {
               return (
                 <Table.Summary.Cell key={key} index={i} align="right">
-                  <b>{totalQuantity1.toLocaleString()}</b>
+                  <b>{customRounded(totalQuantity1).toLocaleString()}</b>
                 </Table.Summary.Cell>
               );
             }
             if (key === "quantity2") {
               return (
                 <Table.Summary.Cell key={key} index={i} align="right">
-                  <b>{totalQuantity2.toLocaleString()}</b>
+                  <b>{customRounded(totalQuantity2).toLocaleString()}</b>
                 </Table.Summary.Cell>
               );
             }

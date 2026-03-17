@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
 import SalesOrderSelect from "./SalesOrderSelect";
 import { deliveryOrderAliases } from "@/utils/aliases";
+import { customRounded } from "@/utils/rounded";
 
 function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
   const allCheckableItems = data;
@@ -64,6 +65,14 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
           key,
           align: "right",
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
+        };
+      } else if (["onhand", "quantity1", "quantity2"].includes(key)) {
+        return {
+          title: aliases?.[key] || key,
+          dataIndex: key,
+          key,
+          align: "right",
+          render: (text) => customRounded(text),
         };
       } else {
         return {
@@ -116,14 +125,14 @@ function TableCustom({ data, keys, aliases, onEdit, onChecked, onCheckAll }) {
             if (col.dataIndex === "quantity1") {
               return (
                 <Table.Summary.Cell key={col.key || index} align="right">
-                  <b>{totalQuantity1.toLocaleString()}</b>
+                  <b>{customRounded(totalQuantity1).toLocaleString()}</b>
                 </Table.Summary.Cell>
               );
             }
             if (col.dataIndex === "quantity2") {
               return (
                 <Table.Summary.Cell key={col.key || index} align="right">
-                  <b>{totalQuantity2.toLocaleString()}</b>
+                  <b>{customRounded(totalQuantity2).toLocaleString()}</b>
                 </Table.Summary.Cell>
               );
             }

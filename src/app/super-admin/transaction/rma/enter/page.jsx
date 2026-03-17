@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useReducer, useState } from "react";
-import { Button, Checkbox, Divider, Form, Select, Table } from "antd";
+import {
+  Button,
+  Checkbox,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  Table,
+} from "antd";
 import Layout from "@/components/superAdmin/Layout";
 import { CheckOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
@@ -29,6 +39,7 @@ function TableCustom({
   checkbox,
   keyRow,
   onDelete = null,
+  onEdit,
 }) {
   let columns = [
     {
@@ -89,6 +100,20 @@ function TableCustom({
         };
       }
     }),
+    {
+      title: "Action",
+      key: "action",
+      align: "right",
+      render: (_, record) => (
+        <Button
+          disabled={!record.ischecked}
+          type="link"
+          onClick={() => onEdit(record)}
+        >
+          Edit
+        </Button>
+      ),
+    },
   ];
 
   if (!checkbox) {
@@ -134,6 +159,8 @@ export default function Enter() {
   const [dataCustomerInv, setDataCustomerInv] = useState([]);
 
   const [dataInvItem, setDataInvItem] = useState([]);
+
+  const [editItem, setEditItem] = useState(null);
 
   async function fetchCustomer() {
     try {
@@ -419,7 +446,11 @@ export default function Enter() {
                       onChange={async (value, inv) => {
                         const invItem = await fetchCustomerInvItem(value);
                         setDataInvItem(
-                          invItem.map((inv) => ({ ...inv, ischecked: false })),
+                          invItem.map((inv) => ({
+                            ...inv,
+                            ischecked: false,
+                            qtymax: inv.qtymax ?? inv.quantity,
+                          })),
                         );
                       }}
                       options={dataCustomerInv}
@@ -496,6 +527,9 @@ export default function Enter() {
                 aliases={rmaAliases.item}
                 keyRow={"id"}
                 checkbox={true}
+                onEdit={(val) => {
+                  setEditItem(val);
+                }}
               />
             </div>
           </div>
@@ -503,6 +537,95 @@ export default function Enter() {
       </Layout>
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
+      <Modal
+        open={editItem?.id}
+        onOk={() => {
+          if (editItem.quantity < 1) {
+            notify("error", "Error", "Quantity must be at least 1");
+            return;
+          }
+
+          if (editItem.quantity > editItem.qtymax) {
+            notify(
+              "error",
+              "Error",
+              "Quantity cannot be greater than " + editItem.qtymax,
+            );
+            return;
+          }
+
+          const round2 = (value) => parseFloat(value.toFixed(2));
+
+          const recalcItem = (item, quantity) => {
+            const amount = round2(quantity * item.rate);
+            const dpp = round2(amount / 1.11);
+            const taxvalue = round2(amount - dpp);
+
+            return {
+              ...item,
+              quantity,
+              amount,
+              subtotal: amount,
+              dpp,
+              taxvalue,
+            };
+          };
+
+          let updatedDataInvItem = dataInvItem.map((item) =>
+            item.id === editItem.id
+              ? recalcItem(item, editItem.quantity)
+              : item,
+          );
+
+          setDataInvItem(updatedDataInvItem);
+
+          const total = updatedDataInvItem.reduce(
+            (sum, inv) =>
+              inv.ischecked ? sum + Number(inv.subtotal || 0) : sum,
+            0,
+          );
+
+          dispatch({
+            type: "SET_PRIMARY",
+            payload: { total },
+          });
+
+          setEditItem(null);
+        }}
+        onCancel={() => {
+          setEditItem(null);
+        }}
+        width={850}
+        cancelText="Cancel"
+      >
+        <div className="w-full mt-6">
+          <div className="w-full flex flex-col gap-4 mt-6">
+            <Divider
+              style={{
+                margin: "0",
+                textTransform: "capitalize",
+                borderColor: "#1677ff",
+              }}
+              orientation="left"
+            >
+              Edit Item
+            </Divider>
+            <div className="w-1/2 flex flex-col">
+              <span>Qantity</span>
+              <InputNumber
+                style={{ width: "100%" }}
+                value={editItem?.quantity || 0}
+                onChange={(value) => {
+                  setEditItem((prev) => ({
+                    ...prev,
+                    quantity: value,
+                  }));
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }

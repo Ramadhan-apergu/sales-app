@@ -210,7 +210,7 @@ export default function Enter() {
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex justify-between items-center">
             <p className="text-xl lg:text-2xl font-semibold text-blue-6">
-              RMA Enter
+              Customer Refund Enter
             </p>
             <Button
               icon={<UnorderedListOutlined />}
@@ -279,6 +279,11 @@ export default function Enter() {
                         form.setFieldsValue({
                           creditmemo: null,
                         });
+
+                        dispatch({
+                          type: "SET_PAYMENT",
+                          payload: { amount: 0 },
+                        });
                       }}
                       options={dataCustomer}
                       style={{ width: "100%" }}
@@ -319,6 +324,11 @@ export default function Enter() {
                       optionFilterProp="label"
                       onChange={async (value, opt) => {
                         setCreditMemoSelected(opt);
+
+                        dispatch({
+                          type: "SET_PAYMENT",
+                          payload: { amount: opt.unapplied },
+                        });
                       }}
                       options={dataCustomerCredit}
                       style={{ width: "100%" }}
@@ -397,6 +407,7 @@ export default function Enter() {
                 input: "number",
                 isAlias: true,
                 accounting: true,
+                isReadOnly: true,
               },
             ]}
             aliases={rmaAliases.primary}
