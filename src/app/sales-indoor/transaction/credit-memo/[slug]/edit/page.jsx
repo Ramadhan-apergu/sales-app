@@ -47,6 +47,7 @@ function TableCustom({
       align: "center",
       render: (_, record) => (
         <Checkbox
+        disabled={record.disabled}
           checked={record.ischecked}
           onChange={(e) => {
             const isChecked = e.target.checked;
@@ -322,6 +323,7 @@ export default function Enter() {
             ...memoApply,
             refnum: dataInv.fulfillmentnum || "",
             ischecked: true,
+            disabled: true
           };
         } catch (error) {
           console.error("Gagal fetch invoice ID:", memoApply.invoiceid, error);
@@ -329,6 +331,7 @@ export default function Enter() {
             ...memoApply,
             refnum: "",
             ischecked: true,
+            disabled: true
           };
         }
       }),
@@ -341,6 +344,7 @@ export default function Enter() {
         id: crypto.randomUUID(),
         ...inv,
         ischecked: false,
+        disabled: false
       };
     });
 
@@ -1161,6 +1165,7 @@ export default function Enter() {
                     ]}
                   >
                     <Select
+                      disabled={data?.status.toLowerCase() != "unapplied"}
                       showSearch
                       placeholder="Select a source"
                       optionFilterProp="label"
@@ -1212,6 +1217,7 @@ export default function Enter() {
                     ]}
                   >
                     <Select
+                      disabled={data?.status.toLowerCase() != "unapplied"}
                       showSearch
                       placeholder="Select a source id"
                       optionFilterProp="label"
