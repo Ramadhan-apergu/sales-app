@@ -361,7 +361,7 @@ export default function Enter() {
                     `/sales-indoor/transaction/rma/${data?.id || ""}/edit`,
                   );
                 }}
-                disabled={data?.status?.toLowerCase() == "received"}
+                disabled={data?.status?.toLowerCase() != "open"}
               >
                 {isLargeScreen ? "Edit" : ""}
               </Button>

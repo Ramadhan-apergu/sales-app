@@ -24,7 +24,7 @@ export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const title = "customer refund";
+  const title = "customer-refund";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const { slug } = useParams();
 
