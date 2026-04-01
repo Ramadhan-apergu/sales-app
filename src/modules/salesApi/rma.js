@@ -66,7 +66,7 @@ export default class RmaFetch extends ProcessFetch {
 
   static async getInvoiceCustomerItem(id) {
     try {
-      const response = await this.axios.get(`trx/sources-item/invoice/${id}`);
+      const response = await this.axios.get(`trx/sources-item-rma/${id}`);
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

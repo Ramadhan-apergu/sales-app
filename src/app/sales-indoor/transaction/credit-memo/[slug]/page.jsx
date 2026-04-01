@@ -425,6 +425,7 @@ export default function Enter() {
                             }/edit`,
                           );
                         }}
+                        disabled={data?.status?.toLowerCase() != 'unapplied'}
                       >
                         {isLargeScreen ? "Edit" : ""}
                       </Button>

@@ -6,7 +6,7 @@ export default class ItemFetch extends ProcessFetch {
     limit,
     displayname = "",
     itemid = "",
-    itemprocessfamily = ""
+    itemprocessfamily = "",
   ) {
     try {
       const params = {};
@@ -84,7 +84,7 @@ export default class ItemFetch extends ProcessFetch {
         formData,
         {
           isMultipart: true,
-        }
+        },
       );
       return new this().processResponse(response);
     } catch (error) {
@@ -92,7 +92,7 @@ export default class ItemFetch extends ProcessFetch {
     }
   }
 
-  static async getItemFamily(id) {
+  static async getItemFamily() {
     try {
       const response = await this.axios.get(`/master/itemprocessfamily`);
       return new this().processResponse(response);
@@ -105,7 +105,19 @@ export default class ItemFetch extends ProcessFetch {
     try {
       const response = await this.axios.put(
         `/master/items/price-family/${isDefault}/${id}`,
-        payload
+        payload,
+      );
+      return new this().processResponse(response);
+    } catch (error) {
+      return new this().processError(error);
+    }
+  }
+
+  static async exportItem(payload) {
+    try {
+      const response = await this.axios.post(
+        "/master/items/export",
+        payload,
       );
       return new this().processResponse(response);
     } catch (error) {

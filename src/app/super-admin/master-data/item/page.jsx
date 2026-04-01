@@ -13,6 +13,7 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
+import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -68,7 +69,7 @@ function Item() {
         page,
         limit,
         searchName == "" ? null : searchName,
-        !searchCode || searchCode == "" ? null : searchCode
+        !searchCode || searchCode == "" ? null : searchCode,
       );
       const resData = getResponseHandler(response, notify);
 
@@ -231,7 +232,14 @@ function Item() {
               />
             </div>
           </div>
-          <div className="flex gap-2"></div>
+          <div className="flex gap-2">
+            <ExportButton
+              disabled={!datas.length}
+              notify={notify}
+              searchCode={searchCode}
+              searchName={searchName}
+            />
+          </div>
         </div>
         {!isLoading ? (
           <>
@@ -254,7 +262,7 @@ function Item() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"
@@ -278,5 +286,62 @@ export default function ItemPage() {
     <Suspense fallback={<LoadingSpinProcessing />}>
       <Item />
     </Suspense>
+  );
+}
+
+function ExportButton({
+  disabled = false,
+  notify = null,
+  searchCode = "",
+  searchName = "",
+}) {
+  const [isloading, setIsloading] = useState(false);
+  const [linkdownload, setLinkdownload] = useState(null);
+
+  useEffect(() => {
+    setLinkdownload(null);
+  }, [searchCode, searchName]);
+
+  async function handleExport() {
+    try {
+      setIsloading(true);
+
+      const payload = {
+        itemid: searchCode || "",
+        displayname: searchName || "",
+      };
+
+      const response = await ItemFetch.exportItem(payload);
+      const resData = getResponseHandler(response, notify);
+
+      if (resData) {
+        setLinkdownload(resData.url);
+      }
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+
+  return (
+    <Button
+      onClick={() => {
+        if (linkdownload) {
+          window.open(linkdownload);
+        } else {
+          handleExport();
+        }
+      }}
+      type={linkdownload ? "primary" : ""}
+      disabled={disabled}
+      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
+      loading={isloading}
+    >
+      {linkdownload ? "Download" : "Export All"}
+    </Button>
   );
 }
