@@ -47,7 +47,7 @@ function TableCustom({
       align: "center",
       render: (_, record) => (
         <Checkbox
-        disabled={record.disabled}
+          disabled={record.disabled}
           checked={record.ischecked}
           onChange={(e) => {
             const isChecked = e.target.checked;
@@ -262,7 +262,8 @@ export default function Enter() {
 
     await fetchCustomerSource(data.sources, data.entity);
     await fetchCustomerSourceItem(data.sources, data.sourceid);
-    console.log(data);
+    formSource.setFieldValue("source", data.sources);
+    setSourceTypeSelected(data.sources);
 
     formSource.setFieldValue("sourceid", data.sourceid);
 
@@ -323,7 +324,7 @@ export default function Enter() {
             ...memoApply,
             refnum: dataInv.fulfillmentnum || "",
             ischecked: true,
-            disabled: true
+            disabled: true,
           };
         } catch (error) {
           console.error("Gagal fetch invoice ID:", memoApply.invoiceid, error);
@@ -331,7 +332,7 @@ export default function Enter() {
             ...memoApply,
             refnum: "",
             ischecked: true,
-            disabled: true
+            disabled: true,
           };
         }
       }),
@@ -344,7 +345,7 @@ export default function Enter() {
         id: crypto.randomUUID(),
         ...inv,
         ischecked: false,
-        disabled: false
+        disabled: false,
       };
     });
 
@@ -1152,7 +1153,7 @@ export default function Enter() {
                 Source
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                <Form layout="vertical">
+                <Form layout="vertical" form={formSource}>
                   <Form.Item
                     label={<span className="capitalize">Source Type</span>}
                     initialValue={sourceTypeSelected}
