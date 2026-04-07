@@ -8,7 +8,16 @@ import {
 } from "@ant-design/icons";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { Button, Modal, Pagination, Table, Tag, Select, Checkbox } from "antd";
+import {
+  Button,
+  Modal,
+  Pagination,
+  Table,
+  Tag,
+  Select,
+  Checkbox,
+  Input,
+} from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -40,6 +49,7 @@ function Payment() {
   const [isLoading, setIsloading] = useState(false);
   const [statusFilterFrom, setStatusFilterFrom] = useState("Undeposited");
   const [statusFilterTo, setStatusFilterTo] = useState("Deposited");
+  const [bankaccount, setBankaccount] = useState("");
   const [modal, contextHolder] = Modal.useModal();
   const title = "payment";
   const { notify, contextHolder: notificationContextHolder } =
@@ -195,6 +205,11 @@ function Payment() {
       if (idsSelected.length === 0) {
         throw new Error("Please select at least one item first.");
       }
+
+      if (!bankaccount) {
+        throw new Error("Bank Account is required!");
+      }
+
       modal.confirm({
         title: `Are you sure you want to update statuses in bulk?`,
         content: "This action cannot be undone.",
@@ -215,12 +230,12 @@ function Payment() {
       const payload = {
         status: statusFilterTo,
         id: idsSelected,
+        bankaccount: bankaccount,
       };
 
       const response = await PaymentFetch.bulkUpdateStatus(payload);
 
       const resData = updateResponseHandler(response, notify);
-      console.log(resData);
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
@@ -304,6 +319,18 @@ function Payment() {
                   dropdownAlign={{ points: ["tr", "br"] }}
                 />
               </div>
+            </div>
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className="hidden lg:block text-sm font-semibold leading-none">
+                Bank Account
+              </label>
+              <Input
+                placeholder="Bank Account"
+                value={bankaccount}
+                onChange={(e) => {
+                  setBankaccount(e.target.value);
+                }}
+              />
             </div>
           </div>
           {!isLoading ? (
