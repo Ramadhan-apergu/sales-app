@@ -181,7 +181,7 @@ function List() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-            disabled={record?.status?.toLowerCase() != "open"}
+            disabled={record?.status?.toLowerCase() == "received"}
           >
             {isLargeScreen ? "Edit" : ""}
           </Button>

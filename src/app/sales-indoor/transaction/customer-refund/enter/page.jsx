@@ -23,7 +23,7 @@ export default function Enter() {
   const { notify, contextHolder: contextNotify } = useNotification();
   const router = useRouter();
   const isLargeScreen = useBreakpoint("lg");
-  const title = "customer-refund";
+  const title = "customer refund";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const [form] = Form.useForm();
@@ -399,7 +399,7 @@ export default function Enter() {
                 key: "bankaccount",
                 input: "select",
                 isAlias: true,
-                options: bankOptions,
+                option: bankOptions,
                 hidden: state.payloadPayment.refundmethod != "transfer",
               },
               {
@@ -410,7 +410,7 @@ export default function Enter() {
                 isReadOnly: true,
               },
             ]}
-            aliases={rmaAliases.payment}
+            aliases={rmaAliases.primary}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}

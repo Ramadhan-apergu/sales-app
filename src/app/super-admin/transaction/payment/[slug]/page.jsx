@@ -381,6 +381,14 @@ export default function Details() {
                           (data.status?.toLowerCase() || "") !== "deposited",
                       },
                       {
+                        key: "bankaccount",
+                        input: "input",
+                        isAlias: true,
+                        isRead: true,
+                        hidden:
+                          state.payloadPayment.paymentoption != "transfer",
+                      },
+                      {
                         key: "giroduedate",
                         input: "input",
                         isAlias: true,
@@ -393,15 +401,6 @@ export default function Details() {
                         isAlias: true,
                         isRead: true,
                         hidden: state.payloadPayment.paymentoption != "giro",
-                      },
-                      {
-                        key: "bankaccount",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                        hidden: !["transfer", "giro"].includes(
-                          state.payloadPayment.paymentoption,
-                        ),
                       },
                     ]}
                     aliases={paymentAliases.payment}

@@ -3,11 +3,7 @@
 import { useEffect, useReducer, useState } from "react";
 import { Button, Checkbox, Divider, Table, Tag } from "antd";
 import Layout from "@/components/accounting/Layout";
-import {
-  EditOutlined,
-  PrinterOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 import useNotification from "@/hooks/useNotification";
 import { useParams, useRouter } from "next/navigation";
@@ -24,7 +20,6 @@ import InvoiceFetch from "@/modules/salesApi/invoice";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
 import { creditMemoAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
-import CreditMemoPrint from "@/components/superAdmin/CreditMemoPrint";
 
 function TableCustom({
   data,
@@ -61,7 +56,7 @@ function TableCustom({
           render: (text) => <p>{text ? "Yes" : "No"}</p>,
         };
       } else if (
-        ["due", "amount", "payment", "rate", "amount", "taxrate1", "discountitem", "totaldiscount"].includes(key)
+        ["due", "amount", "payment", "rate", "amount", "taxrate1"].includes(key)
       ) {
         return {
           title: aliases?.[key] || key,
@@ -180,11 +175,9 @@ export default function Enter() {
 
   const initialState = {
     payloadPrimary: {
-      source_tranid: "",
       entity: "",
       trandate: "",
       memo: "",
-      sources: "",
     },
     payloadSummary: {
       subtotal: 0,
@@ -256,11 +249,9 @@ export default function Enter() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
-        source_tranid: data.source_tranid,
         entity: data.entity,
         trandate: formatDateToShort(data.trandate),
         memo: data.memo,
-        sources: data.sources,
       },
     });
 
@@ -425,15 +416,6 @@ export default function Enter() {
                     </div>
                     <div className="w-full lg:w-1/2 flex justify-end items-center gap-2">
                       <Button
-                        icon={<PrinterOutlined />}
-                        type={"primary"}
-                        onClick={() => {
-                          window.print();
-                        }}
-                      >
-                        {isLargeScreen ? "Print" : ""}
-                      </Button>
-                      <Button
                         icon={<EditOutlined />}
                         type={"primary"}
                         onClick={() => {
@@ -443,7 +425,6 @@ export default function Enter() {
                             }/edit`,
                           );
                         }}
-                        disabled={data?.status?.toLowerCase() != "unapplied"}
                       >
                         {isLargeScreen ? "Edit" : ""}
                       </Button>
@@ -478,18 +459,6 @@ export default function Enter() {
                     type="SET_PRIMARY"
                     payload={state.payloadPrimary}
                     data={[
-                      {
-                        key: "sources",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "source_tranid",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
                       {
                         key: "entity",
                         input: "input",
@@ -553,8 +522,6 @@ export default function Enter() {
                       //   "units",
                       "itemdescription",
                       "rate",
-                      "discountitem",
-                      "totaldiscount",
                       //   "taxable",
                       "amount",
                       "taxrate1",
@@ -639,34 +606,6 @@ export default function Enter() {
       </Layout>
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
-      <div className="to-print-invoice hidden">
-        <CreditMemoPrint
-          data={data}
-          dataTable={state?.credit_memo_items || []}
-          dataSummary={state?.payloadSummary || {}}
-        />
-      </div>
-      <style jsx>{`
-        @media print {
-          * {
-            display: none !important;
-          }
-
-          .ant-dropdown {
-            display: none !important;
-          }
-
-          .to-print-invoice {
-            display: block !important;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: white;
-            z-index: 99999;
-          }
-        }
-      `}</style>
     </>
   );
 }

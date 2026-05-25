@@ -361,7 +361,7 @@ export default function Enter() {
                     `/super-admin/transaction/rma/${data?.id || ""}/edit`,
                   );
                 }}
-                disabled={data?.status?.toLowerCase() != "open"}
+                disabled={data?.status?.toLowerCase() == "received"}
               >
                 {isLargeScreen ? "Edit" : ""}
               </Button>

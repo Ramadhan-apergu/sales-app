@@ -47,7 +47,6 @@ function TableCustom({
       align: "center",
       render: (_, record) => (
         <Checkbox
-          disabled={record.disabled}
           checked={record.ischecked}
           onChange={(e) => {
             const isChecked = e.target.checked;
@@ -262,8 +261,7 @@ export default function Enter() {
 
     await fetchCustomerSource(data.sources, data.entity);
     await fetchCustomerSourceItem(data.sources, data.sourceid);
-    formSource.setFieldValue("source", data.sources);
-    setSourceTypeSelected(data.sources);
+    console.log(data);
 
     formSource.setFieldValue("sourceid", data.sourceid);
 
@@ -324,7 +322,6 @@ export default function Enter() {
             ...memoApply,
             refnum: dataInv.fulfillmentnum || "",
             ischecked: true,
-            disabled: true,
           };
         } catch (error) {
           console.error("Gagal fetch invoice ID:", memoApply.invoiceid, error);
@@ -332,7 +329,6 @@ export default function Enter() {
             ...memoApply,
             refnum: "",
             ischecked: true,
-            disabled: true,
           };
         }
       }),
@@ -345,7 +341,6 @@ export default function Enter() {
         id: crypto.randomUUID(),
         ...inv,
         ischecked: false,
-        disabled: false,
       };
     });
 
@@ -1153,7 +1148,7 @@ export default function Enter() {
                 Source
               </Divider>
               <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                <Form layout="vertical" form={formSource}>
+                <Form layout="vertical">
                   <Form.Item
                     label={<span className="capitalize">Source Type</span>}
                     initialValue={sourceTypeSelected}
@@ -1166,7 +1161,6 @@ export default function Enter() {
                     ]}
                   >
                     <Select
-                      disabled={data?.status.toLowerCase() != "unapplied"}
                       showSearch
                       placeholder="Select a source"
                       optionFilterProp="label"
@@ -1218,7 +1212,6 @@ export default function Enter() {
                     ]}
                   >
                     <Select
-                      disabled={data?.status.toLowerCase() != "unapplied"}
                       showSearch
                       placeholder="Select a source id"
                       optionFilterProp="label"

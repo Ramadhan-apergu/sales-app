@@ -273,8 +273,6 @@ export const creditMemoAliases = {
     entity: "Customer ID",
     trandate: "Date",
     memo: "Memo",
-    source_tranid: "Source ID",
-    sources: "Source Type",
   },
   item: {
     unapplied: "Unapplied",
@@ -289,8 +287,6 @@ export const creditMemoAliases = {
     amount: "Total Amount",
     taxrate1: "Tax Rate",
     taxamount: "Tax Amount",
-    totaldiscount: "Total Discount",
-    discountitem: "@ Discount",
   },
   apply: {
     invoiceid: "Invoice ID",
@@ -364,7 +360,6 @@ export const salesReportAliases = {
   no: "No",
   diskon: "Total Diskon",
   diskonfreeitem: "Diskon Free Item",
-  diskonsatuan: "@ Diskon",
 };
 
 export const productReportAliases = {
@@ -454,9 +449,5 @@ export const rmaAliases = {
     totaldiscount: "Total Discount",
     taxvalue: "Tax Value",
     isfree: "Free",
-  },
-  payment: {
-    refundmethod: "Refund Method",
-    bankaccount: "Bank Account",
   },
 };
