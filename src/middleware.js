@@ -7,7 +7,7 @@ const PROTECTED_ROUTES = [
   "/accounting",
   "finance",
 ];
-
+//comand
 function sha1(message) {
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
