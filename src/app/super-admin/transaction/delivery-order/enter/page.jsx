@@ -328,8 +328,8 @@ function Enter({ salesOrderId }) {
       }
 
       if (
-        new Date(payloadToInsert.trandate).toDateString() <
-        new Date(dataSalesOrder.trandate).toDateString()
+        new Date(payloadToInsert.trandate).getTime() <
+        new Date(dataSalesOrder.trandate).getTime()
       ) {
         notify(
           "error",

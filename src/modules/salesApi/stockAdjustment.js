@@ -28,7 +28,7 @@ export default class StockAdjustmentFetch extends ProcessFetch {
         formData,
         {
           isMultipart: true,
-        },
+        }
       );
       return new this().processResponse(response);
     } catch (error) {
@@ -41,42 +41,11 @@ export default class StockAdjustmentFetch extends ProcessFetch {
     limit = 10,
     itemid = "",
     displayname = "",
-    itemprocessfamily = "",
-    startdate = "",
-    enddate = "",
+    itemprocessfamily = ""
   ) {
     try {
       const response = await this.axios.get("/report/stock-item", {
-        params: {
-          offset,
-          limit,
-          itemid,
-          displayname,
-          itemprocessfamily,
-          startdate,
-          enddate,
-        },
-      });
-      return new this().processResponse(response);
-    } catch (error) {
-      return new this().processError(error);
-    }
-  }
-
-  static async getStockStatusExport(
-    itemid = "",
-    displayname = "",
-    itemprocessfamily = "",
-    startdate = "",
-    enddate = "",
-  ) {
-    try {
-      const response = await this.axios.post("/report/stock-item-export", {
-        itemid,
-        displayname,
-        itemprocessfamily,
-        startdate,
-        enddate,
+        params: { offset, limit, itemid, displayname, itemprocessfamily },
       });
       return new this().processResponse(response);
     } catch (error) {
@@ -88,7 +57,7 @@ export default class StockAdjustmentFetch extends ProcessFetch {
     try {
       const response = await this.axios.post(
         "/trx/validate-itemid-stock",
-        payload,
+        payload
       );
       return new this().processResponse(response);
     } catch (error) {

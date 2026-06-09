@@ -1,6 +1,12 @@
 "use client";
 import Layout from "@/components/accounting/Layout";
-import { EditOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EditOutlined,
+  ExportOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import ItemFetch from "@/modules/salesApi/item";
@@ -68,7 +74,7 @@ function Item() {
         page,
         limit,
         searchName == "" ? null : searchName,
-        !searchCode || searchCode == "" ? null : searchCode
+        !searchCode || searchCode == "" ? null : searchCode,
       );
       const resData = getResponseHandler(response, notify);
 
@@ -200,7 +206,7 @@ function Item() {
             </Button>
           </div>
         </div>
-        <div className="w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
+        <div className="w-full flex flex-col lg:flex-row justify-between items-end lg:items-center p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
@@ -231,7 +237,12 @@ function Item() {
               />
             </div>
           </div>
-          <div className="flex gap-2"></div>
+          <div className="flex gap-2">
+            <ExportButton
+              disabled={!datas || datas.length == 0}
+              notify={notify}
+            />
+          </div>
         </div>
         {!isLoading ? (
           <>
@@ -254,7 +265,7 @@ function Item() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/accounting/master-data/${title}?page=${newPage}&limit=${newLimit}`
+                    `/accounting/master-data/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"
@@ -278,5 +289,50 @@ export default function ItemPage() {
     <Suspense fallback={<LoadingSpinProcessing />}>
       <Item />
     </Suspense>
+  );
+}
+
+function ExportButton({ disabled = true, filters = {}, notify = null }) {
+  const [isloading, setIsloading] = useState(false);
+  const [linkdownload, setLinkdownload] = useState(null);
+
+  async function handleExport() {
+    try {
+      setIsloading(true);
+      const response = await ItemFetch.exportItem(
+        filters.searchName,
+        filters.displayname,
+        filters.itemprocessfamily,
+      );
+
+      const resData = getResponseHandler(response, notify);
+      if (resData) {
+        setLinkdownload(resData.url);
+      }
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+  return (
+    <Button
+      onClick={() => {
+        if (linkdownload) {
+          window.open(linkdownload);
+        } else {
+          handleExport();
+        }
+      }}
+      type={linkdownload ? "primary" : ""}
+      disabled={disabled}
+      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
+      loading={isloading}
+    >
+      {linkdownload ? "Download" : "Export All"}
+    </Button>
   );
 }

@@ -92,7 +92,7 @@ export default class ItemFetch extends ProcessFetch {
     }
   }
 
-  static async getItemFamily() {
+  static async getItemFamily(id) {
     try {
       const response = await this.axios.get(`/master/itemprocessfamily`);
       return new this().processResponse(response);
@@ -113,12 +113,17 @@ export default class ItemFetch extends ProcessFetch {
     }
   }
 
-  static async exportItem(payload) {
+  static async exportItem(
+    itemid = "",
+    displayname = "",
+    itemprocessfamily = "",
+  ) {
     try {
-      const response = await this.axios.post(
-        "/master/items/export",
-        payload,
-      );
+      const response = await this.axios.post("/master/items/export", {
+        itemid,
+        displayname,
+        itemprocessfamily,
+      });
       return new this().processResponse(response);
     } catch (error) {
       return new this().processError(error);

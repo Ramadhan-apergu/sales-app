@@ -180,11 +180,9 @@ export default function Enter() {
 
   const initialState = {
     payloadPrimary: {
-      source_tranid: "",
       entity: "",
       trandate: "",
       memo: "",
-      sources: "",
     },
     payloadSummary: {
       subtotal: 0,
@@ -256,11 +254,9 @@ export default function Enter() {
     dispatch({
       type: "SET_PRIMARY",
       payload: {
-        source_tranid: data.source_tranid,
         entity: data.entity,
         trandate: formatDateToShort(data.trandate),
         memo: data.memo,
-        sources: data.sources,
       },
     });
 
@@ -443,7 +439,6 @@ export default function Enter() {
                             }/edit`,
                           );
                         }}
-                        disabled={data?.status?.toLowerCase() != "unapplied"}
                       >
                         {isLargeScreen ? "Edit" : ""}
                       </Button>
@@ -478,18 +473,6 @@ export default function Enter() {
                     type="SET_PRIMARY"
                     payload={state.payloadPrimary}
                     data={[
-                      {
-                        key: "sources",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
-                      {
-                        key: "source_tranid",
-                        input: "input",
-                        isAlias: true,
-                        isRead: true,
-                      },
                       {
                         key: "entity",
                         input: "input",
