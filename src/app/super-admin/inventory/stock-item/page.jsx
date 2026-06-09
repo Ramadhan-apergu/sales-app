@@ -76,6 +76,7 @@ function StockItem() {
         style: { minWidth: 200 },
       }),
     },
+    
     {
       title: "Display Name/Code",
       dataIndex: "displayname",
