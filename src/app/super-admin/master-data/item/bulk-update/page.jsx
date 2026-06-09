@@ -14,10 +14,14 @@ import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { createResponseHandler } from "@/utils/responseHandlers";
+import {
+  createResponseHandler,
+  getResponseHandler,
+} from "@/utils/responseHandlers";
 import * as XLSX from "xlsx";
 import ItemFetch from "@/modules/salesApi/item";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { saveAs } from "file-saver";
 
 function TableCustom({ data, aliases }) {
   if (!data?.length) return null;
@@ -235,23 +239,6 @@ export default function Enter() {
     }
   };
 
-  const handleDownloadTemplate = () => {
-    const header = [
-      [
-        "Item Id",
-        "Item Processing Family",
-        "Price Family",
-        "Addons",
-        "Rate Transaksi",
-        "Effective Date",
-      ],
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(header);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "template.xlsx");
-  };
-
   return (
     <>
       <Layout pageTitle="">
@@ -280,12 +267,7 @@ export default function Enter() {
                   {uploadedFile.name}
                 </Button>
               )}
-              <Button
-                icon={<DownloadOutlined />}
-                onClick={handleDownloadTemplate}
-              >
-                {isLargeScreen ? "Template" : ""}
-              </Button>
+              <ExportButton disabled={false} notify={notify} />
               <Button
                 type="primary"
                 icon={<CheckOutlined />}
@@ -331,5 +313,59 @@ export default function Enter() {
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
     </>
+  );
+}
+
+function ExportButton({ disabled = true, filters = {}, notify = null }) {
+  const [isloading, setIsloading] = useState(false);
+
+  async function handleExport() {
+    try {
+      setIsloading(true);
+      const responseExport = await ItemFetch.exportItem(
+        filters.searchName,
+        filters.displayname,
+        filters.itemprocessfamily,
+      );
+
+      const resData = getResponseHandler(responseExport, notify);
+      if (!resData) return;
+
+      const downloadUrl = resData.url;
+      const responseDownload = await fetch("/api/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: downloadUrl,
+          filename: "template.xlsx",
+        }),
+      });
+
+      if (!responseDownload.ok) {
+        throw new Error("Download failed");
+      }
+
+      const blob = await responseDownload.blob();
+      const filename = "template.xlsx";
+      saveAs(blob, filename);
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+
+  return (
+    <Button
+      onClick={handleExport}
+      disabled={disabled}
+      icon={<DownloadOutlined />}
+      loading={isloading}
+    >
+      Template
+    </Button>
   );
 }
