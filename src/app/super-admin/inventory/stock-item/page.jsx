@@ -10,12 +10,6 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
-import { DatePicker } from "antd";
-import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
-import { Button } from "antd";
-import { formatRupiah } from "@/utils/formatRupiah";
-
-const { RangePicker } = DatePicker;
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -36,7 +30,6 @@ function StockItem() {
   const [searchItemTemp, setSearchItemTemp] = useState("");
   const [searchItemProcess, setSearchItemProcess] = useState("");
   const [searchItemProcessTemp, setSearchItemProcessTemp] = useState("");
-  const [dateRange, setDateRange] = useState(["", ""]);
   const title = "stock-item";
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
@@ -52,8 +45,6 @@ function StockItem() {
           searchItem,
           null,
           searchItemProcess,
-          dateRange[0],
-          dateRange[1],
         );
 
         const resData = getResponseHandler(response, notify);
@@ -70,7 +61,7 @@ function StockItem() {
     };
 
     fetchData();
-  }, [page, limit, pathname, searchItem, searchItemProcess, dateRange]);
+  }, [page, limit, pathname, searchItem, searchItemProcess]);
 
   const columns = [
     {
@@ -135,59 +126,6 @@ function StockItem() {
       onCell: () => ({
         style: { minWidth: 200 },
       }),
-    },
-    {
-      title: "Saldo Awal",
-      dataIndex: "saldo_awal",
-      key: "saldo_awal",
-      align:'right',
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>
-          {formatRupiah(text)}
-        </p>
-      ),
-    },
-    {
-      title: "In",
-      dataIndex: "qty_in",
-      key: "qty_in",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>
-          {typeof text == "number"
-            ? text.toLocaleString("en")
-            : parseFloat(text).toLocaleString("en")}
-        </p>
-      ),
-    },
-    {
-      title: "Out",
-      dataIndex: "qty_out",
-      key: "qty_out",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>
-          {typeof text == "number"
-            ? text.toLocaleString("en")
-            : parseFloat(text).toLocaleString("en")}
-        </p>
-      ),
     },
   ];
   return (
@@ -256,27 +194,6 @@ function StockItem() {
                 }}
               />
             </div>
-            <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden md:block text-sm font-semibold leading-none">
-                Date
-              </label>
-              <RangePicker
-                format="YYYY-MM-DD"
-                onChange={(dates, dateStrings) => {
-                  setDateRange(dateStrings);
-                }}
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <ExportButton
-              disabled={!datas.length}
-              notify={notify}
-              itemid={searchItem}
-              displayname={""}
-              itemprocessfamily={searchItemProcess}
-              dateRange={dateRange}
-            />
           </div>
         </div>
         {!isLoading ? (
@@ -324,74 +241,5 @@ export default function StockItemPage() {
     <Suspense fallback={<LoadingSpinProcessing />}>
       <StockItem />
     </Suspense>
-  );
-}
-
-function ExportButton({
-  disabled = false,
-  notify = null,
-  itemid = "",
-  displayname = "",
-  itemprocessfamily = "",
-  dateRange = ["", ""],
-}) {
-  const [isloading, setIsloading] = useState(false);
-  const [linkdownload, setLinkdownload] = useState(null);
-
-  useEffect(() => {
-    setLinkdownload(null);
-  }, [itemid, displayname, itemprocessfamily, dateRange]);
-
-  async function handleExport() {
-    try {
-      setIsloading(true);
-
-      const payload = {
-        itemid: itemid || "",
-        displayname: displayname || "",
-        itemprocessfamily: itemprocessfamily || "",
-        startdate: dateRange?.[0] || "",
-        enddate: dateRange?.[1] || "",
-      };
-
-      const response = await StockAdjustmentFetch.getStockStatusExport(
-        payload.itemid,
-        payload.displayname,
-        payload.itemprocessfamily,
-        payload.startdate,
-        payload.enddate,
-      );
-
-      const resData = getResponseHandler(response, notify);
-
-      if (resData) {
-        setLinkdownload(resData.url);
-      }
-    } catch (error) {
-      console.error(error);
-      if (notify) {
-        notify("error", "Failed", error?.message || "Failed Export");
-      }
-    } finally {
-      setIsloading(false);
-    }
-  }
-
-  return (
-    <Button
-      onClick={() => {
-        if (linkdownload) {
-          window.open(linkdownload);
-        } else {
-          handleExport();
-        }
-      }}
-      type={linkdownload ? "primary" : ""}
-      disabled={disabled}
-      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
-      loading={isloading}
-    >
-      {linkdownload ? "Download" : "Export All"}
-    </Button>
   );
 }

@@ -289,6 +289,7 @@ export default function Enter() {
         const resData = getResponseHandler(response);
 
         setDataInvoiceCustomer(resData);
+        console.log(resData);
 
         dispatch({
           type: "SET_ITEMS",
@@ -652,39 +653,15 @@ export default function Enter() {
               },
               {
                 key: "bankaccount",
-                input:
-                  state.payloadPayment.paymentoption == "transfer"
-                    ? "select"
-                    : "input",
+                input: "select",
                 options: bankOptions,
                 isAlias: true,
-                hidden: !["transfer", "giro"].includes(
-                  state.payloadPayment.paymentoption,
-                ),
+                hidden: state.payloadPayment.paymentoption != "transfer",
               },
             ]}
             aliases={paymentAliases.payment}
             onChange={(type, payload) => {
-              let updatePayload = payload;
-              const isPaymentChanged =
-                payload.paymentoption !== state.payloadPayment.paymentoption;
-
-              if (isPaymentChanged) {
-                if (payload.paymentoption === "transfer") {
-                  updatePayload = {
-                    ...updatePayload,
-                    bankaccount: "Bank BCA/CV SUKSES MANDIRI/3831487788",
-                  };
-                }
-
-                if (payload.paymentoption === "giro") {
-                  updatePayload = {
-                    ...updatePayload,
-                    bankaccount: "",
-                  };
-                }
-              }
-              dispatch({ type, payload: updatePayload });
+              dispatch({ type, payload });
             }}
           />
           <div className="w-full flex flex-col gap-2 items-end">

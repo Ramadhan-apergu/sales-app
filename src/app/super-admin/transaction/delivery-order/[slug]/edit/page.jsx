@@ -346,7 +346,6 @@ export default function Page() {
   }
 
   const handleSubmit = async () => {
-    setIsLoadingSubmit(true);
     try {
       let payloadToInsert = {
         ...state.payloadPrimary,
@@ -408,7 +407,6 @@ export default function Page() {
     } catch (error) {
       notify("error", "Error", error.message || "Internal server error");
     } finally {
-      setIsLoadingSubmit(false);
     }
   };
 

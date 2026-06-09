@@ -273,8 +273,6 @@ export const creditMemoAliases = {
     entity: "Customer ID",
     trandate: "Date",
     memo: "Memo",
-    source_tranid: "Source ID",
-    sources: "Source Type",
   },
   item: {
     unapplied: "Unapplied",
@@ -362,7 +360,6 @@ export const salesReportAliases = {
   no: "No",
   diskon: "Total Diskon",
   diskonfreeitem: "Diskon Free Item",
-  diskonsatuan: "@ Diskon",
 };
 
 export const productReportAliases = {

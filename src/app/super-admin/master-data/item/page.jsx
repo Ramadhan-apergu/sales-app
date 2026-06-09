@@ -1,6 +1,12 @@
 "use client";
 import Layout from "@/components/superAdmin/Layout";
-import { EditOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EditOutlined,
+  ExportOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import ItemFetch from "@/modules/salesApi/item";
@@ -13,7 +19,6 @@ import useNotification from "@/hooks/useNotification";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
-import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -201,7 +206,7 @@ function Item() {
             </Button>
           </div>
         </div>
-        <div className="w-full flex justify-between items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
+        <div className="w-full flex flex-col lg:flex-row justify-between items-end lg:items-center p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden lg:block text-sm font-semibold leading-none">
@@ -234,10 +239,8 @@ function Item() {
           </div>
           <div className="flex gap-2">
             <ExportButton
-              disabled={!datas.length}
+              disabled={!datas || datas.length == 0}
               notify={notify}
-              searchCode={searchCode}
-              searchName={searchName}
             />
           </div>
         </div>
@@ -289,31 +292,20 @@ export default function ItemPage() {
   );
 }
 
-function ExportButton({
-  disabled = false,
-  notify = null,
-  searchCode = "",
-  searchName = "",
-}) {
+function ExportButton({ disabled = true, filters = {}, notify = null }) {
   const [isloading, setIsloading] = useState(false);
   const [linkdownload, setLinkdownload] = useState(null);
-
-  useEffect(() => {
-    setLinkdownload(null);
-  }, [searchCode, searchName]);
 
   async function handleExport() {
     try {
       setIsloading(true);
+      const response = await ItemFetch.exportItem(
+        filters.searchName,
+        filters.displayname,
+        filters.itemprocessfamily,
+      );
 
-      const payload = {
-        itemid: searchCode || "",
-        displayname: searchName || "",
-      };
-
-      const response = await ItemFetch.exportItem(payload);
       const resData = getResponseHandler(response, notify);
-
       if (resData) {
         setLinkdownload(resData.url);
       }
@@ -326,7 +318,6 @@ function ExportButton({
       setIsloading(false);
     }
   }
-
   return (
     <Button
       onClick={() => {
