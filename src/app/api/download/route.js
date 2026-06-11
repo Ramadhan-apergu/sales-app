@@ -6,7 +6,10 @@ export async function POST(request) {
     const { url, filename } = await request.json();
 
     if (!url) {
-      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "URL is required" },
+        { status: 400 }
+      );
     }
 
     const response = await fetch(url);
@@ -14,37 +17,49 @@ export async function POST(request) {
     if (!response.ok) {
       return NextResponse.json(
         { error: "Failed to fetch file" },
-        { status: response.status },
+        { status: response.status }
       );
     }
 
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const ref = sheet["!ref"];
 
     if (ref) {
       const range = XLSX.utils.decode_range(ref);
-      const headers = {};
-      const keepColumns = ["Item Id", "Item Processing Family"];
 
-      for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: range.s.r, c: col });
-        const cell = sheet[cellAddress];
-        if (cell) {
-          headers[col] = cell.v;
-        }
-      }
+      // Tambah kolom baru di sebelah kanan kolom terakhir
+      const newCol = range.e.c + 1;
 
+      // Header "Convertation"
+      const headerCell = XLSX.utils.encode_cell({
+        r: range.s.r,
+        c: newCol,
+      });
+
+      sheet[headerCell] = {
+        t: "s",
+        v: "Convertation",
+      };
+
+      // Isi seluruh baris data dengan string kosong
       for (let row = range.s.r + 1; row <= range.e.r; row++) {
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const header = headers[col];
-          if (header && !keepColumns.includes(header)) {
-            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-            delete sheet[cellAddress];
-          }
-        }
+        const cellAddress = XLSX.utils.encode_cell({
+          r: row,
+          c: newCol,
+        });
+
+        sheet[cellAddress] = {
+          t: "s",
+          v: "",
+        };
       }
+
+      // Update range sheet agar kolom baru ikut tersimpan
+      range.e.c = newCol;
+      sheet["!ref"] = XLSX.utils.encode_range(range);
     }
 
     const modifiedBuffer = XLSX.write(workbook, {
@@ -62,7 +77,7 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json(
       { error: "Download failed" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
