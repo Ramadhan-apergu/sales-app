@@ -14,14 +14,10 @@ import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import {
-  createResponseHandler,
-  getResponseHandler,
-} from "@/utils/responseHandlers";
+import { createResponseHandler } from "@/utils/responseHandlers";
 import * as XLSX from "xlsx";
 import ItemFetch from "@/modules/salesApi/item";
 import { formatRupiah } from "@/utils/formatRupiah";
-import { saveAs } from "file-saver";
 
 function TableCustom({ data, aliases }) {
   if (!data?.length) return null;
@@ -86,6 +82,10 @@ export default function Enter() {
     "Addons",
     "Rate Transaksi",
     "Effective Date",
+    "Conversion",
+    "Dimensi",
+    "Base Unit",
+    "Unit 2",
   ];
 
   const props = {
@@ -316,45 +316,59 @@ export default function Enter() {
   );
 }
 
-function ExportButton({ disabled = true, filters = {}, notify = null }) {
-  const [isloading, setIsloading] = useState(false);
+function ExportButton({ disabled = true, notify = null }) {
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleExport() {
     try {
-      setIsloading(true);
-      const responseExport = await ItemFetch.exportItem(
-        filters.searchName,
-        filters.displayname,
-        filters.itemprocessfamily,
-      );
+      setIsLoading(true);
 
-      const resData = getResponseHandler(responseExport, notify);
-      if (!resData) return;
+      const headers = [
+        "Item Id",
+        "Item Processing Family",
+        "Price Family",
+        "Addons",
+        "Rate Transaksi",
+        "Effective Date",
+        "Dimensi",
+        "Conversion",
+        "Base Unit",
+        "Unit 2",
+      ];
 
-      const downloadUrl = resData.url;
-      const responseDownload = await fetch("/api/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: downloadUrl,
-          filename: "template.xlsx",
-        }),
-      });
+      // Membuat worksheet hanya dengan header
+      const worksheet = XLSX.utils.aoa_to_sheet([headers]);
 
-      if (!responseDownload.ok) {
-        throw new Error("Download failed");
-      }
+      // Optional: mengatur lebar kolom
+      worksheet["!cols"] = [
+        { wch: 20 },
+        { wch: 25 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 },
+      ];
 
-      const blob = await responseDownload.blob();
-      const filename = "template.xlsx";
-      saveAs(blob, filename);
+      // Membuat workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
+
+      // Download file
+      XLSX.writeFile(workbook, "template.xlsx");
     } catch (error) {
       console.error(error);
-      if (notify) {
-        notify("error", "Failed", error?.message || "Failed Export");
-      }
+
+      notify?.(
+        "error",
+        "Failed",
+        error?.message || "Failed to export template",
+      );
     } finally {
-      setIsloading(false);
+      setIsLoading(false);
     }
   }
 
@@ -363,7 +377,7 @@ function ExportButton({ disabled = true, filters = {}, notify = null }) {
       onClick={handleExport}
       disabled={disabled}
       icon={<DownloadOutlined />}
-      loading={isloading}
+      loading={isLoading}
     >
       Template
     </Button>
