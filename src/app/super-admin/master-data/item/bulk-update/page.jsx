@@ -82,10 +82,6 @@ export default function Enter() {
     "Addons",
     "Rate Transaksi",
     "Effective Date",
-    "Conversion",
-    "Dimensi",
-    "Base Unit",
-    "Unit 2",
   ];
 
   const props = {
@@ -239,6 +235,23 @@ export default function Enter() {
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const header = [
+      [
+        "Item Id",
+        "Item Processing Family",
+        "Price Family",
+        "Addons",
+        "Rate Transaksi",
+        "Effective Date",
+      ],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(header);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "template.xlsx");
+  };
+
   return (
     <>
       <Layout pageTitle="">
@@ -267,7 +280,12 @@ export default function Enter() {
                   {uploadedFile.name}
                 </Button>
               )}
-              <ExportButton disabled={false} notify={notify} />
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={handleDownloadTemplate}
+              >
+                {isLargeScreen ? "Template" : ""}
+              </Button>
               <Button
                 type="primary"
                 icon={<CheckOutlined />}
@@ -313,73 +331,5 @@ export default function Enter() {
       {isLoadingSubmit && <LoadingSpinProcessing />}
       {contextNotify}
     </>
-  );
-}
-
-function ExportButton({ disabled = true, notify = null }) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleExport() {
-    try {
-      setIsLoading(true);
-
-      const headers = [
-        "Item Id",
-        "Item Processing Family",
-        "Price Family",
-        "Addons",
-        "Rate Transaksi",
-        "Effective Date",
-        "Dimensi",
-        "Conversion",
-        "Base Unit",
-        "Unit 2",
-      ];
-
-      // Membuat worksheet hanya dengan header
-      const worksheet = XLSX.utils.aoa_to_sheet([headers]);
-
-      // Optional: mengatur lebar kolom
-      worksheet["!cols"] = [
-        { wch: 20 },
-        { wch: 25 },
-        { wch: 20 },
-        { wch: 15 },
-        { wch: 18 },
-        { wch: 18 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-      ];
-
-      // Membuat workbook
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
-
-      // Download file
-      XLSX.writeFile(workbook, "template.xlsx");
-    } catch (error) {
-      console.error(error);
-
-      notify?.(
-        "error",
-        "Failed",
-        error?.message || "Failed to export template",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <Button
-      onClick={handleExport}
-      disabled={disabled}
-      icon={<DownloadOutlined />}
-      loading={isLoading}
-    >
-      Template
-    </Button>
   );
 }
