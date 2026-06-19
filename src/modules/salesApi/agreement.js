@@ -48,10 +48,10 @@ export default class AgreementFetch extends ProcessFetch {
     }
   }
 
-  static async getAgreementApply(offset = 0, limit = 10, customerid = "") {
+  static async getAgreementApply(offset = 0, limit = 10, customer = "") {
     try {
       const response = await this.axios.get("/master/agreement-apply", {
-        params: { offset, limit, customerid },
+        params: { offset, limit, customer },
       });
       return new this().processResponse(response);
     } catch (error) {
