@@ -657,6 +657,7 @@ export default function Enter() {
                 onChange={(_, option) => handleCustomerChange(option.data)}
                 isRequired={true}
                 allowClear={false}
+                status="active"
               />
             </div>
           </div>

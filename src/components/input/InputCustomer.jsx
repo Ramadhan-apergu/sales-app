@@ -21,6 +21,7 @@ export default function InputCustomer({
   allowClear = true,
   placeholder = "Select a customer",
   isRequired = false, // <-- tanda mandatory
+  status = "",
 }) {
   const { notify } = useNotification();
 
@@ -39,7 +40,12 @@ export default function InputCustomer({
 
     try {
       setIsLoading(true);
-      const response = await CustomerFetch.get(pageNum, limit, null, keyword);
+      const response = await CustomerFetch.get(
+        pageNum,
+        limit,
+        status || null,
+        keyword,
+      );
       const resData = getResponseHandler(response, notify);
 
       if (resData) {

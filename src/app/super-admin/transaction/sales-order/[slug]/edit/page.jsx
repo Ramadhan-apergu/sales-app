@@ -797,6 +797,7 @@ export default function Enter() {
                       }
                       isRequired={true}
                       allowClear={false}
+                      status="active"
                     />
                   )}
                 </Form>
