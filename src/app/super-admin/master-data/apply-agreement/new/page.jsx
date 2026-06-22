@@ -17,6 +17,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import AgreementFetch from "@/modules/salesApi/agreement";
 import { formatDateToShort } from "@/utils/formatDate";
 import InputCustomer from "@/components/input/InputCustomer";
+import InputAgreement from "@/components/input/InputAgreement";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -69,35 +70,7 @@ export default function AgreementApplyNew() {
   const [isModal, setIsModal] = useState(false);
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [dataAgreement, setDataAgreement] = useState([]);
   const [agreementSelectedTemp, setAgreementSelectedTemp] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchDataAgreement = async () => {
-      try {
-        const response = await AgreementFetch.get(0, 10000, "active");
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          setDataAgreement(
-            resData.list.map((agreement) => ({
-              ...agreement,
-              label: agreement.agreementname,
-              value: agreement.id,
-            })),
-          );
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDataAgreement();
-  }, []);
 
   const handleSubmit = async () => {
     setIsLoadingSubmit(true);
@@ -189,6 +162,7 @@ export default function AgreementApplyNew() {
                   }}
                   isRequired
                   label="Customer ID"
+                  allowClear={false}
                 />
               </div>
               <span className="hidden lg:static"> </span>
@@ -261,19 +235,18 @@ export default function AgreementApplyNew() {
                   Agreement
                 </Divider>
                 <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                  <p>Agreement Name</p>
-                  <Select
+                  <InputAgreement
                     value={agreementSelectedTemp?.value || null}
-                    showSearch
-                    placeholder="Select an item"
-                    optionFilterProp="label"
-                    onChange={(_, agreement) => {
+                    allowClear={false}
+                    onChange={(_, option) => {
+                      const agreement = option.data;
                       const findAgreementExisting = payloadAgreementList.find(
                         (itemAgreement) => itemAgreement.id == agreement.id,
                       );
                       if (!findAgreementExisting) {
                         setAgreementSelectedTemp({
                           ...agreement,
+                          ...option,
                           effectivedate: agreement.effectivedate
                             ? formatDateToShort(agreement.effectivedate)
                             : agreement.effectivedate,
@@ -287,8 +260,6 @@ export default function AgreementApplyNew() {
                         setAgreementSelectedTemp(null);
                       }
                     }}
-                    options={dataAgreement}
-                    style={{ width: "100%" }}
                   />
                 </div>
               </div>

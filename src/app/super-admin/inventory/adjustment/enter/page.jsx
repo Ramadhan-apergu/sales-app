@@ -18,6 +18,7 @@ import ItemFetch from "@/modules/salesApi/item";
 import dayjs from "dayjs";
 import { stockAdjustmentAliases } from "@/utils/aliases";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
+import InputItem from "@/components/input/InputItem";
 
 function formatRupiah(number) {
   if (typeof number !== "number" || isNaN(number)) {
@@ -82,31 +83,7 @@ export default function Enter() {
   const title = "adjustment";
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-  const [dataItem, setDataItem] = useState([]);
   const [itemSelected, setItemSelected] = useState(null);
-
-  useEffect(() => {
-    async function fetchItem() {
-      try {
-        const response = await ItemFetch.get(0, 10000);
-        const resData = getResponseHandler(response);
-
-        if (resData) {
-          const addLabelItem = resData.list.map((item) => {
-            return {
-              ...item,
-              label: item.displayname,
-              value: item.id,
-            };
-          });
-          setDataItem(addLabelItem);
-        }
-      } catch (error) {
-        notify("error", "Error", "Failed get data item");
-      }
-    }
-    fetchItem();
-  }, []);
 
   const initialState = {
     payloadPrimary: {
@@ -192,11 +169,6 @@ export default function Enter() {
       notify("error", "Error", "Item has been added.");
       return;
     }
-
-    /*if (itemTableTemp.qty <= 0) {
-      notify("error", "Error", "Please enter a quantity greater than 0.");
-      return;
-    }*/
 
     dispatch({
       type: "SET_STOCK",
@@ -369,13 +341,11 @@ export default function Enter() {
                   Item
                 </Divider>
                 <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                  <p>Item</p>
-                  <Select
+                  <InputItem
+                    allowClear={false}
                     value={itemSelected?.value || undefined}
-                    showSearch
-                    placeholder="Select an item"
-                    optionFilterProp="label"
-                    onChange={(_, item) => {
+                    onChange={(_, option) => {
+                      const item = option.data;
                       const isDuplicate = state.stock_opname_det.some(
                         (tableItem) => tableItem.itemid === item.value,
                       );
@@ -409,8 +379,6 @@ export default function Enter() {
                         price: item.price,
                       }));
                     }}
-                    options={dataItem}
-                    style={{ width: "100%" }}
                   />
                 </div>
               </div>

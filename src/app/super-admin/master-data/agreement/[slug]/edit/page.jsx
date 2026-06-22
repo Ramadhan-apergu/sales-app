@@ -391,7 +391,6 @@ export default function AgreementEdit() {
   const [modal, contextHolder] = Modal.useModal();
   const title = "agreement";
   const [data, setData] = useState(null);
-  const [dataItem, setDataItem] = useState(null);
   const [itemprocessfamilyOptions, setItemprocessfamilyOptions] = useState([]);
   const [payloadCustomForm, setPayloadCustomForm] = useState({
     customform: "2",
@@ -499,25 +498,6 @@ export default function AgreementEdit() {
       }
     }
     fetchData();
-
-    const fetchDataItem = async () => {
-      try {
-        const response = await ItemFetch.get(0, 10000, null, null, null);
-        const resData = getResponseHandler(response);
-        if (resData) {
-          const dataWithLabel = resData.list.map((item) => ({
-            ...item,
-            label: item.displayname,
-            value: item.id,
-          }));
-          setDataItem(dataWithLabel);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      }
-    };
-
-    fetchDataItem();
     fetchItemFamily();
   }, []);
 
