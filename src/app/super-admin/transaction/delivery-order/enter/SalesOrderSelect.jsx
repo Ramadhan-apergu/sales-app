@@ -12,7 +12,7 @@ import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { formatDateToShort } from "@/utils/formatDate";
-import CustomerFetch from "@/modules/salesApi/customer";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -68,90 +68,6 @@ function SalesOrder() {
     fetchData();
   }, [page, limit, pathname, statusFilter, searchName, dateRange]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-
-        const response = await CustomerFetch.get(0, 10000, null);
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          const mapingCustomerOption = resData.list.map((data) => {
-            return {
-              ...data,
-              value: data.id,
-              label: data.companyname,
-            };
-          });
-          setDataCustomer(mapingCustomerOption);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleEdit = (record) => {
-    router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
-  };
-
-  const handleStatusChange = ({ key }) => {
-    dropdownItems.forEach((item) => {
-      if (item.key == key) {
-        const label = item.label.toLocaleLowerCase();
-        if (label != statusFilter.toLocaleLowerCase()) {
-          switch (label) {
-            case "all status":
-              setStatusFilter("all");
-              break;
-            // case 'pending approval':
-            //     setStatusFilter('pending')
-            //     break;
-            default:
-              setStatusFilter(item.label);
-          }
-        }
-      }
-    });
-  };
-
-  const dropdownItems = [
-    {
-      key: "1",
-      label: "All Status",
-    },
-    {
-      key: "2",
-      label: "Open",
-    },
-    {
-      key: "3",
-      label: "Fulfilled ",
-    },
-    {
-      key: "4",
-      label: "Partially Fulfilled",
-    },
-    {
-      key: "5",
-      label: "Credit Hold",
-    },
-    {
-      key: "6",
-      label: "Closed",
-    },
-    {
-      key: "7",
-      label: "Pending Approval",
-    },
-  ];
-
   const columns = [
     {
       title: "No. SO",
@@ -206,23 +122,6 @@ function SalesOrder() {
     },
   ];
 
-  // const fetchData = async () => {
-  //   try {
-  //     setIsloading(true);
-  //     const response = await SalesOrderFetch.get(page, limit, statusFilter, searchName);
-  //     const resData = getResponseHandler(response, notify)
-
-  //     if (resData) {
-  //         setDatas(resData.list)
-  //         setTotalItems(resData.total_items)
-  //     }
-  //   } catch (error) {
-  //       notify('error', 'Error', error?.message || "Internal Server error");
-  //   } finally {
-  //     setIsloading(false);
-  //   }
-  // };
-
   return (
     <>
       <div className="w-full flex flex-col gap-4">
@@ -243,30 +142,10 @@ function SalesOrder() {
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
             <div className="hidden lg:flex flex-col justify-start items-start gap-1">
-              <label className="text-sm font-semibold leading-none">
-                Customer Name
-              </label>
-              <Select
-                showSearch
-                placeholder="Select a person"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
+              <FilterCustomer
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
-                allowClear
               />
             </div>
             <div className="flex flex-col justify-start items-start gap-1">
@@ -280,8 +159,6 @@ function SalesOrder() {
                   onChange={(value, dateString) => {
                     setDateRange(dateString);
                   }}
-                  //   onOk={(val) => {
-                  //   }}
                 />
               </div>
             </div>

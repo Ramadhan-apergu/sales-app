@@ -11,8 +11,8 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import { formatDateToShort } from "@/utils/formatDate";
-import CustomerFetch from "@/modules/salesApi/customer";
 import InvoiceFetch from "@/modules/salesApi/invoice";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -27,7 +27,6 @@ function DeliveryOrder() {
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
 
   const [datas, setDatas] = useState([]);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -66,35 +65,6 @@ function DeliveryOrder() {
 
     fetchData();
   }, [page, limit, pathname, statusFilter, searchName]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-
-        const response = await CustomerFetch.get(0, 10000, null);
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          const mapingCustomerOption = resData.list.map((data) => {
-            return {
-              ...data,
-              value: data.id,
-              label: data.companyname,
-            };
-          });
-          setDataCustomer(mapingCustomerOption);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const columns = [
     {
@@ -159,30 +129,10 @@ function DeliveryOrder() {
         <div className="w-full flex flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
-                Customer Name
-              </label>
-              <Select
-                showSearch
-                placeholder="Select a person"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
+              <FilterCustomer
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
-                allowClear
               />
             </div>
           </div>

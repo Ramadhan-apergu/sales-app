@@ -33,6 +33,7 @@ import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import { Dropdown } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -354,30 +355,10 @@ function SalesOrder() {
         <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
             <div className="hidden lg:flex flex-col justify-start items-start gap-1">
-              <label className="text-sm font-semibold leading-none">
-                Customer ID
-              </label>
-              <Select
-                showSearch
-                placeholder="Select a person"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={dataCustomer}
-                styles={{
-                  popup: {
-                    root: {
-                      minWidth: 250,
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                }}
+              <FilterCustomer
                 onChange={(value, option) => {
                   setSearchName(option?.companyname || "");
                 }}
-                allowClear
               />
             </div>
             <div className="flex flex-col justify-start items-start gap-1">

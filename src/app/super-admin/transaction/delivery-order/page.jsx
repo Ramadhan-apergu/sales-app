@@ -19,6 +19,7 @@ import { getResponseHandler } from "@/utils/responseHandlers";
 import { formatDateToShort } from "@/utils/formatDate";
 import CustomerFetch from "@/modules/salesApi/customer";
 import FullfillmentFetch from "@/modules/salesApi/itemFullfillment";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -71,35 +72,6 @@ function DeliveryOrder() {
 
     fetchData();
   }, [page, limit, pathname, statusFilter, searchName, toggleRefetch]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-
-        const response = await CustomerFetch.get(0, 10000, null);
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          const mapingCustomerOption = resData.list.map((data) => {
-            return {
-              ...data,
-              value: data.id,
-              label: data.customerid || data.companyname,
-            };
-          });
-          setDataCustomer(mapingCustomerOption);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const handleEdit = (record) => {
     router.push(`/super-admin/transaction/${title}/${record.id}/edit`);
@@ -257,7 +229,7 @@ function DeliveryOrder() {
         <div className="w-full flex flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2">
             <div className="flex flex-col justify-start items-start gap-1">
-              <label className="hidden lg:block text-sm font-semibold leading-none">
+              {/* <label className="hidden lg:block text-sm font-semibold leading-none">
                 Customer ID
               </label>
               <Select
@@ -281,6 +253,11 @@ function DeliveryOrder() {
                   setSearchName(option?.companyname || "");
                 }}
                 allowClear
+              /> */}
+              <FilterCustomer
+                onChange={(value, option) => {
+                  setSearchName(option?.companyname || "");
+                }}
               />
             </div>
           </div>

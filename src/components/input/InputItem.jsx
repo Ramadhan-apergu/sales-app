@@ -2,26 +2,20 @@
 
 import { Select, Spin } from "antd";
 import { useEffect, useState, useCallback, useRef } from "react";
-import CustomerFetch from "@/modules/salesApi/customer";
+import ItemFetch from "@/modules/salesApi/item";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import useNotification from "@/hooks/useNotification";
 import debounce from "lodash.debounce";
 
-/**
- * Reusable component for filtering customers
- * - Lazy load with infinite scroll
- * - Debounced search
- * - Show required asterisk (without Antd Form.Item)
- */
-export default function InputCustomer({
+export default function InputItem({
   onChange,
   value,
   showLabel = true,
-  label = "Customer ID",
+  label = "Item",
   allowClear = true,
-  placeholder = "Select a customer",
-  isRequired = false, // <-- tanda mandatory
-  status = "",
+  placeholder = "Select an item",
+  isRequired = false,
+  disabled = false,
 }) {
   const { notify } = useNotification();
 
@@ -34,25 +28,21 @@ export default function InputCustomer({
   const limit = 50;
   const isFetchingRef = useRef(false);
 
-  const fetchCustomers = async (pageNum = 1, keyword = "", append = false) => {
+  const fetchItems = async (pageNum = 1, keyword = "", append = false) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
     try {
       setIsLoading(true);
-      const response = await CustomerFetch.get(
-        pageNum,
-        limit,
-        status || null,
-        keyword,
-      );
+      const response = await ItemFetch.get(pageNum, limit, keyword, keyword);
       const resData = getResponseHandler(response, notify);
 
       if (resData) {
         const mapped = resData.list.map((data) => ({
-          value: data.customerid,
-          label: data.customerid || data.companyname,
-          companyname: data.companyname,
+          value: data.itemid,
+          label: data.itemid || data.displayname,
+          displayname: data.displayname,
+          itemprocessfamily: data.itemprocessfamily,
           id: data.id,
           data
         }));
@@ -61,19 +51,17 @@ export default function InputCustomer({
         setHasMore(mapped.length === limit);
       }
     } catch (err) {
-      notify("error", "Error", err?.message || "Failed to fetch customers");
+      notify("error", "Error", err?.message || "Failed to fetch items");
     } finally {
       setIsLoading(false);
       isFetchingRef.current = false;
     }
   };
 
-  // Initial load
   useEffect(() => {
-    fetchCustomers(1);
+    fetchItems(1);
   }, []);
 
-  // Handle scroll to bottom for infinite load
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     const isBottom = scrollTop + clientHeight >= scrollHeight - 10;
@@ -81,15 +69,14 @@ export default function InputCustomer({
     if (isBottom && hasMore && !isLoading) {
       const nextPage = page + 1;
       setPage(nextPage);
-      fetchCustomers(nextPage, searchTerm, true);
+      fetchItems(nextPage, searchTerm, true);
     }
   };
 
-  // Debounced search
   const debouncedSearch = useCallback(
     debounce((word) => {
       setPage(1);
-      fetchCustomers(1, word, false);
+      fetchItems(1, word, false);
     }, 500),
     []
   );
@@ -113,10 +100,11 @@ export default function InputCustomer({
         allowClear={allowClear}
         placeholder={placeholder}
         value={value}
+        disabled={disabled}
         onChange={onChange}
         onSearch={handleSearch}
         onPopupScroll={handleScroll}
-        filterOption={false} // supaya tidak filter client-side
+        filterOption={false}
         notFoundContent={isLoading ? <Spin size="small" /> : "No data"}
         loading={isLoading && options.length === 0}
         options={options}

@@ -53,6 +53,7 @@ export default function FilterCustomer({
           label: data.customerid || data.companyname,
           customerid: data.customerid,
           companyname: data.companyname,
+          data
         }));
 
         setOptions((prev) => (append ? [...prev, ...mapped] : mapped));

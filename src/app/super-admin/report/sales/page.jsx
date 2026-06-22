@@ -14,6 +14,7 @@ import ReportSo from "@/modules/salesApi/report/salesAndSo";
 import { salesReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -34,7 +35,6 @@ function SalesOrder() {
   );
 
   const [datas, setDatas] = useState([]);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [filters, setFilters] = useState({
@@ -104,39 +104,6 @@ function SalesOrder() {
     fetchData();
   }, [page, limit, pathname, filters]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-
-        const response = await CustomerFetch.get(0, 10000, null);
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          const mapingCustomerOption = resData.list.map((data) => {
-            return {
-              ...data,
-              value: data.customerid,
-              label: data.customerid,
-            };
-          });
-          setDataCustomer(mapingCustomerOption);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleEdit = (record) => {
-    router.push(`/super-admin/report/${title}/${record.id}/edit`);
-  };
-
   const aliases = salesReportAliases;
 
   const columns = [
@@ -184,21 +151,10 @@ function SalesOrder() {
           <div className="w-full flex flex-wrap gap-2 justify-between">
             {/* Customer ID */}
             <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
-              <label className="text-sm font-semibold text-gray-700">
-                Customer ID
-              </label>
-              <Select
-                showSearch
-                placeholder="Select customer"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
+              <FilterCustomer
+                onChange={(value, opt) =>
+                  handleFilter("searchName", opt?.companyname || undefined)
                 }
-                options={dataCustomer}
-                onChange={(value) => handleFilter("searchName", value)}
-                allowClear
-                style={{ width: "100%" }}
               />
             </div>
 

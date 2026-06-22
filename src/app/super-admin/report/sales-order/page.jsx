@@ -15,6 +15,7 @@ import { soReportAliases } from "@/utils/aliases";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { DownloadOutlined, ExportOutlined } from "@ant-design/icons";
 import { exportJSONToExcel } from "@/utils/export";
+import FilterCustomer from "@/components/filter/FilterCustomer";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -31,7 +32,6 @@ function SalesOrder() {
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`);
 
   const [datas, setDatas] = useState([]);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [tableKeys, setTableKeys] = useState([]);
@@ -150,31 +150,6 @@ function SalesOrder() {
     fetchData();
   }, [page, limit, pathname, filters]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await CustomerFetch.get(0, 10000, null);
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          const mapingCustomerOption = resData.list.map((data) => {
-            return {
-              ...data,
-              value: data.customerid,
-              label: data.customerid,
-            };
-          });
-          setDataCustomer(mapingCustomerOption);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      }
-    };
-
-    fetchData();
-  }, []);
-
   const handleEdit = (record) => {
     router.push(`/super-admin/report/${title}/${record.id}/edit`);
   };
@@ -247,27 +222,15 @@ function SalesOrder() {
           />
         </div>
         <div className="w-full p-3 bg-gray-2 border border-gray-4 rounded-lg">
+          {/* Customer ID */}
+          <div className="w-1/2 md:w-1/4">
+            <FilterCustomer
+              onChange={(value, opt) =>
+                handleFilter("searchName", opt?.companyname || undefined)
+              }
+            />
+          </div>
           <div className="w-full flex flex-wrap gap-2">
-            {/* Customer ID */}
-            <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
-              <label className="text-sm font-semibold text-gray-700">
-                Customer ID
-              </label>
-              <Select
-                showSearch
-                placeholder="Select customer"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={dataCustomer}
-                onChange={(value) => handleFilter("searchName", value)}
-                allowClear
-                style={{ width: "100%" }}
-              />
-            </div>
-
             {/* Date */}
             <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
               <label className="text-sm font-semibold text-gray-700">
