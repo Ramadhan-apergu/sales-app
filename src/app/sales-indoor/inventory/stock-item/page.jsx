@@ -99,6 +99,24 @@ function StockItem() {
       }),
     },
     {
+      title: "Stock",
+      dataIndex: "stock",
+      key: "stock",
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      render: (text) => (
+        <p>
+          {typeof text == "number"
+            ? text.toLocaleString("en")
+            : parseFloat(text).toLocaleString("en")}
+        </p>
+      ),
+    },
+    {
       title: "Unit",
       dataIndex: "unitstype",
       key: "unitstype",
@@ -108,82 +126,6 @@ function StockItem() {
       onCell: () => ({
         style: { minWidth: 200 },
       }),
-    },
-    {
-      title: "Saldo Awal",
-      dataIndex: "saldo_awal",
-      key: "saldo_awal",
-      align: "right",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>
-          {typeof text == "number"
-            ? text.toLocaleString("en")
-            : parseFloat(text).toLocaleString("en")}
-        </p>
-      ),
-    },
-    {
-      title: "Qty In",
-      dataIndex: "qty_in",
-      key: "qty_in",
-      align: "right",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>
-          {typeof text == "number"
-            ? text.toLocaleString("en")
-            : parseFloat(text).toLocaleString("en")}
-        </p>
-      ),
-    },
-    {
-      title: "Qty Out",
-      dataIndex: "qty_out",
-      key: "qty_out",
-      align: "right",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>
-          {typeof text == "number"
-            ? text.toLocaleString("en")
-            : parseFloat(text).toLocaleString("en")}
-        </p>
-      ),
-    },
-    {
-      title: "Stock",
-      dataIndex: "stock",
-      key: "stock",
-      align: "right",
-      onHeaderCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      onCell: () => ({
-        style: { minWidth: 200 },
-      }),
-      render: (text) => (
-        <p>
-          {typeof text == "number"
-            ? text.toLocaleString("en")
-            : parseFloat(text).toLocaleString("en")}
-        </p>
-      ),
     },
   ];
   return (
