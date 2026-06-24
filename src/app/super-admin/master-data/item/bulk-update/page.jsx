@@ -333,3 +333,71 @@ export default function Enter() {
     </>
   );
 }
+
+function ExportButton({ disabled = true, notify = null }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleExport() {
+    try {
+      setIsLoading(true);
+
+      const headers = [
+        "Item Id",
+        "Item Processing Family",
+        "Price Family",
+        "Addons",
+        "Rate Transaksi",
+        "Effective Date",
+        "Dimensi",
+        "Conversion",
+        "Base Unit",
+        "Unit 2",
+      ];
+
+      // Membuat worksheet hanya dengan header
+      const worksheet = XLSX.utils.aoa_to_sheet([headers]);
+
+      // Optional: mengatur lebar kolom
+      worksheet["!cols"] = [
+        { wch: 20 },
+        { wch: 25 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 },
+      ];
+
+      // Membuat workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
+
+      // Download file
+      XLSX.writeFile(workbook, "template.xlsx");
+    } catch (error) {
+      console.error(error);
+
+      notify?.(
+        "error",
+        "Failed",
+        error?.message || "Failed to export template",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  } //trigger deploy
+
+  return (
+    <Button
+      onClick={handleExport}
+      disabled={disabled}
+      icon={<DownloadOutlined />}
+      loading={isLoading}
+    >
+      Template
+    </Button>
+  );
+}
