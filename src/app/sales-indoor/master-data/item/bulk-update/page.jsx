@@ -82,10 +82,6 @@ export default function Enter() {
     "Addons",
     "Rate Transaksi",
     "Effective Date",
-    "Conversion",
-    "Dimensi",
-    "Base Unit",
-    "Unit 2",
   ];
 
   const props = {
@@ -239,6 +235,23 @@ export default function Enter() {
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const header = [
+      [
+        "Item Id",
+        "Item Processing Family",
+        "Price Family",
+        "Addons",
+        "Rate Transaksi",
+        "Effective Date",
+      ],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(header);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "template.xlsx");
+  };
+
   return (
     <>
       <Layout pageTitle="">
@@ -267,7 +280,12 @@ export default function Enter() {
                   {uploadedFile.name}
                 </Button>
               )}
-              <ExportButton disabled={false} notify={notify} />
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={handleDownloadTemplate}
+              >
+                {isLargeScreen ? "Template" : ""}
+              </Button>
               <Button
                 type="primary"
                 icon={<CheckOutlined />}

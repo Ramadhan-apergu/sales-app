@@ -1028,7 +1028,7 @@ export default function Enter() {
               //   "units",
               "itemdescription",
               "rate",
-            //   "taxable",
+              "taxable",
               "amount",
               "taxrate1",
               "taxamount",
