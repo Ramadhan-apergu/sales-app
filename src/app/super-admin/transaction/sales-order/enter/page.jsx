@@ -1,12 +1,11 @@
 "use client";
 
-import InputCustomer from "@/components/input/InputCustomer";
-import InputItem from "@/components/input/InputItem";
 import InputForm from "@/components/superAdmin/InputForm";
 import Layout from "@/components/superAdmin/Layout";
 import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import useNotification from "@/hooks/useNotification";
+import CustomerFetch from "@/modules/salesApi/customer";
 import ItemFetch from "@/modules/salesApi/item";
 import SalesOrderFetch from "@/modules/salesApi/salesOrder";
 import { salesOrderAliases } from "@/utils/aliases";
@@ -45,7 +44,8 @@ export default function Enter() {
   const isLargeScreen = useBreakpoint("lg");
   const { notify, contextHolder: contextNotify } = useNotification();
 
-  const [dataItemFreeOptions, setDataItemFreeOptions] = useState([]);
+  const [dataCustomer, setDataCustomer] = useState([]);
+  const [dataItem, setDataItem] = useState([]);
 
   const [customerSelected, setCustomerSelected] = useState({});
   const [customerInfo, setCustomerInfo] = useState({
@@ -114,6 +114,58 @@ export default function Enter() {
   }
 
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  async function fetchCustomer() {
+    try {
+      const response = await CustomerFetch.get(0, 10000, "active");
+      const resData = getResponseHandler(response);
+      return resData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async function fetchItem() {
+    try {
+      const response = await ItemFetch.get(0, 10000);
+      const resData = getResponseHandler(response);
+      return resData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async function fetchInit() {
+    try {
+      const getCustomer = await fetchCustomer();
+      if (getCustomer) {
+        const updateLabelCustomer = getCustomer.list.map((item) => ({
+          ...item,
+          label: item.customerid,
+          value: item.id,
+        }));
+        setDataCustomer(updateLabelCustomer);
+      }
+
+      const getItem = await fetchItem();
+      console.log(getItem);
+      if (getItem) {
+        const updateLabelItem = getItem.list.map((item) => ({
+          ...item,
+          label: item.itemid,
+          value: item.id,
+        }));
+        setDataItem(updateLabelItem);
+      }
+    } catch (error) {
+      console.error(error);
+      notify("error", "Failed get data");
+    }
+  }
+
+  useEffect(() => {
+    fetchInit();
+  }, []);
 
   function handleCustomerChange(customer) {
     setCustomerSelected(customer);
@@ -305,29 +357,6 @@ export default function Enter() {
   const [dataTableItem, setDataTableItem] = useState([]);
   const [dataItemFree, setDataItemFree] = useState([]);
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-
-  useEffect(() => {
-    if (!dataItemFree.length) {
-      setDataItemFreeOptions([]);
-      return;
-    }
-    Promise.all(
-      dataItemFree.map((_, i) => {
-        const family = dataDiscount?.diskon_group?.[i]?.itemprocessfamily;
-        return ItemFetch.get(0, 1000, "", "", family);
-      }),
-    ).then((results) => {
-      setDataItemFreeOptions(
-        results.map((r) => {
-          const resData = getResponseHandler(r);
-          return (resData?.list ?? []).map((d) => ({
-            label: d.itemid,
-            value: d.id,
-          }));
-        }),
-      );
-    });
-  }, [dataItemFree]);
 
   async function handleModalItemOk() {
     if (!stateItemTable.item.item) {
@@ -572,26 +601,27 @@ export default function Enter() {
   };
 
   function handleEdit(record) {
-    setItemSelected({
-      value: record.itemid,
-      displayname: record.displayname,
-      id: record.item,
-    });
+    console.log("record", record);
+    console.log("record.rate", record.rate);
+    const item = dataItem.find((item) => item.value == record.item);
+
+    setItemSelected(item);
     dispatchItemTable({
       type: "SET_ITEM",
       payload: {
-        item: record.item,
-        units: record.units,
-        rate: record.rate,
-        displayname: record.displayname,
-        itemprocessfamily: record.itemprocessfamily,
-        itemid: record.itemid,
-        itemcode: record.itemid,
-        iseditable: record.iseditable,
+        item: item.id,
+        units: item.unitstype,
+        rate: item.rate,
+        displayname: item.displayname,
+        itemprocessfamily: item.itemprocessfamily,
+        itemid: item.itemid,
+        itemcode: item.itemid,
+        iseditable: item.iseditable,
         quantity: record.quantity,
         iseditline: true,
       },
     });
+
     dispatchItemTable({
       type: "SET_TAX",
       payload: {
@@ -652,13 +682,32 @@ export default function Enter() {
               >
                 Customer
               </Divider>
-              <InputCustomer
-                value={customerSelected?.customerid || undefined}
-                onChange={(_, option) => handleCustomerChange(option.data)}
-                isRequired={true}
-                allowClear={false}
-                status="active"
-              />
+              <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
+                <Form layout="vertical">
+                  <Form.Item
+                    label={<span className="capitalize">Customer ID</span>}
+                    name="customer"
+                    style={{ margin: 0 }}
+                    className="w-full"
+                    labelCol={{ style: { padding: 0 } }}
+                    rules={[
+                      { required: true, message: `Customer is required` },
+                    ]}
+                  >
+                    <Select
+                      showSearch
+                      placeholder="Select a customer"
+                      optionFilterProp="label"
+                      value={customerSelected?.value || undefined}
+                      onChange={(_, customer) => {
+                        handleCustomerChange(customer);
+                      }}
+                      options={dataCustomer}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
             </div>
           </div>
 
@@ -854,7 +903,16 @@ export default function Enter() {
                                 ),
                               );
                             }}
-                            options={dataItemFreeOptions[i] ?? []}
+                            // options={dataItem}
+                            options={dataItem.filter((data) => {
+                              const diskonGroup =
+                                dataDiscount?.diskon_group || [];
+                              const currentGroup = diskonGroup[i] || {};
+                              return (
+                                currentGroup.itemprocessfamily ===
+                                data.itemprocessfamily
+                              );
+                            })}
                             style={{ width: "100%" }}
                           />
                         </Form.Item>
@@ -938,14 +996,16 @@ export default function Enter() {
                 </Divider>
                 <div className="w-full flex gap-2">
                   <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                    <InputItem
-                      allowClear={false}
-                      label="Item Name/Number"
+                    <p>Item Name/Number</p>
+                    <Select
                       value={itemSelected?.value || undefined}
+                      showSearch
+                      placeholder="Select an item"
+                      optionFilterProp="label"
                       disabled={stateItemTable.item.iseditline}
-                      onChange={(value, option) => {
+                      onChange={(_, item) => {
                         const isDuplicate = dataTableItem.some(
-                          (tableItem) => tableItem.item === option.data.id,
+                          (tableItem) => tableItem.item === item.value,
                         );
 
                         if (isDuplicate) {
@@ -953,22 +1013,30 @@ export default function Enter() {
                           return;
                         }
 
-                        setItemSelected(option.data);
+                        setItemSelected(item);
 
                         dispatchItemTable({
                           type: "SET_ITEM",
                           payload: {
-                            item: option.data.id,
-                            units: option.data.unitstype,
-                            rate: option.data.rate,
-                            displayname: option.data.displayname,
-                            itemprocessfamily: option.data.itemprocessfamily,
-                            itemid: option.data.itemid || value,
-                            iseditable: option.data.iseditable,
+                            item: item.id,
+                            units: item.unitstype,
+                            rate: item.rate,
+                            displayname: item.displayname,
+                            itemprocessfamily: item.itemprocessfamily,
+                            itemid: item.itemid,
+                            iseditable: item.iseditable,
                             iseditline: false,
                           },
                         });
                       }}
+                      options={dataItem.filter(
+                        (data) =>
+                          !dataTableItem
+                            .map((item) => item.item)
+                            .filter((val) => val !== itemSelected?.value)
+                            .includes(data.value),
+                      )}
+                      style={{ width: "100%" }}
                     />
                   </div>
                   <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">

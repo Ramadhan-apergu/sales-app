@@ -28,7 +28,6 @@ function SalesOrder() {
   const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
 
   const [datas, setDatas] = useState([]);
-  const [dataCustomer, setDataCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsloading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -69,35 +68,6 @@ function SalesOrder() {
 
     fetchData();
   }, [page, limit, pathname, searchName, statusFilter]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsloading(true);
-
-        const response = await CustomerFetch.get(0, 10000, null);
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          const mapingCustomerOption = resData.list.map((data) => {
-            return {
-              ...data,
-              value: data.id,
-              label: data.companyname,
-            };
-          });
-          setDataCustomer(mapingCustomerOption);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const columns = [
     {

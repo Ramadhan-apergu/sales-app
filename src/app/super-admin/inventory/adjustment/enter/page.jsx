@@ -323,6 +323,7 @@ export default function Enter() {
         open={isModalItemOpen}
         onOk={handleModalItemOk}
         onCancel={handleModalItemCancel}
+        destroyOnHidden
         width={850}
         cancelText="Cancel"
       >

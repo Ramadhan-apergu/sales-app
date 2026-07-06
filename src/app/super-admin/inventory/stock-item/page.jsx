@@ -2,7 +2,7 @@
 import Layout from "@/components/superAdmin/Layout";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { Pagination, Table, Input } from "antd";
+import { Pagination, Table, Input, Button } from "antd";
 import { Suspense, useEffect, useState } from "react";
 
 import useNotification from "@/hooks/useNotification";
@@ -10,6 +10,7 @@ import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing
 import LoadingSpin from "@/components/superAdmin/LoadingSpin";
 import { getResponseHandler } from "@/utils/responseHandlers";
 import StockAdjustmentFetch from "@/modules/salesApi/stockAdjustment";
+import { ExportOutlined, DownloadOutlined } from "@ant-design/icons";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -99,9 +100,45 @@ function StockItem() {
       }),
     },
     {
-      title: "Stock",
+      title: "Saldo Awal",
       dataIndex: "stock",
       key: "stock",
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      render: (text) => (
+        <p>
+          {typeof text == "number"
+            ? text.toLocaleString("en")
+            : parseFloat(text).toLocaleString("en")}
+        </p>
+      ),
+    },
+    {
+      title: "Qty In",
+      dataIndex: "qty_in",
+      key: "qty_in",
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      render: (text) => (
+        <p>
+          {typeof text == "number"
+            ? text.toLocaleString("en")
+            : parseFloat(text).toLocaleString("en")}
+        </p>
+      ),
+    },
+    {
+      title: "Qty Out",
+      dataIndex: "qty_out",
+      key: "qty_out",
       onHeaderCell: () => ({
         style: { minWidth: 200 },
       }),
@@ -136,7 +173,7 @@ function StockItem() {
             Stock Item List
           </p>
         </div>
-        <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-start p-2 bg-gray-2 border border-gray-4 rounded-lg">
+        <div className="w-full flex flex-col md:flex-row gap-2 justify-between items-end lg:items-center p-2 bg-gray-2 border border-gray-4 rounded-lg">
           <div className="flex gap-2 flex-col md:flex-row">
             <div className="flex flex-col justify-start items-start gap-1">
               <label className="hidden md:block text-sm font-semibold leading-none">
@@ -195,6 +232,13 @@ function StockItem() {
               />
             </div>
           </div>
+          <div className="flex gap-2 flex-col md:flex-row">
+            <ExportButton
+              disabled={isLoading}
+              filters={{ searchItem, displayname: null, searchItemProcess }}
+              notify={notify}
+            />
+          </div>
         </div>
         {!isLoading ? (
           <>
@@ -241,5 +285,52 @@ export default function StockItemPage() {
     <Suspense fallback={<LoadingSpinProcessing />}>
       <StockItem />
     </Suspense>
+  );
+}
+
+function ExportButton({ disabled = true, filters = {}, notify = null }) {
+  const [isloading, setIsloading] = useState(false);
+  const [linkdownload, setLinkdownload] = useState(null);
+  useEffect(() => {
+    setLinkdownload(null);
+  }, [filters]);
+  async function handleExport() {
+    try {
+      setIsloading(true);
+      const response = await StockAdjustmentFetch.getStockStatusExport(
+        filters?.searchItem || "",
+        filters?.displayname || "",
+        filters?.searchItemProcess || "",
+      );
+
+      const resData = getResponseHandler(response, notify);
+      if (resData) {
+        setLinkdownload(resData.url);
+      }
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+  return (
+    <Button
+      onClick={() => {
+        if (linkdownload) {
+          window.open(linkdownload);
+        } else {
+          handleExport();
+        }
+      }}
+      type={linkdownload ? "primary" : ""}
+      disabled={disabled}
+      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
+      loading={isloading}
+    >
+      {linkdownload ? "Download" : "Export"}
+    </Button>
   );
 }

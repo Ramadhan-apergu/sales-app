@@ -39,7 +39,7 @@ function Customer() {
   const [isLoading, setIsloading] = useState(true);
   const [refetch, setRefetch] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [searchCust, setSearchCust] = useState("");
+  const [searchCust, setSearchCust] = useState({});
   const [modal, contextHolder] = Modal.useModal();
   const title = "customer";
   const { notify, contextHolder: notificationContextHolder } =
@@ -54,7 +54,7 @@ function Customer() {
           page,
           limit,
           statusFilter,
-          searchCust
+          searchCust.customerid || "",
         );
 
         const resData = getResponseHandler(response, notify);
@@ -247,9 +247,10 @@ function Customer() {
               </Dropdown>
             </div>
             <FilterCustomer
-              value={searchCust}
+              value={searchCust.value || undefined}
               onChange={(value, option) => {
-                setSearchCust(option?.value || "");
+                console.log(value);
+                setSearchCust(option || "");
               }}
             />
           </div>
@@ -275,7 +276,7 @@ function Customer() {
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
                   router.push(
-                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`
+                    `/super-admin/master-data/${title}?page=${newPage}&limit=${newLimit}`,
                   );
                 }}
                 size="small"

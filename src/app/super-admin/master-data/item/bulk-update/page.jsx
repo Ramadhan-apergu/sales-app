@@ -373,7 +373,7 @@ function ExportButton({ disabled = true, notify = null }) {
 
       // Membuat workbook
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
       // Download file
       XLSX.writeFile(workbook, "template.xlsx");
@@ -388,7 +388,7 @@ function ExportButton({ disabled = true, notify = null }) {
     } finally {
       setIsLoading(false);
     }
-  } //trigger deploy
+  } //trigger deploy 2
 
   return (
     <Button
