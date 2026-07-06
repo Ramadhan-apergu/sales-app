@@ -18,6 +18,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import AgreementFetch from "@/modules/salesApi/agreement";
 import { formatDateToShort } from "@/utils/formatDate";
 import EmptyCustom from "@/components/superAdmin/EmptyCustom";
+import InputAgreement from "@/components/input/InputAgreement";
 
 function TableCustom({ data, keys, aliases, onDelete }) {
   const columns = [
@@ -104,30 +105,6 @@ export default function AgreementApplyDetail() {
     };
 
     fetchDataApplyAgreement();
-
-    const fetchDataAgreement = async () => {
-      try {
-        const response = await AgreementFetch.get(0, 10000, "active");
-
-        const resData = getResponseHandler(response, notify);
-
-        if (resData) {
-          setDataAgreement(
-            resData.list.map((agreement) => ({
-              ...agreement,
-              label: agreement.agreementname,
-              value: agreement.id,
-            })),
-          );
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDataAgreement();
   }, []);
 
   const handleChangePayload = (type, payload) => {
@@ -330,18 +307,16 @@ export default function AgreementApplyDetail() {
                   Agreement
                 </Divider>
                 <div className="w-full lg:w-1/2 flex lg:pr-2 flex-col">
-                  <p>Agreement Name</p>
-                  <Select
+                  <InputAgreement
                     value={agreementSelectedTemp?.value || null}
-                    showSearch
-                    placeholder="Select an item"
-                    optionFilterProp="label"
-                    onChange={(_, agreement) => {
+                    onChange={(_, option) => {
+                      const agreement = option.data;
                       const findAgreementExisting = payloadAgreementList.find(
                         (itemAgreement) => itemAgreement.id == agreement.id,
                       );
                       if (!findAgreementExisting) {
                         setAgreementSelectedTemp({
+                          ...option,
                           ...agreement,
                           effectivedate: formatDateToShort(
                             agreement.effectivedate,
@@ -354,8 +329,6 @@ export default function AgreementApplyDetail() {
                         setAgreementSelectedTemp(null);
                       }
                     }}
-                    options={dataAgreement}
-                    style={{ width: "100%" }}
                   />
                 </div>
               </div>

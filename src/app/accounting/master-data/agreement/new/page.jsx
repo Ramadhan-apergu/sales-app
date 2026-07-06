@@ -398,7 +398,6 @@ export default function AgreementNew() {
     status: "active",
     description: "",
   });
-  const [isPayloadGroupItem, setIsPayloadGroupItem] = useState(false);
   const [payloadGroup, setPayloadGroup] = useState({
     itemcategory: "",
     qtymin: 0,
@@ -426,23 +425,6 @@ export default function AgreementNew() {
   };
 
   useEffect(() => {
-    const fetchDataItem = async () => {
-      try {
-        const response = await ItemFetch.get(0, 10000, null, null, null);
-        const resData = getResponseHandler(response);
-        if (resData) {
-          const dataWithLabel = resData.list.map((item) => ({
-            ...item,
-            label: item.displayname,
-            value: item.id,
-          }));
-          setDataItem(dataWithLabel);
-        }
-      } catch (error) {
-        notify("error", "Error", error?.message || "Internal Server error");
-      }
-    };
-    fetchDataItem();
     fetchItemFamily();
   }, []);
 

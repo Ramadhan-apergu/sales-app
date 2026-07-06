@@ -33,6 +33,7 @@ function Agreement() {
   const { notify, contextHolder: notificationContextHolder } =
     useNotification();
   const [searchCust, setSearchCust] = useState("");
+  const [customerSelected, setCustomerSelected] = useState(null);
 
   const title = "apply-agreement";
 
@@ -150,9 +151,10 @@ function Agreement() {
           <div className="flex gap-2"></div>
           <div className="flex gap-2">
             <FilterCustomer
-              value={searchCust}
+              value={customerSelected?.value || ""}
               onChange={(value, option) => {
-                setSearchCust(option?.value || "");
+                setCustomerSelected(option);
+                setSearchCust(option?.customerid || "");
               }}
             />
           </div>

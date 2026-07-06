@@ -99,53 +99,6 @@ export default function AgreementApplyDetail() {
     };
 
     fetchDataApplyAgreement();
-    // const fetchDataCusomer = async () => {
-    //   try {
-    //     const response = await CustomerFetch.get(0, 10000, "active");
-
-    //     const resData = getResponseHandler(response, notify);
-
-    //     if (resData) {
-    //       setDataCustomer(
-    //         resData.list.map((customer) => ({
-    //           ...customer,
-    //           label: customer.companyname,
-    //           value: customer.id,
-    //         }))
-    //       );
-    //     }
-    //   } catch (error) {
-    //     notify("error", "Error", error?.message || "Internal Server error");
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-
-    // fetchDataCusomer();
-
-    // const fetchDataAgreement = async () => {
-    //   try {
-    //     const response = await AgreementFetch.get(0, 10000, "active");
-
-    //     const resData = getResponseHandler(response, notify);
-
-    //     if (resData) {
-    //       setDataAgreement(
-    //         resData.list.map((agreement) => ({
-    //           ...agreement,
-    //           label: agreement.agreementname,
-    //           value: agreement.id,
-    //         }))
-    //       );
-    //     }
-    //   } catch (error) {
-    //     notify("error", "Error", error?.message || "Internal Server error");
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-
-    // fetchDataAgreement();
   }, []);
 
   const handleChangePayload = (type, payload) => {
