@@ -153,7 +153,7 @@ function SalesOrder() {
             <div className="flex flex-col w-full sm:w-[200px] md:w-[220px]">
               <FilterCustomer
                 onChange={(value, opt) =>
-                  handleFilter("searchName", opt?.companyname || undefined)
+                  handleFilter("searchName", opt?.customerid || undefined)
                 }
               />
             </div>
@@ -245,9 +245,10 @@ function SalesOrder() {
                 defaultPageSize={limit}
                 defaultCurrent={page}
                 onChange={(newPage, newLimit) => {
-                  router.push(
-                    `/finance/report/${title}?page=${newPage}&limit=${newLimit}`,
-                  );
+                  setPage(newPage);
+                //   router.push(
+                //     `/finance/report/${title}?page=${newPage}&limit=${newLimit}`,
+                //   );
                 }}
                 size="small"
                 align={"end"}
