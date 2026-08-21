@@ -453,7 +453,7 @@ export default function Enter() {
                 isRead: true,
               },
             ]}
-            aliases={rmaAliases.primary}
+            aliases={rmaAliases.payment}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}

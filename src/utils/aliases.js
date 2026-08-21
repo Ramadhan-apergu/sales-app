@@ -287,6 +287,8 @@ export const creditMemoAliases = {
     amount: "Total Amount",
     taxrate1: "Tax Rate",
     taxamount: "Tax Amount",
+    totaldiscount: "Total Discount",
+    discountitem: "@ Discount",
   },
   apply: {
     invoiceid: "Invoice ID",
@@ -449,5 +451,9 @@ export const rmaAliases = {
     totaldiscount: "Total Discount",
     taxvalue: "Tax Value",
     isfree: "Free",
+  },
+  payment: {
+    refundmethod: "Refund Method",
+    bankaccount: "Bank Account",
   },
 };

@@ -256,7 +256,12 @@ export default function Enter() {
         "",
     }));
 
-    updateDataItemTable(syncItems, data.paymentoption, data.entity);
+    updateDataItemTable(
+      syncItems,
+      data.paymentoption,
+      data.entity,
+      data.trandate,
+    );
   }
 
   function handleCustomerChange(customer) {
@@ -490,12 +495,14 @@ export default function Enter() {
     updatedData = null,
     payment_type = null,
     cust_id = null,
+    trandate = null,
   ) {
     try {
       const updateDiscountItem = await getDiscountItem(
         updatedData ? updatedData : dataTableItem,
         payment_type,
         cust_id,
+        trandate,
       );
 
       if (dataTableItem != updateDataItemTable) {
@@ -506,7 +513,12 @@ export default function Enter() {
     }
   }
 
-  async function getDiscountItem(itemTable, payment_type_params, customer_id) {
+  async function getDiscountItem(
+    itemTable,
+    payment_type_params,
+    customer_id,
+    trandate_params,
+  ) {
     try {
       if (itemTable.length == 0) {
         setDataDiscount(null);
@@ -515,7 +527,9 @@ export default function Enter() {
       }
       const payload = {
         cust_id: customer_id ? customer_id : customerSelected.id,
-        trandate: convertToLocalDate(state.payloadPrimary.trandate),
+        trandate: convertToLocalDate(
+          trandate_params ? trandate_params : state.payloadPrimary.trandate,
+        ),
         payment_type: payment_type_params
           ? payment_type_params
           : state.payloadBilling.paymentoption,

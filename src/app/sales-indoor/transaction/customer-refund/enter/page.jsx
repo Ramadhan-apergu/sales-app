@@ -399,7 +399,7 @@ export default function Enter() {
                 key: "bankaccount",
                 input: "select",
                 isAlias: true,
-                option: bankOptions,
+                options: bankOptions,
                 hidden: state.payloadPayment.refundmethod != "transfer",
               },
               {
@@ -410,7 +410,7 @@ export default function Enter() {
                 isReadOnly: true,
               },
             ]}
-            aliases={rmaAliases.primary}
+            aliases={rmaAliases.payment}
             onChange={(type, payload) => {
               dispatch({ type, payload });
             }}
