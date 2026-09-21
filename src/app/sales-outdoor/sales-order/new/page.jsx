@@ -25,7 +25,7 @@ import {
 } from "@ant-design/icons";
 import useNotification from "@/hooks/useNotification";
 import { useRouter } from "next/navigation";
-import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import LoadingSpinProcessing from "@/components/shared/LoadingSpinProcessing";
 import CustomerFetch from "@/modules/salesApi/customer";
 import {
   createResponseHandler,

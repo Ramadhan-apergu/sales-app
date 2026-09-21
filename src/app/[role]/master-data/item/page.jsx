@@ -1,0 +1,340 @@
+"use client";
+import Layout from "@/components/shared/Layout";
+import {
+  DownloadOutlined,
+  EditOutlined,
+  ExportOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import ItemFetch from "@/modules/salesApi/item";
+import { Button, Input, Modal, Pagination, Table } from "antd";
+import { Suspense, useEffect, useState } from "react";
+
+import Link from "next/link";
+import Search from "antd/es/input/Search";
+import useNotification from "@/hooks/useNotification";
+import LoadingSpinProcessing from "@/components/shared/LoadingSpinProcessing";
+import LoadingSpin from "@/components/shared/LoadingSpin";
+import { getResponseHandler } from "@/utils/responseHandlers";
+import useRolePrefix from "@/hooks/useRolePrefix";
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+
+function Item() {
+  const prefix = useRolePrefix();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isLargeScreen = useBreakpoint("lg");
+
+  const page = parseInt(searchParams.get("page") || `${DEFAULT_PAGE}`, 10);
+  const limit = parseInt(searchParams.get("limit") || `${DEFAULT_LIMIT}`, 10);
+  const [searchName, setSearchName] = useState("");
+  const [searchCode, setSearchCode] = useState();
+
+  const [datas, setDatas] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isLoading, setIsloading] = useState(true);
+  const [modal, contextHolder] = Modal.useModal();
+  const title = "item";
+  const { notify, contextHolder: notificationContextHolder } =
+    useNotification();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsloading(true);
+
+        const response = await ItemFetch.get(page, limit);
+
+        const resData = getResponseHandler(response, notify);
+
+        if (resData) {
+          setDatas(resData.list);
+          setTotalItems(resData.total_items);
+        }
+      } catch (error) {
+        notify("error", "Error", error?.message || "Internal Server error");
+      } finally {
+        setIsloading(false);
+      }
+    };
+
+    if (!searchCode && searchName == "") {
+      fetchData();
+    }
+  }, [page, limit, pathname, searchCode, searchName]);
+
+  const fetchData = async () => {
+    try {
+      setIsloading(true);
+      const response = await ItemFetch.get(
+        page,
+        limit,
+        searchName == "" ? null : searchName,
+        !searchCode || searchCode == "" ? null : searchCode,
+      );
+      const resData = getResponseHandler(response, notify);
+
+      if (resData) {
+        setDatas(resData.list);
+        setTotalItems(resData.total_items);
+      }
+    } catch (error) {
+      notify("error", "Error", error?.message || "Internal Server error");
+    } finally {
+      setIsloading(false);
+    }
+  };
+
+  const handleEdit = (record) => {
+    router.push(`${prefix}/master-data/${title}/${record.id}/edit`);
+  };
+
+  const columns = [
+    // {
+    //   title: 'Internal ID',
+    //   dataIndex: 'id',
+    //   key: 'id',
+    //   onHeaderCell: () => ({
+    //     style: { minWidth: 200 },
+    //   }),
+    //   onCell: () => ({
+    //     style: { minWidth: 200 },
+    //   }),
+    // },
+    {
+      title: "Item Name/Number",
+      dataIndex: "itemid",
+      key: "itemid",
+      fixed: isLargeScreen ? "left" : "",
+      render: (text, record) => (
+        <Link href={`${prefix}/master-data/${title}/${record.id}`}>
+          {text || "-"}
+        </Link>
+      ),
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
+    },
+    {
+      title: "Display Name/Code",
+      dataIndex: "displayname",
+      key: "displayname",
+      onHeaderCell: () => ({
+        style: { minWidth: 180 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 180 },
+      }),
+    },
+    {
+      title: "Item Process Family",
+      dataIndex: "itemprocessfamily",
+      key: "itemprocessfamily",
+      onHeaderCell: () => ({
+        style: { minWidth: 200 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 200 },
+      }),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      fixed: "right",
+      align: "right",
+      width: 87,
+      render: (_, record) => (
+        <div className="flex justify-center items-center gap-2">
+          <Button
+            type="link"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            {isLargeScreen ? "Edit" : ""}
+          </Button>
+          {contextHolder}
+        </div>
+      ),
+      onHeaderCell: () => ({
+        style: { minWidth: 80 },
+      }),
+      onCell: () => ({
+        style: { minWidth: 80 },
+      }),
+    },
+  ];
+
+  const handleEnter = (e, type) => {
+    if (e.key === "Enter") {
+      fetchData();
+    }
+  };
+
+  return (
+    <Layout pageTitle={title}>
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex justify-between items-center">
+          <p className="text-xl lg:text-2xl font-semibold text-blue-6">
+            Item List
+          </p>
+          <div className="flex gap-2">
+            <Button
+              icon={<UploadOutlined />}
+              onClick={() =>
+                router.push(`${prefix}/master-data/${title}/bulk-update`)
+              }
+            >
+              {isLargeScreen ? `Update` : ""}
+            </Button>
+
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() =>
+                router.push(`${prefix}/master-data/${title}/new`)
+              }
+            >
+              {isLargeScreen ? `New` : ""}
+            </Button>
+          </div>
+        </div>
+        <div className="w-full flex flex-col lg:flex-row justify-between items-end lg:items-center p-2 bg-gray-2 border border-gray-4 rounded-lg">
+          <div className="flex gap-2">
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className="hidden lg:block text-sm font-semibold leading-none">
+                Code
+              </label>
+              <Input
+                value={searchCode}
+                onChange={(e) => setSearchCode(e.target.value)}
+                onKeyDown={(e) => handleEnter(e)}
+                placeholder={isLargeScreen ? "" : "Code"}
+                allowClear
+              />
+            </div>
+            <div className="flex flex-col justify-start items-start gap-1">
+              <label className="hidden lg:block text-sm font-semibold leading-none">
+                Display Name
+              </label>
+              <Search
+                placeholder={isLargeScreen ? "" : "Name"}
+                width={"100%"}
+                allowClear
+                value={searchName}
+                onChange={(e) => {
+                  setSearchName(e.target.value);
+                  handleEnter(e, "name");
+                }}
+                onSearch={fetchData}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <ExportButton
+              disabled={!datas || datas.length == 0}
+              notify={notify}
+            />
+          </div>
+        </div>
+        {!isLoading ? (
+          <>
+            <div>
+              <Table
+                rowKey={(record) => record.id}
+                size="small"
+                pagination={false}
+                columns={columns}
+                dataSource={datas}
+                scroll={{ x: "max-content" }}
+                bordered
+                tableLayout="auto"
+              />
+            </div>
+            <div>
+              <Pagination
+                total={totalItems}
+                defaultPageSize={limit}
+                defaultCurrent={page}
+                onChange={(newPage, newLimit) => {
+                  router.push(
+                    `${prefix}/master-data/${title}?page=${newPage}&limit=${newLimit}`,
+                  );
+                }}
+                size="small"
+                align={"end"}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-96">
+            <LoadingSpin />
+          </div>
+        )}
+      </div>
+      {notificationContextHolder}
+    </Layout>
+  );
+}
+
+export default function ItemPage() {
+  return (
+    <Suspense fallback={<LoadingSpinProcessing />}>
+      <Item />
+    </Suspense>
+  );
+}
+
+function ExportButton({ disabled = true, filters = {}, notify = null }) {
+  const [isloading, setIsloading] = useState(false);
+  const [linkdownload, setLinkdownload] = useState(null);
+
+  async function handleExport() {
+    try {
+      setIsloading(true);
+      const response = await ItemFetch.exportItem(
+        filters.searchName,
+        filters.displayname,
+        filters.itemprocessfamily,
+      );
+
+      const resData = getResponseHandler(response, notify);
+      if (resData) {
+        setLinkdownload(resData.url);
+      }
+    } catch (error) {
+      console.error(error);
+      if (notify) {
+        notify("error", "Failed", error?.message || "Failed Export");
+      }
+    } finally {
+      setIsloading(false);
+    }
+  }
+  return (
+    <Button
+      onClick={() => {
+        if (linkdownload) {
+          window.open(linkdownload);
+        } else {
+          handleExport();
+        }
+      }}
+      type={linkdownload ? "primary" : ""}
+      disabled={disabled}
+      icon={linkdownload ? <DownloadOutlined /> : <ExportOutlined />}
+      loading={isloading}
+    >
+      {linkdownload ? "Download" : "Export All"}
+    </Button>
+  );
+}
