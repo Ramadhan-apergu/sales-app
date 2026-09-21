@@ -34,7 +34,7 @@ export default function InputItem({
 
     try {
       setIsLoading(true);
-      const response = await ItemFetch.get(pageNum, limit, keyword, keyword);
+      const response = await ItemFetch.get(pageNum, limit, "", keyword);
       const resData = getResponseHandler(response, notify);
 
       if (resData) {

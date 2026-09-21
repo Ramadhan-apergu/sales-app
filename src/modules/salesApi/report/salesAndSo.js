@@ -10,7 +10,8 @@ export default class ReportSo extends ProcessFetch {
     status = "",
     itemprocessfamily = "",
     salesrep = "",
-    displayname = ""
+    displayname = "",
+    signal = undefined
   ) {
     try {
       const response = await this.axios.get("/report/sales-order", {
@@ -25,6 +26,7 @@ export default class ReportSo extends ProcessFetch {
           salesrep,
           displayname,
         },
+        signal,
       });
       return new this().processResponse(response);
     } catch (error) {

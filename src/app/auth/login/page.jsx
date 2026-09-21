@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import { redirect, useRouter } from "next/navigation";
 import ApiAuth from "@/modules/api/auth";
 import useNotification from "@/hooks/useNotification";
-import LoadingSpinProcessing from "@/components/superAdmin/LoadingSpinProcessing";
+import LoadingSpinProcessing from "@/components/shared/LoadingSpinProcessing";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
 export default function Login() {
